@@ -516,13 +516,32 @@ function closeEditor(){ editor.style.display='none'; previewWrap.innerHTML=''; }
 
 function buildPreviewFrom(el){
   previewWrap.innerHTML='';
-  const clone=el.cloneNode(true); clone.removeAttribute('id'); clone.classList.remove('sel'); clone.style.position='relative'; clone.style.left='0'; clone.style.top='0'; clone.style.width='220px'; clone.style.height='140px';
+  const clone=el.cloneNode(true);
+  const rect=el.getBoundingClientRect();
+  const W=Math.round(rect.width);
+  const H=Math.round(rect.height);
+  const stage=previewWrap;
+  stage.style.width=W+'px';
+  stage.style.height=H+'px';
+  stage.style.boxSizing='content-box';
+  stage.style.padding='0';
+  stage.style.margin='0';
+  const frame=stage.parentElement||stage;
+  if(frame){ frame.style.padding=frame.style.padding||'0'; }
+  clone.removeAttribute('id');
+  clone.classList.remove('sel');
+  clone.style.position='static';
+  clone.style.left='0';
+  clone.style.top='0';
+  clone.style.margin='0';
+  clone.style.width='100%';
+  clone.style.height='100%';
   const ih=clone.querySelector('.innerHost'); if(!ih){ const wrap=document.createElement('div'); wrap.className='innerHost'; [...clone.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); }); clone.appendChild(wrap); }
   previewWrap.appendChild(clone);
   enablePreviewInnerDrag(clone);
   applyZoom();
 }
-function applyZoom(){ const z = (parseInt(zoom.value)||100)/100; previewWrap.style.transform=`scale(${z})`; }
+function applyZoom(){ const z = (parseInt(zoom.value)||100)/100; previewWrap.style.transformOrigin='top left'; previewWrap.style.transform=`scale(${z})`; }
 zoom.addEventListener('input', applyZoom);
 
 edTabs.addEventListener('click', e=>{ const t=e.target.closest('.tab'); if(!t) return; $$('.tab').forEach(n=>n.classList.remove('active')); t.classList.add('active'); const key=t.dataset.tab; $$('.pane').forEach(p=>p.classList.remove('active')); const pane=$(`#pane-${key}`); if(pane) pane.classList.add('active'); });
