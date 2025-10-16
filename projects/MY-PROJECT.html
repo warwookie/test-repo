@@ -291,6 +291,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
               <div id="dgPreview" class="design-preview" role="img" aria-label="Design preview area"></div>
             </div>
           </div>
+          <div class="dgRow">
+            <div class="dgLabel">Apply</div>
+            <div class="dgField">
+              <button id="dgApply" class="btn" title="Apply current preview to selected block">Apply to Block</button>
+            </div>
+          </div>
           <div class="edRow" style="gap:6px">
             <button id="dgGenerate">Generate</button>
             <button id="dgRandom">Randomize</button>
@@ -1242,6 +1248,34 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   ta.addEventListener('blur',handleChange);
 
   handleChange();
+})();
+</script>
+<script>
+(function(){
+  const btn=document.getElementById('dgApply');
+  const box=document.getElementById('dgPreview');
+  if(!btn||!box) return;
+  if(btn.dataset.bound==='1') return;
+  btn.dataset.bound='1';
+  btn.addEventListener('click',()=>{
+    const bg=box.style.backgroundImage||'';
+    if(!bg||!bg.includes('data:image')){
+      console.warn('[Design] No preview image to apply');
+      return;
+    }
+    const el=window.selected;
+    if(!el||!el.classList||!el.classList.contains('block')){
+      console.warn('[Design] No block selected to apply preview');
+      return;
+    }
+    el.style.backgroundImage=bg;
+    el.style.backgroundRepeat='no-repeat';
+    el.style.backgroundPosition='center';
+    el.style.backgroundSize='contain';
+    el.style.imageRendering='pixelated';
+    el.classList.add('designApplied');
+    if(typeof window.snapshot==='function') window.snapshot();
+  });
 })();
 </script>
 </body>
