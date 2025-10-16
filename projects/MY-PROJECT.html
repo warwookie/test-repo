@@ -101,6 +101,21 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 /* text fit helpers */
 .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hasFS{font-size:var(--fs-override, inherit)}
+.design-preview {
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--line, #444);
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.2) inset;
+  background:
+    linear-gradient(45deg, rgba(0,0,0,0.07) 25%, transparent 25%) 0 0/16px 16px,
+    linear-gradient(-45deg, rgba(0,0,0,0.07) 25%, transparent 25%) 0 0/16px 16px,
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.07) 75%) 0 0/16px 16px,
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.07) 75%) 0 0/16px 16px;
+  background-color: var(--badge, #101014);
+  image-rendering: pixelated;
+  display: inline-block;
+}
 </style>
 </head>
 <body class="theme-midnight">
@@ -261,6 +276,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             <label>Seed
               <input id="dgSeed" type="number" value="0"/>
             </label>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Preview</div>
+            <div class="dgField">
+              <div id="dgPreview" class="design-preview" role="img" aria-label="Design preview area"></div>
+            </div>
           </div>
           <div class="edRow" style="gap:6px">
             <button id="dgGenerate">Generate</button>
