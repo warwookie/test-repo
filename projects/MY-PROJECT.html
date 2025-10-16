@@ -115,6 +115,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   background-color: var(--badge, #101014);
   image-rendering: pixelated;
   display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 </style>
 </head>
@@ -609,6 +612,203 @@ function enablePreviewInnerDrag(blockClone){
 // demo helper
 $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.toggle('burn'); };
 
+</script>
+<script>
+(function(){
+  const promptEl=document.getElementById('dgPrompt');
+  const seedEl=document.getElementById('dgSeed');
+  const generateBtn=document.getElementById('dgGenerate');
+  const randomBtn=document.getElementById('dgRandom');
+  const previewEl=document.getElementById('dgPreview');
+  if(!promptEl || !seedEl || !generateBtn || !randomBtn || !previewEl){ return; }
+
+  const BOUND_ATTR='data-bound';
+  const parserCtx=(()=>{
+    try{
+      const canvas=document.createElement('canvas');
+      canvas.width=canvas.height=1;
+      return canvas.getContext('2d');
+    }catch{return null;}
+  })();
+
+  function parseColor(value){
+    if(!value || !parserCtx) return null;
+    try{
+      parserCtx.fillStyle='#000';
+      parserCtx.fillStyle=value.trim();
+      const normalized=parserCtx.fillStyle;
+      if(!normalized) return null;
+      if(normalized.startsWith('#')){
+        if(normalized.length===7){
+          return {
+            r:parseInt(normalized.slice(1,3),16),
+            g:parseInt(normalized.slice(3,5),16),
+            b:parseInt(normalized.slice(5,7),16)
+          };
+        }
+        if(normalized.length===4){
+          const r=normalized.charAt(1);
+          const g=normalized.charAt(2);
+          const b=normalized.charAt(3);
+          return {
+            r:parseInt(r+r,16),
+            g:parseInt(g+g,16),
+            b:parseInt(b+b,16)
+          };
+        }
+      }
+      if(normalized.startsWith('rgb')){
+        const parts=normalized.match(/\d+/g);
+        if(parts && parts.length>=3){
+          return {
+            r:parseInt(parts[0],10),
+            g:parseInt(parts[1],10),
+            b:parseInt(parts[2],10)
+          };
+        }
+      }
+    }catch{}
+    return null;
+  }
+
+  const fallbackPalette=['#ff6b6b','#ffd93d','#6bcfff','#9dff8c','#ff9bfd']
+    .map(parseColor)
+    .filter(Boolean);
+
+  function getPalette(){
+    const bodyStyles=getComputedStyle(document.body);
+    const candidates=['--hi','--red','--org','--ylw','--green','--grn','--blu','--sel'];
+    const colors=candidates.map(name=>parseColor(bodyStyles.getPropertyValue(name))).filter(Boolean);
+    return colors.length?colors:(fallbackPalette.length?fallbackPalette:[{r:255,g:255,b:255}]);
+  }
+
+  function hashString(str){
+    let h=0;
+    for(let i=0;i<str.length;i++){
+      h=Math.imul(31,h)+str.charCodeAt(i);
+      h|=0;
+    }
+    return h>>>0;
+  }
+
+  function createRng(seed){
+    let s=seed>>>0;
+    return function(){
+      s=(Math.imul(s,1664525)+1013904223)>>>0;
+      return s/4294967296;
+    };
+  }
+
+  function createCanvas(size){
+    if(typeof OffscreenCanvas!=='undefined'){
+      try{ return new OffscreenCanvas(size,size); }catch{}
+    }
+    const canvas=document.createElement('canvas');
+    canvas.width=size;
+    canvas.height=size;
+    return canvas;
+  }
+
+  function canvasToDataURL(canvas){
+    if(typeof OffscreenCanvas!=='undefined' && canvas instanceof OffscreenCanvas){
+      if(typeof canvas.convertToBlob==='function'){
+        return canvas.convertToBlob().then(blob=>new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=()=>resolve(reader.result);
+          reader.onerror=reject;
+          reader.readAsDataURL(blob);
+        }));
+      }
+      if(typeof canvas.transferToImageBitmap==='function'){
+        const bmp=canvas.transferToImageBitmap();
+        const copy=document.createElement('canvas');
+        copy.width=bmp.width;
+        copy.height=bmp.height;
+        const ctx=copy.getContext('2d');
+        if(ctx){ ctx.drawImage(bmp,0,0); return Promise.resolve(copy.toDataURL('image/png')); }
+      }
+    }
+    return Promise.resolve(canvas.toDataURL('image/png'));
+  }
+
+  async function buildPatternDataURL(prompt, seedValue){
+    const promptHash=hashString(prompt||'');
+    const numericSeed=parseInt(seedValue,10);
+    const baseSeed=Number.isFinite(numericSeed)?numericSeed:0;
+    const finalSeed=(promptHash ^ (baseSeed|0))>>>0;
+    const rng=createRng(finalSeed);
+    const size=8;
+    const palette=getPalette();
+    const canvas=createCanvas(size);
+    const ctx=canvas.getContext('2d');
+    if(!ctx) return '';
+    const imageData=ctx.createImageData(size,size);
+    const data=imageData.data;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<Math.ceil(size/2);x++){
+        const isOn=rng()<0.45;
+        let color=null;
+        if(isOn){
+          color=palette[Math.floor(rng()*palette.length)]||palette[0];
+        }
+        const mirror=size-1-x;
+        const targets=[[x,y],[mirror,y]];
+        for(const [cx,cy] of targets){
+          const idx=(cy*size+cx)*4;
+          if(isOn && color){
+            data[idx]=color.r;
+            data[idx+1]=color.g;
+            data[idx+2]=color.b;
+            data[idx+3]=255;
+          }else{
+            data[idx]=0;
+            data[idx+1]=0;
+            data[idx+2]=0;
+            data[idx+3]=0;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imageData,0,0);
+    return canvasToDataURL(canvas);
+  }
+
+  async function runGenerate(){
+    const prompt=(promptEl.value||'').trim();
+    const seedRaw=parseInt(seedEl.value,10);
+    const normalized=Number.isFinite(seedRaw)?seedRaw:0;
+    seedEl.value=String(normalized);
+    try{
+      const dataUrl=await buildPatternDataURL(prompt, normalized);
+      if(dataUrl){
+        previewEl.style.backgroundImage=`url(${dataUrl})`;
+      }
+    }catch(err){
+      console.error('Design preview generation failed', err);
+    }
+  }
+
+  const handleGenerateClick=async ev=>{
+    ev.preventDefault();
+    await runGenerate();
+  };
+
+  const handleRandomClick=async ev=>{
+    ev.preventDefault();
+    const seed=Math.floor(Math.random()*999999)+1;
+    seedEl.value=String(seed);
+    await runGenerate();
+  };
+
+  if(!generateBtn.hasAttribute(BOUND_ATTR)){
+    generateBtn.setAttribute(BOUND_ATTR,'1');
+    generateBtn.addEventListener('click', handleGenerateClick);
+  }
+  if(!randomBtn.hasAttribute(BOUND_ATTR)){
+    randomBtn.setAttribute(BOUND_ATTR,'1');
+    randomBtn.addEventListener('click', handleRandomClick);
+  }
+})();
 </script>
 </body>
 </html>
