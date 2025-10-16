@@ -158,6 +158,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="undo">Undo</button><button id="redo">Redo</button>
       <button id="delete">Delete</button>
       <button id="export">Export</button><button id="import">Import</button>
+      <button id="tidyTextBtn" class="btn" title="Auto-fit all labels">Tidy Text</button>
       <button id="reset">Reset</button>
       <button id="toggleGrid">Grid: ON</button>
       <button id="openEditor">Open Editor</button>
@@ -1308,6 +1309,67 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   box.style.backgroundPosition||='center';
   box.style.backgroundSize||='contain';
   box.style.imageRendering||='pixelated';
+})();
+</script>
+<script>
+(()=>{
+  const btn=document.getElementById('tidyTextBtn');
+  if(!btn) return;
+  if(btn.dataset.bound==='1') return;
+  btn.dataset.bound='1';
+
+  btn.addEventListener('click',()=>{
+    const blocks=document.querySelectorAll('.block');
+    blocks.forEach(el=>{
+      if(!el || !(el instanceof HTMLElement)) return;
+      const innerHost=el.querySelector('.innerHost')||el;
+      let host=innerHost;
+      if(typeof window.getTextHost==='function'){
+        try{
+          const resolved=window.getTextHost(el);
+          if(resolved instanceof HTMLElement){ host=resolved; }
+        }catch{}
+      }
+      const textContent=((host.textContent||'').trim())||((innerHost.textContent||'').trim());
+      const dataText=(host.getAttribute&&host.getAttribute('data-text'))||(innerHost.getAttribute&&innerHost.getAttribute('data-text'));
+      if(!textContent && !dataText) return;
+
+      if(typeof window.applyAlign==='function'){
+        try{ window.applyAlign(el,'left','center'); }catch{}
+      }
+
+      let usedHelper=false;
+      if(typeof window.autoFit==='function'){
+        try{ window.autoFit(host, el); usedHelper=true; }catch{}
+      }
+
+      if(!usedHelper){
+        try{
+          host.style.whiteSpace='nowrap';
+          host.style.overflow='hidden';
+          const r=el.getBoundingClientRect();
+          const cs=getComputedStyle(el);
+          const padX=parseFloat(cs.getPropertyValue('--padx'))||0;
+          const padY=parseFloat(cs.getPropertyValue('--pady'))||0;
+          const availW=Math.max(8, r.width-padX*2);
+          const availH=Math.max(8, r.height-padY*2);
+          let fs=parseFloat(getComputedStyle(host).fontSize)||14;
+          while(host.scrollWidth>availW && fs>6){ fs-=0.5; host.style.fontSize=fs+'px'; }
+          while(host.scrollHeight>availH && fs>6){ fs-=0.5; host.style.fontSize=fs+'px'; }
+          innerHost.style.display='flex';
+          innerHost.style.alignItems='center';
+          innerHost.style.justifyContent='flex-start';
+          if(!(getComputedStyle(el).getPropertyValue('--padx')||'').trim()){
+            el.style.setProperty('--padx','4px');
+          }
+        }catch{}
+      }
+    });
+
+    if(typeof window.snapshot==='function'){
+      try{ window.snapshot(); }catch{}
+    }
+  });
 })();
 </script>
 </body>
