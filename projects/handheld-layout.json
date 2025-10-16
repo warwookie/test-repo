@@ -1,0 +1,26 @@
+{
+  "theme": "midnight",
+  "grid": { "tilesX": 18, "tilesY": 32, "tileSize": 8 },
+  "blocks": {
+    "title":      { "x": 0,  "y": 0,  "w": 18, "h": 2,  "kind": "title" },
+    "board":      { "x": 1,  "y": 3,  "w": 16, "h": 14, "kind": "_board" },
+    "hudSneakers":{ "x": 1,  "y": 18, "w": 8,  "h": 2,  "kind": "snkr" },
+    "hudPowerups":{ "x": 9,  "y": 18, "w": 8,  "h": 2,  "kind": "power" },
+    "hudLife":    { "x": 1,  "y": 21, "w": 5,  "h": 2,  "kind": "life" },
+    "hudScore":   { "x": 7,  "y": 21, "w": 6,  "h": 2,  "kind": "score" },
+    "hudTimer":   { "x": 14, "y": 21, "w": 4,  "h": 2,  "kind": "timer" },
+    "ctrlZone":   { "x": 1,  "y": 24, "w": 16, "h": 8,  "kind": "_ctrl" },
+    "statBoxes":  { "x": 1,  "y": 24, "w": 6,  "h": 2,  "kind": "stat" },
+    "statFires":  { "x": 1,  "y": 26, "w": 6,  "h": 2,  "kind": "stat" },
+    "joyStick":   { "x": 12, "y": 24, "w": 4,  "h": 4,  "kind": "joystick" },
+    "btnBombBar": { "x": 1,  "y": 30, "w": 11, "h": 2,  "kind": "bombbar" },
+    "btnPause":   { "x": 14, "y": 30, "w": 3,  "h": 2,  "kind": "pause" }
+  },
+  "version": "v6_aligned",
+  "meta": {
+    "aspectRatio": "9:16",
+    "scaleRange": [3, 7],
+    "font": "Press Start 2P",
+    "snap": ["tiles", "edges", "centers"]
+  }
+}
