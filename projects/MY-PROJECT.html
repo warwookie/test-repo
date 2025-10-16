@@ -158,6 +158,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="undo">Undo</button><button id="redo">Redo</button>
       <button id="delete">Delete</button>
       <button id="export">Export</button><button id="import">Import</button>
+      <button id="fitLabelBtn" class="btn" title="Shrink-to-fit label in selected block">Fit Label</button>
       <button id="auditTextBtn" class="btn" title="Scan labels for overflow">Audit Text</button>
       <button id="tidyTextBtn" class="btn" title="Auto-fit all labels">Tidy Text</button>
       <button id="reset">Reset</button>
@@ -1478,6 +1479,96 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
     console.log(`[TextAudit] Blocks scanned: ${results.length}, Overflows: ${overflowCount}`);
   });
 })();
+</script>
+<script>
+  (function() {
+    const btn = document.getElementById('fitLabelBtn');
+    if (!btn) return;
+    if (btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+
+    function getInner(el) {
+      if (!el) return null;
+      if (typeof window.getTextHost === 'function') {
+        try {
+          const h = window.getTextHost(el);
+          if (h) return h;
+        } catch (e) {}
+      }
+      return el.querySelector('.innerHost') || el;
+    }
+
+    function px(n){ return (Math.round(n*100)/100) + 'px'; }
+
+    btn.addEventListener('click', () => {
+      const el = (window.selected && window.selected.classList && window.selected.classList.contains('block'))
+        ? window.selected
+        : document.querySelector('.block.sel');
+      if (!el) { console.warn('[FitLabel] No selected block'); return; }
+
+      const inner = getInner(el);
+      if (!inner) { console.warn('[FitLabel] No text host'); return; }
+
+      const text = (inner.textContent || '').trim();
+      if (!text) { console.warn('[FitLabel] Empty label'); return; }
+
+      const er = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const padx = parseFloat(cs.getPropertyValue('--padx')) || 0;
+      const pady = parseFloat(cs.getPropertyValue('--pady')) || 0;
+      const availW = Math.max(8, er.width - 2*padx);
+      const availH = Math.max(8, er.height - 2*pady);
+
+      inner.style.whiteSpace = 'nowrap';
+      inner.style.overflow = 'hidden';
+      inner.style.display = 'flex';
+      inner.style.alignItems = 'center';
+      inner.style.justifyContent = 'flex-start';
+      if (!cs.getPropertyValue('--padx') || cs.getPropertyValue('--padx') === '0px') {
+        el.style.setProperty('--padx', '4px');
+      }
+
+      const baseCS = getComputedStyle(inner);
+      let fs = parseFloat(baseCS.fontSize) || 14;
+      const minFS = 6;
+
+      const meas = document.createElement('div');
+      meas.textContent = text;
+      meas.style.position = 'fixed';
+      meas.style.left = '-99999px';
+      meas.style.top = '-99999px';
+      meas.style.whiteSpace = 'nowrap';
+      meas.style.fontFamily = baseCS.fontFamily;
+      meas.style.fontWeight = baseCS.fontWeight;
+      meas.style.letterSpacing = baseCS.letterSpacing;
+      meas.style.lineHeight = baseCS.lineHeight;
+      document.body.appendChild(meas);
+
+      function fits(sizePx){
+        meas.style.fontSize = px(sizePx);
+        const w = meas.scrollWidth;
+        const h = Math.max(meas.scrollHeight, sizePx * 1.1);
+        return (w <= availW && h <= availH);
+      }
+
+      if (!fits(fs)) {
+        let hi = fs, lo = minFS;
+        while (hi - lo > 0.25) {
+          const mid = (hi + lo) / 2;
+          if (fits(mid)) lo = mid; else hi = mid;
+        }
+        fs = Math.max(minFS, Math.floor(lo*100)/100);
+      }
+
+      inner.style.fontSize = px(fs);
+
+      document.body.removeChild(meas);
+
+      if (typeof window.snapshot === 'function') {
+        try { window.snapshot(); } catch(e){}
+      }
+    });
+  })();
 </script>
 </body>
 </html>
