@@ -1075,5 +1075,43 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   });
 })();
 </script>
+<script>
+(function(){
+  const promptEl=document.getElementById('dgPrompt');
+  const seedEl=document.getElementById('dgSeed');
+  const genBtn=document.getElementById('dgGenerate');
+  const previewBox=document.getElementById('dgPreview');
+  if(!promptEl||!seedEl||!genBtn||!previewBox) return;
+  if(genBtn.dataset.aiHookBound==='1') return;
+  genBtn.dataset.aiHookBound='1';
+  genBtn.addEventListener('click',ev=>{
+    const prompt=String(promptEl.value||'');
+    const seedRaw=parseInt(seedEl.value,10);
+    const seed=Number.isFinite(seedRaw)?seedRaw:0;
+    if(typeof window.sqGenImage==='function'){
+      const applyUrl=url=>{
+        if(typeof url==='string'&&url){
+          previewBox.style.backgroundImage=`url(${url})`;
+          previewBox.textContent='';
+          ev.stopImmediatePropagation();
+          ev.preventDefault();
+        }
+      };
+      let result;
+      try{ result=window.sqGenImage({prompt,seed}); }catch(err){ result=null; }
+      if(result&&typeof result.then==='function'){
+        result.then(applyUrl).catch(()=>{});
+        ev.stopImmediatePropagation();
+        ev.preventDefault();
+      }else{
+        applyUrl(result);
+      }
+    }else{
+      previewBox.textContent='No AI provider configured';
+      previewBox.style.backgroundImage='';
+    }
+  },{capture:true});
+})();
+</script>
 </body>
 </html>
