@@ -158,6 +158,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="undo">Undo</button><button id="redo">Redo</button>
       <button id="delete">Delete</button>
       <button id="export">Export</button><button id="import">Import</button>
+      <button id="auditTextBtn" class="btn" title="Scan labels for overflow">Audit Text</button>
       <button id="tidyTextBtn" class="btn" title="Auto-fit all labels">Tidy Text</button>
       <button id="reset">Reset</button>
       <button id="toggleGrid">Grid: ON</button>
@@ -1369,6 +1370,112 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
     if(typeof window.snapshot==='function'){
       try{ window.snapshot(); }catch{}
     }
+  });
+})();
+</script>
+<script>
+(()=>{
+  const btn=document.getElementById('auditTextBtn');
+  if(!btn || btn.dataset.bound==='1') return;
+  btn.dataset.bound='1';
+
+  function ensureStyle(){
+    if(document.querySelector('style[data-text-audit]')) return;
+    const style=document.createElement('style');
+    style.setAttribute('data-text-audit','');
+    style.textContent='.text-audit { outline: 2px dashed #ff9f43; outline-offset: -3px; }';
+    document.head.appendChild(style);
+  }
+
+  btn.addEventListener('click',()=>{
+    ensureStyle();
+    document.querySelectorAll('.text-audit').forEach(n=>n.classList.remove('text-audit'));
+    const blocks=document.querySelectorAll('.block');
+    const results=[];
+    let overflowCount=0;
+
+    blocks.forEach(el=>{
+      if(!(el instanceof HTMLElement)) return;
+      let inner=null;
+      if(typeof window.getTextHost==='function'){
+        try{ inner=window.getTextHost(el); }catch(e){ inner=null; }
+      }
+      if(!(inner instanceof HTMLElement)){
+        inner=el.querySelector('.innerHost')||el;
+      }
+      if(!(inner instanceof HTMLElement)){
+        inner=el;
+      }
+
+      const text=(inner.textContent||'').trim();
+      if(!text){
+        return;
+      }
+
+      const br=el.getBoundingClientRect();
+      const cs=getComputedStyle(el);
+      const padx=parseFloat(cs.getPropertyValue('--padx'))||0;
+      const pady=parseFloat(cs.getPropertyValue('--pady'))||0;
+      const availW=Math.max(8, br.width-2*padx);
+      const availH=Math.max(8, br.height-2*pady);
+      const innerCS=getComputedStyle(inner);
+      const fs0=parseFloat(innerCS.fontSize)||12;
+
+      const clone=inner.cloneNode(true);
+      if(clone.removeAttribute){ clone.removeAttribute('id'); }
+      clone.style.position='absolute';
+      clone.style.visibility='hidden';
+      clone.style.pointerEvents='none';
+      clone.style.whiteSpace='nowrap';
+      clone.style.maxWidth='none';
+      clone.style.maxHeight='none';
+      clone.style.left='-9999px';
+      clone.style.top='-9999px';
+      clone.style.fontFamily=innerCS.fontFamily;
+      clone.style.fontWeight=innerCS.fontWeight;
+      clone.style.fontStyle=innerCS.fontStyle;
+      clone.style.letterSpacing=innerCS.letterSpacing;
+      clone.style.lineHeight=innerCS.lineHeight;
+      clone.style.fontSize=fs0+'px';
+      document.body.appendChild(clone);
+
+      let fsFit=fs0;
+      let fits=clone.scrollWidth<=availW && clone.scrollHeight<=availH;
+      let guard=0;
+      while(!fits && fsFit>1 && guard<200){
+        fsFit=Math.max(1, fsFit-0.5);
+        clone.style.fontSize=fsFit+'px';
+        fits=clone.scrollWidth<=availW && clone.scrollHeight<=availH;
+        guard++;
+      }
+      if(!fits && fsFit!==1){
+        fsFit=1;
+        clone.style.fontSize='1px';
+        fits=clone.scrollWidth<=availW && clone.scrollHeight<=availH;
+      }
+      const fsFitRounded=Number(fsFit.toFixed(2));
+      clone.remove();
+
+      const innerOverflow=inner.scrollWidth>availW || inner.scrollHeight>availH;
+      const isOverflow=(fs0-fsFitRounded)>0.1 || !fits || innerOverflow;
+      if(isOverflow){
+        el.classList.add('text-audit');
+        overflowCount++;
+      }
+
+      results.push({
+        id: el.id || '(unnamed)',
+        text,
+        fsCurrent: Number(fs0.toFixed(2)),
+        fsFit: fsFitRounded,
+        availW: Math.round(availW),
+        availH: Math.round(availH),
+        overflow: isOverflow
+      });
+    });
+
+    console.table(results);
+    console.log(`[TextAudit] Blocks scanned: ${results.length}, Overflows: ${overflowCount}`);
   });
 })();
 </script>
