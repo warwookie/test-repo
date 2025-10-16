@@ -168,7 +168,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="reset">Reset</button>
       <button id="toggleGrid">Grid: ON</button>
       <button id="openEditor">Open Editor</button>
-      <button id="aiSettingsBtn">Settings</button>
     </div>
   </div>
 
@@ -237,6 +236,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         <div class="tab" data-tab="design">Design Generator</div>
       </div>
       <div class="edRow" style="justify-content:flex-end">
+        <button id="aiSettingsBtn">AI Settings</button>
         <button id="edClose">Close</button>
       </div>
     </div>
@@ -540,7 +540,9 @@ function openAiSettings(){
     aiSettingsModal.style.display='grid';
   }
   if(aiProviderEl){
-    aiProviderEl.focus();
+    const focusFn=()=>aiProviderEl.focus();
+    if(typeof requestAnimationFrame==='function'){ requestAnimationFrame(focusFn); }
+    else{ setTimeout(focusFn,0); }
   }
 }
 
@@ -554,8 +556,9 @@ if(aiSettingsBtn){
   aiSettingsBtn.addEventListener('click', openAiSettings);
 }
 
-if(aiCancelBtn){
-  aiCancelBtn.addEventListener('click', closeAiSettings);
+if(aiCancelBtn && !aiCancelBtn.dataset.bound){
+  aiCancelBtn.dataset.bound='1';
+  aiCancelBtn.addEventListener('click', ev=>{ ev.preventDefault(); closeAiSettings(); });
 }
 
 if(aiSettingsModal){
@@ -564,7 +567,8 @@ if(aiSettingsModal){
 
 if(aiSaveBtn && !aiSaveBtn.dataset.bound){
   aiSaveBtn.dataset.bound='1';
-  aiSaveBtn.addEventListener('click', ()=>{
+  aiSaveBtn.addEventListener('click', ev=>{
+    ev.preventDefault();
     const rawProvider=aiProviderEl?aiProviderEl.value.trim():'';
     const provider=sanitizeProvider(rawProvider);
     const apiKey=aiApiKeyEl?aiApiKeyEl.value.trim():'';
