@@ -978,5 +978,102 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   }
 })();
 </script>
+<script>
+(function(){
+  let btnGen=document.getElementById('dgGenerate');
+  const box=document.getElementById('dgPreview');
+  if(!btnGen||!box) return;
+  if(btnGen.dataset.boundHeart==='1') return;
+
+  const fresh=btnGen.cloneNode(true);
+  btnGen.replaceWith(fresh);
+  btnGen=fresh;
+  btnGen.dataset.boundHeart='1';
+
+  box.style.backgroundRepeat||='no-repeat';
+  box.style.backgroundPosition||='center';
+  box.style.backgroundSize||='contain';
+  box.style.imageRendering||='pixelated';
+
+  function makeHeartDataURL(){
+    const size=16;
+    let canvas;
+    if(typeof OffscreenCanvas!=='undefined'){
+      try{ canvas=new OffscreenCanvas(size,size); }catch{}
+    }
+    if(!canvas){ canvas=document.createElement('canvas'); }
+    canvas.width=size;
+    canvas.height=size;
+    const ctx=canvas.getContext('2d');
+    if(!ctx) return '';
+    const image=ctx.createImageData(size,size);
+    const data=image.data;
+    const rows=[
+      '....rr....rr....',
+      '...hrrr..rrrh...',
+      '..hrrrrrrrrrrh..',
+      '.rrrrrrrrrrrrrr.',
+      '.rrrrrrrrrrrrrr.',
+      '.rrrrrrrrrrrrrr.',
+      '..rrrrrrrrrrrr..',
+      '...rrrrrrrrrr...',
+      '....rrrrrrrr....',
+      '.....rrrrrr.....',
+      '......rrrr......',
+      '.......rr.......',
+      '................',
+      '................',
+      '................',
+      '................'
+    ];
+    const palette={
+      r:[0xe5,0x39,0x35],
+      h:[0xff,0xd7,0xd7]
+    };
+    for(let y=0;y<size;y++){
+      const row=rows[y]||'';
+      for(let x=0;x<size;x++){
+        const idx=(y*size+x)*4;
+        const code=row.charAt(x);
+        const color=palette[code];
+        if(color){
+          data[idx]=color[0];
+          data[idx+1]=color[1];
+          data[idx+2]=color[2];
+          data[idx+3]=255;
+        }else{
+          data[idx]=0;
+          data[idx+1]=0;
+          data[idx+2]=0;
+          data[idx+3]=0;
+        }
+      }
+    }
+    ctx.putImageData(image,0,0);
+    if(canvas instanceof OffscreenCanvas){
+      const helper=document.createElement('canvas');
+      helper.width=size;
+      helper.height=size;
+      const hctx=helper.getContext('2d');
+      if(!hctx) return '';
+      if(typeof canvas.transferToImageBitmap==='function'){
+        hctx.drawImage(canvas.transferToImageBitmap(),0,0);
+      }else{
+        const copy=ctx.getImageData(0,0,size,size);
+        hctx.putImageData(copy,0,0);
+      }
+      return helper.toDataURL('image/png');
+    }
+    return typeof canvas.toDataURL==='function'?canvas.toDataURL('image/png'):'';
+  }
+
+  btnGen.addEventListener('click',()=>{
+    const url=makeHeartDataURL();
+    if(url){
+      box.style.backgroundImage=`url(${url})`;
+    }
+  });
+})();
+</script>
 </body>
 </html>
