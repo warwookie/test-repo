@@ -1119,5 +1119,130 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   },{capture:true});
 })();
 </script>
+<script>
+(function(){
+  const ta=document.getElementById('dgSpriteJson');
+  const box=document.getElementById('dgPreview');
+  if(!ta||!box) return;
+  if(ta.dataset.spritePreviewBound==='1') return;
+  ta.dataset.spritePreviewBound='1';
+
+  box.style.backgroundRepeat||='no-repeat';
+  box.style.backgroundPosition||='center';
+  box.style.backgroundSize||='contain';
+  box.style.imageRendering||='pixelated';
+
+  function safeColorToRGBA(input){
+    if(!input) return [0,0,0,0];
+    const raw=String(input).trim();
+    if(!raw) return [0,0,0,0];
+    if(raw.toLowerCase()==='transparent') return [0,0,0,0];
+    if(raw[0]==='#'){
+      let hex=raw.slice(1);
+      if(hex.length===3){
+        hex=hex.split('').map(ch=>ch+ch).join('');
+      }
+      if(hex.length===6 && /^[0-9a-f]{6}$/i.test(hex)){
+        const num=parseInt(hex,16);
+        return [
+          (num>>16)&255,
+          (num>>8)&255,
+          num&255,
+          255
+        ];
+      }
+    }
+    return [0,0,0,0];
+  }
+
+  function renderSprite(data){
+    if(!data||typeof data!=='object') throw new Error('Expected object');
+    const width=Number(data.w);
+    const height=Number(data.h);
+    if(!Number.isInteger(width)||width<=0) throw new Error('Invalid width');
+    if(!Number.isInteger(height)||height<=0) throw new Error('Invalid height');
+    const pixels=data.pixels;
+    if(!Array.isArray(pixels)||pixels.length!==height) throw new Error('Invalid pixels');
+    const palette=(data.palette&&typeof data.palette==='object')?data.palette:{};
+
+    let canvas; let ctx; let offscreen=false;
+    if(typeof OffscreenCanvas!=='undefined'){
+      try{
+        const off=new OffscreenCanvas(width,height);
+        const offCtx=off.getContext('2d');
+        if(offCtx){
+          canvas=off;
+          ctx=offCtx;
+          offscreen=true;
+        }
+      }catch{}
+    }
+    if(!canvas){
+      const el=document.createElement('canvas');
+      el.width=width;
+      el.height=height;
+      const elCtx=el.getContext('2d');
+      if(!elCtx) throw new Error('No 2d context');
+      canvas=el;
+      ctx=elCtx;
+    }
+
+    const image=ctx.createImageData(width,height);
+    const buf=image.data;
+    for(let y=0;y<height;y++){
+      const row=String(pixels[y]??'');
+      if(row.length!==width) throw new Error('Row width mismatch');
+      for(let x=0;x<width;x++){
+        const idx=(y*width+x)*4;
+        const color=safeColorToRGBA(palette[row[x]]);
+        buf[idx]=color[0];
+        buf[idx+1]=color[1];
+        buf[idx+2]=color[2];
+        buf[idx+3]=color[3];
+      }
+    }
+    ctx.putImageData(image,0,0);
+
+    if(offscreen){
+      const helper=document.createElement('canvas');
+      helper.width=width;
+      helper.height=height;
+      const hctx=helper.getContext('2d');
+      if(!hctx) throw new Error('No helper context');
+      if(typeof canvas.transferToImageBitmap==='function'){
+        hctx.drawImage(canvas.transferToImageBitmap(),0,0);
+      }else{
+        hctx.putImageData(image,0,0);
+      }
+      return helper.toDataURL('image/png');
+    }
+
+    return canvas.toDataURL('image/png');
+  }
+
+  function handleChange(){
+    const text=ta.value;
+    if(!text||!text.trim()) return;
+    try{
+      const parsed=JSON.parse(text);
+      const url=renderSprite(parsed);
+      if(url){
+        box.style.backgroundImage=`url(${url})`;
+        box.textContent='';
+        box.removeAttribute('title');
+      }
+    }catch(err){
+      console.warn('[SpriteJSON] invalid:', err);
+      box.title='Invalid sprite JSON';
+    }
+  }
+
+  ta.addEventListener('input',handleChange);
+  ta.addEventListener('change',handleChange);
+  ta.addEventListener('blur',handleChange);
+
+  handleChange();
+})();
+</script>
 </body>
 </html>
