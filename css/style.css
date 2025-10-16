@@ -1,0 +1,146 @@
+/* =========================================================
+   Base Styles and Layout Structure
+   --------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --color-text: #1f2933;
+  --color-background: #f9fafb;
+  --color-accent: #2563eb;
+  --color-muted: #4b5563;
+  --color-border: #d1d5db;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e5e7eb;
+    --color-background: #111827;
+    --color-muted: #9ca3af;
+    --color-border: #374151;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   Accessibility Enhancements
+   --------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border-radius: 0.25rem;
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.no-script {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  background-color: var(--color-border);
+  color: inherit;
+}
+
+/* =========================================================
+   Layout Containers
+   --------------------------------------------------------- */
+.container {
+  width: min(90%, 60rem);
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.site-header,
+.site-footer {
+  background-color: rgba(37, 99, 235, 0.08);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  border-bottom: none;
+}
+
+.site-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+}
+
+.primary-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.primary-nav a {
+  font-weight: 600;
+}
+
+.site-main {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.site-main section + section {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 2.5rem;
+}
+
+.site-main h2 {
+  margin-top: 0;
+  font-size: clamp(1.5rem, 1.5vw + 1rem, 2rem);
+}
+
+.site-footer p {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+@media (max-width: 40rem) {
+  .primary-nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

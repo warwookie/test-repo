@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accessible Starter Website</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <noscript>
+      <p class="no-script">JavaScript is disabled in your browser. Some interactive features may not work as expected.</p>
+    </noscript>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Site Header -->
+    <header class="site-header" role="banner">
+      <div class="container">
+        <h1 class="site-title">Starter Website</h1>
+        <!-- Primary Navigation -->
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <ul>
+            <li><a href="#section-intro">Intro</a></li>
+            <li><a href="#section-features">Features</a></li>
+            <li><a href="#section-contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="site-main" tabindex="-1">
+      <div class="container">
+        <!-- Intro Section -->
+        <section id="section-intro" aria-labelledby="intro-heading">
+          <h2 id="intro-heading">Welcome</h2>
+          <p>
+            This minimal starter layout provides a solid foundation for building an
+            accessible, responsive website. Customize these sections with your own content.
+          </p>
+        </section>
+
+        <!-- Features Section -->
+        <section id="section-features" aria-labelledby="features-heading">
+          <h2 id="features-heading">Key Highlights</h2>
+          <ul>
+            <li>Semantic HTML5 structure for improved accessibility.</li>
+            <li>Responsive design that adapts to a range of devices.</li>
+            <li>Baseline styles with focus on readability and usability.</li>
+          </ul>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="section-contact" aria-labelledby="contact-heading">
+          <h2 id="contact-heading">Get in Touch</h2>
+          <p>
+            Ready to make this template your own? Replace this placeholder content with your
+            contact details or a call to action to connect with your audience.
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="container">
+        <p>&copy; <span id="current-year"></span> Starter Website. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
