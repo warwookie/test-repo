@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Handheld Layout Preview</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    /* Handheld preview-specific styles (kept minimal) */
+    :root { --s: 4; } /* integer scale 3–7; adjust to see sizes change */
+    .handheld {
+      position: relative;
+      width: calc(18 * 8px * var(--s));
+      height: calc(32 * 8px * var(--s));
+      margin: 16px auto;
+      outline: 2px solid #555;
+      background: #0b0f1a; /* midnight theme backdrop */
+    }
+    .tilebox {
+      position: absolute;
+      box-sizing: border-box;
+      border: 2px solid #4ea8de;
+      padding: calc(2px * var(--s));
+      background: rgba(255,255,255,0.04);
+      color: #e0e0e0;
+      /* Pixel font sizing that fits tile height */
+      font-family: "Press Start 2P", system-ui, monospace;
+      line-height: 1.1;
+      font-size: calc(6px * var(--s)); /* tuned to fit 2-tile HUD boxes */
+      letter-spacing: 0.02em;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .tilebox.smallText { font-size: calc(5px * var(--s)); } /* optional tighter fit */
+
+    .legend {
+      max-width: 60ch; margin: 0 auto; padding: 12px;
+      color: inherit;
+    }
+    .legend code { background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <main id="main">
+    <h1>Handheld Layout Preview</h1>
+    <p class="legend">
+      This page reads <code>projects/handheld-layout.json</code> and places boxes on an 18×32 tile grid.
+      Adjust the scale by changing <code>:root { --s: 4; }</code> in the inline CSS.
+    </p>
+    <div id="root" class="handheld" aria-label="Handheld preview area"></div>
+  </main>
+  <script src="../js/handheld-renderer.js" defer></script>
+</body>
+</html>
