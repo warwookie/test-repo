@@ -371,6 +371,99 @@ const GRID_KEY='SQ_GRID_V1';
 const META_KEY='SQ_BLOCK_META_V1'; // per-block inner offsets + padding
 const SNAP_INNER_KEY='SQ_INNER_SNAP_V1';
 const AI_SETTINGS_KEY='SQ_AI_SETTINGS_V1';
+const aiModal=$('#aiSettingsModal');
+const aiSettingsBtn=$('#aiSettingsBtn');
+const aiProvider=$('#aiProvider');
+const aiApiKey=$('#aiApiKey');
+const aiModel=$('#aiModel');
+const aiPrefix=$('#aiPrefix');
+const aiSaveBtn=$('#aiSave');
+const aiCancelBtn=$('#aiCancel');
+
+function loadAiSettings(){
+  try{
+    const raw=localStorage.getItem(AI_SETTINGS_KEY);
+    if(!raw) return null;
+    const parsed=JSON.parse(raw);
+    return (parsed && typeof parsed==='object')?parsed:null;
+  }catch{}
+  return null;
+}
+
+function applyAiSettingsToForm(data){
+  if(!aiProvider||!aiApiKey||!aiModel||!aiPrefix) return;
+  const settings=data||{};
+  const providerValue=settings.provider||'openai';
+  const providerOption=[...aiProvider.options].some(opt=>opt.value===providerValue)?providerValue:'openai';
+  aiProvider.value=providerOption;
+  aiApiKey.value=settings.apiKey||'';
+  aiModel.value=settings.model||'';
+  aiPrefix.value=settings.prefix||'';
+}
+
+function openAiSettings(){
+  if(!aiModal) return;
+  applyAiSettingsToForm(loadAiSettings());
+  aiModal.style.display='grid';
+  if(aiProvider){
+    const focusFn=()=>aiProvider.focus();
+    if(typeof requestAnimationFrame==='function') requestAnimationFrame(focusFn);
+    else setTimeout(focusFn,0);
+  }
+}
+
+function closeAiSettings(){
+  if(!aiModal) return;
+  aiModal.style.display='none';
+}
+
+function handleAiSave(ev){
+  ev.preventDefault();
+  if(!aiProvider||!aiApiKey) return;
+  const provider=(aiProvider.value||'').trim();
+  const apiKey=(aiApiKey.value||'').trim();
+  if(!provider){
+    alert('Please select a provider.');
+    aiProvider.focus();
+    return;
+  }
+  if(!apiKey){
+    alert('API key is required.');
+    aiApiKey.focus();
+    return;
+  }
+  const payload={
+    provider,
+    apiKey,
+    model:(aiModel&&aiModel.value||'').trim(),
+    prefix:(aiPrefix&&aiPrefix.value||'').trim()
+  };
+  try{ localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(payload)); }catch{}
+  closeAiSettings();
+}
+
+function handleAiCancel(ev){
+  ev.preventDefault();
+  closeAiSettings();
+}
+
+if(aiSettingsBtn){
+  aiSettingsBtn.addEventListener('click',openAiSettings);
+}
+
+if(aiSaveBtn && !aiSaveBtn.dataset.bound){
+  aiSaveBtn.dataset.bound='1';
+  aiSaveBtn.addEventListener('click', handleAiSave);
+}
+
+if(aiCancelBtn && !aiCancelBtn.dataset.bound){
+  aiCancelBtn.dataset.bound='1';
+  aiCancelBtn.addEventListener('click', handleAiCancel);
+}
+
+if(aiModal){
+  aiModal.addEventListener('click',e=>{ if(e.target===aiModal) closeAiSettings(); });
+}
 function getTheme(){ return localStorage.getItem(THEME_KEY)||'midnight'; }
 function applyTheme(name){ const body=document.body; body.className=body.className.split(/\s+/).filter(c=>!c.startsWith(THEME_CLASS_PREFIX)).join(' ').trim(); body.classList.add(THEME_CLASS_PREFIX+name); }
 function setTheme(name){ localStorage.setItem(THEME_KEY,name); applyTheme(name); }
