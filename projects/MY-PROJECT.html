@@ -1251,31 +1251,63 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
 })();
 </script>
 <script>
-(function(){
+(()=>{
   const btn=document.getElementById('dgApply');
   const box=document.getElementById('dgPreview');
   if(!btn||!box) return;
-  if(btn.dataset.bound==='1') return;
-  btn.dataset.bound='1';
+  if(btn.dataset.applyBound==='1') return;
+  btn.dataset.applyBound='1';
+
+  function extractDataURL(el){
+    let bg=(el.style&&el.style.backgroundImage)||'';
+    if(!bg){
+      const cs=getComputedStyle(el);
+      bg=(cs&&cs.backgroundImage)||'';
+    }
+    const match=bg.match(/url\((['"]?)(data:image\/[a-zA-Z+]+;base64,[^'")]+)\1\)/);
+    return match?match[2]:'';
+  }
+
+  function getSelectedBlock(){
+    if(window.selected&&window.selected.classList&&window.selected.classList.contains('block')) return window.selected;
+    const el=document.querySelector('.block.sel');
+    if(el) return el;
+    return document.querySelector('.block[data-selected="1"]')||null;
+  }
+
   btn.addEventListener('click',()=>{
-    const bg=box.style.backgroundImage||'';
-    if(!bg||!bg.includes('data:image')){
-      console.warn('[Design] No preview image to apply');
+    const url=extractDataURL(box);
+    if(!url||!/^data:image\//.test(url)){
+      console.warn('[DesignApply] No preview image to apply');
       return;
     }
-    const el=window.selected;
-    if(!el||!el.classList||!el.classList.contains('block')){
-      console.warn('[Design] No block selected to apply preview');
+
+    const target=getSelectedBlock();
+    if(!target){
+      console.warn('[DesignApply] No selected block found (select a block first)');
       return;
     }
-    el.style.backgroundImage=bg;
-    el.style.backgroundRepeat='no-repeat';
-    el.style.backgroundPosition='center';
-    el.style.backgroundSize='contain';
-    el.style.imageRendering='pixelated';
-    el.classList.add('designApplied');
-    if(typeof window.snapshot==='function') window.snapshot();
+
+    target.style.backgroundImage=`url(${url})`;
+    target.style.backgroundRepeat='no-repeat';
+    target.style.backgroundPosition='center';
+    target.style.backgroundSize='contain';
+    target.style.imageRendering='pixelated';
+
+    try{
+      target.classList.add('designApplied');
+      setTimeout(()=>target.classList.remove('designApplied'),300);
+    }catch(e){}
+
+    if(typeof window.snapshot==='function'){
+      try{window.snapshot();}catch(e){}
+    }
   });
+
+  box.style.backgroundRepeat||='no-repeat';
+  box.style.backgroundPosition||='center';
+  box.style.backgroundSize||='contain';
+  box.style.imageRendering||='pixelated';
 })();
 </script>
 </body>
