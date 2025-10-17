@@ -568,8 +568,21 @@ $('#reset').onclick=()=>{ localStorage.removeItem(STORAGE_KEY); localStorage.rem
 $('#openEditor').onclick=()=>{ if(!selected){ const first=$$('#root .block').find(b=>b.id!=='board'&&b.id!=='ctrlZone')||$('#board'); select(first);} openEditor(selected); };
 
 const modal=$('#modal'), io=$('#io');
-function openModal(txt){ io.value=txt||''; modal.style.display='grid'; io.focus(); io.select(); }
-function closeModal(){ modal.style.display='none'; }
+let _lastFocus = null;
+
+function openModal(txt){
+  try { _lastFocus = document.activeElement; } catch {}
+  io.value = txt || '';
+  modal.style.display = 'grid';
+  modal.setAttribute('aria-hidden', 'false');
+  try { io.focus(); io.select(); } catch {}
+}
+
+function closeModal(){
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+  try { if(_lastFocus && typeof _lastFocus.focus === 'function') _lastFocus.focus(); } catch {}
+}
 $('#export').onclick=()=>{ const payload={ version: EXPORT_VERSION, theme:getTheme(), layout: collect() }; openModal(JSON.stringify(payload,null,2)); };
 $('#import').onclick=()=>{ openModal('Paste JSON here, then press Apply. Supports {version,theme,layout} or layout-only.'); };
 $('#copy').onclick=()=>{ navigator.clipboard.writeText(io.value).catch(()=>{}); };
@@ -614,8 +627,27 @@ function setSafeMultilineText(host, value){ host.textContent=''; const parts=Str
 function autoFit(host){ host.classList.add('hasFS'); let size=parseInt(getComputedStyle(host).fontSize)||12; const min=8; const container=host.closest('.block')||host; const fits=()=> host.scrollWidth<=container.clientWidth && host.scrollHeight<=container.clientHeight; let guard=40; while(!fits() && size>min && guard-->0){ size-=1; host.style.setProperty('--fs-override', size+'px'); } }
 function applyAlign(block, xAlign, yAlign){ const host=getTextHost(block); host.style.textAlign=xAlign; const map={top:'flex-start',center:'center',bottom:'flex-end'}; block.style.alignItems=map[yAlign]||'center'; const jmap={left:'flex-start',center:'center',right:'flex-end'}; block.style.justifyContent=jmap[xAlign]||'center'; }
 
-function openEditor(el){ if(!el){ return; } select(el); ensureInnerHost(el); buildPreviewFrom(el); editor.style.display='grid'; syncLayoutFields(el); preloadTextControls(el); preloadInnerControls(el); }
-function closeEditor(){ editor.style.display='none'; previewWrap.innerHTML=''; }
+/* Editor open/close with focus save/restore */
+function openEditor(el){
+  if(!el) return;
+  try { _lastFocus = document.activeElement; } catch {}
+  select(el);
+  ensureInnerHost(el);
+  buildPreviewFrom(el);
+  editor.style.display = 'grid';
+  editor.setAttribute('aria-hidden', 'false');
+  try { $('#edClose') && $('#edClose').focus(); } catch {}
+  syncLayoutFields(el);
+  preloadTextControls(el);
+  preloadInnerControls(el);
+}
+
+function closeEditor(){
+  editor.style.display = 'none';
+  editor.setAttribute('aria-hidden', 'true');
+  previewWrap.innerHTML = '';
+  try { if(_lastFocus && typeof _lastFocus.focus === 'function') _lastFocus.focus(); } catch {}
+}
 
 function buildPreviewFrom(el){
   previewWrap.innerHTML='';
