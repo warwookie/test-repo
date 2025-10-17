@@ -1997,5 +1997,152 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   refreshEditorFieldsFromSelection();
 })();
 </script>
+<script>
+(function(){
+  if (window.__ix2bBound) return; window.__ix2bBound = true;
+
+  // ---------- Helpers ----------
+  function getSel(){
+    return document.querySelector('.block.sel') || window.selected || null;
+  }
+  function getInner(block){
+    if (!block) return null;
+    return block.querySelector('.innerHost') || block;
+  }
+  function ensureLayers(block){
+    const inner = getInner(block); if (!inner) return {};
+    // ensure labelHost
+    let label = inner.querySelector(':scope > .labelHost');
+    if (!label) {
+      label = document.createElement('span');
+      label.className = 'labelHost';
+      // harvest existing text from any txtHost/label node
+      const host = block.querySelector('.txtHost') || block.querySelector('.label') || inner;
+      const txt = (host.textContent || '').trim();
+      // clear only the text node from host (non-destructive for other elements)
+      if (host !== label) host.textContent = '';
+      label.textContent = txt || 'LABEL';
+      inner.appendChild(label);
+    }
+    // ensure iconsHost
+    let icons = inner.querySelector(':scope > .iconsHost');
+    if (!icons) {
+      icons = document.createElement('span');
+      icons.className = 'iconsHost';
+      inner.appendChild(icons);
+    }
+    // absolute anchoring already in CSS; ensure relative container
+    if (getComputedStyle(inner).position === 'static') inner.style.position = 'relative';
+    return { inner, label, icons };
+  }
+
+  function rebuildIcons(block, count){
+    const { icons } = ensureLayers(block);
+    if (!icons) return;
+    const n = Math.max(0, Math.min(8, parseInt(count||0,10) || 0));
+    // rebuild tokens
+    if (icons.dataset.count === String(n)) return; // no-op
+    icons.innerHTML = '';
+    for (let i=0; i<n; i++){
+      const t = document.createElement('span');
+      t.className = 'iconToken';
+      icons.appendChild(t);
+    }
+    icons.dataset.count = String(n);
+  }
+
+  function setIconsPos(block, cx, cy){
+    const { icons } = ensureLayers(block);
+    if (!icons) return;
+    const X = Math.max(0, Math.min(100, Number(cx)));
+    const Y = Math.max(0, Math.min(100, Number(cy)));
+    icons.style.left = X + '%';
+    icons.style.top  = Y + '%';
+    icons.dataset.cx = String(X);
+    icons.dataset.cy = String(Y);
+  }
+
+  function readIconsPos(block){
+    const { icons } = ensureLayers(block);
+    if (!icons) return { cx:50, cy:50 };
+    const cx = +(icons.dataset.cx ?? 50);
+    const cy = +(icons.dataset.cy ?? 50);
+    return { cx, cy };
+  }
+
+  function refreshPreview(block){
+    if (typeof window.buildPreviewFrom === 'function') {
+      try { window.buildPreviewFrom(block); } catch(e){}
+    }
+  }
+  function snap(){
+    if (typeof window.snapshot === 'function') {
+      try { window.snapshot(); } catch(e){}
+    }
+  }
+
+  // ---------- Field bindings ----------
+  const iconCount = document.getElementById('iconCount');
+  const iconsX    = document.getElementById('iconsX');
+  const iconsY    = document.getElementById('iconsY');
+
+  if (!iconCount || !iconsX || !iconsY) {
+    console.warn('[IX-2B] Missing editor fields (iconCount/iconsX/iconsY).');
+    return;
+  }
+  if (iconCount.dataset.bound === '1') return;
+  iconCount.dataset.bound = '1';
+  iconsX.dataset.bound = '1';
+  iconsY.dataset.bound = '1';
+
+  // Change handlers
+  iconCount.addEventListener('input', () => {
+    const b = getSel(); if (!b) return;
+    rebuildIcons(b, iconCount.value);
+    refreshPreview(b);
+  });
+  iconCount.addEventListener('change', () => {
+    const b = getSel(); if (!b) return;
+    rebuildIcons(b, iconCount.value);
+    snap(); refreshPreview(b);
+  });
+
+  iconsX.addEventListener('input', () => {
+    const b = getSel(); if (!b) return;
+    setIconsPos(b, iconsX.value, readIconsPos(b).cy);
+    refreshPreview(b);
+  });
+  iconsX.addEventListener('change', () => { const b=getSel(); if(!b) return; setIconsPos(b, iconsX.value, readIconsPos(b).cy); snap(); });
+
+  iconsY.addEventListener('input', () => {
+    const b = getSel(); if (!b) return;
+    setIconsPos(b, readIconsPos(b).cx, iconsY.value);
+    refreshPreview(b);
+  });
+  iconsY.addEventListener('change', () => { const b=getSel(); if(!b) return; setIconsPos(b, readIconsPos(b).cx, iconsY.value); snap(); });
+
+  // Patch openEditor to prefill fields and normalize layers for the selected block
+  if (!window.__ix2bOpenPatched && typeof window.openEditor === 'function') {
+    window.__ix2bOpenPatched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try {
+        const b = el || (document.querySelector('.block.sel') || window.selected);
+        if (!b) return r;
+        const { icons } = ensureLayers(b);
+        // Prefill fields
+        iconCount.value = (icons && icons.dataset.count) ? icons.dataset.count : (icons ? icons.children.length : 0);
+        const pos = readIconsPos(b);
+        iconsX.value = String(pos.cx);
+        iconsY.value = String(pos.cy);
+      } catch(e){}
+      return r;
+    };
+  }
+
+  console.log('[IX-2B] Icon layer wired for selected block.');
+})();
+</script>
 </body>
 </html>
