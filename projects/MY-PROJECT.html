@@ -2858,5 +2858,175 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   }
 })();
 </script>
+<style id="prv-rsz-style">
+  .pvRszWrap { position: relative; }
+  .pvHandle {
+    position: absolute;
+    width: 10px; height: 10px;
+    margin: -5px 0 0 -5px;
+    background: #00d1ff;
+    border: 1px solid #04586c;
+    border-radius: 2px;
+    cursor: nwse-resize;
+    z-index: 50;
+  }
+  .pvHandle.br { right: 0; bottom: 0; left: auto; top: auto; cursor: nwse-resize; }
+  .pvHandle.tr { right: 0; top: 0; left: auto; cursor: nesw-resize; }
+  .pvHandle.bl { left: 0; bottom: 0; top: auto; cursor: nesw-resize; }
+  .pvHandle.tl { left: 0; top: 0; cursor: nwse-resize; }
+</style>
+<script>
+(function(){
+  if (window.__prvRszBound) return; window.__prvRszBound = true;
+
+  // --- helpers ---
+  function selBlock(){ return document.querySelector('.block.sel') || window.selected || null; }
+  function getPreviewStage(){
+    // The element that contains the preview clone (used earlier by PV-1)
+    return document.querySelector('.editor .preview, .editor .design-preview, .editor .pane .preview') || null;
+  }
+  function getTilePx(){
+    // TILE = --s * 8
+    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 5;
+    return 8 * s;
+  }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+  function ensureHandles(stage){
+    // Wrap the preview stage content with a relative wrapper so handles can be positioned
+    if (!stage) return null;
+    if (stage.dataset.pvRsz === '1') return stage.querySelector('.pvRszWrap');
+    stage.dataset.pvRsz = '1';
+
+    // Create wrap if missing
+    let wrap = stage.querySelector(':scope > .pvRszWrap');
+    if (!wrap){
+      wrap = document.createElement('div');
+      wrap.className = 'pvRszWrap';
+      // Move existing children into wrap
+      while (stage.firstChild) wrap.appendChild(stage.firstChild);
+      stage.appendChild(wrap);
+    }
+
+    // Add four corner handles if not present
+    const need = ['tl','tr','bl','br'];
+    need.forEach(pos=>{
+      if (!wrap.querySelector('.pvHandle.'+pos)) {
+        const h = document.createElement('div');
+        h.className = 'pvHandle ' + pos;
+        wrap.appendChild(h);
+      }
+    });
+    return wrap;
+  }
+
+  // Read/write the live block size using tiles when possible, else px
+  function getLiveBlockRectTiles(b){
+    // Prefer dataset x,y,w,h in tiles if present
+    const TILE = getTilePx();
+    const br = b.getBoundingClientRect();
+    const wTiles = Math.round(br.width / TILE);
+    const hTiles = Math.round(br.height / TILE);
+    return { wTiles, hTiles, TILE };
+  }
+
+  function setLiveBlockSizeFromPreview(b, pxW, pxH){
+    const { TILE } = getLiveBlockRectTiles(b);
+    const wTiles = clamp(Math.round(pxW / TILE), 1, 999);
+    const hTiles = clamp(Math.round(pxH / TILE), 1, 999);
+
+    // If the project uses tile-based APIs, adjust via dataset and trigger existing layout apply.
+    // Otherwise, apply inline width/height in px as a fallback.
+    if (b.dataset && ('x' in b.dataset || 'w' in b.dataset)) {
+      b.dataset.w = String(wTiles);
+      b.dataset.h = String(hTiles);
+    }
+    // Inline fallback to ensure visual update immediately:
+    b.style.width  = (wTiles * TILE) + 'px';
+    b.style.height = (hTiles * TILE) + 'px';
+
+    // Re-wire preview
+    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
+  }
+
+  // Attach resize behavior to handles inside preview
+  function bindPreviewResize(){
+    const stage = getPreviewStage(); if (!stage) return;
+    const wrap = ensureHandles(stage); if (!wrap) return;
+    if (wrap.dataset.bound === '1') return; wrap.dataset.bound = '1';
+
+    let dragging = null;
+
+    wrap.addEventListener('pointerdown', (e)=>{
+      const h = e.target.closest('.pvHandle'); if (!h) return;
+      const b = selBlock(); if (!b) return;
+
+      // Measure current preview block box (the clone fills the wrap)
+      const clone = wrap.querySelector('.block') || wrap.firstElementChild;
+      if (!clone) return;
+
+      const rect = clone.getBoundingClientRect();
+      dragging = {
+        handle: h,
+        startX: e.clientX,
+        startY: e.clientY,
+        startW: rect.width,
+        startH: rect.height,
+        kind: h.classList.contains('br') ? 'br' :
+              h.classList.contains('tr') ? 'tr' :
+              h.classList.contains('bl') ? 'bl' : 'tl',
+        live: b
+      };
+      wrap.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    wrap.addEventListener('pointermove', (e)=>{
+      if (!dragging) return;
+      const dx = e.clientX - dragging.startX;
+      const dy = e.clientY - dragging.startY;
+
+      let newW = dragging.startW;
+      let newH = dragging.startH;
+
+      // Corner logic (resize from the corner dragged)
+      if (dragging.kind === 'br') { newW += dx; newH += dy; }
+      if (dragging.kind === 'tr') { newW += dx; newH -= dy; }
+      if (dragging.kind === 'bl') { newW -= dx; newH += dy; }
+      if (dragging.kind === 'tl') { newW -= dx; newH -= dy; }
+
+      // Minimum 1 tile
+      const TILE = getTilePx();
+      newW = Math.max(TILE, newW);
+      newH = Math.max(TILE, newH);
+
+      // Apply to live block and refresh preview
+      setLiveBlockSizeFromPreview(dragging.live, newW, newH);
+    });
+
+    wrap.addEventListener('pointerup', ()=>{
+      if (!dragging) return;
+      // Commit history snapshot if available
+      if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
+      dragging = null;
+    });
+  }
+
+  // Patch openEditor so handles appear and bind every time preview rebuilds
+  if (typeof window.openEditor === 'function' && !window.__prvRszOpenPatched){
+    window.__prvRszOpenPatched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try { bindPreviewResize(); } catch(e){}
+      return r;
+    };
+  }
+
+  // If editor already open, bind immediately
+  bindPreviewResize();
+})();
+</script>
 </body>
 </html>
