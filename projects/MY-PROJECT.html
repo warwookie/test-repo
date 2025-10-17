@@ -3028,5 +3028,74 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   bindPreviewResize();
 })();
 </script>
+<style id="diag-rsz-style">
+  .pv-diag-outline { outline: 2px dashed #ff3b30; outline-offset: -2px; }
+  .pv-diag-watermark {
+    position: absolute; right: 6px; top: 6px; padding: 2px 6px;
+    font: 10px/1 monospace; background: rgba(255,59,48,0.15); color: #ff3b30; z-index: 9999;
+    pointer-events: none; user-select: none; border-radius: 3px;
+  }
+</style>
+<script>
+(function(){
+  if (window.__diagRSZBound) return; window.__diagRSZBound = true;
+
+  function selBlock(){
+    return document.querySelector('.block.sel') || window.selected || null;
+  }
+  function findPreviewContainer(){
+    // Try common containers used by the project
+    const cands = [
+      document.querySelector('.editor .preview'),
+      document.querySelector('.editor .design-preview'),
+      document.querySelector('.editor .pane .preview'),
+      document.querySelector('#dgPreview')
+    ];
+    return cands.find(Boolean) || null;
+  }
+
+  function markContainer(stage){
+    if (!stage) return;
+    // Add outline + a small watermark tag (once per stage)
+    stage.classList.add('pv-diag-outline');
+    if (!stage.querySelector('.pv-diag-watermark')) {
+      const tag = document.createElement('div');
+      tag.className = 'pv-diag-watermark';
+      tag.textContent = 'RSZ-DIAG ACTIVE';
+      // Positioning helper: ensure stage can host absolute children
+      const cs = getComputedStyle(stage);
+      if (cs.position === 'static') stage.style.position = 'relative';
+      stage.appendChild(tag);
+    }
+  }
+
+  function logState(prefix){
+    const stage = findPreviewContainer();
+    const sel = selBlock();
+    const clone = stage ? stage.querySelector('.block') : null;
+    console.group('[DIAG-RSZ]', prefix);
+    console.log('previewStage:', stage);
+    console.log('selectedBlock:', sel ? (sel.id || sel) : null);
+    console.log('previewClone(.block inside stage):', clone);
+    console.log('stageChildrenCount:', stage ? stage.children.length : 0);
+    console.groupEnd();
+    if (stage) markContainer(stage);
+  }
+
+  // Log immediately if editor is already visible
+  logState('boot');
+
+  // Patch openEditor to log every time the editor opens/rebuilds
+  if (typeof window.openEditor === 'function' && !window.__diagRSZOpenPatched){
+    window.__diagRSZOpenPatched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try { logState('after openEditor'); } catch(e){}
+      return r;
+    };
+  }
+})();
+</script>
 </body>
 </html>
