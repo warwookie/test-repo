@@ -77,5 +77,70 @@
     </footer>
 
     <script src="js/app.js"></script>
+    <script>
+      /* === SEP-2: Icon generator + text coexist fix === */
+      (function () {
+        if (window.__sep2Bound) return;
+        window.__sep2Bound = true;
+
+        // Utility: get selected block
+        function getSel() {
+          return document.querySelector('.block.sel') || window.selected || null;
+        }
+
+        // Ensure iconsHost exists
+        function ensureIconsHost(block) {
+          if (!block) return null;
+          let icons = block.querySelector('.iconsHost');
+          if (!icons) {
+            icons = document.createElement('span');
+            icons.className = 'iconsHost';
+            const inner = block.querySelector('.innerHost') || block;
+            inner.appendChild(icons);
+          }
+          return icons;
+        }
+
+        // Create icons inside block
+        function rebuildIcons(block, count) {
+          const host = ensureIconsHost(block);
+          host.innerHTML = '';
+          for (let i = 0; i < count; i++) {
+            const icon = document.createElement('span');
+            icon.className = 'iconToken';
+            host.appendChild(icon);
+          }
+        }
+
+        // Find "Icon Count" input dynamically
+        let targetInput = null;
+        document.querySelectorAll('input').forEach((inp) => {
+          if (inp.previousElementSibling?.textContent?.match(/Icon Count/i)) targetInput = inp;
+        });
+
+        if (!targetInput) {
+          console.warn('[SEP-2] No Icon Count input found');
+          return;
+        }
+
+        // Bind events to the Icon Count field
+        targetInput.addEventListener('input', () => {
+          const block = getSel();
+          if (!block) return;
+          const n = Math.max(0, parseInt(targetInput.value) || 0);
+          rebuildIcons(block, n);
+        });
+
+        targetInput.addEventListener('change', () => {
+          const block = getSel();
+          if (!block) return;
+          const n = Math.max(0, parseInt(targetInput.value) || 0);
+          rebuildIcons(block, n);
+          if (window.snapshot) window.snapshot();
+        });
+
+        console.log('[SEP-2] Text + Icons unified successfully');
+      })();
+    </script>
   </body>
 </html>
