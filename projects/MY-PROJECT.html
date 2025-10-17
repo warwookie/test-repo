@@ -2144,5 +2144,116 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   console.log('[IX-2B] Icon layer wired for selected block.');
 })();
 </script>
+<style id="icon-fix-css">
+  .innerHost { position: relative; }
+  .labelHost { position: absolute; transform: translate(-50%, -50%); left: 50%; top: 40%; white-space: nowrap; }
+  .iconsHost { position: absolute; transform: translate(-50%, -50%); left: 50%; top: 70%; display: flex; gap: 6px; }
+  .iconToken { width: 12px; height: 12px; border-radius: 50%; background: #000; border: 1px solid #222; display: inline-block; }
+</style>
+<script>
+(function(){
+  if (window.__ICON_FIX_BOUND) return; window.__ICON_FIX_BOUND = true;
+
+  // --- helpers ---
+  function selBlock(){
+    return document.querySelector('.block.sel') || window.selected || null;
+  }
+  function getInner(b){
+    return b ? (b.querySelector('.innerHost') || b) : null;
+  }
+  function ensureLayers(b){
+    const inner = getInner(b); if (!inner) return {};
+    // label host: do not destroy existing text, only relocate it if needed
+    let label = inner.querySelector(':scope > .labelHost');
+    if (!label) {
+      label = document.createElement('span');
+      label.className = 'labelHost';
+      // harvest text from existing inner (but DO NOT wipe inner children wholesale)
+      const txt = (inner.textContent || '').trim();
+      if (txt) label.textContent = txt;
+      inner.appendChild(label);
+    }
+    // icons host
+    let icons = inner.querySelector(':scope > .iconsHost');
+    if (!icons) {
+      icons = document.createElement('span');
+      icons.className = 'iconsHost';
+      inner.appendChild(icons);
+    }
+    // default positions only if not already set (0–100%)
+    if (!icons.dataset.cx) { icons.dataset.cx = '50'; icons.style.left = '50%'; }
+    if (!icons.dataset.cy) { icons.dataset.cy = '70'; icons.style.top  = '70%'; }
+    if (!label.dataset.cx) { label.dataset.cx = '50'; label.style.left = '50%'; }
+    if (!label.dataset.cy) { label.dataset.cy = '40'; label.style.top  = '40%'; }
+
+    return { inner, label, icons };
+  }
+
+  function rebuildIcons(b, count){
+    const L = ensureLayers(b); if (!L.icons) return;
+    const n = Math.max(0, Math.min(8, parseInt(count||0,10) || 0));
+    // Rebuild only if different
+    if (L.icons.dataset.count === String(n)) return;
+    L.icons.innerHTML = '';
+    for (let i=0;i<n;i++){
+      const t = document.createElement('span');
+      t.className = 'iconToken';
+      L.icons.appendChild(t);
+    }
+    L.icons.dataset.count = String(n);
+  }
+
+  // --- bind Icon Count field robustly (by its label text) ---
+  function findIconCountInput(){
+    const explicit = document.getElementById('iconCount');
+    if (explicit) return explicit;
+    const rows = document.querySelectorAll('.dgRow');
+    for (const row of rows){
+      const lbl = row.querySelector('.dgLabel');
+      const fld = row.querySelector('.dgField input[type="number"], .dgField input');
+      if (lbl && /icon\s*count/i.test(lbl.textContent||'') && fld) return fld;
+    }
+    return null;
+  }
+
+  const iconCount = findIconCountInput();
+  if (!iconCount) { console.warn('[ICON-FIX] Icon Count input not found'); return; }
+  if (iconCount.dataset.iconFixBound === '1') return;
+  iconCount.dataset.iconFixBound = '1';
+
+  function applyCount(){
+    const b = selBlock(); if (!b) { console.warn('[ICON-FIX] no selected block'); return; }
+    rebuildIcons(b, iconCount.value);
+    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
+    if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
+  }
+
+  iconCount.addEventListener('input', function(){
+    const b = selBlock(); if (!b) return;
+    rebuildIcons(b, iconCount.value);
+    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
+  });
+  iconCount.addEventListener('change', applyCount);
+
+  // --- patch openEditor so both layers exist and the field reflects current icons ---
+  if (typeof window.openEditor === 'function' && !window.__ICON_FIX_OPEN_PATCH){
+    window.__ICON_FIX_OPEN_PATCH = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try {
+        const b = el || selBlock(); if (!b) return r;
+        const L = ensureLayers(b);
+        // set field from current icons child count if dataset not set
+        const current = (L.icons && L.icons.dataset.count) ? parseInt(L.icons.dataset.count,10) : (L.icons ? L.icons.children.length : 0);
+        iconCount.value = isNaN(current) ? 0 : current;
+      } catch(e){}
+      return r;
+    };
+  }
+
+  console.log('[ICON-FIX] Icon Count now renders icons in selected block');
+})();
+</script>
 </body>
 </html>
