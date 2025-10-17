@@ -334,7 +334,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
                 <option value="line1">Line 1</option>
                 <option value="line2">Line 2</option>
                 <option value="icons">Icons</option>
-                <option value="box">Box</option>
               </select>
               <small style="opacity:.7;margin-left:8px;">Drag in preview to move</small>
             </div>
@@ -2866,419 +2865,38 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   }
 })();
 </script>
-<style id="prv-rsz-style">
-  .pvRszWrap { position: relative; }
-  .pvHandle {
-    position: absolute;
-    width: 10px; height: 10px;
-    margin: -5px 0 0 -5px;
-    background: #00d1ff;
-    border: 1px solid #04586c;
-    border-radius: 2px;
-    cursor: nwse-resize;
-    z-index: 50;
-  }
-  .pvHandle.br { right: 0; bottom: 0; left: auto; top: auto; cursor: nwse-resize; }
-  .pvHandle.tr { right: 0; top: 0; left: auto; cursor: nesw-resize; }
-  .pvHandle.bl { left: 0; bottom: 0; top: auto; cursor: nesw-resize; }
-  .pvHandle.tl { left: 0; top: 0; cursor: nwse-resize; }
-</style>
 <script>
 (function(){
-  if (window.__prvRszBound) return; window.__prvRszBound = true;
-
-  // --- helpers ---
-  function selBlock(){ return document.querySelector('.block.sel') || window.selected || null; }
-  function getPreviewStage(){
-    // The element that contains the preview clone (used earlier by PV-1)
-    return document.querySelector('.editor .preview, .editor .design-preview, .editor .pane .preview') || null;
-  }
-  function getTilePx(){
-    // TILE = --s * 8
-    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 5;
-    return 8 * s;
-  }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-
-  function ensureHandles(stage){
-    // Wrap the preview stage content with a relative wrapper so handles can be positioned
-    if (!stage) return null;
-    if (stage.dataset.pvRsz === '1') return stage.querySelector('.pvRszWrap');
-    stage.dataset.pvRsz = '1';
-
-    // Create wrap if missing
-    let wrap = stage.querySelector(':scope > .pvRszWrap');
-    if (!wrap){
-      wrap = document.createElement('div');
-      wrap.className = 'pvRszWrap';
-      // Move existing children into wrap
-      while (stage.firstChild) wrap.appendChild(stage.firstChild);
-      stage.appendChild(wrap);
-    }
-
-    // Add four corner handles if not present
-    const need = ['tl','tr','bl','br'];
-    need.forEach(pos=>{
-      if (!wrap.querySelector('.pvHandle.'+pos)) {
-        const h = document.createElement('div');
-        h.className = 'pvHandle ' + pos;
-        wrap.appendChild(h);
-      }
-    });
-    return wrap;
-  }
-
-  // Read/write the live block size using tiles when possible, else px
-  function getLiveBlockRectTiles(b){
-    // Prefer dataset x,y,w,h in tiles if present
-    const TILE = getTilePx();
-    const br = b.getBoundingClientRect();
-    const wTiles = Math.round(br.width / TILE);
-    const hTiles = Math.round(br.height / TILE);
-    return { wTiles, hTiles, TILE };
-  }
-
-  function setLiveBlockSizeFromPreview(b, pxW, pxH){
-    const { TILE } = getLiveBlockRectTiles(b);
-    const wTiles = clamp(Math.round(pxW / TILE), 1, 999);
-    const hTiles = clamp(Math.round(pxH / TILE), 1, 999);
-
-    // If the project uses tile-based APIs, adjust via dataset and trigger existing layout apply.
-    // Otherwise, apply inline width/height in px as a fallback.
-    if (b.dataset && ('x' in b.dataset || 'w' in b.dataset)) {
-      b.dataset.w = String(wTiles);
-      b.dataset.h = String(hTiles);
-    }
-    // Inline fallback to ensure visual update immediately:
-    b.style.width  = (wTiles * TILE) + 'px';
-    b.style.height = (hTiles * TILE) + 'px';
-
-    // Re-wire preview
-    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
-  }
-
-  // Attach resize behavior to handles inside preview
-  function bindPreviewResize(){
-    const stage = getPreviewStage(); if (!stage) return;
-    const wrap = ensureHandles(stage); if (!wrap) return;
-    if (wrap.dataset.bound === '1') return; wrap.dataset.bound = '1';
-
-    let dragging = null;
-
-    wrap.addEventListener('pointerdown', (e)=>{
-      const h = e.target.closest('.pvHandle'); if (!h) return;
-      const b = selBlock(); if (!b) return;
-
-      // Measure current preview block box (the clone fills the wrap)
-      const clone = wrap.querySelector('.block') || wrap.firstElementChild;
-      if (!clone) return;
-
-      const rect = clone.getBoundingClientRect();
-      dragging = {
-        handle: h,
-        startX: e.clientX,
-        startY: e.clientY,
-        startW: rect.width,
-        startH: rect.height,
-        kind: h.classList.contains('br') ? 'br' :
-              h.classList.contains('tr') ? 'tr' :
-              h.classList.contains('bl') ? 'bl' : 'tl',
-        live: b
-      };
-      wrap.setPointerCapture(e.pointerId);
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    wrap.addEventListener('pointermove', (e)=>{
-      if (!dragging) return;
-      const dx = e.clientX - dragging.startX;
-      const dy = e.clientY - dragging.startY;
-
-      let newW = dragging.startW;
-      let newH = dragging.startH;
-
-      // Corner logic (resize from the corner dragged)
-      if (dragging.kind === 'br') { newW += dx; newH += dy; }
-      if (dragging.kind === 'tr') { newW += dx; newH -= dy; }
-      if (dragging.kind === 'bl') { newW -= dx; newH += dy; }
-      if (dragging.kind === 'tl') { newW -= dx; newH -= dy; }
-
-      // Minimum 1 tile
-      const TILE = getTilePx();
-      newW = Math.max(TILE, newW);
-      newH = Math.max(TILE, newH);
-
-      // Apply to live block and refresh preview
-      setLiveBlockSizeFromPreview(dragging.live, newW, newH);
-    });
-
-    wrap.addEventListener('pointerup', ()=>{
-      if (!dragging) return;
-      // Commit history snapshot if available
-      if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
-      dragging = null;
-    });
-  }
-
-  // Patch openEditor so handles appear and bind every time preview rebuilds
-  if (typeof window.openEditor === 'function' && !window.__prvRszOpenPatched){
-    window.__prvRszOpenPatched = true;
-    const orig = window.openEditor;
-    window.openEditor = function(el){
-      const r = orig.apply(this, arguments);
-      try { bindPreviewResize(); } catch(e){}
-      return r;
-    };
-  }
-
-  // If editor already open, bind immediately
-  bindPreviewResize();
-})();
-</script>
-<style id="box-rsz-style">
-  .pvRszWrap { position: relative; }
-  .pvHandle {
-    position: absolute;
-    width: 10px; height: 10px;
-    margin: -5px 0 0 -5px;
-    background: #00d1ff;
-    border: 1px solid #04586c;
-    border-radius: 2px;
-    z-index: 50;
-  }
-  .pvHandle.tl { left: 0; top: 0; cursor: nwse-resize; }
-  .pvHandle.tr { right: 0; top: 0; cursor: nesw-resize; }
-  .pvHandle.bl { left: 0; bottom: 0; cursor: nesw-resize; }
-  .pvHandle.br { right: 0; bottom: 0; cursor: nwse-resize; }
-  /* show handles only in Box mode */
-  .pvHandlesHidden .pvHandle { display: none; }
-</style>
-<style id="diag-rsz-style">
-  .pv-diag-outline { outline: 2px dashed #ff3b30; outline-offset: -2px; }
-  .pv-diag-watermark {
-    position: absolute; right: 6px; top: 6px; padding: 2px 6px;
-    font: 10px/1 monospace; background: rgba(255,59,48,0.15); color: #ff3b30; z-index: 9999;
-    pointer-events: none; user-select: none; border-radius: 3px;
-  }
-</style>
-<script>
-(function(){
-  if (window.__diagRSZBound) return; window.__diagRSZBound = true;
-
-  function selBlock(){
-    return document.querySelector('.block.sel') || window.selected || null;
-  }
-  function findPreviewContainer(){
-    // Try common containers used by the project
-    const cands = [
-      document.querySelector('.editor .preview'),
-      document.querySelector('.editor .design-preview'),
-      document.querySelector('.editor .pane .preview'),
-      document.querySelector('#dgPreview')
-    ];
-    return cands.find(Boolean) || null;
-  }
-
-  function markContainer(stage){
-    if (!stage) return;
-    // Add outline + a small watermark tag (once per stage)
-    stage.classList.add('pv-diag-outline');
-    if (!stage.querySelector('.pv-diag-watermark')) {
-      const tag = document.createElement('div');
-      tag.className = 'pv-diag-watermark';
-      tag.textContent = 'RSZ-DIAG ACTIVE';
-      // Positioning helper: ensure stage can host absolute children
-      const cs = getComputedStyle(stage);
-      if (cs.position === 'static') stage.style.position = 'relative';
-      stage.appendChild(tag);
-    }
-  }
-
-  function logState(prefix){
-    const stage = findPreviewContainer();
-    const sel = selBlock();
-    const clone = stage ? stage.querySelector('.block') : null;
-    console.group('[DIAG-RSZ]', prefix);
-    console.log('previewStage:', stage);
-    console.log('selectedBlock:', sel ? (sel.id || sel) : null);
-    console.log('previewClone(.block inside stage):', clone);
-    console.log('stageChildrenCount:', stage ? stage.children.length : 0);
-    console.groupEnd();
-    if (stage) markContainer(stage);
-  }
-
-  // Log immediately if editor is already visible
-  logState('boot');
-
-  // Patch openEditor to log every time the editor opens/rebuilds
-  if (typeof window.openEditor === 'function' && !window.__diagRSZOpenPatched){
-    window.__diagRSZOpenPatched = true;
-    const orig = window.openEditor;
-    window.openEditor = function(el){
-      const r = orig.apply(this, arguments);
-      try { logState('after openEditor'); } catch(e){}
-      return r;
-    };
-  }
-})();
-</script>
-<script>
-(function(){
-  if (window.__boxRszBound) return; window.__boxRszBound = true;
-
-  function selBlock(){ return document.querySelector('.block.sel') || window.selected || null; }
-  function getPreviewStage(){
-    return document.querySelector('.editor .preview') ||
-           document.querySelector('.editor .design-preview') ||
-           document.querySelector('.editor .pane .preview') ||
-           document.getElementById('dgPreview') || null;
-  }
-  function getTilePx(){
-    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 5;
-    return 8 * s;
-  }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-
-  function ensureWrap(stage){
-    if (!stage) return null;
-    if (stage.dataset.boxRsz === '1') return stage.querySelector(':scope > .pvRszWrap') || stage.firstElementChild;
-    stage.dataset.boxRsz = '1';
-
-    let wrap = stage.querySelector(':scope > .pvRszWrap');
-    if (!wrap){
-      wrap = document.createElement('div');
-      wrap.className = 'pvRszWrap';
-      while (stage.firstChild) wrap.appendChild(stage.firstChild);
-      stage.appendChild(wrap);
-    }
-    ['tl','tr','bl','br'].forEach(pos=>{
-      if (!wrap.querySelector('.pvHandle.'+pos)){
-        const h = document.createElement('div');
-        h.className = 'pvHandle ' + pos;
-        wrap.appendChild(h);
-      }
-    });
-    wrap.classList.add('pvHandlesHidden');
-    return wrap;
-  }
-
-  function applyLiveSizeFromPreview(pxW, pxH){
-    const b = selBlock(); if (!b) return;
-    const TILE = getTilePx();
-    const wTiles = clamp(Math.round(pxW / TILE), 1, 999);
-    const hTiles = clamp(Math.round(pxH / TILE), 1, 999);
-
-    if (b.dataset){
-      if ('w' in b.dataset) b.dataset.w = String(wTiles);
-      if ('h' in b.dataset) b.dataset.h = String(hTiles);
-    }
-    b.style.width  = (wTiles * TILE) + 'px';
-    b.style.height = (hTiles * TILE) + 'px';
-
-    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
-  }
-
-  function bindHandles(){
-    const stage = getPreviewStage(); if (!stage) return;
-    const wrap = ensureWrap(stage); if (!wrap) return;
-    if (wrap.dataset.bound === '1') return; wrap.dataset.bound = '1';
-
-    let drag = null;
-
-    wrap.addEventListener('pointerdown', (e)=>{
-      const handle = e.target.closest('.pvHandle');
-      if (!handle) return;
-      const b = selBlock(); if (!b) return;
-
-      const clone = wrap.querySelector('.block') || wrap.firstElementChild;
-      if (!clone) return;
-
-      const r = clone.getBoundingClientRect();
-
-      drag = {
-        kind: handle.classList.contains('br') ? 'br' :
-              handle.classList.contains('tr') ? 'tr' :
-              handle.classList.contains('bl') ? 'bl' : 'tl',
-        startX: e.clientX,
-        startY: e.clientY,
-        startW: r.width,
-        startH: r.height
-      };
-
-      wrap.setPointerCapture(e.pointerId);
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    wrap.addEventListener('pointermove', (e)=>{
-      if (!drag) return;
-      let dx = e.clientX - drag.startX;
-      let dy = e.clientY - drag.startY;
-
-      let newW = drag.startW;
-      let newH = drag.startH;
-
-      if (drag.kind === 'br') { newW += dx; newH += dy; }
-      if (drag.kind === 'tr') { newW += dx; newH -= dy; }
-      if (drag.kind === 'bl') { newW -= dx; newH += dy; }
-      if (drag.kind === 'tl') { newW -= dx; newH -= dy; }
-
-      const TILE = getTilePx();
-      newW = Math.max(TILE, newW);
-      newH = Math.max(TILE, newH);
-
-      applyLiveSizeFromPreview(newW, newH);
-    });
-
-    wrap.addEventListener('pointerup', ()=>{
-      if (!drag) return;
-      drag = null;
-      if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
-    });
-
-    return wrap;
-  }
-
-  function setHandlesVisible(visible){
-    const stage = getPreviewStage(); if (!stage) return;
-    const wrap = stage.querySelector('.pvRszWrap'); if (!wrap) return;
-    if (visible) wrap.classList.remove('pvHandlesHidden');
-    else wrap.classList.add('pvHandlesHidden');
-  }
-
-  const sel = document.getElementById('moveTarget');
-  if (!sel) { console.warn('[BOX-RSZ] moveTarget select not found'); return; }
-
-  if (!Array.from(sel.options).some(o => o.value === 'box')) {
-    const opt = document.createElement('option');
-    opt.value = 'box'; opt.textContent = 'Box';
-    sel.appendChild(opt);
-  }
-
-  if (sel.dataset.boxRszBound === '1') return;
-  sel.dataset.boxRszBound = '1';
-
-  sel.addEventListener('change', ()=>{
-    setHandlesVisible(sel.value === 'box');
+  // Remove styles by id if still present
+  ['box-rsz-style','prv-rsz-style','diag-rsz-style'].forEach(id=>{
+    const n = document.getElementById(id); if (n) n.remove();
   });
 
-  bindHandles();
-
-  if (typeof window.openEditor === 'function' && !window.__boxRszOpenPatched){
-    window.__boxRszOpenPatched = true;
-    const orig = window.openEditor;
-    window.openEditor = function(el){
-      const r = orig.apply(this, arguments);
-      try {
-        bindHandles();
-        setHandlesVisible((document.getElementById('moveTarget')||{}).value === 'box');
-      } catch(e){}
-      return r;
-    };
+  // Remove “Box” option from Move element selector
+  const sel = document.getElementById('moveTarget');
+  if (sel) {
+    const opt = Array.from(sel.options).find(o => o.value === 'box');
+    if (opt) sel.removeChild(opt);
   }
 
-  setHandlesVisible(sel.value === 'box');
+  // Clear preview wrappers/handles/diag classes
+  const preview = document.querySelector('.editor .preview, .editor .design-preview, .editor .pane .preview, #dgPreview');
+  if (preview) {
+    preview.classList.remove('pv-diag-outline');
+    preview.querySelectorAll('.pv-diag-watermark,.pvHandle').forEach(n=>n.remove());
+    const wrap = preview.querySelector(':scope > .pvRszWrap');
+    if (wrap) {
+      // Move children out of wrap, then remove wrap
+      while (wrap.firstChild) preview.appendChild(wrap.firstChild);
+      wrap.remove();
+    }
+  }
+
+  // Clear global flags if they were set
+  ['__boxRszBound','__boxRszOpenPatched','__prvRszBound','__diagRSZBound','__diagRSZOpenPatched']
+    .forEach(k => { try { if (k in window) delete window[k]; } catch(_){} });
+
+  console.info('[revert] preview-resize & diagnostics removed');
 })();
 </script>
 </body>
