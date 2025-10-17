@@ -209,6 +209,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <label title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label>
       <button id="undo">Undo</button><button id="redo">Redo</button>
       <button id="delete">Delete</button>
+      <button id="dupBlockBtn" class="btn" title="Duplicate selected block">Duplicate</button>
       <button id="export">Export</button><button id="import">Import</button>
       <button id="fitLabelBtn" class="btn" title="Shrink-to-fit label in selected block">Fit Label</button>
       <button id="auditTextBtn" class="btn" title="Scan labels for overflow">Audit Text</button>
@@ -2689,6 +2690,96 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   bindPreviewDrag();
   bindSelect();
   syncSelect();
+})();
+</script>
+<script>
+(function(){
+  const btn = document.getElementById('dupBlockBtn');
+  if (!btn || btn.dataset.bound === '1') { if(btn) btn.dataset.bound = '1'; return; }
+  btn.dataset.bound = '1';
+
+  // Helpers assumed by project; provide fallbacks
+  function selBlock(){ return document.querySelector('.block.sel') || window.selected || null; }
+  function gridTile(){ return (window.TILE || 8 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s'))||5)); }
+  function px(n){ return (Math.round(n*100)/100)+'px'; }
+
+  function uniqueId(base){
+    const root = base.replace(/-copy\d+$/,'');
+    let i = 1, id;
+    do { id = root + '-copy' + i++; } while (document.getElementById(id));
+    return id;
+  }
+
+  function offsetRect(el, dxTiles, dyTiles){
+    const style = getComputedStyle(el);
+    const left = el.style.left || style.left;
+    const top  = el.style.top  || style.top;
+    // If layout is using tile grid via CSS variables, fall back to transform via x/y/w/h attrs
+    // Prefer tile snap if available
+    const TILE = gridTile();
+    const dx = (dxTiles||1) * TILE;
+    const dy = (dyTiles||1) * TILE;
+
+    // Use translate via style.left/top if absolute positioning is used
+    if (left && top && left.endsWith('px') && top.endsWith('px')) {
+      el.style.left = px(parseFloat(left) + dx);
+      el.style.top  = px(parseFloat(top)  + dy);
+      return;
+    }
+    // Otherwise use dataset tile coordinates if present
+    const x = parseInt(el.dataset.x || '0',10) + (dxTiles||1);
+    const y = parseInt(el.dataset.y || '0',10) + (dyTiles||1);
+    el.dataset.x = String(x);
+    el.dataset.y = String(y);
+  }
+
+  function wireIfNeeded(el){
+    try {
+      if (typeof window.wire === 'function') window.wire(el);
+    } catch(e){}
+  }
+  function focusAndFlash(el){
+    try {
+      if (typeof window.select === 'function') window.select(el);
+      if (typeof window.focusAndFlash === 'function') window.focusAndFlash(el);
+      else { el.classList.add('sel'); setTimeout(()=>el.classList.remove('sel'), 250); }
+    } catch(e){}
+  }
+  function snapshot(){
+    try { if (typeof window.snapshot === 'function') window.snapshot(); } catch(e){}
+  }
+
+  btn.addEventListener('click', function(){
+    const src = selBlock();
+    if (!src) { console.warn('[duplicate] no selected block'); return; }
+
+    // Create deep clone of the block DOM (including label/icons layers if present)
+    const dup = src.cloneNode(true);
+
+    // Assign unique id
+    const newId = uniqueId(src.id || 'block');
+    if (dup.id) dup.id = newId; else dup.setAttribute('id', newId);
+
+    // Ensure selection class not carried over
+    dup.classList.remove('sel');
+
+    // Insert after source in the same parent
+    src.parentElement.insertBefore(dup, src.nextSibling);
+
+    // Offset position by 1 tile x/y (or ~8px * --s)
+    offsetRect(dup, 1, 1);
+
+    // Rewire interactions for the new element
+    wireIfNeeded(dup);
+
+    // Select the duplicate and flash
+    focusAndFlash(dup);
+
+    // Commit to history
+    snapshot();
+
+    console.log('[duplicate] created:', newId);
+  });
 })();
 </script>
 </body>
