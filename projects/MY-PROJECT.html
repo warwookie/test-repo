@@ -1735,5 +1735,36 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
     }
   })();
 </script>
+<script>
+(function(){
+  // Capture key events early within the modal editor and keep them from bubbling to global handlers.
+  const editorRoot = document.querySelector('.editor');
+  if (!editorRoot || editorRoot.dataset.kbGuard === '1') return;
+  editorRoot.dataset.kbGuard = '1';
+
+  function isFormTarget(t){
+    return t &&
+           (t.tagName === 'INPUT' ||
+            t.tagName === 'TEXTAREA' ||
+            t.isContentEditable === true);
+  }
+
+  // Use capture to intercept before document keydown logic.
+  editorRoot.addEventListener('keydown', function(e){
+    if (!isFormTarget(e.target)) return;
+
+    // Keys that should be handled by the field, not the global editor:
+    const k = e.key;
+    if (k === 'Backspace' || k === 'Delete' ||
+        k === 'ArrowLeft' || k === 'ArrowRight' ||
+        k === 'ArrowUp'   || k === 'ArrowDown' ||
+        k === 'Home'      || k === 'End' ||
+        k === 'PageUp'    || k === 'PageDown') {
+      // Allow default text editing behavior, but stop bubbling to global hotkeys.
+      e.stopPropagation();
+    }
+  }, true);
+})();
+</script>
 </body>
 </html>
