@@ -18,8 +18,8 @@
     if (token.toLowerCase() === 'midnight synth') token = 'midnight';
     if (token.toLowerCase() === 'cream synth') token = 'cream';
     // Apply immediately to avoid flash of default theme
-    document.documentElement.classList.add(token);
-    document.body && document.body.classList.add(token);
+    document.documentElement.classList.add('theme-' + token);
+    document.body && document.body.classList.add('theme-' + token);
   } catch (e) { /* fail safe, no console noise before paint */ }
 })();
 </script>
