@@ -444,7 +444,15 @@ const GRID_KEY='SQ_GRID_V1';
 const META_KEY='SQ_BLOCK_META_V1'; // per-block inner offsets + padding
 const SNAP_INNER_KEY='SQ_INNER_SNAP_V1';
 function getTheme(){ return localStorage.getItem(THEME_KEY)||'midnight'; }
-function applyTheme(name){ const body=document.body; body.className=body.className.split(/\s+/).filter(c=>!c.startsWith(THEME_CLASS_PREFIX)).join(' ').trim(); body.classList.add(THEME_CLASS_PREFIX+name); }
+function applyTheme(name){
+  const body=document.body;
+  body.className=body.className
+    .split(/\s+/)
+    .filter(c=>!c.startsWith(THEME_CLASS_PREFIX))
+    .join(' ')
+    .trim();
+  body.classList.add(THEME_CLASS_PREFIX+name);
+}
 function setTheme(name){ localStorage.setItem(THEME_KEY,name); applyTheme(name); }
 
 const REQUIRED_IDS=['title','board','ctrlZone','hudSneakers','hudPowerups','hudLife','hudScore','hudTimer','statBoxes','statFires','joyStick','btnBombBar','btnPause'];
