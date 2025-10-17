@@ -228,9 +228,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 </div>
 
 <!-- Export/Import Modal -->
-<div class="modal" id="modal">
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
   <div class="card">
-    <b>Layout JSON</b>
+    <b id="modalTitle">Layout JSON</b>
     <textarea id="io"></textarea>
     <div class="row">
       <button id="copy" type="button">Copy</button>
