@@ -139,16 +139,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 }
 .iconsHost { display:inline-flex; align-items:center; gap:8px; vertical-align:middle; }
 .iconToken {
-  --iconSize: 14px;
-  width: var(--iconSize);
-  height: var(--iconSize);
+  width: var(--iconSize, 14px);
+  height: var(--iconSize, 14px);
   border-radius: 50%;
   background: #000;
-  box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,0.08),
-    0 0 0 1px rgba(0,0,0,0.8);
-  image-rendering: pixelated;
-  display:inline-block;
+  border: 1px solid #222;
+  display: inline-block;
 }
 .labelHost, .iconsHost {
   position: absolute;
@@ -324,6 +320,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           <div class="dgRow">
             <div class="dgLabel">Icons Y (0–100%)</div>
             <div class="dgField"><input id="iconsY" type="range" min="0" max="100" value="50" step="1"></div>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Icon Size</div>
+            <div class="dgField">
+              <input id="iconSize" type="range" min="8" max="36" step="1" value="14" />
+              <span id="iconSizeVal" style="margin-left:8px;opacity:.8;">14px</span>
+            </div>
           </div>
           <div class="dgRow">
             <div class="dgLabel">Move element</div>
@@ -2175,7 +2178,7 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   .innerHost { position: relative; }
   .labelHost { position: absolute; transform: translate(-50%, -50%); left: 50%; top: 40%; white-space: nowrap; }
   .iconsHost { position: absolute; transform: translate(-50%, -50%); left: 50%; top: 70%; display: flex; gap: 6px; }
-  .iconToken { width: 12px; height: 12px; border-radius: 50%; background: #000; border: 1px solid #222; display: inline-block; }
+  .iconToken { width: var(--iconSize, 14px); height: var(--iconSize, 14px); border-radius: 50%; background: #000; border: 1px solid #222; display: inline-block; }
 </style>
 <script>
 (function(){
@@ -2780,6 +2783,79 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
 
     console.log('[duplicate] created:', newId);
   });
+})();
+</script>
+<script>
+(function(){
+  if (window.__isz1Bound) return; window.__isz1Bound = true;
+
+  const sizeInput = document.getElementById('iconSize');
+  const sizeLabel = document.getElementById('iconSizeVal');
+  if (!sizeInput || !sizeLabel) { console.warn('[ISZ-1] Icon Size controls not found'); return; }
+  if (sizeInput.dataset.bound === '1') return; sizeInput.dataset.bound = '1';
+
+  function selBlock(){ return document.querySelector('.block.sel') || window.selected || null; }
+  function innerOf(b){ return b ? (b.querySelector('.innerHost') || b) : null; }
+  function ensureIconsHost(b){
+    const inner = innerOf(b); if (!inner) return null;
+    let host = inner.querySelector(':scope > .iconsHost');
+    if (!host){
+      host = document.createElement('span');
+      host.className = 'iconsHost';
+      inner.appendChild(host);
+    }
+    return host;
+  }
+  function setIconSizePx(b, px){
+    const host = ensureIconsHost(b); if (!host) return;
+    host.style.setProperty('--iconSize', px + 'px');
+    host.querySelectorAll('.iconToken').forEach(t=>{
+      t.style.width = ''; t.style.height = '';
+    });
+  }
+  function getIconSizePx(b){
+    const host = ensureIconsHost(b); if (!host) return 14;
+    const v = getComputedStyle(host).getPropertyValue('--iconSize').trim();
+    if (v.endsWith('px')) return parseFloat(v) || 14;
+    return parseFloat(v) || 14;
+  }
+  function refreshPreview(b){
+    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
+  }
+  function snap(){
+    if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
+  }
+
+  sizeInput.addEventListener('input', () => {
+    const b = selBlock(); if (!b) return;
+    const px = Math.max(8, Math.min(36, parseInt(sizeInput.value,10) || 14));
+    setIconSizePx(b, px);
+    sizeLabel.textContent = px + 'px';
+    refreshPreview(b);
+  });
+  sizeInput.addEventListener('change', () => {
+    const b = selBlock(); if (!b) return;
+    const px = Math.max(8, Math.min(36, parseInt(sizeInput.value,10) || 14));
+    setIconSizePx(b, px);
+    sizeLabel.textContent = px + 'px';
+    snap();
+  });
+
+  if (typeof window.openEditor === 'function' && !window.__isz1OpenPatched){
+    window.__isz1OpenPatched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try{
+        const b = el || selBlock(); if (!b) return r;
+        const px = getIconSizePx(b);
+        sizeInput.value = String(Math.round(px));
+        sizeLabel.textContent = Math.round(px) + 'px';
+        refreshPreview(b);
+      }catch(e){}
+      return r;
+    };
+  }
 })();
 </script>
 </body>
