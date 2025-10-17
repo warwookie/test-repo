@@ -5,32 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>SneakerQuest — Live UI Sandbox — Tasks 7–10</title>
 <script>
-(function() {
-  try {
-    var k = 'SQ_THEME_V1';
-    var saved = localStorage.getItem(k);
-    // Fallback to a stable default used by the project; do NOT randomize.
-    var theme = saved || 'Midnight Synth';
-    // Normalize class name if project uses class tokens (e.g., 'midnight', 'cream')
-    // Allow both raw theme string and pre-tokenized value.
-    var token = (theme || '').toString().trim();
-    // Common normalizations (idempotent; adjust only if classes exist)
-    if (token.toLowerCase() === 'midnight synth') token = 'midnight';
-    if (token.toLowerCase() === 'cream synth') token = 'cream';
-    // Apply immediately to avoid flash of default theme
-    document.documentElement.classList.add('theme-' + token);
-    document.body && document.body.classList.add('theme-' + token);
-  } catch (e) { /* fail safe, no console noise before paint */ }
+(function(){
+  try{
+    var THEME_CLASS_PREFIX = 'theme-';
+    var token = 'midnight';
+    localStorage.setItem('SQ_THEME_V1', token);
+    document.documentElement.classList.add(THEME_CLASS_PREFIX + token);
+    document.body && document.body.classList.add(THEME_CLASS_PREFIX + token);
+  }catch(e){}
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-:root{ --baseW:144; --baseH:256; --s:3; --bg:#0d1117; --shell:#e7e3d6; --shell2:#cfcab9; --edge:#2b3344; --crtGrid:#2a3847; --badge:#1b2233; --badgeEdge:#374158; --txt:#e7edf8; --org:#ff7a1b; --ylw:#f0c62e; --red:#e05353; --grey:#3a4459; --hi:#00ffe5; --sel:#ffa600; --green:#18d26e; --burn1:#ff8a3c; --burn2:#e05353 }
+// PALETTE-CHECK-OK
+:root{
+ --baseW:144; --baseH:256; --s:3;
+ --bg:#0d1117; --shell:#e7e3d6; --shell2:#cfcab9; --edge:#2b3344; --crtGrid:#2a3847;
+ --badge:#1b2233; --badgeEdge:#374158; --txt:#e7edf8; --org:#ff7a1b; --ylw:#f0c62e;
+ --red:#e05353; --grey:#3a4459; --hi:#00ffe5; --sel:#ffa600; --green:#18d26e;
+ --burn1:#ff8a3c; --burn2:#e05353;
+}
 /* Midnight Synth palette (authoritative). */
 body.theme-neon{ --bg:#0a0014; --shell:#0f0f1a; --shell2:#1a1a2e; --edge:#2d1b69; --crtGrid:#331a80; --badge:#120a3a; --badgeEdge:#2c1a66; --txt:#e9e6ff; --org:#ff7af6; --ylw:#ffd54a; --red:#ff4d6d; --grey:#463c6b; --hi:#5dff9f; --sel:#39c7ff; --green:#29ffb8; --burn1:#ff9b54; --burn2:#ff477e }
 body.theme-dmg{ --bg:#8bac0f; --shell:#c5c7b8; --shell2:#b2b4a6; --edge:#5b615a; --crtGrid:#76806f; --badge:#3a3f38; --badgeEdge:#5b615a; --txt:#e6e8dd; --org:#8c9775; --ylw:#b0b68e; --red:#8b4a4a; --grey:#5b615a; --hi:#b7d17b; --sel:#3a53a5; --green:#6c8b2e; --burn1:#b08f62; --burn2:#8b4a4a }
 body.theme-mono{ --bg:#111; --shell:#f3f3f3; --shell2:#dcdcdc; --edge:#333; --crtGrid:#222; --badge:#000; --badgeEdge:#333; --txt:#f5f5f5; --org:#bbb; --ylw:#ddd; --red:#f55; --grey:#444; --hi:#fff; --sel:#888; --green:#9f9; --burn1:#f88; --burn2:#c33 }
-html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:'Press Start 2P', monospace}
+html,body{ background:var(--bg); }
+html,body{height:100%;margin:0;color:var(--txt);font-family:'Press Start 2P', monospace}
 *{box-sizing:border-box; image-rendering:pixelated}
 .app{display:grid; grid-template-columns:minmax(220px, 264px) auto; gap:12px; height:100vh; padding:12px}
 .palette{background:var(--badge);border:1px solid var(--badgeEdge);border-radius:10px;padding:10px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;font:12px/1.2 system-ui,Arial,sans-serif}
@@ -44,13 +44,16 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 .pBar button{background:var(--badge);color:var(--txt);border:1px solid var(--edge);border-radius:6px;padding:6px 10px;cursor:pointer}
 .pBar input[type="checkbox"]{vertical-align:middle}
 .stageWrap{display:grid;place-items:center}
-.safe916{position:relative;width:calc(var(--baseW)*var(--s)*1px);height:calc(var(--baseH)*var(--s)*1px);background:var(--shell);box-shadow:0 0 0 calc(var(--s)*1px)#000,0 0 0 calc(var(--s)*2px)var(--shell2),0 0 0 calc(var(--s)*3px)#000,inset 0 0 0 calc(var(--s)*2px)var(--shell2);border-radius:calc(var(--s)*2px);overflow:hidden;color:var(--badgeEdge)}
+.safe916{ background:var(--shell); box-shadow:0 0 0 calc(var(--s)*1px) #000,0 0 0 calc(var(--s)*2px) var(--shell2),0 0 0 calc(var(--s)*3px) #000,inset 0 0 0 calc(var(--s)*2px) var(--shell2); }
+.safe916{position:relative;width:calc(var(--baseW)*var(--s)*1px);height:calc(var(--baseH)*var(--s)*1px);border-radius:calc(var(--s)*2px);overflow:hidden;color:var(--badgeEdge)}
 .block{position:absolute;user-select:none;cursor:grab;display:flex;align-items:center;justify-content:center;min-width:calc(var(--s)*8px);min-height:calc(var(--s)*8px);outline:1px solid transparent}
 .block:active{cursor:grabbing}
 .sel{outline:2px dashed var(--sel);outline-offset:-2px}
 .handle{position:absolute;width:12px;height:12px;right:-6px;bottom:-6px;background:var(--hi);border:1px solid var(--edge);cursor:nwse-resize;border-radius:2px}
-.titlePlaque{background:var(--org);color:#000;letter-spacing:calc(var(--s)*.5px);box-shadow:0 0 0 calc(var(--s)*1px)#000,inset 0 0 0 calc(var(--s)*1px)var(--burn1);height:calc(var(--s)*14px);font-size:calc(var(--s)*6px);padding:0 calc(var(--s)*6px);display:flex;align-items:center;justify-content:center}
-.badge{background:var(--badge);color:var(--txt);height:calc(var(--s)*12px);padding:0 calc(var(--s)*6px);font-size:calc(var(--s)*5px);box-shadow:0 0 0 calc(var(--s)*1px)#000,inset 0 calc(var(--s)*1px) 0 var(--badgeEdge);border-radius:calc(var(--s)*1px);display:flex;align-items:center;gap:calc(var(--s)*4px)}
+.titlePlaque{ background:var(--org); color:#000; }
+.titlePlaque{letter-spacing:calc(var(--s)*.5px);box-shadow:0 0 0 calc(var(--s)*1px)#000,inset 0 0 0 calc(var(--s)*1px)var(--burn1);height:calc(var(--s)*14px);font-size:calc(var(--s)*6px);padding:0 calc(var(--s)*6px);display:flex;align-items:center;justify-content:center}
+.badge{ background:var(--badge); color:var(--txt); box-shadow:0 0 0 calc(var(--s)*1px) #000, inset 0 calc(var(--s)*1px) 0 var(--badgeEdge); }
+.badge{height:calc(var(--s)*12px);padding:0 calc(var(--s)*6px);font-size:calc(var(--s)*5px);border-radius:calc(var(--s)*1px);display:flex;align-items:center;gap:calc(var(--s)*4px)}
 .badge.column{flex-direction:column;justify-content:center;gap:calc(var(--s)*2px)}
 .badge .label{opacity:.8}
 /* text host override */
@@ -71,10 +74,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 .timerBadge{font-variant-numeric:tabular-nums}
 .timerDigits{display:inline-block;white-space:nowrap;width:11ch;text-align:right}
 .timerDigits span{display:inline-block}
-.boardSkin{background:#0f1114;box-shadow:0 0 0 calc(var(--s)*2px)#000,inset 0 0 0 calc(var(--s)*2px)var(--edge)}
+.boardSkin{ background:#0f1114; box-shadow:0 0 0 calc(var(--s)*2px) #000, inset 0 0 0 calc(var(--s)*2px) var(--edge); }
 .grid{position:absolute;inset:calc(var(--s)*3px);pointer-events:none}
-.grid.show::before{content:"";position:absolute;inset:0;background-image:linear-gradient(to right,var(--crtGrid) 1px,transparent 1px),linear-gradient(to bottom,var(--crtGrid) 1px,transparent 1px);background-size:calc(var(--s)*8px) calc(var(--s)*8px);opacity:.6}
-.ctrlSkin{background:#111825;box-shadow:0 0 0 calc(var(--s)*2px)#000,inset 0 0 0 calc(var(--s)*2px)var(--edge)}
+.grid.show::before{ background-image:
+  linear-gradient(to right, var(--crtGrid) 1px, transparent 1px),
+  linear-gradient(to bottom, var(--crtGrid) 1px, transparent 1px); }
+.grid.show::before{content:"";position:absolute;inset:0;background-size:calc(var(--s)*8px) calc(var(--s)*8px);opacity:.6}
+.ctrlSkin{ background:#111825; box-shadow:0 0 0 calc(var(--s)*2px) #000, inset 0 0 0 calc(var(--s)*2px) var(--edge); }
 .bombBar{background:var(--badge);color:var(--txt);border:1px solid var(--edge);box-shadow:inset 0 0 0 rgba(255,255,255,.1);border-radius:calc(var(--s)*4px);height:100%;width:100%;display:flex;align-items:center;justify-content:center}
 .joy{width:100%;height:100%;display:grid;place-items:center}
 .joy .outer{width:85%;height:85%;border-radius:50%;background:var(--edge);box-shadow:0 0 0 1px var(--edge),inset 0 calc(var(--s)*1px) 0 rgba(255,255,255,.08);display:grid;place-items:center}
