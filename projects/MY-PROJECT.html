@@ -118,6 +118,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   background-size: contain;
   display: inline-block;
 }
+.iconsHost { display:inline-flex; align-items:center; gap:6px; vertical-align:middle; }
+.iconSquare { width:12px; height:12px; border-radius:2px; box-shadow:inset 0 0 0 2px rgba(0,0,0,0.4); background:var(--chip,#202531); }
+.iconSquare::after { content:""; display:block; width:100%; height:100%; background:var(--chipFill,#2b3242); }
 </style>
 </head>
 <body class="theme-midnight">
@@ -240,6 +243,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             <label>Padding X (px)
               <input id="padX" type="range" min="0" max="24" step="1" value="0"/>
             </label>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Icon Count</div>
+            <div class="dgField">
+              <input id="iconCount" type="number" min="0" max="8" step="1" value="0" />
+            </div>
           </div>
           <hr style="border:none;border-top:1px solid #24324c;margin:8px 0">
           <div class="edRow">
@@ -1587,6 +1596,143 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
         try { window.snapshot(); } catch(e){}
       }
     });
+  })();
+</script>
+<script>
+  (function(){
+    const input = document.getElementById('iconCount');
+    if (!input) return;
+    if (input.dataset.bound === '1') return;
+    input.dataset.bound = '1';
+
+    function supportsIcons(el){
+      if (!el) return false;
+      const kind = (el.dataset && el.dataset.kind) || '';
+      const id = el.id || '';
+      if (kind === 'snkr' || kind === 'power') return true;
+      if (id === 'hudSneakers' || id === 'hudPowerups') return true;
+      return false;
+    }
+
+    function getSelectedBlock(){
+      if (window.selected && window.selected.classList && window.selected.classList.contains('block')) return window.selected;
+      return document.querySelector('.block.sel');
+    }
+
+    // Ensure current block has separate label + icons containers
+    function ensureSplit(el){
+      const inner = (typeof window.getTextHost === 'function' ? (window.getTextHost(el)||null) : null) || el.querySelector('.innerHost') || el;
+
+      let labelHost = inner.querySelector(':scope > .labelHost');
+      let iconsHost = inner.querySelector(':scope > .iconsHost');
+
+      if (!labelHost){
+        labelHost = document.createElement('span');
+        labelHost.className = 'labelHost label txtHost';
+        labelHost.style.display = 'inline-block';
+        labelHost.style.whiteSpace = 'nowrap';
+        labelHost.style.verticalAlign = 'middle';
+        inner.insertBefore(labelHost, inner.firstChild || null);
+      } else {
+        labelHost.classList.add('labelHost');
+        labelHost.classList.add('label');
+        labelHost.classList.add('txtHost');
+      }
+      if (!iconsHost){
+        iconsHost = document.createElement('span');
+        iconsHost.className = 'iconsHost';
+        if (labelHost.nextSibling){
+          labelHost.after(iconsHost);
+        } else {
+          inner.appendChild(iconsHost);
+        }
+      }
+
+      const txtSource = inner.querySelector(':scope > .txtHost');
+      if (txtSource && txtSource !== labelHost){
+        labelHost.textContent = (txtSource.textContent || '').trim();
+        txtSource.remove();
+      } else if (!labelHost.textContent){
+        const raw = (labelHost.textContent || '').trim();
+        if (!raw){
+          const fallback = (inner.textContent || '').trim();
+          if (fallback) labelHost.textContent = fallback;
+        }
+      }
+
+      Array.from(inner.childNodes).forEach(node=>{
+        if (node === labelHost || node === iconsHost) return;
+        if (node.nodeType === Node.TEXT_NODE){
+          if (node.textContent && node.textContent.trim()){ labelHost.textContent = node.textContent.trim(); }
+          inner.removeChild(node);
+          return;
+        }
+        if (node instanceof HTMLElement){
+          iconsHost.appendChild(node);
+          return;
+        }
+        inner.removeChild(node);
+      });
+
+      Array.from(iconsHost.children).forEach(child=>{
+        if (!(child instanceof HTMLElement)) return;
+        if (child.classList.contains('iconSquare')) return;
+        const sq=document.createElement('span');
+        sq.className='iconSquare';
+        iconsHost.replaceChild(sq, child);
+      });
+      return { inner, labelHost, iconsHost };
+    }
+
+    function setIconCount(iconsHost, n){
+      n = Math.max(0, Math.min(8, parseInt(n,10) || 0));
+      while (iconsHost.children.length > n) iconsHost.removeChild(iconsHost.lastElementChild);
+      while (iconsHost.children.length < n){
+        const sq = document.createElement('span');
+        sq.className = 'iconSquare';
+        iconsHost.appendChild(sq);
+      }
+    }
+
+    function applyCount(){
+      const el = getSelectedBlock();
+      if (!el) { console.warn('[IconCount] No selected block'); return; }
+      if (!supportsIcons(el)) return;
+      const { iconsHost } = ensureSplit(el);
+      setIconCount(iconsHost, input.value);
+      // Refresh preview if available
+      if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(el); } catch(e){} }
+      // Snapshot if available (one per change)
+      if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
+    }
+
+    // Bind changes
+    input.addEventListener('change', applyCount);
+    input.addEventListener('input', function(){
+      const el = getSelectedBlock(); if (!el) return;
+      if (!supportsIcons(el)) return;
+      const { iconsHost } = ensureSplit(el);
+      setIconCount(iconsHost, input.value);
+      if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(el); } catch(e){} }
+    });
+
+    // When opening editor, prefill the field from the selected block (non-invasive patch)
+    if (typeof window.openEditor === 'function' && !window._iconCountHook){
+      window._iconCountHook = true;
+      const orig = window.openEditor;
+      window.openEditor = function(el){
+        const r = orig.apply(this, arguments);
+        try{
+          if (supportsIcons(el)){
+            const { iconsHost } = ensureSplit(el);
+            input.value = iconsHost.children.length;
+          } else {
+            input.value = 0;
+          }
+        }catch(e){}
+        return r;
+      };
+    }
   })();
 </script>
 </body>
