@@ -447,12 +447,10 @@ const SNAP_INNER_KEY='SQ_INNER_SNAP_V1';
 function getTheme(){ return localStorage.getItem(THEME_KEY)||'midnight'; }
 function applyTheme(name){
   const body=document.body;
-  body.className=body.className
-    .split(/\s+/)
-    .filter(c=>!c.startsWith(THEME_CLASS_PREFIX))
-    .join(' ')
-    .trim();
-  body.classList.add(THEME_CLASS_PREFIX+name);
+  // remove any existing theme- prefix classes
+  body.className = body.className.split(/\s+/).filter(c=>!c.startsWith(THEME_CLASS_PREFIX)).join(' ').trim();
+  // add the requested theme class with prefix
+  if(name) body.classList.add(THEME_CLASS_PREFIX + name);
 }
 function setTheme(name){ localStorage.setItem(THEME_KEY,name); applyTheme(name); }
 
