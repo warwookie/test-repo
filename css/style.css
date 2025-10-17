@@ -156,3 +156,28 @@ a:focus {
   /* optional fallback size for small HUD boxes, tune later */
   font-size: 12px;
 }
+
+/* === SEP-2: Text + Icon Host Layout === */
+.iconsHost {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  pointer-events: none;
+}
+
+.iconToken {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #000;
+  border: 1px solid #222;
+  display: inline-block;
+}
+
+.labelHost {
+  position: absolute;
+  white-space: pre-line;
+  pointer-events: none;
+}
