@@ -163,6 +163,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   padding: 0 var(--padx, 0px);
 }
 .innerHost { position: relative; }
+.labelHost{ position:absolute; transform:translate(-50%,-50%); left:50%; top:50%; white-space:nowrap; pointer-events:none; }
+.innerHost{ position:relative; }
 </style>
 </head>
 <body class="theme-midnight">
@@ -300,6 +302,14 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             <label>Content Y (0–100%)
               <input id="contentY" type="range" min="0" max="100" step="1" value="50"/>
             </label>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Text X (0–100%)</div>
+            <div class="dgField"><input id="textX" type="range" min="0" max="100" step="1" value="50"></div>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Text Y (0–100%)</div>
+            <div class="dgField"><input id="textY" type="range" min="0" max="100" step="1" value="50"></div>
           </div>
           <div class="dgRow">
             <div class="dgLabel">Icons X (0–100%)</div>
@@ -2253,6 +2263,81 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
   }
 
   console.log('[ICON-FIX] Icon Count now renders icons in selected block');
+})();
+</script>
+<script>
+(function(){
+  if (window.__tx1Bound) return; window.__tx1Bound = true;
+
+  const sx = document.getElementById('textX');
+  const sy = document.getElementById('textY');
+  if (!sx || !sy) { console.warn('[TX-1] text sliders not found'); return; }
+  if (sx.dataset.bound === '1') return;
+  sx.dataset.bound = sy.dataset.bound = '1';
+
+  function selBlock(){
+    return document.querySelector('.block.sel') || window.selected || null;
+  }
+  function innerOf(b){
+    return b ? (b.querySelector('.innerHost') || b) : null;
+  }
+  function ensureLabel(b){
+    const inner = innerOf(b); if (!inner) return {};
+    let label = inner.querySelector(':scope > .labelHost');
+    if (!label){
+      label = document.createElement('span');
+      label.className = 'labelHost';
+      const txt = (inner.textContent || '').trim();
+      if (txt) label.textContent = txt;
+      inner.appendChild(label);
+    }
+    if (getComputedStyle(inner).position === 'static') inner.style.position = 'relative';
+    return { inner, label };
+  }
+  function setTextPos(b, xPct, yPct){
+    const L = ensureLabel(b); if (!L.label) return;
+    const X = Math.max(0, Math.min(100, Number(xPct)));
+    const Y = Math.max(0, Math.min(100, Number(yPct)));
+    L.label.style.left = X + '%';
+    L.label.style.top  = Y + '%';
+    L.label.dataset.cx = String(X);
+    L.label.dataset.cy = String(Y);
+  }
+  function readTextPos(b){
+    const L = ensureLabel(b); if (!L.label) return {cx:50, cy:50};
+    const cx = +(L.label.dataset.cx ?? 50);
+    const cy = +(L.label.dataset.cy ?? 50);
+    return {cx, cy};
+  }
+  function refreshPreview(b){
+    if (typeof window.buildPreviewFrom === 'function') { try { window.buildPreviewFrom(b); } catch(e){} }
+  }
+  function snap(){
+    if (typeof window.snapshot === 'function') { try { window.snapshot(); } catch(e){} }
+  }
+
+  // Bind
+  sx.addEventListener('input', () => { const b=selBlock(); if(!b) return; setTextPos(b, sx.value, (readTextPos(b).cy)); refreshPreview(b); });
+  sy.addEventListener('input', () => { const b=selBlock(); if(!b) return; setTextPos(b, (readTextPos(b).cx), sy.value); refreshPreview(b); });
+  sx.addEventListener('change', () => { const b=selBlock(); if(!b) return; setTextPos(b, sx.value, (readTextPos(b).cy)); snap(); });
+  sy.addEventListener('change', () => { const b=selBlock(); if(!b) return; setTextPos(b, (readTextPos(b).cx), sy.value); snap(); });
+
+  // Patch openEditor to preload slider values from the selected block
+  if (typeof window.openEditor === 'function' && !window.__tx1OpenPatched){
+    window.__tx1OpenPatched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try {
+        const b = el || selBlock(); if (!b) return r;
+        const pos = readTextPos(b);
+        sx.value = String(pos.cx);
+        sy.value = String(pos.cy);
+        refreshPreview(b);
+      } catch(e){}
+      return r;
+    };
+  }
 })();
 </script>
 </body>
