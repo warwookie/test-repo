@@ -201,26 +201,26 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button type="button" class="pItem" data-make="pause"><div class="swatch"></div>Pause</button>
     </div>
     <div class="pBar">
-      <button id="toggleEdit">Edit: ON</button>
+      <button id="toggleEdit" type="button">Edit: ON</button>
       <label title="Snap to 8px tiles"><input type="checkbox" id="snapTiles" checked>tiles</label>
       <label title="Snap edges to other edges"><input type="checkbox" id="snapEdges" checked>edges</label>
       <label title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label>
-      <button id="undo">Undo</button><button id="redo">Redo</button>
-      <button id="delete">Delete</button>
-      <button id="dupBlockBtn" class="btn" title="Duplicate selected block">Duplicate</button>
-      <button id="export">Export</button><button id="import">Import</button>
-      <button id="fitLabelBtn" class="btn" title="Shrink-to-fit label in selected block">Fit Label</button>
-      <button id="auditTextBtn" class="btn" title="Scan labels for overflow">Audit Text</button>
-      <button id="tidyTextBtn" class="btn" title="Auto-fit all labels">Tidy Text</button>
-      <button id="reset">Reset</button>
-      <button id="toggleGrid">Grid: ON</button>
-      <button id="openEditor">Open Editor</button>
+      <button id="undo" type="button">Undo</button><button id="redo" type="button">Redo</button>
+      <button id="delete" type="button">Delete</button>
+      <button id="dupBlockBtn" class="btn" title="Duplicate selected block" type="button">Duplicate</button>
+      <button id="export" type="button">Export</button><button id="import" type="button">Import</button>
+      <button id="fitLabelBtn" class="btn" title="Shrink-to-fit label in selected block" type="button">Fit Label</button>
+      <button id="auditTextBtn" class="btn" title="Scan labels for overflow" type="button">Audit Text</button>
+      <button id="tidyTextBtn" class="btn" title="Auto-fit all labels" type="button">Tidy Text</button>
+      <button id="reset" type="button">Reset</button>
+      <button id="toggleGrid" type="button">Grid: ON</button>
+      <button id="openEditor" type="button">Open Editor</button>
     </div>
   </div>
 
   <div class="stageWrap">
     <div class="safe916" id="root">
-      <div class="overlay" id="overlay"><button id="burnToggle">Toggle heart burn</button></div>
+      <div class="overlay" id="overlay"><button id="burnToggle" type="button">Toggle heart burn</button></div>
       <div id="board" class="block boardSkin"><div class="grid" id="grid"></div><div class="handle"></div></div>
       <div id="ctrlZone" class="block ctrlSkin"><div class="handle"></div></div>
     </div>
@@ -233,10 +233,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
     <b>Layout JSON</b>
     <textarea id="io"></textarea>
     <div class="row">
-      <button id="copy">Copy</button>
-      <button id="pasteApply">Apply</button>
-      <button id="downloadJson">Download .json</button>
-      <button id="close">Close</button>
+      <button id="copy" type="button">Copy</button>
+      <button id="pasteApply" type="button">Apply</button>
+      <button id="downloadJson" type="button">Download .json</button>
+      <button id="close" type="button">Close</button>
     </div>
   </div>
 </div>
@@ -253,7 +253,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         <div class="tab" data-tab="design">Design Generator</div>
       </div>
       <div class="edRow" style="justify-content:flex-end">
-        <button id="edClose">Close</button>
+        <button id="edClose" type="button">Close</button>
       </div>
     </div>
 
@@ -344,7 +344,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           <div class="dgRow">
             <div class="dgLabel">Maintenance</div>
             <div class="dgField">
-              <button id="cleanExtras" class="btn" title="Remove legacy/demo children from this block, keep label+icons">Clean extras</button>
+              <button id="cleanExtras" class="btn" title="Remove legacy/demo children from this block, keep label+icons" type="button">Clean extras</button>
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:6px;width:max-content"><input type="checkbox" id="snapInner" checked> Snap inner drag (10%)</label>
@@ -394,12 +394,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           <div class="dgRow">
             <div class="dgLabel">Apply</div>
             <div class="dgField">
-              <button id="dgApply" class="btn" title="Apply current preview to selected block">Apply to Block</button>
+              <button id="dgApply" class="btn" title="Apply current preview to selected block" type="button">Apply to Block</button>
             </div>
           </div>
           <div class="edRow" style="gap:6px">
-            <button id="dgGenerate">Generate</button>
-            <button id="dgRandom">Randomize</button>
+            <button id="dgGenerate" type="button">Generate</button>
+            <button id="dgRandom" type="button">Randomize</button>
           </div>
           <p style="opacity:.7">Design Generator is planned for Task 12. Buttons are visible so you know where it will be.</p>
         </div>
