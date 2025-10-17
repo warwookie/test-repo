@@ -60,7 +60,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 
 /* Inner content positioning + padding */
 .block{position:absolute}
-.block .innerHost{position:absolute; left:var(--cx,50%); top:var(--cy,50%); transform:translate(-50%,-50%); width:fit-content; height:fit-content; pointer-events:auto; padding:0 var(--padx,0px)}
+.block .innerHost{position:relative; width:100%; height:100%; pointer-events:auto}
 
 .heart{width:calc(var(--s)*4px);height:calc(var(--s)*4px);background:var(--green);display:inline-block;margin-left:calc(var(--s)*2px)}
 .heart.burn{background:linear-gradient(180deg,var(--burn1),var(--burn2))}
@@ -150,6 +150,19 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   image-rendering: pixelated;
   display:inline-block;
 }
+.labelHost, .iconsHost {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  pointer-events: auto;
+}
+.block .labelHost {
+  left: var(--cx, 50%);
+  top: var(--cy, 50%);
+  padding: 0 var(--padx, 0px);
+}
+.innerHost { position: relative; }
 </style>
 </head>
 <body class="theme-midnight">
@@ -287,6 +300,20 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             <label>Content Y (0–100%)
               <input id="contentY" type="range" min="0" max="100" step="1" value="50"/>
             </label>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Icons X (0–100%)</div>
+            <div class="dgField"><input id="iconsX" type="range" min="0" max="100" value="50" step="1"></div>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Icons Y (0–100%)</div>
+            <div class="dgField"><input id="iconsY" type="range" min="0" max="100" value="50" step="1"></div>
+          </div>
+          <div class="dgRow">
+            <div class="dgLabel">Maintenance</div>
+            <div class="dgField">
+              <button id="cleanExtras" class="btn" title="Remove legacy/demo children from this block, keep label+icons">Clean extras</button>
+            </div>
           </div>
           <label style="display:flex;align-items:center;gap:6px;width:max-content"><input type="checkbox" id="snapInner" checked> Snap inner drag (10%)</label>
           <p style="opacity:.7;margin-top:6px">Tip: drag the content inside the <b>preview</b> to reposition. Sliders update too.</p>
@@ -1793,6 +1820,181 @@ $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.t
       e.stopPropagation();
     }
   }, true);
+})();
+</script>
+<script>
+(function(){
+  const els = {
+    iconsX: document.getElementById('iconsX'),
+    iconsY: document.getElementById('iconsY'),
+    clean: document.getElementById('cleanExtras'),
+  };
+  if (!els.iconsX || !els.iconsY || els.iconsX.dataset.bound === '1') return;
+  els.iconsX.dataset.bound = '1';
+
+  function getSel(){
+    if (window.selected && window.selected.classList?.contains('block')) return window.selected;
+    return document.querySelector('.block.sel');
+  }
+
+  function getInner(el){
+    if (!el) return null;
+    if (typeof window.getTextHost === 'function'){
+      try {
+        const h = window.getTextHost(el);
+        if (h) return h.closest('.innerHost') || h;
+      } catch(e){}
+    }
+    return el.querySelector('.innerHost') || el;
+  }
+
+  function ensureLayers(el){
+    const inner = getInner(el);
+    if (!inner) return { inner:null, label:null, icons:null };
+
+    try {
+      const cs = getComputedStyle(inner);
+      if (cs.position === 'static') inner.style.position = 'relative';
+    } catch(e){}
+
+    let label = inner.querySelector(':scope > .labelHost');
+    if (label && !label.classList.contains('txtHost')) label.classList.add('txtHost');
+    if (label && !label.classList.contains('label')) label.classList.add('label');
+
+    if (!label){
+      const existing = inner.querySelector(':scope > .txtHost');
+      if (existing){
+        label = existing;
+        label.classList.add('labelHost');
+        if (!label.classList.contains('label')) label.classList.add('label');
+      } else {
+        label = document.createElement('span');
+        label.className = 'labelHost label txtHost';
+        const fallback = (inner.textContent || '').trim();
+        if (fallback) label.textContent = fallback;
+      }
+    }
+
+    if (!label.parentElement){
+      inner.insertBefore(label, inner.firstChild || null);
+    }
+
+    let icons = inner.querySelector(':scope > .iconsHost');
+    if (!icons){
+      icons = document.createElement('span');
+      icons.className = 'iconsHost';
+    } else if (!icons.classList.contains('iconsHost')){
+      icons.classList.add('iconsHost');
+    }
+
+    if (!icons.parentElement){
+      inner.appendChild(icons);
+    }
+
+    if (!label.textContent?.trim()){
+      const raw = (inner.textContent || '').trim();
+      if (raw) label.textContent = raw;
+    }
+
+    return { inner, label, icons };
+  }
+
+  function applyIconsPos(el, cx, cy){
+    const { icons } = ensureLayers(el);
+    if (!icons) return;
+    icons.dataset.cx = String(cx);
+    icons.dataset.cy = String(cy);
+    icons.style.left = cx + '%';
+    icons.style.top = cy + '%';
+  }
+
+  function readIconsPos(el){
+    const { icons } = ensureLayers(el);
+    if (!icons) return { cx:50, cy:50 };
+    const cx = +(icons.dataset.cx ?? 50);
+    const cy = +(icons.dataset.cy ?? 50);
+    return { cx, cy };
+  }
+
+  function refreshEditorFieldsFromSelection(){
+    const el = getSel();
+    if (!el) return;
+    const { cx, cy } = readIconsPos(el);
+    els.iconsX.value = String(cx);
+    els.iconsY.value = String(cy);
+  }
+
+  function pushPreview(el){
+    if (typeof window.buildPreviewFrom === 'function'){
+      try { window.buildPreviewFrom(el); } catch(e){}
+    }
+  }
+
+  function snap(){
+    if (typeof window.snapshot === 'function'){
+      try { window.snapshot(); } catch(e){}
+    }
+  }
+
+  function onIconsX(){
+    const el = getSel();
+    if (!el) return;
+    const { cy } = readIconsPos(el);
+    applyIconsPos(el, +els.iconsX.value, cy);
+    pushPreview(el);
+  }
+
+  function onIconsY(){
+    const el = getSel();
+    if (!el) return;
+    const { cx } = readIconsPos(el);
+    applyIconsPos(el, cx, +els.iconsY.value);
+    pushPreview(el);
+  }
+
+  els.iconsX.addEventListener('input', onIconsX);
+  els.iconsX.addEventListener('change', function(){ const el = getSel(); if (!el) return; onIconsX(); snap(); });
+  els.iconsY.addEventListener('input', onIconsY);
+  els.iconsY.addEventListener('change', function(){ const el = getSel(); if (!el) return; onIconsY(); snap(); });
+
+  function doClean(){
+    const el = getSel();
+    if (!el){ console.warn('[CleanExtras] No selected block'); return; }
+    const layer = ensureLayers(el);
+    const inner = layer.inner;
+    if (!inner) return;
+    Array.from(inner.childNodes).forEach(node => {
+      if (node === layer.label || node === layer.icons) return;
+      if (node.nodeType === Node.ELEMENT_NODE){
+        const cls = (node.className || '').toString().toUpperCase();
+        if (cls.includes('LABELHOST') || cls.includes('ICONSHOST')) return;
+      }
+      inner.removeChild(node);
+    });
+    ensureLayers(el);
+    pushPreview(el);
+    snap();
+  }
+
+  if (els.clean){
+    els.clean.addEventListener('click', doClean);
+  }
+
+  if (!window.__sep1Patched && typeof window.openEditor === 'function'){
+    window.__sep1Patched = true;
+    const orig = window.openEditor;
+    window.openEditor = function(el){
+      const r = orig.apply(this, arguments);
+      try {
+        if (el) ensureLayers(el);
+        refreshEditorFieldsFromSelection();
+        if (el) pushPreview(el);
+      } catch(e){}
+      return r;
+    };
+  }
+
+  refreshEditorFieldsFromSelection();
 })();
 </script>
 </body>
