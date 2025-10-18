@@ -22,7 +22,7 @@ appRoot=document.querySelector('.app');
   if(savedRaw){ try{ applyStrict(reconcileLayout(JSON.parse(savedRaw)), true); }catch{ applyStrict(STRICT_LAYOUT,true); } }
   else { applyStrict(STRICT_LAYOUT,true); }
   const meta=loadMeta(); Object.entries(meta).forEach(([id,m])=>{ const el=document.getElementById(id); if(el){ if(m.cx) el.style.setProperty('--cx', m.cx); if(m.cy) el.style.setProperty('--cy', m.cy); if(m.padx) el.style.setProperty('--padx', m.padx); }});
-  hist.stack=[]; hist.cursor=-1; snapshot(); updateHistCounter();
+  hist.stack=[]; hist.cursor=-1; snapshot(); refreshLayoutSelect(); updateHistCounter();
   const mo=new MutationObserver(muts=>{ muts.forEach(m=>{ m.addedNodes&&m.addedNodes.forEach(n=>{ if(n.classList&&n.classList.contains('block')) wire(n); }); }); });
   mo.observe(root,{childList:true});
   try{

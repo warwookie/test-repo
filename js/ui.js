@@ -195,6 +195,78 @@ if(toggleGridInput){
   toggleGridInput.addEventListener('change',()=>{ toggleGrid(toggleGridInput.checked); });
 }
 
+(function(){
+  const sel = document.getElementById('layoutSel');
+  const btnSave = document.getElementById('layoutSave');
+  const btnLoad = document.getElementById('layoutLoad');
+  const btnDel  = document.getElementById('layoutDelete');
+  if (!sel || !btnSave || !btnLoad || !btnDel) return;
+
+  refreshLayoutSelect();
+
+  btnSave.onclick = () => {
+    const name = prompt('Save layout as name:');
+    if (!name) return;
+    const trimmed = name.trim().slice(0,64);
+    if (!trimmed) return;
+
+    const map = readSavedLayouts();
+    if (map[trimmed] && !confirm('Name exists. Overwrite?')) return;
+
+    const payload = buildSavePayload();
+    map[trimmed] = payload;
+    writeSavedLayouts(map);
+    refreshLayoutSelect();
+    sel.value = trimmed;
+    alert('Layout saved as "' + trimmed + '".');
+  };
+
+  btnLoad.onclick = () => {
+    const key = sel.value;
+    if (!key) { alert('Choose a saved layout.'); return; }
+    const map = readSavedLayouts();
+    const data = map[key];
+    if (!data) { alert('Not found.'); return; }
+
+    if (data.theme){
+      const name = String(data.theme).replace(/^theme-/, '');
+      setTheme(name); applyTheme(name);
+    }
+
+    const res = validateLayoutPayload({ layout: data.layout, meta: data.metaPerBlock || undefined });
+    if (!res.ok) { alert('Saved layout failed validation:\n\n' + res.errors.join('\n')); return; }
+
+    applyStrict(reconcileLayout(res.layout), true);
+
+    if (res.meta && typeof res.meta === 'object') {
+      try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
+      Object.entries(res.meta).forEach(([id, m]) => {
+        const el = document.getElementById(id);
+        if (el && m) {
+          if (m.cx) el.style.setProperty('--cx', m.cx);
+          if (m.cy) el.style.setProperty('--cy', m.cy);
+          if (m.padx) el.style.setProperty('--padx', m.padx);
+        }
+      });
+    }
+
+    snapshot();
+    alert('Layout "' + key + '" loaded.');
+  };
+
+  btnDel.onclick = () => {
+    const key = sel.value;
+    if (!key) { alert('Choose a saved layout.'); return; }
+    if (!confirm('Delete "' + key + '"?')) return;
+    const map = readSavedLayouts();
+    delete map[key];
+    writeSavedLayouts(map);
+    refreshLayoutSelect();
+    sel.value = '';
+    alert('Deleted.');
+  };
+})();
+
 $('#undo').onclick=()=>{ const s=hist.undo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
 $('#redo').onclick=()=>{ const s=hist.redo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
 $('#delete').onclick=()=>{ if(deleteSelection()) snapshot(); };
