@@ -27,31 +27,102 @@ function makeBlock(kind, forceId){
 function place(el,tx,ty,tw,th){ const rr=root.getBoundingClientRect(); const w=(tw||6)*TILE(), h=(th||2)*TILE(); const x=(typeof tx==='number')?tx*TILE():(rr.width-w)/2, y=(typeof ty==='number')?ty*TILE():(rr.height-h)/2; el.style.left=px(x); el.style.top=px(y); el.style.width=px(w); el.style.height=px(h); }
 
 const snapTiles=$('#snapTiles'), snapEdges=$('#snapEdges'), snapCenters=$('#snapCenters');
-function select(el){ if(selected) selected.classList.remove('sel'); selected=el||null; if(selected) selected.classList.add('sel'); }
+function select(el){ setSingleSelection(el); selected=el||null; }
 function focusAndFlash(el){ select(el); el.scrollIntoView({block:'nearest',inline:'nearest'}); el.animate([{outlineColor:'transparent'},{outlineColor:'var(--sel)'}],{duration:300,iterations:2}); }
 function wire(el){
   let lastTap=0;
   el.addEventListener('dblclick',()=>openEditor(el));
   el.addEventListener('pointerdown',ev=>{ const now=Date.now(); if(now-lastTap<300){ openEditor(el); ev.preventDefault(); return; } lastTap=now; });
   el.addEventListener('pointerdown',e=>{
-    if(!editing) return; select(el);
+    if(!editing) return;
+    if(el.classList.contains('locked')) return;
+    const toggle=(e.ctrlKey||e.metaKey);
+    if(toggle){
+      if(window.selSet.has(el.id)){
+        removeFromSelection(el);
+        if(selected===el){
+          const list=getSelection();
+          selected=list.length?list[list.length-1]:null;
+        }
+        if(!window.selSet.has(el.id)){
+          if(!getSelection().length) selected=null;
+          e.preventDefault();
+          return;
+        }
+      } else {
+        addToSelection(el);
+        selected=el;
+      }
+    } else {
+      setSingleSelection(el);
+      selected=el;
+    }
     const handle=e.target.classList.contains('handle'); const mode=handle?'resize':'move';
     const rr=root.getBoundingClientRect(), r=el.getBoundingClientRect();
-    const start={x:e.clientX,y:e.clientY,l:r.left-rr.left,t:r.top-rr.top,w:r.width,h:r.height};
+    const start={x:e.clientX,y:e.clientY,l:r.left-rr.left,t:r.top-rr.top,w:r.width,h:r.height,map:{}};
+    const selTargets=getSelection();
+    const targets=selTargets.length?selTargets:[el];
+    targets.forEach(t=>{
+      const tr=t.getBoundingClientRect();
+      start.map[t.id]={l:tr.left-rr.left,t:tr.top-rr.top};
+    });
     const refs=[root.getBoundingClientRect(), board.getBoundingClientRect(), ctrl.getBoundingClientRect()];
     const EV=refs.flatMap(R=>[R.left,R.right]), EH=refs.flatMap(R=>[R.top,R.bottom]);
     const CV=refs.map(R=>(R.left+R.right)/2), CH=refs.map(R=>(R.top+R.bottom)/2);
     let moved=false;
     const move=ev=>{
       moved=true;
-      let L=start.l+(ev.clientX-start.x), T=start.t+(ev.clientY-start.y), W=start.w, H=start.h;
-      if(mode==='resize'){ W=Math.max(TILE(),start.w+(ev.clientX-start.x)); H=Math.max(TILE(),start.h+(ev.clientY-start.y)); }
-      if(snapTiles.checked && !ev.altKey){ L=Math.round(L/TILE())*TILE(); T=Math.round(T/TILE())*TILE(); W=Math.round(W/TILE())*TILE(); H=Math.round(H/TILE())*TILE(); }
-      const cur={left:rr.left+L,top:rr.top+T,right:rr.left+L+W,bottom:rr.top+T+H,cx:rr.left+L+W/2,cy:rr.top+T+H/2}, thr=TILE()/2;
-      if(snapEdges.checked && !ev.altKey){ EV.forEach(x=>{ if(Math.abs(cur.left-x)<thr) L=x-rr.left; if(Math.abs(cur.right-x)<thr) L=x-rr.left-W;}); EH.forEach(y=>{ if(Math.abs(cur.top-y)<thr) T=y-rr.top; if(Math.abs(cur.bottom-y)<thr) T=y-rr.top-H;}); }
-      if(snapCenters.checked && !ev.altKey){ CV.forEach(x=>{ if(Math.abs(cur.cx-x)<thr) L=x-rr.left-W/2;}); CH.forEach(y=>{ if(Math.abs(cur.cy-y)<thr) T=y-rr.top-H/2;}); }
-      const shell=root.getBoundingClientRect(); L=clamp(L,0,shell.width-W); T=clamp(T,0,shell.height-H); if(mode==='resize'){ W=clamp(W,TILE(),shell.width-L); H=clamp(H,TILE(),shell.height-T); }
-      el.style.left=px(L); el.style.top=px(T); if(mode==='resize'){ el.style.width=px(W); el.style.height=px(H); }
+      if(mode==='move'){
+        const dx=(ev.clientX-start.x);
+        const dy=(ev.clientY-start.y);
+        const base=start.map[el.id]||{l:start.l,t:start.t};
+        let baseL=base.l+dx;
+        let baseT=base.t+dy;
+        const W=start.w, H=start.h;
+        if(snapTiles.checked && !ev.altKey){ baseL=Math.round(baseL/TILE())*TILE(); baseT=Math.round(baseT/TILE())*TILE(); }
+        const shell=root.getBoundingClientRect();
+        const cur={left:rr.left+baseL,top:rr.top+baseT,right:rr.left+baseL+W,bottom:rr.top+baseT+H,cx:rr.left+baseL+W/2,cy:rr.top+baseT+H/2};
+        const thr=TILE()/2;
+        if(snapEdges.checked && !ev.altKey){ EV.forEach(x=>{ if(Math.abs(cur.left-x)<thr) baseL=x-rr.left; if(Math.abs(cur.right-x)<thr) baseL=x-rr.left-W;}); EH.forEach(y=>{ if(Math.abs(cur.top-y)<thr) baseT=y-rr.top; if(Math.abs(cur.bottom-y)<thr) baseT=y-rr.top-H;}); }
+        if(snapCenters.checked && !ev.altKey){ CV.forEach(x=>{ if(Math.abs(cur.cx-x)<thr) baseL=x-rr.left-W/2;}); CH.forEach(y=>{ if(Math.abs(cur.cy-y)<thr) baseT=y-rr.top-H/2;}); }
+        baseL=clamp(baseL,0,shell.width-W);
+        baseT=clamp(baseT,0,shell.height-H);
+        const deltaX=baseL-base.l;
+        const deltaY=baseT-base.t;
+        const movingTargets=getSelection().length?getSelection():[el];
+        movingTargets.forEach(t=>{
+          if(t.classList.contains('locked')) return;
+          const info=start.map[t.id];
+          if(!info) return;
+          const tr=t.getBoundingClientRect();
+          let L=info.l+deltaX;
+          let T=info.t+deltaY;
+          if(snapTiles.checked && !ev.altKey){ L=Math.round(L/TILE())*TILE(); T=Math.round(T/TILE())*TILE(); }
+          L=clamp(L,0,shell.width-tr.width);
+          T=clamp(T,0,shell.height-tr.height);
+          t.style.left=Math.round(L)+'px';
+          t.style.top=Math.round(T)+'px';
+        });
+      } else {
+        let L=start.l+(ev.clientX-start.x);
+        let T=start.t+(ev.clientY-start.y);
+        let W=Math.max(TILE(),start.w+(ev.clientX-start.x));
+        let H=Math.max(TILE(),start.h+(ev.clientY-start.y));
+        if(snapTiles.checked && !ev.altKey){ L=Math.round(L/TILE())*TILE(); T=Math.round(T/TILE())*TILE(); W=Math.round(W/TILE())*TILE(); H=Math.round(H/TILE())*TILE(); }
+        const cur={left:rr.left+L,top:rr.top+T,right:rr.left+L+W,bottom:rr.top+T+H,cx:rr.left+L+W/2,cy:rr.top+T+H/2};
+        const thr=TILE()/2;
+        if(snapEdges.checked && !ev.altKey){ EV.forEach(x=>{ if(Math.abs(cur.left-x)<thr) L=x-rr.left; if(Math.abs(cur.right-x)<thr) L=x-rr.left-W;}); EH.forEach(y=>{ if(Math.abs(cur.top-y)<thr) T=y-rr.top; if(Math.abs(cur.bottom-y)<thr) T=y-rr.top-H;}); }
+        if(snapCenters.checked && !ev.altKey){ CV.forEach(x=>{ if(Math.abs(cur.cx-x)<thr) L=x-rr.left-W/2;}); CH.forEach(y=>{ if(Math.abs(cur.cy-y)<thr) T=y-rr.top-H/2;}); }
+        const shell=root.getBoundingClientRect();
+        L=clamp(L,0,shell.width-W);
+        T=clamp(T,0,shell.height-H);
+        W=clamp(W,TILE(),shell.width-L);
+        H=clamp(H,TILE(),shell.height-T);
+        el.style.left=px(L);
+        el.style.top=px(T);
+        el.style.width=px(W);
+        el.style.height=px(H);
+      }
     };
     const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up); if(moved) snapshot(); };
     window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); e.preventDefault();
