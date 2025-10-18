@@ -12,6 +12,13 @@ function updateHistCounter(){
   el.textContent=`Undo: ${total} (pos ${pos}/${total})`;
 }
 
+window.selSet=new Set();
+function getSelection(){ return Array.from(window.selSet).map(id=>document.getElementById(id)).filter(Boolean); }
+function clearSelection(){ window.selSet.clear(); $$('.block').forEach(b=>b.classList.remove('sel')); }
+function addToSelection(el){ if(!el) return; window.selSet.add(el.id); el.classList.add('sel'); }
+function removeFromSelection(el){ if(!el) return; window.selSet.delete(el.id); el.classList.remove('sel'); }
+function setSingleSelection(el){ clearSelection(); if(el) addToSelection(el); }
+
 window.hist = hist;
 window.collect = collect;
 window.persist = persist;
@@ -19,3 +26,8 @@ window.persistMeta = persistMeta;
 window.loadMeta = loadMeta;
 window.snapshot = snapshot;
 window.updateHistCounter = updateHistCounter;
+window.getSelection = getSelection;
+window.clearSelection = clearSelection;
+window.addToSelection = addToSelection;
+window.removeFromSelection = removeFromSelection;
+window.setSingleSelection = setSingleSelection;

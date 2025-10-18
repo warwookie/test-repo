@@ -60,6 +60,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .block{position:absolute;user-select:none;cursor:grab;display:flex;align-items:center;justify-content:center;min-width:calc(var(--s)*8px);min-height:calc(var(--s)*8px);outline:1px solid transparent}
 .block:active{cursor:grabbing}
 .sel{outline:2px dashed var(--sel);outline-offset:-2px}
+.block.locked{outline:2px dotted var(--red);cursor:not-allowed}
+.block.locked .handle{display:none}
 .handle{position:absolute;width:12px;height:12px;right:-6px;bottom:-6px;background:var(--hi);border:1px solid #003b37;cursor:nwse-resize;border-radius:2px}
 .titlePlaque{background:var(--org);color:#000;letter-spacing:calc(var(--s)*.5px);box-shadow:0 0 0 calc(var(--s)*1px)#000,inset 0 0 0 calc(var(--s)*1px)#b35b12;height:calc(var(--s)*14px);font-size:calc(var(--s)*6px);padding:0 calc(var(--s)*6px);display:flex;align-items:center;justify-content:center}
 .badge{background:var(--badge);color:var(--txt);height:calc(var(--s)*12px);padding:0 calc(var(--s)*6px);font-size:calc(var(--s)*5px);box-shadow:0 0 0 calc(var(--s)*1px)#000,inset 0 calc(var(--s)*1px) 0 var(--badgeEdge);border-radius:calc(var(--s)*1px);display:flex;align-items:center;gap:calc(var(--s)*4px)}
@@ -218,6 +220,27 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="undo" type="button">Undo</button><button id="redo" type="button">Redo</button><span id="histCount" style="opacity:.8;font:11px/1 ui-monospace;margin-left:4px;">Undo: 0</span>
       <button id="delete" type="button">Delete</button>
       <button id="dupBlockBtn" class="btn" title="Duplicate selected block" type="button">Duplicate</button>
+      <div id="layoutTools" style="display:inline-flex; gap:6px; align-items:center;">
+        <select id="alignSel" aria-label="Align">
+          <option value="">Align…</option>
+          <option value="left">Left</option>
+          <option value="centerX">Center X</option>
+          <option value="right">Right</option>
+          <option value="top">Top</option>
+          <option value="middleY">Middle Y</option>
+          <option value="bottom">Bottom</option>
+        </select>
+        <button id="alignApply" type="button">Apply</button>
+
+        <select id="distSel" aria-label="Distribute">
+          <option value="">Distribute…</option>
+          <option value="h">Horizontal</option>
+          <option value="v">Vertical</option>
+        </select>
+        <button id="distApply" type="button">Apply</button>
+
+        <button id="lockSel" type="button" title="Lock/Unlock selection">Lock</button>
+      </div>
       <button id="export" type="button">Export</button><button id="import" type="button">Import</button>
       <button id="fitLabelBtn" class="btn" title="Shrink-to-fit label in selected block" type="button">Fit Label</button>
       <button id="auditTextBtn" class="btn" title="Scan labels for overflow" type="button">Audit Text</button>
@@ -2773,6 +2796,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       try {
         console.assert(typeof FLAGS === 'object', 'FLAGS present');
         console.assert(document.getElementById('inspectorBtn'), 'Inspector button present');
+        console.assert(typeof getSelection === 'function' && typeof addToSelection === 'function', 'selection helpers present');
+        console.assert(document.getElementById('alignApply') && document.getElementById('distApply'), 'align/distribute controls present');
       } catch {}
     });
   })();
