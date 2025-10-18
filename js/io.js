@@ -39,6 +39,26 @@ const modal=$('#modal'), io=$('#io');
 let _lastFocus = null;
 Object.defineProperty(window, '_lastFocus', { get: () => _lastFocus, set: v => { _lastFocus = v; } });
 
+const SAVED_KEY = 'SQ_SAVED_LAYOUTS_V1';
+
+function readSavedLayouts(){
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '{}') || {}; }
+  catch { return {}; }
+}
+
+function writeSavedLayouts(map){
+  try { localStorage.setItem(SAVED_KEY, JSON.stringify(map)); } catch {}
+}
+
+function refreshLayoutSelect(){
+  const sel = document.getElementById('layoutSel'); if(!sel) return;
+  const map = readSavedLayouts();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- none --</option>' +
+    Object.keys(map).sort().map(n=>`<option value="${n}">${n}</option>`).join('');
+  if (cur && map[cur]) sel.value = cur;
+}
+
 function openModal(txt){
   try { _lastFocus = document.activeElement; } catch {}
   io.value = txt || '';
@@ -106,6 +126,18 @@ function buildExportPayload(){
     layout,
     metaPerBlock:metaPerBlock||undefined,
     coords
+  };
+}
+
+function buildSavePayload(){
+  const p = buildExportPayload();
+  const themeName = (p.meta && String(p.meta.theme || '')).replace(/^theme-/, '');
+  return {
+    version: p.version,
+    savedAt: new Date().toISOString(),
+    theme: themeName,
+    layout: p.layout,
+    metaPerBlock: p.metaPerBlock || undefined
   };
 }
 
@@ -210,6 +242,7 @@ $('#pasteApply').onclick=()=>{
     }
 
     snapshot();
+    refreshLayoutSelect();
     alert('Layout import succeeded.');
     closeModal();
   } catch (e) {
@@ -272,6 +305,7 @@ $('#close').onclick=closeModal;
             });
           }
           snapshot();
+          refreshLayoutSelect();
           alert('Layout import succeeded.');
           closeModal();
         } else {
@@ -314,5 +348,10 @@ window.unlockScroll = unlockScroll;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.buildExportPayload = buildExportPayload;
+window.buildSavePayload = buildSavePayload;
 window.validateLayoutPayload = validateLayoutPayload;
+window.readSavedLayouts = readSavedLayouts;
+window.writeSavedLayouts = writeSavedLayouts;
+window.refreshLayoutSelect = refreshLayoutSelect;
+
 

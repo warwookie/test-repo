@@ -227,6 +227,16 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             <option value="paper">paper</option>
           </select>
         </label>
+        <div id="layoutsUI" style="display:inline-flex;gap:6px;align-items:center;">
+          <label>Layouts
+            <select id="layoutSel" aria-label="Saved layouts">
+              <option value="">-- none --</option>
+            </select>
+          </label>
+          <button id="layoutSave"  type="button" title="Save current layout">Save</button>
+          <button id="layoutLoad"  type="button" title="Load selected layout">Load</button>
+          <button id="layoutDelete" type="button" title="Delete selected layout">Delete</button>
+        </div>
         <button id="import" type="button" class="hidden">Import</button><!-- Hidden: unfinished feature -->
       </div>
       <div class="tb tb-edit" role="group" aria-label="Edit">
@@ -2833,6 +2843,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         console.assert(document.getElementById('themeSel'), 'theme selector present');
         console.assert(document.querySelector('.tb-file') && document.querySelector('.tb-edit') && document.querySelector('.tb-view'), 'toolbar groups present');
         console.assert(document.getElementById('export') && document.getElementById('alignApply') && document.getElementById('snapToggle'), 'key controls present');
+        console.assert(typeof readSavedLayouts === 'function' && typeof writeSavedLayouts === 'function', 'saved layout I/O present');
+        console.assert(document.getElementById('layoutSel'), 'layouts UI present');
       } catch {}
     });
   })();
