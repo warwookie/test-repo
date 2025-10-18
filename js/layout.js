@@ -34,34 +34,24 @@ function wire(el){
   el.addEventListener('dblclick',()=>openEditor(el));
   el.addEventListener('pointerdown',ev=>{ const now=Date.now(); if(now-lastTap<300){ openEditor(el); ev.preventDefault(); return; } lastTap=now; });
   el.addEventListener('pointerdown',e=>{
-    if(!editing) return;
-    if(el.classList.contains('locked')) return;
-    const toggle=(e.ctrlKey||e.metaKey);
+    // --- selection handling ---
+    const toggle=(e.ctrlKey||e.metaKey)===true;
     if(toggle){
-      if(window.selSet.has(el.id)){
-        removeFromSelection(el);
-        if(selected===el){
-          const list=getSelection();
-          selected=list.length?list[list.length-1]:null;
-        }
-        if(!window.selSet.has(el.id)){
-          if(!getSelection().length) selected=null;
-          e.preventDefault();
-          return;
-        }
-      } else {
-        addToSelection(el);
-        selected=el;
-      }
+      if(window.selSet && window.selSet.has(el.id)) removeFromSelection(el);
+      else addToSelection(el);
     } else {
       setSingleSelection(el);
-      selected=el;
     }
+    e.__handledSelection=true;
+    const selList=getSelection();
+    selected=selList.length?selList[selList.length-1]:null;
+    if(!editing) return;
+    if(el.classList.contains('locked')) return;
     const handle=e.target.classList.contains('handle'); const mode=handle?'resize':'move';
     const rr=root.getBoundingClientRect(), r=el.getBoundingClientRect();
-    const start={x:e.clientX,y:e.clientY,l:r.left-rr.left,t:r.top-rr.top,w:r.width,h:r.height,map:{}};
-    const selTargets=getSelection();
-    const targets=selTargets.length?selTargets:[el];
+    const start={x:e.clientX,y:e.clientY,l:r.left-rr.left,t:r.top-rr.top,w:r.width,h:r.height};
+    const targets=(window.selSet && window.selSet.size>0)?getSelection():[el];
+    start.map={};
     targets.forEach(t=>{
       const tr=t.getBoundingClientRect();
       start.map[t.id]={l:tr.left-rr.left,t:tr.top-rr.top};
