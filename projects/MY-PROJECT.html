@@ -231,7 +231,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
   <div class="card">
     <b id="modalTitle">Layout JSON</b>
-    <textarea id="io"></textarea>
+    <textarea id="io" aria-label="Layout JSON"></textarea>
     <div class="row" id="row-upload">
       <input id="uploadJson" type="file" accept="application/json" />
       <button id="uploadBtn" type="button">Upload</button>
@@ -449,8 +449,46 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 const root=$('#root'), board=$('#board'), ctrl=$('#ctrlZone'), gridEl=$('#grid');
+const appRoot=document.querySelector('.app');
 const TILE=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--s'))*8;
 const px=n=>Math.round(n)+'px'; const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function getTabbables(scope){
+  if(!scope) return [];
+  return [...scope.querySelectorAll('a[href],button,textarea,input,select,[tabindex]:not([tabindex="-1"])')]
+    .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1 && el.offsetParent !== null);
+}
+
+function trapFocus(container){
+  if(!container) return;
+  function onKey(e){
+    if(e.key !== 'Tab') return;
+    const tabbables = getTabbables(container);
+    if(!tabbables.length) { e.preventDefault(); return; }
+    const first = tabbables[0];
+    const last  = tabbables[tabbables.length - 1];
+    const active = document.activeElement;
+    if(e.shiftKey){
+      if(active === first || !container.contains(active)){
+        e.preventDefault(); last.focus();
+      }
+    }else{
+      if(active === last || !container.contains(active)){
+        e.preventDefault(); first.focus();
+      }
+    }
+  }
+  container.__trapFocusHandler = onKey;
+  document.addEventListener('keydown', onKey, true);
+}
+
+function releaseFocus(container){
+  const h = container && container.__trapFocusHandler;
+  if(h){ document.removeEventListener('keydown', h, true); delete container.__trapFocusHandler; }
+}
+
+function lockScroll(){ try{ document.body.dataset._preOverflow = document.body.style.overflow || ''; document.body.style.overflow = 'hidden'; }catch{} }
+function unlockScroll(){ try{ document.body.style.overflow = document.body.dataset._preOverflow || ''; delete document.body.dataset._preOverflow; }catch{} }
 
 const EXPORT_VERSION='sq-ui-v1';
 const THEME_KEY='SQ_THEME_V1';
@@ -672,12 +710,22 @@ function openModal(txt){
   io.value = txt || '';
   modal.style.display = 'grid';
   modal.setAttribute('aria-hidden', 'false');
+  modal.setAttribute('aria-describedby', 'io');
   try { io.focus(); io.select(); } catch {}
+  lockScroll();
+  if(appRoot) appRoot.setAttribute('aria-hidden','true');
+  const card = modal.querySelector('.card');
+  trapFocus(card);
+  const tabs = getTabbables(card);
+  if(!tabs.length){ const closeBtn = document.getElementById('close'); if(closeBtn) closeBtn.focus(); }
 }
 
 function closeModal(){
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
+  const card = modal.querySelector('.card'); releaseFocus(card);
+  unlockScroll();
+  if(appRoot) appRoot.removeAttribute('aria-hidden');
   try { if(_lastFocus && typeof _lastFocus.focus === 'function') _lastFocus.focus(); } catch {}
 }
 $('#export').onclick=()=>{ const payload=buildExportPayload(); openModal('// Export schema: version, meta, layout, metaPerBlock?, coords\n'+JSON.stringify(payload,null,2)); };
@@ -920,6 +968,13 @@ function openEditor(el){
   editor.style.display = 'grid';
   editor.setAttribute('aria-hidden', 'false');
   try { $('#edClose') && $('#edClose').focus(); } catch {}
+  lockScroll();
+  if(appRoot) appRoot.setAttribute('aria-hidden','true');
+  const panel = document.querySelector('#editor .edCard');
+  trapFocus(panel);
+  if(panel) panel.setAttribute('aria-describedby','previewWrap');
+  const tabs = getTabbables(panel);
+  if(!tabs.length){ const c = document.getElementById('edClose'); if(c) c.focus(); }
   syncLayoutFields(el);
   preloadTextControls(el);
   preloadInnerControls(el);
@@ -928,6 +983,9 @@ function openEditor(el){
 function closeEditor(){
   editor.style.display = 'none';
   editor.setAttribute('aria-hidden', 'true');
+  const panel = document.querySelector('#editor .edCard'); releaseFocus(panel);
+  unlockScroll();
+  if(appRoot) appRoot.removeAttribute('aria-hidden');
   previewWrap.innerHTML = '';
   try { if(_lastFocus && typeof _lastFocus.focus === 'function') _lastFocus.focus(); } catch {}
 }
@@ -1083,6 +1141,9 @@ function enablePreviewInnerDrag(blockClone){
       }
     } catch {}
     edClose && edClose.click();
+    try {
+      console.assert(typeof trapFocus === 'function' && typeof releaseFocus === 'function', 'focus trap helpers present');
+    } catch {}
   }catch{}
 })();
 
