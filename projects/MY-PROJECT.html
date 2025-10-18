@@ -232,6 +232,20 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   <div class="card">
     <b id="modalTitle">Layout JSON</b>
     <textarea id="io"></textarea>
+    <div class="row" id="row-upload">
+      <input id="uploadJson" type="file" accept="application/json" />
+      <button id="uploadBtn" type="button">Upload</button>
+    </div>
+    <div class="row" id="row-presets" style="justify-content:flex-start">
+      <label for="presetSel" style="color:#bcd2ff">Preset</label>
+      <select id="presetSel" aria-label="Preset layout">
+        <option value="">-- choose preset --</option>
+        <option value="strictDefault">Strict Default (current STRICT_LAYOUT)</option>
+        <option value="compactHUD">Compact HUD</option>
+        <option value="wideHUD">Wide HUD</option>
+      </select>
+      <button id="applyPreset" type="button">Apply Preset</button>
+    </div>
     <div class="row">
       <button id="copy" type="button">Copy</button>
       <button id="pasteApply" type="button">Apply</button>
@@ -472,6 +486,35 @@ const STRICT_LAYOUT={
   btnPause:{k:'pause',x:14,y:30,w:3,h:2}
 };
 
+const PRESETS = {
+  strictDefault: function(){
+    // Clone STRICT_LAYOUT to avoid accidental mutation
+    return JSON.parse(JSON.stringify(STRICT_LAYOUT));
+  },
+  compactHUD: function(){
+    // Start from STRICT and tweak: tighten HUD rows
+    const L = JSON.parse(JSON.stringify(STRICT_LAYOUT));
+    // Move sneakers/powerups into one row and bring stats closer
+    L.hudSneakers.y = 19; L.hudSneakers.w = 7;
+    L.hudPowerups.y = 19; L.hudPowerups.x = 8; L.hudPowerups.w = 10;
+    L.hudScore.y = 22; L.hudScore.x = 6; L.hudScore.w = 6;
+    L.hudTimer.y = 22; L.hudTimer.x = 13; L.hudTimer.w = 5;
+    L.statBoxes.y = 24; L.statBoxes.x = 1;
+    L.statFires.y = 24; L.statFires.x = 7;
+    return L;
+  },
+  wideHUD: function(){
+    // Spread HUD across width under the board
+    const L = JSON.parse(JSON.stringify(STRICT_LAYOUT));
+    L.hudSneakers = {k:'snkr', x:1,  y:19, w:6,  h:2};
+    L.hudPowerups = {k:'power', x:7,  y:19, w:6,  h:2};
+    L.hudLife     = {k:'life', x:13, y:19, w:5,  h:2};
+    L.hudScore.y = 22; L.hudScore.x = 6;  L.hudScore.w = 6;
+    L.hudTimer.y = 22; L.hudTimer.x = 14; L.hudTimer.w = 4;
+    return L;
+  }
+};
+
 let editing=true; let selected=null;
 const hist={stack:[],cursor:-1,current(){return this.cursor>=0?JSON.parse(this.stack[this.cursor]):null;},push(state){const s=JSON.stringify(state);this.stack=this.stack.slice(0,this.cursor+1);this.stack.push(s);this.cursor=this.stack.length-1;if(this.stack.length>UNDO_MAX){const over=this.stack.length-UNDO_MAX;this.stack.splice(0,over);this.cursor=this.stack.length-1;}updateHistCounter();},undo(){if(this.cursor>0){this.cursor--;updateHistCounter();return JSON.parse(this.stack[this.cursor]);}return null;},redo(){if(this.cursor<this.stack.length-1){this.cursor++;updateHistCounter();return JSON.parse(this.stack[this.cursor]);}return null;}};
 function collect(){ const data={}; $$('.block').forEach(el=>{ const r=el.getBoundingClientRect(), rr=root.getBoundingClientRect(); data[el.id]={k:el.dataset.kind||(el.id==='board'?'_board':el.id==='ctrlZone'?'_ctrl':null),x:Math.round((r.left-rr.left)/TILE()), y:Math.round((r.top-rr.top)/TILE()), w:Math.round(r.width/TILE()), h:Math.round(r.height/TILE())}; }); return data; }
@@ -688,6 +731,77 @@ $('#downloadJson').onclick=()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
 $('#close').onclick=closeModal;
+
+(function(){
+  const fileInput = document.getElementById('uploadJson');
+  const uploadBtn = document.getElementById('uploadBtn');
+  if (!fileInput || !uploadBtn) return;
+
+  uploadBtn.onclick = () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) { alert('Choose a .json file first.'); return; }
+    const reader = new FileReader();
+    reader.onerror = () => alert('Failed to read file.');
+    reader.onload = () => {
+      try {
+        const txt = String(reader.result || '');
+        const obj = JSON.parse(txt);
+        // Show pretty JSON in the textarea so user can inspect
+        try { io.value = JSON.stringify(obj, null, 2); } catch {}
+        const res = validateLayoutPayload(obj);
+        if (!res.ok) {
+          alert('Upload parse/validate failed:\n\n' + res.errors.join('\n'));
+          return;
+        }
+        // Apply immediately with confirmation
+        if (confirm('Valid layout. Apply it now?')) {
+          applyStrict(reconcileLayout(res.layout), true);
+          if (res.meta && typeof res.meta === 'object') {
+            try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
+            Object.entries(res.meta).forEach(([id, m]) => {
+              const el = document.getElementById(id);
+              if (el && m) {
+                if (m.cx) el.style.setProperty('--cx', m.cx);
+                if (m.cy) el.style.setProperty('--cy', m.cy);
+                if (m.padx) el.style.setProperty('--padx', m.padx);
+              }
+            });
+          }
+          snapshot();
+          alert('Layout import succeeded.');
+          closeModal();
+        } else {
+          alert('Layout validated. Review the JSON in the textarea, then click Apply if desired.');
+        }
+      } catch {
+        alert('Invalid JSON in file.');
+      }
+    };
+    reader.readAsText(f);
+  };
+})();
+
+(function(){
+  const sel = document.getElementById('presetSel');
+  const btn = document.getElementById('applyPreset');
+  if (!sel || !btn) return;
+
+  btn.onclick = () => {
+    const key = sel.value;
+    if (!key) { alert('Choose a preset.'); return; }
+    const fn = PRESETS[key];
+    if (typeof fn !== 'function') { alert('Preset unavailable.'); return; }
+    const layout = fn();
+    const payload = {
+      version: EXPORT_VERSION,
+      meta: { exportedAt: new Date().toISOString(), theme: getTheme(), source: 'sq-ui-editor' },
+      layout
+    };
+    // Show in textarea for review
+    io.value = JSON.stringify(payload, null, 2);
+    alert('Preset loaded into the JSON box. Click Apply to use it.');
+  };
+})();
 
 function pruneToRequired(){ $$('.block').forEach(el=>{ if(!REQUIRED_IDS.includes(el.id)) el.remove(); }); }
 function ensureBlock(id, kind){ let el=document.getElementById(id); if(!el){ el=makeBlock(kind,id);} el.dataset.kind=kind; ensureInnerHost(el); return el; }
@@ -960,6 +1074,14 @@ function enablePreviewInnerDrag(blockClone){
     hist.stack=savedStack;
     hist.cursor=savedCursor;
     updateHistCounter();
+    try {
+      if (typeof PRESETS === 'object') {
+        const s = PRESETS.strictDefault && PRESETS.strictDefault();
+        console.assert(s && s.title && s.board, 'strictDefault preset builds');
+        const c = PRESETS.compactHUD && PRESETS.compactHUD();
+        console.assert(c && c.hudSneakers && c.hudPowerups, 'compactHUD preset builds');
+      }
+    } catch {}
     edClose && edClose.click();
   }catch{}
 })();
