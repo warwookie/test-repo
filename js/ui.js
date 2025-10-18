@@ -167,10 +167,33 @@ function deleteSelection(){
   return true;
 }
 
-$('#toggleEdit').onclick=e=>{editing=!editing; e.target.textContent='Edit: '+(editing?'ON':'OFF'); document.getElementById('overlay').style.display=editing?'block':'none';};
-$('#toggleGrid').onclick=()=>toggleGrid();
-function setGridUI(on){ gridEl.classList.toggle('show', on); $('#toggleGrid').textContent='Grid: '+(on?'ON':'OFF'); }
-function toggleGrid(){ const on=!gridEl.classList.contains('show'); setGridUI(on); try{ localStorage.setItem(GRID_KEY, on? '1':'0'); }catch{} }
+const overlayEl=document.getElementById('overlay');
+const toggleEditEl=document.getElementById('toggleEdit');
+if(toggleEditEl){
+  const applyEditState=checked=>{
+    editing=checked!==false;
+    if(toggleEditEl.checked!==editing) toggleEditEl.checked=editing;
+    if(overlayEl) overlayEl.style.display=editing?'block':'none';
+  };
+  applyEditState(toggleEditEl.checked || editing);
+  toggleEditEl.addEventListener('change',()=>{ applyEditState(toggleEditEl.checked); });
+}
+
+const toggleGridInput=document.getElementById('toggleGrid');
+function setGridUI(on){
+  const enabled=!!on;
+  if(gridEl) gridEl.classList.toggle('show', enabled);
+  if(toggleGridInput) toggleGridInput.checked=enabled;
+}
+function toggleGrid(force){
+  const next=typeof force==='boolean'?force:!(gridEl&&gridEl.classList.contains('show'));
+  setGridUI(next);
+  try{ localStorage.setItem(GRID_KEY, next? '1':'0'); }catch{}
+  return next;
+}
+if(toggleGridInput){
+  toggleGridInput.addEventListener('change',()=>{ toggleGrid(toggleGridInput.checked); });
+}
 
 $('#undo').onclick=()=>{ const s=hist.undo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
 $('#redo').onclick=()=>{ const s=hist.redo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
