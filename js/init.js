@@ -71,6 +71,11 @@ appRoot=document.querySelector('.app');
       console.assert(typeof window.selSet !== 'undefined', 'selSet exists');
       console.assert(typeof window.addToSelection === 'function', 'addToSelection exists');
     } catch {}
+    try {
+      console.assert(typeof snapState === 'object', 'snapState present');
+      console.assert(typeof snapValuePx === 'function', 'snapValuePx present');
+      console.assert(document.getElementById('guides'), 'guides overlay exists');
+    } catch {}
   }catch{}
 })();
 

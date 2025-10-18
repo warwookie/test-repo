@@ -1,3 +1,58 @@
+window.snapState = window.snapState || {
+  enabled: true,
+  step: 1,
+  showGuides: true,
+  thresholdPx: 6
+};
+
+function clearGuides(){
+  const g = $('#guides');
+  if (g) g.innerHTML = '';
+}
+window.clearGuides = clearGuides;
+
+function drawGuideLine(kind, posPx){
+  if (!snapState.showGuides) return;
+  const g = $('#guides');
+  if (!g) return;
+  const div = document.createElement('div');
+  div.className = 'guide-line ' + (kind === 'h' ? 'h' : 'v');
+  if (kind === 'h') div.style.top = Math.round(posPx) + 'px';
+  else div.style.left = Math.round(posPx) + 'px';
+  g.appendChild(div);
+}
+window.drawGuideLine = drawGuideLine;
+
+const snapToggleEl = $('#snapToggle');
+if (snapToggleEl){
+  snapToggleEl.checked = snapState.enabled !== false;
+  snapState.enabled = snapToggleEl.checked;
+  snapToggleEl.onchange = () => {
+    snapState.enabled = snapToggleEl.checked;
+    if (!snapState.enabled) clearGuides();
+  };
+}
+
+const snapStepEl = $('#snapStep');
+if (snapStepEl){
+  const initial = parseFloat(snapStepEl.value) || snapState.step || 1;
+  snapState.step = initial;
+  snapStepEl.value = String(initial);
+  snapStepEl.onchange = () => {
+    snapState.step = parseFloat(snapStepEl.value) || 1;
+  };
+}
+
+const guideToggleEl = $('#guideToggle');
+if (guideToggleEl){
+  guideToggleEl.checked = snapState.showGuides !== false;
+  snapState.showGuides = guideToggleEl.checked;
+  guideToggleEl.onchange = () => {
+    snapState.showGuides = guideToggleEl.checked;
+    clearGuides();
+  };
+}
+
 addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'){ toggleGrid(); }
   if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); const s=hist.undo(); if(s) applyStrict(s,true); updateHistCounter(); return; }
@@ -13,7 +68,8 @@ addEventListener('keydown',e=>{
   }
   if(!selList.length) return;
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
-    const step=(e.shiftKey?5:1)*TILE();
+    const base=typeof tileSize==='function'?tileSize():TILE();
+    const step=e.shiftKey?base*0.5:base;
     const rr=root.getBoundingClientRect();
     if(e.ctrlKey||e.metaKey){
       e.preventDefault();
@@ -41,16 +97,18 @@ addEventListener('keydown',e=>{
       const shell=root.getBoundingClientRect();
       const movers=selList.filter(el=>!el.classList.contains('locked'));
       if(!movers.length) return;
+      let didMove=false;
       movers.forEach(el=>{
         const r=el.getBoundingClientRect();
         let L=r.left-rr.left+dx;
         let T=r.top-rr.top+dy;
         L=clamp(L,0,shell.width-r.width);
         T=clamp(T,0,shell.height-r.height);
+        if(Math.round(L)!==Math.round(r.left-rr.left)||Math.round(T)!==Math.round(r.top-rr.top)) didMove=true;
         el.style.left=px(L);
         el.style.top=px(T);
       });
-      snapshot();
+      if(didMove) snapshot();
     }
   }
 });

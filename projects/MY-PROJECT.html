@@ -36,7 +36,7 @@ window.__disabledHandlerReport = window.__disabledHandlerReport || [];
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{ --baseW:144; --baseH:256; --s:3 }
-:root{ --bg:#0d1117; --shell:#e7e3d6; --shell2:#cfcab9; --edge:#2b3344; --crtGrid:#2a3847; --badge:#1b2233; --badgeEdge:#374158; --txt:#e7edf8; --org:#ff7a1b; --ylw:#f0c62e; --red:#e05353; --grey:#3a4459; --hi:#00ffe5; --sel:#ffa600; --green:#18d26e; --burn1:#ff8a3c; --burn2:#e05353 }
+:root{ --bg:#0d1117; --shell:#e7e3d6; --shell2:#cfcab9; --edge:#2b3344; --crtGrid:#2a3847; --badge:#1b2233; --badgeEdge:#374158; --txt:#e7edf8; --org:#ff7a1b; --ylw:#f0c62e; --red:#e05353; --grey:#3a4459; --hi:#00ffe5; --sel:#ffa600; --green:#18d26e; --burn1:#ff8a3c; --burn2:#e05353; --cyan:var(--hi) }
 body.theme-midnight{}
 body.theme-neon{ --bg:#0a0014; --shell:#0f0f1a; --shell2:#1a1a2e; --edge:#2d1b69; --crtGrid:#331a80; --badge:#120a3a; --badgeEdge:#2c1a66; --txt:#e9e6ff; --org:#ff7af6; --ylw:#ffd54a; --red:#ff4d6d; --grey:#463c6b; --hi:#5dff9f; --sel:#39c7ff; --green:#29ffb8; --burn1:#ff9b54; --burn2:#ff477e }
 body.theme-dmg{ --bg:#8bac0f; --shell:#c5c7b8; --shell2:#b2b4a6; --edge:#5b615a; --crtGrid:#76806f; --badge:#3a3f38; --badgeEdge:#5b615a; --txt:#e6e8dd; --org:#8c9775; --ylw:#b0b68e; --red:#8b4a4a; --grey:#5b615a; --hi:#b7d17b; --sel:#3a53a5; --green:#6c8b2e; --burn1:#b08f62; --burn2:#8b4a4a }
@@ -179,6 +179,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .iconsHost { position:absolute; transform:translate(-50%,-50%); left:50%; top:70%; display:flex; gap:6px; }
 /* visual hit target in preview only (added/removed by JS) */
 .dragTargetHint { outline:1px dashed #00d1ff; outline-offset:-2px; }
+.guide-line {
+  position:absolute; pointer-events:none; z-index:9998; opacity:0.7;
+  background: var(--cyan);
+}
+.guide-line.h { height:1px; width:100%; left:0; }
+.guide-line.v { width:1px; height:100%; top:0; }
+.guide-wrap { position:absolute; inset:0; pointer-events:none; z-index:9997; }
 </style>
 </head>
 <body class="theme-midnight">
@@ -247,6 +254,19 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="tidyTextBtn" class="btn" title="Auto-fit all labels" type="button">Tidy Text</button>
       <button id="reset" type="button">Reset</button>
       <button id="toggleGrid" type="button">Grid: ON</button>
+      <label style="margin-left:6px;">
+        <input id="snapToggle" type="checkbox" checked> Snap
+      </label>
+      <label style="margin-left:6px;">
+        Step
+        <select id="snapStep">
+          <option value="1">1× tile</option>
+          <option value="0.5">½× tile</option>
+        </select>
+      </label>
+      <label style="margin-left:6px;">
+        <input id="guideToggle" type="checkbox" checked> Guides
+      </label>
       <button id="openEditor" type="button">Open Editor</button>
     </div>
   </div>
@@ -254,6 +274,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   <div class="stageWrap">
     <div class="safe916" id="root">
       <div class="overlay" id="overlay"><button id="burnToggle" type="button">Toggle heart burn</button></div>
+      <div id="guides" class="guide-wrap" aria-hidden="true"></div>
       <div id="board" class="block boardSkin"><div class="grid" id="grid"></div><div class="handle"></div></div>
       <div id="ctrlZone" class="block ctrlSkin"><div class="handle"></div></div>
     </div>
