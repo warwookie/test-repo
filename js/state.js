@@ -14,7 +14,7 @@ function updateHistCounter(){
 
 window.selSet=new Set();
 function getSelection(){ return Array.from(window.selSet).map(id=>document.getElementById(id)).filter(Boolean); }
-function clearSelection(){ window.selSet.clear(); $$('.block').forEach(b=>b.classList.remove('sel')); }
+function clearSelection(){ window.selSet.clear(); $$('.block').forEach(b=>b.classList.remove('sel')); try{ if(typeof clearGuides==='function') clearGuides(); }catch{} }
 function addToSelection(el){ if(!el) return; window.selSet.add(el.id); el.classList.add('sel'); }
 function removeFromSelection(el){ if(!el) return; window.selSet.delete(el.id); el.classList.remove('sel'); }
 function setSingleSelection(el){ clearSelection(); if(el) addToSelection(el); }
