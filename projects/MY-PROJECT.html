@@ -25,6 +25,14 @@
   } catch (e) { /* fail safe, no console noise before paint */ }
 })();
 </script>
+<script>
+const FLAGS = {
+  designGenerator: false // hide unfinished Design Generator tab/controls when false
+};
+window.__featureFlags = FLAGS;
+window.__unusedFunctionReport = window.__unusedFunctionReport || [];
+window.__disabledHandlerReport = window.__disabledHandlerReport || [];
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{ --baseW:144; --baseH:256; --s:3 }
@@ -45,6 +53,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .pItem .swatch{width:16px;height:16px;background:#2a3347;border:1px solid #000}
 .pBar{display:flex;gap:8px;flex-wrap:wrap}
 .pBar button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 10px;cursor:pointer}
+.hidden{display:none!important}
 .pBar input[type="checkbox"]{vertical-align:middle}
 .stageWrap{display:grid;place-items:center}
 .safe916{position:relative;width:calc(var(--baseW)*var(--s)*1px);height:calc(var(--baseH)*var(--s)*1px);background:var(--shell);box-shadow:0 0 0 calc(var(--s)*1px)#000,0 0 0 calc(var(--s)*2px)var(--shell2),0 0 0 calc(var(--s)*3px)#000,inset 0 0 0 calc(var(--s)*2px)var(--shell2);border-radius:calc(var(--s)*2px);overflow:hidden;color:#000}
@@ -202,6 +211,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
     </div>
     <div class="pBar">
       <button id="toggleEdit" type="button">Edit: ON</button>
+      <button id="inspectorBtn" type="button">Inspector</button>
       <label title="Snap to 8px tiles"><input type="checkbox" id="snapTiles" checked>tiles</label>
       <label title="Snap edges to other edges"><input type="checkbox" id="snapEdges" checked>edges</label>
       <label title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label>
@@ -264,7 +274,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         <div class="tab active" data-tab="text">Text</div>
         <div class="tab" data-tab="icons">Icons</div>
         <div class="tab" data-tab="layout">Layout</div>
-        <div class="tab" data-tab="design">Design Generator</div>
+        <div class="tab" data-tab="design">Design Generator</div><!-- Hidden by FLAGS.designGenerator -->
       </div>
       <div class="edRow" style="justify-content:flex-end">
         <button id="edClose" type="button">Close</button>
@@ -384,7 +394,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           </div>
           <p style="opacity:.7">Fields mirror selection now. Live apply arrives later.</p>
         </div>
-        <div class="pane" id="pane-design">
+        <div class="pane" id="pane-design"><!-- Hidden by FLAGS.designGenerator -->
           <div class="edRow">
             <label>Prompt
               <input id="dgPrompt" placeholder="Describe a simple pixel motif"/>
@@ -437,8 +447,24 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 </div>
 
 
+<div id="inspector" class="card hidden" style="position:absolute;right:8px;top:56px;z-index:9999;width:220px;">
+  <div style="font-weight:700;color:#bcd2ff;">Inspector</div>
+  <div class="inspector-body" style="display:grid;gap:6px;font:11px/1.2 ui-monospace;">
+    <div><span style="opacity:.7;">id:</span> <span data-field="id">—</span></div>
+    <div><span style="opacity:.7;">kind:</span> <span data-field="kind">—</span></div>
+    <div><span style="opacity:.7;">x:</span> <span data-field="x">—</span></div>
+    <div><span style="opacity:.7;">y:</span> <span data-field="y">—</span></div>
+    <div><span style="opacity:.7;">w:</span> <span data-field="w">—</span></div>
+    <div><span style="opacity:.7;">h:</span> <span data-field="h">—</span></div>
+  </div>
+</div>
+
+
 <script>
 (function(){
+  // DISABLED duplicate dgGenerate binding (conflict).
+  window.__disabledHandlerReport && window.__disabledHandlerReport.push({name:'#dgGenerate', reason:'legacy generator blocked'});
+  return;
   const elPrompt=document.getElementById('dgPrompt');
   const elSeed=document.getElementById('dgSeed');
   const btnGen=document.getElementById('dgGenerate');
@@ -902,6 +928,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 </script>
 <script>
 (function(){
+  // DISABLED duplicate dgGenerate binding (conflict).
+  window.__disabledHandlerReport && window.__disabledHandlerReport.push({name:'#dgGenerate', reason:'ai hook blocked'});
+  return;
   const promptEl=document.getElementById('dgPrompt');
   const seedEl=document.getElementById('dgSeed');
   const genBtn=document.getElementById('dgGenerate');
@@ -2595,5 +2624,158 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   <script src="../js/editor.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/init.js"></script>
+  <script>
+  (function(){
+    function guardHiddenTabs(){
+      const tabsEl=document.getElementById('edTabs');
+      if(!tabsEl || tabsEl.dataset.guardHidden==='1') return;
+      tabsEl.dataset.guardHidden='1';
+      tabsEl.addEventListener('click',function(ev){
+        const blocked=ev.target && ev.target.closest && ev.target.closest('.tab.hidden');
+        if(blocked){
+          ev.preventDefault();
+          ev.stopPropagation();
+          ev.stopImmediatePropagation();
+        }
+      },true);
+    }
+
+    function applyDesignGeneratorFlag(){
+      const enabled=!!(FLAGS && FLAGS.designGenerator);
+      const tab=document.querySelector('#edTabs .tab[data-tab="design"]');
+      const pane=document.getElementById('pane-design');
+      if(tab){
+        tab.classList.toggle('hidden', !enabled);
+        if(!enabled && tab.classList.contains('active')){
+          tab.classList.remove('active');
+        }
+      }
+      if(pane){
+        const wasActive=pane.classList.contains('active');
+        pane.classList.toggle('hidden', !enabled);
+        if(!enabled && wasActive){
+          pane.classList.remove('active');
+        }
+      }
+      if(!enabled){
+        const fallback=document.querySelector('#edTabs .tab:not(.hidden)');
+        if(fallback && !fallback.classList.contains('active')){
+          fallback.classList.add('active');
+          const paneTarget=document.getElementById(`pane-${fallback.dataset.tab}`);
+          document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+          if(paneTarget){ paneTarget.classList.add('active'); }
+        }
+      } else if(enabled && tab && !document.querySelector('#edTabs .tab.active')){
+        tab.classList.add('active');
+        if(pane){
+          document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+          pane.classList.add('active');
+        }
+      }
+    }
+
+    function setupInspector(){
+      const btn=document.getElementById('inspectorBtn');
+      const panel=document.getElementById('inspector');
+      if(!btn || !panel) return;
+      const fields={};
+      panel.querySelectorAll('[data-field]').forEach(el=>{ fields[el.dataset.field]=el; });
+
+      function getSelectedBlock(){
+        if(window.selected && window.selected.classList && window.selected.classList.contains('block')) return window.selected;
+        return document.querySelector('.block.sel');
+      }
+
+      function computeMetrics(){
+        const defaults={id:'—',kind:'—',x:'—',y:'—',w:'—',h:'—'};
+        const sel=getSelectedBlock();
+        if(!sel || !(sel instanceof HTMLElement)) return defaults;
+        let layoutData=null;
+        try{
+          layoutData=typeof collect==='function'?collect():null;
+        }catch(e){ layoutData=null; }
+        const entry=sel.id && layoutData && layoutData[sel.id] ? layoutData[sel.id] : null;
+        const tileSize=(typeof TILE==='function' && Number(TILE())) ? Number(TILE()) : 1;
+        const rootEl=typeof root!=='undefined' && root && root.getBoundingClientRect ? root : document.getElementById('root');
+        const rootRect=rootEl && rootEl.getBoundingClientRect ? rootEl.getBoundingClientRect() : {left:0,top:0};
+        const rect=sel.getBoundingClientRect();
+        const metrics=entry||{
+          k: sel.dataset.kind || null,
+          x: Math.round((rect.left-rootRect.left)/tileSize),
+          y: Math.round((rect.top-rootRect.top)/tileSize),
+          w: Math.round(rect.width/tileSize),
+          h: Math.round(rect.height/tileSize)
+        };
+        return {
+          id: sel.id || '(unnamed)',
+          kind: sel.dataset.kind || (metrics && metrics.k) || '—',
+          x: Number.isFinite(metrics && metrics.x) ? metrics.x : '—',
+          y: Number.isFinite(metrics && metrics.y) ? metrics.y : '—',
+          w: Number.isFinite(metrics && metrics.w) ? metrics.w : '—',
+          h: Number.isFinite(metrics && metrics.h) ? metrics.h : '—'
+        };
+      }
+
+      function applyMetrics(){
+        const info=computeMetrics();
+        Object.entries(fields).forEach(([key,el])=>{
+          if(el) el.textContent = info[key] ?? '—';
+        });
+      }
+
+      btn.addEventListener('click',()=>{
+        panel.classList.toggle('hidden');
+        applyMetrics();
+      });
+
+      function wrapSelect(){
+        if(typeof window.select !== 'function') return;
+        if(window.select.__inspectorWrapped) return;
+        const original=window.select;
+        const wrapped=function(){
+          const result=original.apply(this, arguments);
+          try{ applyMetrics(); }catch(e){}
+          return result;
+        };
+        wrapped.__inspectorWrapped=true;
+        wrapped.__originalSelect=original;
+        window.select=wrapped;
+      }
+
+      wrapSelect();
+      applyMetrics();
+
+      document.addEventListener('keydown',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
+      document.addEventListener('pointerup',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
+      document.addEventListener('pointercancel',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
+      window.addEventListener('resize',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
+    }
+
+    function reportAudits(){
+      const rows=[];
+      const unused=Array.isArray(window.__unusedFunctionReport)?window.__unusedFunctionReport:[];
+      const disabled=Array.isArray(window.__disabledHandlerReport)?window.__disabledHandlerReport:[];
+      unused.forEach(name=>{ rows.push({name, reason:'UNUSED'}); });
+      disabled.forEach(entry=>{
+        if(entry && entry.name){
+          rows.push({name:entry.name, reason:entry.reason || 'DISABLED'});
+        }
+      });
+      console.table(rows);
+    }
+
+    guardHiddenTabs();
+    applyDesignGeneratorFlag();
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      setupInspector();
+      reportAudits();
+      try {
+        console.assert(typeof FLAGS === 'object', 'FLAGS present');
+        console.assert(document.getElementById('inspectorBtn'), 'Inspector button present');
+      } catch {}
+    });
+  })();
+  </script>
 </body>
 </html>
