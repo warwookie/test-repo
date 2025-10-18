@@ -116,6 +116,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .card textarea{width:100%;height:40vh;background:#0e1628;color:#e6f0ff;border:1px solid #3a4a6a;border-radius:6px;padding:8px;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
 .card .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .card button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 10px;cursor:pointer}
+#helpBody ul{margin:6px 0 12px 18px}
 /* === Editor Modal === */
 .editor{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center}
 .edCard{background:#0b1322;border:1px solid #2a3a54;border-radius:12px;padding:12px;display:grid;gap:10px;width:min(980px,95vw);max-height:95vh}
@@ -287,6 +288,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           <label title="Snap edges to other edges"><input type="checkbox" id="snapEdges" checked>edges</label><!-- Hidden: unfinished feature -->
           <label title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label><!-- Hidden: unfinished feature -->
         </div>
+        <button id="helpBtn" type="button" title="Show help">?</button>
       </div>
     </div>
   </div>
@@ -2681,6 +2683,49 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   console.info('[revert] preview-resize & diagnostics removed');
 })();
 </script>
+  <div id="helpOverlay" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
+    <div class="card" style="max-width:720px">
+      <div class="cardHead">
+        <h3 id="helpTitle">Help — Controls & Shortcuts</h3>
+        <button id="helpClose" type="button" aria-label="Close">Close</button>
+      </div>
+      <div class="cardBody" id="helpBody">
+        <h4>Selection</h4>
+        <ul>
+          <li>Click: select one</li>
+          <li>Ctrl/Cmd+Click: add/remove from selection</li>
+          <li>Lock: prevents move/resize</li>
+        </ul>
+        <h4>Move &amp; Resize</h4>
+        <ul>
+          <li>Drag inside block: move (group moves if multi-selected)</li>
+          <li>Drag handles: resize</li>
+          <li>Arrows: nudge 1 tile • Shift+Arrows: ½ tile</li>
+          <li>Alt while dragging: no snapping</li>
+        </ul>
+        <h4>Align &amp; Distribute</h4>
+        <ul>
+          <li>Select 2+ blocks → choose Align/Distribute → Apply</li>
+        </ul>
+        <h4>Snap &amp; Guides</h4>
+        <ul>
+          <li>Snap toggle + Step (1× or ½× tile)</li>
+          <li>Guides: shows edge/center lines when near alignment</li>
+        </ul>
+        <h4>File</h4>
+        <ul>
+          <li>Export: JSON with version, meta, layout, coords</li>
+          <li>Import: paste or Upload .json (validated)</li>
+          <li>Layouts: Save/Load/Delete named layouts</li>
+          <li>Theme: selector persists and exports in meta.theme</li>
+        </ul>
+        <h4>Undo/Redo</h4>
+        <ul>
+          <li>Undo/Redo buttons; history capped if you added the cap</li>
+        </ul>
+      </div>
+    </div>
+  </div>
   <script src="../js/constants.js"></script>
   <script src="../js/state.js"></script>
   <script src="../js/layout.js"></script>
@@ -2841,6 +2886,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         console.assert(document.getElementById('alignApply') && document.getElementById('distApply'), 'align/distribute controls present');
         console.assert(typeof THEME_PRESETS === 'object', 'theme presets present');
         console.assert(document.getElementById('themeSel'), 'theme selector present');
+        console.assert(document.getElementById('helpBtn') && document.getElementById('helpOverlay'), 'help overlay present');
         console.assert(document.querySelector('.tb-file') && document.querySelector('.tb-edit') && document.querySelector('.tb-view'), 'toolbar groups present');
         console.assert(document.getElementById('export') && document.getElementById('alignApply') && document.getElementById('snapToggle'), 'key controls present');
         console.assert(typeof readSavedLayouts === 'function' && typeof writeSavedLayouts === 'function', 'saved layout I/O present');
