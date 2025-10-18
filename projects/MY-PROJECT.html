@@ -481,6 +481,51 @@ function persistMeta(){ try{ const meta={}; $$('.block').forEach(el=>{ const cx=
 function loadMeta(){ try{ return JSON.parse(localStorage.getItem(META_KEY)||'{}'); }catch{return{};} }
 function snapshot(){ const s=collect(); hist.push(s); persist(s); persistMeta(); }
 
+function buildExportPayload(){
+  const version=EXPORT_VERSION;
+  const theme=getTheme();
+  const exportedAt=new Date().toISOString();
+  const layout=collect();
+  let metaPerBlock=null;
+  try{
+    const saved=loadMeta()||{};
+    metaPerBlock={};
+    Object.keys(layout).forEach(id=>{
+      const el=document.getElementById(id);
+      const m=saved[id]||{};
+      const cx=(m.cx||(el&&el.style.getPropertyValue('--cx'))||'').trim();
+      const cy=(m.cy||(el&&el.style.getPropertyValue('--cy'))||'').trim();
+      const padx=(m.padx||(el&&el.style.getPropertyValue('--padx'))||'').trim();
+      const entry={};
+      if(cx) entry.cx=cx;
+      if(cy) entry.cy=cy;
+      if(padx) entry.padx=padx;
+      if(Object.keys(entry).length) metaPerBlock[id]=entry;
+    });
+    if(Object.keys(metaPerBlock).length===0) metaPerBlock=null;
+  }catch{ metaPerBlock=null; }
+  const coords={};
+  const rr=root.getBoundingClientRect();
+  Object.keys(layout).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const r=el.getBoundingClientRect();
+    coords[id]={
+      pxX:Math.round(r.left-rr.left),
+      pxY:Math.round(r.top-rr.top),
+      pxW:Math.round(r.width),
+      pxH:Math.round(r.height)
+    };
+  });
+  return {
+    version,
+    meta:{ exportedAt, theme, source:'sq-ui-editor' },
+    layout,
+    metaPerBlock:metaPerBlock||undefined,
+    coords
+  };
+}
+
 let seq=0; const uid=p=>`${p}_${++seq}`;
 function ensureInnerHost(el){ if(el.querySelector('.innerHost')) return; const wrap=document.createElement('div'); wrap.className='innerHost';
   [...el.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); });
@@ -583,7 +628,7 @@ function closeModal(){
   modal.setAttribute('aria-hidden', 'true');
   try { if(_lastFocus && typeof _lastFocus.focus === 'function') _lastFocus.focus(); } catch {}
 }
-$('#export').onclick=()=>{ const payload={ version: EXPORT_VERSION, theme:getTheme(), layout: collect() }; openModal(JSON.stringify(payload,null,2)); };
+$('#export').onclick=()=>{ const payload=buildExportPayload(); openModal('// Export schema: version, meta, layout, metaPerBlock?, coords\n'+JSON.stringify(payload,null,2)); };
 $('#import').onclick=()=>{ openModal('Paste JSON here, then press Apply. Supports {version,theme,layout} or layout-only.'); };
 $('#copy').onclick=()=>{ navigator.clipboard.writeText(io.value).catch(()=>{}); };
 $('#pasteApply').onclick=()=>{
@@ -622,7 +667,17 @@ $('#pasteApply').onclick=()=>{
     alert('Invalid JSON. Parse error.');
   }
 };
-$('#downloadJson').onclick=()=>{ const dataStr=io.value; try{ JSON.parse(dataStr); }catch{ alert('Invalid JSON'); return;} const blob=new Blob([dataStr],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='sneakerquest_ui.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
+$('#downloadJson').onclick=()=>{
+  const data=io.value&&(()=>{ try{ return JSON.parse(io.value); }catch{ return null; } })();
+  const payload=data||buildExportPayload();
+  const ts=((payload.meta&&payload.meta.exportedAt)||new Date().toISOString()).replace(/[:]/g,'');
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='sq-ui-layout-'+ts+'.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
 $('#close').onclick=closeModal;
 
 function pruneToRequired(){ $$('.block').forEach(el=>{ if(!REQUIRED_IDS.includes(el.id)) el.remove(); }); }
@@ -884,6 +939,10 @@ function enablePreviewInnerDrag(blockClone){
     const b = validateLayoutPayload(bad);
     console.assert(g.ok && g.errors.length === 0, 'good payload validates');
     console.assert(!b.ok && b.errors.length >= 1, 'bad payload rejected');
+    const p=buildExportPayload();
+    console.assert(p && p.version && p.meta && p.layout && p.coords, 'export payload has required sections');
+    const someId=Object.keys(p.layout)[0];
+    console.assert(someId && p.layout[someId].w >= 1, 'layout contains at least one block');
     edClose && edClose.click();
   }catch{}
 })();
