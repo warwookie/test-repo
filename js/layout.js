@@ -225,7 +225,13 @@ function pruneToRequired(){ $$('.block').forEach(el=>{ if(!REQUIRED_IDS.includes
 function ensureBlock(id, kind){ let el=document.getElementById(id); if(!el){ el=makeBlock(kind,id);} el.dataset.kind=kind; ensureInnerHost(el); return el; }
 function applyStrict(layout, prune){ if(prune) pruneToRequired(); Object.entries(layout).forEach(([id, v])=>{ const el=ensureBlock(id, v.k); el.style.left=px(v.x*TILE()); el.style.top=px(v.y*TILE()); el.style.width=px(v.w*TILE()); el.style.height=px(v.h*TILE()); }); $$('.block').forEach(el=>{ if(!layout[el.id] && REQUIRED_IDS.includes(el.id)){ el.remove(); } });
   const meta=loadMeta(); Object.entries(meta).forEach(([id,m])=>{ const el=document.getElementById(id); if(el){ if(m.cx) el.style.setProperty('--cx', m.cx); if(m.cy) el.style.setProperty('--cy', m.cy); if(m.padx) el.style.setProperty('--padx', m.padx); }});
-  editing=true; $('#toggleEdit').textContent='Edit: ON'; document.getElementById('overlay').style.display='block'; persist(layout); }
+  editing=true;
+  const toggle=document.getElementById('toggleEdit');
+  if(toggle) toggle.checked=true;
+  const overlay=document.getElementById('overlay');
+  if(overlay) overlay.style.display='block';
+  persist(layout);
+}
 function reconcileLayout(candidate){ const out={...candidate}; REQUIRED_IDS.forEach(id=>{ if(!out[id]) out[id]={...STRICT_LAYOUT[id]}; }); return out; }
 
 window.ensureInnerHost = ensureInnerHost;

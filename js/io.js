@@ -216,17 +216,21 @@ $('#pasteApply').onclick=()=>{
     alert('Invalid JSON. Parse error.');
   }
 };
-$('#downloadJson').onclick=()=>{
-  const data=io.value&&(()=>{ try{ return JSON.parse(io.value); }catch{ return null; } })();
-  const payload=data||buildExportPayload();
-  const ts=((payload.meta&&payload.meta.exportedAt)||new Date().toISOString()).replace(/[:]/g,'');
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='sq-ui-layout-'+ts+'.json';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};
+['downloadJson','downloadJsonModal'].forEach(id=>{
+  const btn=document.getElementById(id);
+  if(!btn) return;
+  btn.onclick=()=>{
+    const data=io.value&&(()=>{ try{ return JSON.parse(io.value); }catch{ return null; } })();
+    const payload=data||buildExportPayload();
+    const ts=((payload.meta&&payload.meta.exportedAt)||new Date().toISOString()).replace(/[:]/g,'');
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='sq-ui-layout-'+ts+'.json';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+});
 $('#close').onclick=closeModal;
 
 (function(){
