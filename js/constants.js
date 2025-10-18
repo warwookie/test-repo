@@ -20,6 +20,12 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const EXPORT_VERSION = 'sq-ui-v1';
 const THEME_KEY = 'SQ_THEME_V1';
 const THEME_CLASS_PREFIX = 'theme-';
+const THEME_PRESETS = {
+  midnight: 'theme-midnight',
+  classic: 'theme-classic',
+  neon: 'theme-neon',
+  paper: 'theme-paper'
+};
 const GRID_KEY = 'SQ_GRID_V1';
 const META_KEY = 'SQ_BLOCK_META_V1';
 const SNAP_INNER_KEY = 'SQ_INNER_SNAP_V1';
@@ -28,9 +34,12 @@ const UNDO_MAX = 20;
 
 function getTheme(){ return localStorage.getItem(THEME_KEY)||'midnight'; }
 function applyTheme(name){
-  const body=document.body;
-  body.className = body.className.split(/\s+/).filter(c=>!c.startsWith(THEME_CLASS_PREFIX)).join(' ').trim();
-  if(name) body.classList.add(THEME_CLASS_PREFIX + name);
+  const targets=[document.documentElement, document.body];
+  targets.forEach(el=>{
+    if(!el || !el.classList) return;
+    [...el.classList].forEach(cls=>{ if(cls && cls.startsWith(THEME_CLASS_PREFIX)) el.classList.remove(cls); });
+    if(name) el.classList.add(THEME_CLASS_PREFIX + name);
+  });
 }
 function setTheme(name){ localStorage.setItem(THEME_KEY,name); applyTheme(name); }
 
@@ -87,6 +96,7 @@ window.clamp = clamp;
 window.EXPORT_VERSION = EXPORT_VERSION;
 window.THEME_KEY = THEME_KEY;
 window.THEME_CLASS_PREFIX = THEME_CLASS_PREFIX;
+window.THEME_PRESETS = THEME_PRESETS;
 window.GRID_KEY = GRID_KEY;
 window.META_KEY = META_KEY;
 window.SNAP_INNER_KEY = SNAP_INNER_KEY;

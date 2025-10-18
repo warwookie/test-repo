@@ -38,9 +38,11 @@ window.__disabledHandlerReport = window.__disabledHandlerReport || [];
 :root{ --baseW:144; --baseH:256; --s:3 }
 :root{ --bg:#0d1117; --shell:#e7e3d6; --shell2:#cfcab9; --edge:#2b3344; --crtGrid:#2a3847; --badge:#1b2233; --badgeEdge:#374158; --txt:#e7edf8; --org:#ff7a1b; --ylw:#f0c62e; --red:#e05353; --grey:#3a4459; --hi:#00ffe5; --sel:#ffa600; --green:#18d26e; --burn1:#ff8a3c; --burn2:#e05353; --cyan:var(--hi) }
 body.theme-midnight{}
+body.theme-classic{}
 body.theme-neon{ --bg:#0a0014; --shell:#0f0f1a; --shell2:#1a1a2e; --edge:#2d1b69; --crtGrid:#331a80; --badge:#120a3a; --badgeEdge:#2c1a66; --txt:#e9e6ff; --org:#ff7af6; --ylw:#ffd54a; --red:#ff4d6d; --grey:#463c6b; --hi:#5dff9f; --sel:#39c7ff; --green:#29ffb8; --burn1:#ff9b54; --burn2:#ff477e }
 body.theme-dmg{ --bg:#8bac0f; --shell:#c5c7b8; --shell2:#b2b4a6; --edge:#5b615a; --crtGrid:#76806f; --badge:#3a3f38; --badgeEdge:#5b615a; --txt:#e6e8dd; --org:#8c9775; --ylw:#b0b68e; --red:#8b4a4a; --grey:#5b615a; --hi:#b7d17b; --sel:#3a53a5; --green:#6c8b2e; --burn1:#b08f62; --burn2:#8b4a4a }
 body.theme-mono{ --bg:#111; --shell:#f3f3f3; --shell2:#dcdcdc; --edge:#333; --crtGrid:#222; --badge:#000; --badgeEdge:#333; --txt:#f5f5f5; --org:#bbb; --ylw:#ddd; --red:#f55; --grey:#444; --hi:#fff; --sel:#888; --green:#9f9; --burn1:#f88; --burn2:#c33 }
+body.theme-paper{}
 html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Press Start 2P', monospace}
 *{box-sizing:border-box; image-rendering:pixelated}
 .app{display:grid; grid-template-columns:minmax(220px, 264px) auto; gap:12px; height:100vh; padding:12px}
@@ -254,6 +256,15 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <button id="tidyTextBtn" class="btn" title="Auto-fit all labels" type="button">Tidy Text</button>
       <button id="reset" type="button">Reset</button>
       <button id="toggleGrid" type="button">Grid: ON</button>
+      <label style="margin-left:6px;display:inline-flex;gap:6px;align-items:center;">
+        Theme
+        <select id="themeSel" aria-label="Theme preset">
+          <option value="midnight">midnight</option>
+          <option value="classic">classic</option>
+          <option value="neon">neon</option>
+          <option value="paper">paper</option>
+        </select>
+      </label>
       <label style="margin-left:6px;">
         <input id="snapToggle" type="checkbox" checked> Snap
       </label>
@@ -2819,6 +2830,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         console.assert(document.getElementById('inspectorBtn'), 'Inspector button present');
         console.assert(typeof getSelection === 'function' && typeof addToSelection === 'function', 'selection helpers present');
         console.assert(document.getElementById('alignApply') && document.getElementById('distApply'), 'align/distribute controls present');
+        console.assert(typeof THEME_PRESETS === 'object', 'theme presets present');
+        console.assert(document.getElementById('themeSel'), 'theme selector present');
       } catch {}
     });
   })();

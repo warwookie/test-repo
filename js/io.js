@@ -66,6 +66,7 @@ function closeModal(){
 function buildExportPayload(){
   const version=EXPORT_VERSION;
   const theme=getTheme();
+  const themeName=String(theme || '').replace(/^theme-/, '');
   const exportedAt=new Date().toISOString();
   const layout=collect();
   let metaPerBlock=null;
@@ -101,7 +102,7 @@ function buildExportPayload(){
   });
   return {
     version,
-    meta:{ exportedAt, theme, source:'sq-ui-editor' },
+    meta:{ exportedAt, theme: themeName, source:'sq-ui-editor' },
     layout,
     metaPerBlock:metaPerBlock||undefined,
     coords
@@ -182,7 +183,11 @@ $('#pasteApply').onclick=()=>{
     const raw = io.value;
     const obj = JSON.parse(raw);
 
-    if (obj && obj.theme) { setTheme(obj.theme); }
+    if (obj && obj.theme) {
+      const name = String(obj.theme).replace(/^theme-/, '');
+      setTheme(name);
+      applyTheme(name);
+    }
 
     const res = validateLayoutPayload(obj);
     if (!res.ok) {
@@ -238,6 +243,11 @@ $('#close').onclick=closeModal;
       try {
         const txt = String(reader.result || '');
         const obj = JSON.parse(txt);
+        if (obj && obj.theme) {
+          const name = String(obj.theme).replace(/^theme-/, '');
+          setTheme(name);
+          applyTheme(name);
+        }
         try { io.value = JSON.stringify(obj, null, 2); } catch {}
         const res = validateLayoutPayload(obj);
         if (!res.ok) {

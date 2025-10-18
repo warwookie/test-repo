@@ -53,6 +53,24 @@ if (guideToggleEl){
   };
 }
 
+(function(){
+  const sel = document.getElementById('themeSel');
+  if (!sel) return;
+  try {
+    const cur = getTheme();
+    const name = (cur || '').replace(/^theme-/, '');
+    if ([...sel.options].some(o => o.value === name)) sel.value = name;
+  } catch {}
+
+  sel.onchange = () => {
+    const name = sel.value;
+    const cls = (window.THEME_PRESETS && window.THEME_PRESETS[name]) || ('theme-' + name);
+    const token = String(cls || '').replace(/^theme-/, '') || name;
+    setTheme(token);
+    applyTheme(token);
+  };
+})();
+
 addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'){ toggleGrid(); }
   if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); const s=hist.undo(); if(s) applyStrict(s,true); updateHistCounter(); return; }
