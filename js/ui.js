@@ -54,6 +54,43 @@ if (guideToggleEl){
 }
 
 (function(){
+  const btn = document.getElementById('helpBtn');
+  const modal = document.getElementById('helpOverlay');
+  const close = document.getElementById('helpClose');
+  if (!btn || !modal || !close) return;
+
+  let lastFocus = null;
+
+  function openHelp(){
+    lastFocus = document.activeElement;
+    modal.style.display = 'grid';
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden','false');
+    if (typeof lockScroll==='function') lockScroll();
+    const card = modal.querySelector('.card');
+    if (typeof trapFocus==='function') trapFocus(card);
+    (close || card).focus();
+  }
+  function closeHelp(){
+    const card = modal.querySelector('.card');
+    if (typeof releaseFocus==='function') releaseFocus(card);
+    if (typeof unlockScroll==='function') unlockScroll();
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden','true');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  btn.onclick = openHelp;
+  close.onclick = closeHelp;
+
+  document.addEventListener('keydown', (e)=>{
+    if (modal.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeHelp();
+  }, true);
+})();
+
+(function(){
   const sel = document.getElementById('themeSel');
   if (!sel) return;
   try {
