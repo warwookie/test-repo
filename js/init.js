@@ -67,6 +67,10 @@ appRoot=document.querySelector('.app');
     try {
       console.assert(typeof trapFocus === 'function' && typeof releaseFocus === 'function', 'focus trap helpers present');
     } catch {}
+    try {
+      console.assert(typeof window.selSet !== 'undefined', 'selSet exists');
+      console.assert(typeof window.addToSelection === 'function', 'addToSelection exists');
+    } catch {}
   }catch{}
 })();
 

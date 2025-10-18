@@ -55,6 +55,19 @@ addEventListener('keydown',e=>{
   }
 });
 
+document.addEventListener('pointerdown',event=>{
+  if(event && event.button!==0) return;
+  if(event && event.__handledSelection) return;
+  const t=event?event.target:null;
+  if((event.ctrlKey||event.metaKey) && t && t.closest && t.closest('.block')) return;
+  if(t && t.closest && t.closest('.block')) return;
+  const stage=typeof root!=='undefined'?root:document.getElementById('root');
+  if(stage && t && stage.contains(t)){
+    if(typeof select==='function') select(null);
+    else if(typeof clearSelection==='function'){ clearSelection(); if(typeof window!=='undefined') window.selected=null; }
+  }
+});
+
 function deleteSelection(){
   const selList=getSelection();
   if(!selList.length) return false;
