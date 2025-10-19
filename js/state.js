@@ -41,51 +41,6 @@ function updateHistCounter(){
   el.textContent=`Undo: ${total} (pos ${pos}/${total})`;
 }
 
-window.selSet=new Set();
-if(!Array.isArray(window.CURRENT_SELECTION)) window.CURRENT_SELECTION=[];
-
-function syncSelectionCache(){ window.CURRENT_SELECTION=Array.from(window.selSet); }
-function dispatchSelectionChange(){
-  syncSelectionCache();
-  try{ document.dispatchEvent(new CustomEvent('sq-selection-change',{detail:{ids:window.CURRENT_SELECTION.slice()}})); }
-  catch{}
-}
-
-function getSelection(){
-  syncSelectionCache();
-  return Array.from(window.selSet).map(id=>document.getElementById(id)).filter(Boolean);
-}
-function clearSelection(){
-  window.selSet.clear();
-  $$('.block').forEach(b=>b.classList.remove('sel'));
-  try{ if(typeof clearGuides==='function') clearGuides(); }
-  catch{}
-  dispatchSelectionChange();
-}
-function addToSelection(el){
-  if(!el) return;
-  window.selSet.add(el.id);
-  el.classList.add('sel');
-  dispatchSelectionChange();
-}
-function removeFromSelection(el){
-  if(!el) return;
-  window.selSet.delete(el.id);
-  el.classList.remove('sel');
-  dispatchSelectionChange();
-}
-function setSingleSelection(el){
-  try{ if(typeof clearGuides==='function') clearGuides(); }
-  catch{}
-  $$('.block').forEach(b=>b.classList.remove('sel'));
-  window.selSet.clear();
-  if(el){
-    window.selSet.add(el.id);
-    el.classList.add('sel');
-  }
-  dispatchSelectionChange();
-}
-
 window.hist = hist;
 window.collect = collect;
 window.persist = persist;
@@ -93,8 +48,3 @@ window.persistMeta = persistMeta;
 window.loadMeta = loadMeta;
 window.snapshot = snapshot;
 window.updateHistCounter = updateHistCounter;
-window.getSelection = getSelection;
-window.clearSelection = clearSelection;
-window.addToSelection = addToSelection;
-window.removeFromSelection = removeFromSelection;
-window.setSingleSelection = setSingleSelection;
