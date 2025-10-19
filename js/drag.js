@@ -61,14 +61,35 @@
       const stage = resolveStage();
       if (!stage) return;
       const rr = stage.getBoundingClientRect();
+      const startX = clamp(e.clientX, rr.left, rr.right);
+      const startY = clamp(e.clientY, rr.top, rr.bottom);
       const r = el.getBoundingClientRect();
-      const start = { x: e.clientX, y: e.clientY, l: r.left - rr.left, t: r.top - rr.top, w: r.width, h: r.height };
+      const start = { x: startX, y: startY, l: r.left - rr.left, t: r.top - rr.top, w: r.width, h: r.height };
       const targets = (window.selSet && window.selSet.size > 0) ? getSelection() : [el];
       start.map = {};
       targets.forEach(t => {
         const tr = t.getBoundingClientRect();
         start.map[t.id] = { l: tr.left - rr.left, t: tr.top - rr.top };
       });
+
+      const capturePositions = () => {
+        const shell = stage.getBoundingClientRect();
+        return targets
+          .filter(Boolean)
+          .map(t => {
+            const tr = t.getBoundingClientRect();
+            return {
+              id: t.id,
+              x: Math.round(tr.left - shell.left),
+              y: Math.round(tr.top - shell.top)
+            };
+          });
+      };
+      console.debug('drag:start', capturePositions());
+
+      if (typeof el.setPointerCapture === 'function'){
+        try { el.setPointerCapture(e.pointerId); } catch {}
+      }
 
       const boardRect = window.board ? window.board.getBoundingClientRect() : rr;
       const ctrlRect = window.ctrl ? window.ctrl.getBoundingClientRect() : rr;
@@ -80,15 +101,24 @@
       const guides = (mode === 'move' && typeof computeGuides === 'function') ? computeGuides() : null;
       let moved = false;
 
-      const onMove = ev => {
-        moved = true;
+      let rafId = null;
+      let pendingEvent = null;
+
+      const processMove = () => {
+        const ev = pendingEvent;
+        pendingEvent = null;
+        rafId = null;
+        if (!ev) return;
+
+        const shell = stage.getBoundingClientRect();
+        const pointerX = clamp(ev.clientX, shell.left, shell.right);
+        const pointerY = clamp(ev.clientY, shell.top, shell.bottom);
         if (mode === 'move'){
-          const dx = ev.clientX - start.x;
-          const dy = ev.clientY - start.y;
+          const dx = pointerX - start.x;
+          const dy = pointerY - start.y;
           const base = start.map[el.id] || { l: start.l, t: start.t };
           let baseL = base.l + dx;
           let baseT = base.t + dy;
-          const shell = stage.getBoundingClientRect();
           const W = start.w;
           const H = start.h;
           const snapToggle = getSnapToggle();
@@ -106,10 +136,11 @@
           }
           let nx = snapped.x;
           let ny = snapped.y;
-          nx = clamp(nx, 0, shell.width - W);
-          ny = clamp(ny, 0, shell.height - H);
-          const deltaX = nx - base.l;
-          const deltaY = ny - base.t;
+          nx = clamp(nx, 0, Math.max(0, shell.width - W));
+          ny = clamp(ny, 0, Math.max(0, shell.height - H));
+          const baseInfo = start.map[el.id] || { l: start.l, t: start.t };
+          const deltaX = nx - baseInfo.l;
+          const deltaY = ny - baseInfo.t;
           const movingTargets = getSelection().length ? getSelection() : [el];
           movingTargets.forEach(t => {
             if (t.classList.contains('locked')) return;
@@ -120,8 +151,8 @@
             const th = tr.height;
             let L = info.l + deltaX;
             let T = info.t + deltaY;
-            L = clamp(L, 0, shell.width - tw);
-            T = clamp(T, 0, shell.height - th);
+            L = clamp(L, 0, Math.max(0, shell.width - tw));
+            T = clamp(T, 0, Math.max(0, shell.height - th));
             t.style.left = Math.round(L) + 'px';
             t.style.top = Math.round(T) + 'px';
           });
@@ -129,10 +160,12 @@
           if (typeof clearGuides === 'function'){
             try { clearGuides(); } catch {}
           }
-          let L = start.l + (ev.clientX - start.x);
-          let T = start.t + (ev.clientY - start.y);
-          let W = Math.max(TILE(), start.w + (ev.clientX - start.x));
-          let H = Math.max(TILE(), start.h + (ev.clientY - start.y));
+          const deltaX = pointerX - start.x;
+          const deltaY = pointerY - start.y;
+          let L = start.l + deltaX;
+          let T = start.t + deltaY;
+          let W = Math.max(TILE(), start.w + deltaX);
+          let H = Math.max(TILE(), start.h + deltaY);
           const snapToggle = getSnapToggle();
           if (snapToggle && snapToggle.checked && !ev.altKey){
             const size = TILE();
@@ -166,28 +199,71 @@
             CV.forEach(x => { if (Math.abs(cur.cx - x) < thr) L = x - rr.left - W / 2; });
             CH.forEach(y => { if (Math.abs(cur.cy - y) < thr) T = y - rr.top - H / 2; });
           }
-          const shell = stage.getBoundingClientRect();
-          L = clamp(L, 0, shell.width - W);
-          T = clamp(T, 0, shell.height - H);
-          W = clamp(W, TILE(), shell.width - L);
-          H = clamp(H, TILE(), shell.height - T);
-          el.style.left = px(L);
-          el.style.top = px(T);
-          el.style.width = px(W);
-          el.style.height = px(H);
+          L = clamp(L, 0, Math.max(0, shell.width - W));
+          T = clamp(T, 0, Math.max(0, shell.height - H));
+          const availableWidth = Math.max(0, shell.width - L);
+          const availableHeight = Math.max(0, shell.height - T);
+          if (availableWidth < TILE()){
+            W = availableWidth;
+          } else {
+            W = clamp(W, TILE(), availableWidth);
+          }
+          if (availableHeight < TILE()){
+            H = availableHeight;
+          } else {
+            H = clamp(H, TILE(), availableHeight);
+          }
+          el.style.left = px(Math.round(L));
+          el.style.top = px(Math.round(T));
+          el.style.width = px(Math.round(W));
+          el.style.height = px(Math.round(H));
+        }
+        moved = true;
+        if (pendingEvent){
+          rafId = requestAnimationFrame(processMove);
+        }
+      };
+
+      const onMove = ev => {
+        if (!ev) return;
+        if (ev.cancelable) ev.preventDefault();
+        pendingEvent = {
+          clientX: ev.clientX,
+          clientY: ev.clientY,
+          altKey: ev.altKey,
+          ctrlKey: ev.ctrlKey,
+          metaKey: ev.metaKey,
+          shiftKey: ev.shiftKey,
+          target: ev.target || el,
+          type: ev.type
+        };
+        if (!rafId){
+          rafId = requestAnimationFrame(processMove);
         }
       };
 
       const onUp = () => {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
+        if (rafId){
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        pendingEvent = null;
         try {
           if (typeof clearGuides === 'function') clearGuides();
         } catch {}
         if (moved && typeof snapshot === 'function') snapshot();
+        console.debug('drag:end', capturePositions());
+        if (typeof el.releasePointerCapture === 'function'){
+          try { el.releasePointerCapture(e.pointerId); } catch {}
+        }
       };
-
-      window.addEventListener('pointermove', onMove);
+      try {
+        window.addEventListener('pointermove', onMove, { passive: false });
+      } catch {
+        window.addEventListener('pointermove', onMove);
+      }
       window.addEventListener('pointerup', onUp);
       e.preventDefault();
     });
