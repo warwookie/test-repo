@@ -335,13 +335,6 @@ $('#palette').addEventListener('click', e=>{ const item=e.target.closest('.pItem
 
 $('#burnToggle').onclick=()=>{ const h=$('#hudLife .heart'); if(h) h.classList.toggle('burn'); };
 
-function getBBoxRelative(el){
-  const rr=root.getBoundingClientRect();
-  const r=el.getBoundingClientRect();
-  return { x:r.left-rr.left, y:r.top-rr.top, w:r.width, h:r.height };
-}
-function setPos(el,x,y){ el.style.left=Math.round(x)+'px'; el.style.top=Math.round(y)+'px'; }
-
 $('#lockSel').onclick=()=>{
   const list=getSelection();
   if(!list.length){ alert('Select at least one block.'); return; }
@@ -365,47 +358,18 @@ if (alignApply){
   };
 }
 
-$('#distApply').onclick=()=>{
-  const mode=$('#distSel').value;
-  const list=getSelection().filter(b=>!b.classList.contains('locked'));
-  if(!mode || list.length<3){ alert('Select 3+ blocks and a distribute mode.'); return; }
-  const items=list.map(el=>({el,b:getBBoxRelative(el)}));
-  if(mode==='h') items.sort((a,b)=>a.b.x-b.b.x);
-  if(mode==='v') items.sort((a,b)=>a.b.y-b.b.y);
-  const first=items[0].b;
-  const last=items[items.length-1].b;
-  if(mode==='h'){
-    const inner=(last.x-(first.x+first.w));
-    const totalW=items.slice(1,-1).reduce((s,it)=>s+it.b.w,0);
-    const gaps=items.length-1-1;
-    const gap=gaps>0?Math.max(0,Math.round((inner-totalW)/gaps)):0;
-    let cursor=first.x+first.w;
-    for(let i=1;i<items.length-1;i++){
-      const it=items[i]; cursor+=gap;
-      let x=cursor;
-      if(snapState.enabled) x=Math.round(x/TILE())*TILE();
-      setPos(it.el,x,it.b.y);
-      cursor+=it.b.w;
-    }
-  } else if(mode==='v'){
-    const inner=(last.y-(first.y+first.h));
-    const totalH=items.slice(1,-1).reduce((s,it)=>s+it.b.h,0);
-    const gaps=items.length-1-1;
-    const gap=gaps>0?Math.max(0,Math.round((inner-totalH)/gaps)):0;
-    let cursor=first.y+first.h;
-    for(let i=1;i<items.length-1;i++){
-      const it=items[i]; cursor+=gap;
-      let y=cursor;
-      if(snapState.enabled) y=Math.round(y/TILE())*TILE();
-      setPos(it.el,it.b.x,y);
-      cursor+=it.b.h;
-    }
-  }
-  snapshot();
-};
+const distSel = document.getElementById('distSel');
+const distApply = document.getElementById('distApply');
+if (distSel && distApply) {
+  distApply.addEventListener('click', () => {
+    const v = distSel.value;
+    if (!v) return;
+    if (typeof window.distributeSelected === 'function') window.distributeSelected(v);
+  });
+}
 
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
 
-window.setPaletteVersion(6);
+window.setPaletteVersion(7);
 
