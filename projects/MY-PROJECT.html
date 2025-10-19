@@ -20,7 +20,12 @@ body.theme-mono{ --bg:#111; --shell:#f3f3f3; --shell2:#dcdcdc; --edge:#333; --cr
 body.theme-paper{}
 html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Press Start 2P', monospace}
 *{box-sizing:border-box; image-rendering:pixelated}
+#layout-ui{position:relative;z-index:1200}
 .app{display:grid; grid-template-columns:minmax(220px, 264px) auto; gap:12px; height:100vh; padding:12px; position:relative}
+.palette,.pBar,.pBar .tb,.pBar button,.pBar select,.pBar label{position:relative;z-index:1300;pointer-events:auto}
+.stageWrap,.safe916,#root{position:relative;z-index:0}
+.modal,.editor{z-index:2000}
+.modal[aria-hidden="true"],.editor[aria-hidden="true"]{pointer-events:none}
 #layout-ui [data-role="block-palette"]{display:none}
 #layout-ui [data-role="layout-inspector"]{pointer-events:auto}
 #layout-ui [data-role="layout-inspector"].hidden{display:none!important}
