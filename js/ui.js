@@ -5,6 +5,8 @@ window.snapState = window.snapState || {
   thresholdPx: 6
 };
 
+const snapTiles = window.snapTiles || document.getElementById('snapTiles');
+
 function clearGuides(){
   const g = $('#guides');
   if (g) g.innerHTML = '';

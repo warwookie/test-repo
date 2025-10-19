@@ -79,3 +79,35 @@ appRoot=document.querySelector('.app');
   }catch{}
 })();
 
+(function(){
+  function logSanity(){
+    try{
+      const layout = (typeof collect === 'function') ? collect() : {};
+      console.log('[Sanity] Registered blocks:', Object.keys(layout));
+      const moduleStatus = {
+        state: typeof window.snapshot === 'function',
+        selection: typeof window.setSingleSelection === 'function',
+        snap: typeof window.snapValuePx === 'function',
+        drag: typeof window.wire === 'function',
+        layout: typeof window.makeBlock === 'function'
+      };
+      console.log('[Sanity] Active modules:', moduleStatus);
+      const container = document.getElementById('layout-ui');
+      let clickable = false;
+      if(container){
+        const rect = container.getBoundingClientRect();
+        const probeX = rect.left + Math.min(rect.width / 2, 1);
+        const probeY = rect.top + Math.min(rect.height / 2, 1);
+        const target = document.elementFromPoint(probeX, probeY);
+        clickable = !!(target && container.contains(target));
+      }
+      console.log('[Sanity] Layout container mounted:', !!container, 'clickable region inside:', clickable);
+    }catch(err){
+      console.warn('[Sanity] check failed', err);
+    }
+  }
+
+  if(document.readyState === 'complete' || document.readyState === 'interactive') logSanity();
+  else document.addEventListener('DOMContentLoaded', logSanity);
+})();
+
