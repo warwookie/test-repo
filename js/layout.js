@@ -123,3 +123,82 @@ window.ensureBlock = ensureBlock;
 window.applyStrict = applyStrict;
 window.reconcileLayout = reconcileLayout;
 
+window.getBlockXY = window.getBlockXY || function(el){
+  const x = Number(el.style.left?.replace('px','') || el.dataset.x || 0);
+  const y = Number(el.style.top?.replace('px','') || el.dataset.y || 0);
+  return { x, y };
+};
+
+window.setBlockPos = window.setBlockPos || function(el, x, y){
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.dataset.x = String(x);
+  el.dataset.y = String(y);
+};
+
+window.getSelectionBlocks = function(){
+  const ids = (window.getSelectionSet && window.getSelectionSet()) || window.selSet;
+  if (!ids || !ids.size) return [];
+  const arr = [];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.classList && !el.classList.contains('locked')) arr.push(el);
+  });
+  return arr;
+};
+
+window.getSelectionBounds = function(blocks){
+  if (!blocks.length) return null;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const el of blocks){
+    const { x, y } = window.getBlockXY(el);
+    const w = el.offsetWidth, h = el.offsetHeight;
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x + w);
+    maxY = Math.max(maxY, y + h);
+  }
+  return { x:minX, y:minY, w:maxX - minX, h:maxY - minY };
+};
+
+window.alignSelected = function(kind){
+  const blocks = window.getSelectionBlocks();
+  if (blocks.length < 2) return;
+
+  const snap = (typeof getSnapStep === 'function') ? getSnapStep() : 16;
+
+  const box = window.getSelectionBounds(blocks);
+  if (!box) return;
+
+  const stageClamp = (typeof clampToStage === 'function') ? clampToStage : (x,y,w,h)=>({x,y});
+
+  for (const el of blocks){
+    const { x, y } = window.getBlockXY(el);
+    const w = el.offsetWidth, h = el.offsetHeight;
+
+    let nx = x, ny = y;
+
+    switch(kind){
+      case 'left':    nx = box.x; break;
+      case 'centerX': nx = Math.round((box.x + (box.w - w)/2) / snap) * snap; break;
+      case 'right':   nx = box.x + box.w - w; break;
+
+      case 'top':     ny = box.y; break;
+      case 'middleY': ny = Math.round((box.y + (box.h - h)/2) / snap) * snap; break;
+      case 'bottom':  ny = box.y + box.h - h; break;
+    }
+
+    if (['left','right'].includes(kind))  nx = Math.round(nx / snap) * snap;
+    if (['top','bottom'].includes(kind))  ny = Math.round(ny / snap) * snap;
+
+    const c = stageClamp(nx, ny, w, h) || { x: nx, y: ny };
+    window.setBlockPos(el, c.x, c.y);
+  }
+
+  if (typeof window.renderLayout   === 'function') window.renderLayout();
+  if (typeof window.updateInspector=== 'function') window.updateInspector(null);
+  if (typeof window.historyPush    === 'function') window.historyPush({type:'align', note:kind});
+  else if (typeof window.pushHistory=== 'function') window.pushHistory('align-'+kind);
+  try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{source:'align', kind} })); } catch(_){ }
+};
+
