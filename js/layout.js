@@ -123,6 +123,13 @@ window.ensureBlock = ensureBlock;
 window.applyStrict = applyStrict;
 window.reconcileLayout = reconcileLayout;
 
+window.isKnownKind = window.isKnownKind || function(kind){
+  if (!kind || typeof kind !== 'string') return false;
+  if (window.KIND_REGISTRY && Object.prototype.hasOwnProperty.call(window.KIND_REGISTRY, kind)) return true;
+  const inDom = document.querySelector(`[data-kind="${kind}"]`);
+  return !!inDom;
+};
+
 window.getBlockXY = window.getBlockXY || function(el){
   const x = Number(el.style.left?.replace('px','') || el.dataset.x || 0);
   const y = Number(el.style.top?.replace('px','') || el.dataset.y || 0);
