@@ -22,7 +22,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 *{box-sizing:border-box; image-rendering:pixelated}
 #layout-ui{position:relative;z-index:1200}
 .app{display:grid; grid-template-columns:minmax(220px, 264px) auto; gap:12px; height:100vh; padding:12px; position:relative}
-.palette,.pBar,.pBar .tb,.pBar button,.pBar select,.pBar label{position:relative;z-index:1300;pointer-events:auto}
+.palette,.pToolbar,.pToolbar .tb,.pToolbar button,.pToolbar select,.pToolbar label{position:relative;z-index:1300;pointer-events:auto}
 .stageWrap,.safe916,#root{position:relative;z-index:0}
 .modal,.editor{z-index:2000}
 .modal[aria-hidden="true"],.editor[aria-hidden="true"]{pointer-events:none}
@@ -34,21 +34,51 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 #layout-ui [data-role="layout-inspector"] .inspEdit.is-locked{opacity:.6}
 #layout-ui [data-role="layout-inspector"] .inspEdit input:disabled,
 #layout-ui [data-role="layout-inspector"] .inspEdit button:disabled{opacity:.6}
-.palette{background:#0b1322;border:1px solid #2a3a54;border-radius:10px;padding:10px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;font:12px/1.2 system-ui,Arial,sans-serif}
+.palette{background:#0b1322;border:1px solid #2a3a54;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:10px;font:12px/1.2 system-ui,Arial,sans-serif;overflow:hidden}
+.palette-body{flex:1 1 auto;display:flex;flex-direction:column;gap:12px;overflow:auto;padding-right:4px}
 .pHead{font-weight:700;color:#bcd2ff; display:flex; align-items:center; justify-content:space-between; gap:8px}
 .pHead .right{display:flex; align-items:center; gap:6px}
 .pHead select{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 8px}
-.pList{display:flex;flex-direction:column;gap:10px;overflow:auto;padding-right:4px}
+.pList{display:flex;flex-direction:column;gap:10px}
 .pItem{background:#121b2c;border:1px solid #3a4a6a;border-radius:8px;padding:8px;color:#dfe8ff;cursor:pointer;display:flex;align-items:center;gap:8px}
 .pItem .swatch{width:16px;height:16px;background:#2a3347;border:1px solid #000}
-.pBar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.pBar button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 10px;cursor:pointer}
+.pToolbar{display:flex;flex-direction:column;gap:12px;flex:0 0 auto}
+.pToolbar button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 10px;cursor:pointer}
 .hidden{display:none!important}
-.pBar input[type="checkbox"]{vertical-align:middle}
-.tb{display:inline-flex;gap:8px;align-items:center;padding:4px 6px;border-radius:10px;background:rgba(255,255,255,0.04)}
-.tb-file{order:1}
-.tb-edit{order:2}
-.tb-view{order:3;margin-left:auto}
+.pToolbar input[type="checkbox"]{vertical-align:middle}
+.tb{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(76,104,150,0.35)}
+.tb-title{font-weight:700;color:#bcd2ff;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.tb-controls{display:flex;flex-direction:column;gap:10px}
+.tb-row{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.tb-row > *{flex:1 1 120px;min-width:0}
+.tb-row button{flex:1 1 auto}
+.tb-row-single{flex-direction:column}
+.tb-row-single > *{flex:1 1 100%}
+.tb-row-actions{align-items:center}
+.tb-row-actions button{min-width:0}
+.tb-row-field{align-items:flex-end}
+.tb-row-field .tb-field{flex:1 1 160px}
+.tb-row-field button{flex:0 0 auto}
+.tb-row-field .tb-toggle{flex:0 1 auto}
+.tb-row-toggles{align-items:center}
+.tb-row-toggles > *{flex:0 1 auto}
+.tb-field{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#dfe8ff}
+.tb-field select,.tb-field input{width:100%;background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 8px}
+.tb-status{flex:1 1 100%;font:11px/1.2 ui-monospace;color:#9fb7e8;opacity:.85}
+.tb-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:#dfe8ff;padding:4px 6px;border-radius:6px;background:#121b2c;border:1px solid rgba(77,94,133,0.35)}
+.tb-toggle input{margin:0}
+.inspEdit .tb-toggle{justify-content:flex-start;background:#13213b;border:1px solid #3a4a6a;width:100%}
+.inspEdit .tb-toggle input{margin-right:6px}
+.tb-note{font-size:10px;color:#94a7d4}
+.inspector-panel{display:grid;gap:10px;padding:12px;border-radius:10px;background:#121b2c;border:1px solid #3a4a6a;color:#dfe8ff}
+.inspector-title{font-weight:700;color:#bcd2ff;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.inspector-body{display:grid;gap:6px;font:11px/1.2 ui-monospace}
+.inspStatus{font:11px/1.2 ui-monospace;color:#ffbcbc;min-height:14px}
+.inspEdit{display:grid;gap:6px;font:11px/1.2 ui-monospace}
+.inspEdit h4{margin:6px 0 0 0;font-size:11px;color:#bcd2ff;font-weight:600}
+.inspEdit label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0}
+.inspEdit input{flex:0 0 72px;width:72px;max-width:100%;background:#0f1b33;color:#e6f0ff;border:1px solid #3a4a6a;border-radius:6px;padding:4px 6px;text-align:center}
+.inspEdit button{justify-self:flex-end;background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:6px 10px;cursor:pointer}
 .stageWrap{display:grid;place-items:center}
 .safe916{position:relative;width:calc(var(--baseW)*var(--s)*1px);height:calc(var(--baseH)*var(--s)*1px);background:var(--shell);box-shadow:0 0 0 calc(var(--s)*1px)#000,0 0 0 calc(var(--s)*2px)var(--shell2),0 0 0 calc(var(--s)*3px)#000,inset 0 0 0 calc(var(--s)*2px)var(--shell2);border-radius:calc(var(--s)*2px);overflow:hidden;color:#000}
 .block{position:absolute;user-select:none;cursor:grab;display:flex;align-items:center;justify-content:center;min-width:calc(var(--s)*8px);min-height:calc(var(--s)*8px);outline:1px solid transparent}
@@ -97,8 +127,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .pauseIcon:before,.pauseIcon:after{content:"";display:inline-block;width:18%;height:45%;background:#bcd2ff;margin:0 6%}
 .overlay{position:absolute;left:8px;top:8px;z-index:5;display:none}
 .overlay button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:4px 8px;cursor:pointer;font:10px/1.2 ui-monospace,monospace}
-.inspEdit label{display:inline-block;margin:2px 6px;}
-.inspEdit input{width:64px;text-align:center;}
 
 /* IO Modal */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center}
@@ -191,94 +219,151 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
     <div class="pHead">
       <div>Live UI — Palette</div>
     </div>
-    <div class="pList" id="palette" data-role="block-palette">
-      <button type="button" class="pItem" data-make="_board"><div class="swatch"></div>Game Screen</button>
-      <button type="button" class="pItem" data-make="_ctrl"><div class="swatch"></div>Controller Zone</button>
-      <button type="button" class="pItem" data-make="title"><div class="swatch"></div>Title plaque</button>
-      <button type="button" class="pItem" data-make="snkr"><div class="swatch"></div>Sneakers bar</button>
-      <button type="button" class="pItem" data-make="power"><div class="swatch"></div>Power-ups bar</button>
-      <button type="button" class="pItem" data-make="life"><div class="swatch"></div>Life hearts</button>
-      <button type="button" class="pItem" data-make="score"><div class="swatch"></div>Score + Stage</button>
-      <button type="button" class="pItem" data-make="timer"><div class="swatch"></div>Timer</button>
-      <button type="button" class="pItem" data-make="bombbar"><div class="swatch"></div>Bomb bar</button>
-      <button type="button" class="pItem" data-make="joystick"><div class="swatch"></div>Joystick</button>
-      <button type="button" class="pItem" data-make="statBoxes"><div class="swatch"></div>Stat: Boxes</button>
-      <button type="button" class="pItem" data-make="statFires"><div class="swatch"></div>Stat: Fires</button>
-      <button type="button" class="pItem" data-make="pause"><div class="swatch"></div>Pause</button>
-    </div>
-    <div class="pBar">
-      <div class="tb tb-file" role="group" aria-label="File">
-        <button id="export" type="button" title="Open Export / Import">File</button>
-        <button id="downloadJson" type="button" title="Download JSON">Download</button>
-        <label style="margin-left:8px;">Theme
-          <select id="themeSel" aria-label="Theme preset">
-            <option value="midnight">midnight</option>
-            <option value="classic">classic</option>
-            <option value="neon">neon</option>
-            <option value="paper">paper</option>
-          </select>
-        </label>
-        <div id="layoutsUI" style="display:inline-flex;gap:6px;align-items:center;">
-          <label>Layouts
-            <select id="layoutSel" aria-label="Saved layouts">
-              <option value="">-- none --</option>
-            </select>
-          </label>
-          <button id="layoutSave"  type="button" title="Save current layout">Save</button>
-          <button id="layoutLoad"  type="button" title="Load selected layout">Load</button>
-          <button id="layoutDelete" type="button" title="Delete selected layout">Delete</button>
-        </div>
-        <button id="import" type="button" class="hidden">Import</button><!-- Hidden: unfinished feature -->
+    <div class="palette-body">
+      <div class="pList" id="palette" data-role="block-palette">
+        <button type="button" class="pItem" data-make="_board"><div class="swatch"></div>Game Screen</button>
+        <button type="button" class="pItem" data-make="_ctrl"><div class="swatch"></div>Controller Zone</button>
+        <button type="button" class="pItem" data-make="title"><div class="swatch"></div>Title plaque</button>
+        <button type="button" class="pItem" data-make="snkr"><div class="swatch"></div>Sneakers bar</button>
+        <button type="button" class="pItem" data-make="power"><div class="swatch"></div>Power-ups bar</button>
+        <button type="button" class="pItem" data-make="life"><div class="swatch"></div>Life hearts</button>
+        <button type="button" class="pItem" data-make="score"><div class="swatch"></div>Score + Stage</button>
+        <button type="button" class="pItem" data-make="timer"><div class="swatch"></div>Timer</button>
+        <button type="button" class="pItem" data-make="bombbar"><div class="swatch"></div>Bomb bar</button>
+        <button type="button" class="pItem" data-make="joystick"><div class="swatch"></div>Joystick</button>
+        <button type="button" class="pItem" data-make="statBoxes"><div class="swatch"></div>Stat: Boxes</button>
+        <button type="button" class="pItem" data-make="statFires"><div class="swatch"></div>Stat: Fires</button>
+        <button type="button" class="pItem" data-make="pause"><div class="swatch"></div>Pause</button>
       </div>
-      <div class="tb tb-edit" role="group" aria-label="Edit">
-        <button id="undo" type="button">Undo</button>
-        <button id="redo" type="button">Redo</button>
-        <span id="histCount" style="opacity:.8;font:11px/1 ui-monospace;">Undo: 0</span>
-        <button id="delete" type="button">Delete</button>
-        <button id="openEditor" type="button">Block Editor</button>
-        <div id="layoutTools" style="display:inline-flex;gap:6px;align-items:center;">
-          <select id="alignSel" aria-label="Align">
-            <option value="">Align…</option>
-            <option value="left">Left</option>
-            <option value="centerX">Center X</option>
-            <option value="right">Right</option>
-            <option value="top">Top</option>
-            <option value="middleY">Middle Y</option>
-            <option value="bottom">Bottom</option>
-          </select>
-          <button id="alignApply" type="button">Apply</button>
-          <select id="distSel" aria-label="Distribute">
-            <option value="">Distribute…</option>
-            <option value="h">Horizontal</option>
-            <option value="v">Vertical</option>
-          </select>
-          <button id="distApply" type="button">Apply</button>
-          <button id="lockSel" type="button" title="Lock/Unlock selection">Lock</button>
+      <div class="pToolbar">
+        <div class="tb tb-file" role="group" aria-label="File">
+          <div class="tb-title">File</div>
+          <div class="tb-controls">
+            <div class="tb-row tb-row-actions">
+              <button id="export" type="button" title="Open Export / Import">File</button>
+              <button id="downloadJson" type="button" title="Download JSON">Download</button>
+            </div>
+            <label class="tb-field">Theme
+              <select id="themeSel" aria-label="Theme preset">
+                <option value="midnight">midnight</option>
+                <option value="classic">classic</option>
+                <option value="neon">neon</option>
+                <option value="paper">paper</option>
+              </select>
+            </label>
+            <div class="tb-row tb-row-field" id="layoutsUI">
+              <label class="tb-field">Layouts
+                <select id="layoutSel" aria-label="Saved layouts">
+                  <option value="">-- none --</option>
+                </select>
+              </label>
+              <button id="layoutSave" type="button" title="Save current layout">Save</button>
+              <button id="layoutLoad" type="button" title="Load selected layout">Load</button>
+              <button id="layoutDelete" type="button" title="Delete selected layout">Delete</button>
+            </div>
+            <button id="import" type="button" class="hidden">Import</button><!-- Hidden: unfinished feature -->
+          </div>
         </div>
-        <button id="inspectorBtn" type="button">Inspector</button>
-        <button id="dupBlockBtn" class="btn hidden" title="Duplicate selected block" type="button">Duplicate</button><!-- Hidden: unfinished feature -->
-        <button id="fitLabelBtn" class="btn hidden" title="Shrink-to-fit label in selected block" type="button">Fit Label</button><!-- Hidden: unfinished feature -->
-        <button id="auditTextBtn" class="btn hidden" title="Scan labels for overflow" type="button">Audit Text</button><!-- Hidden: unfinished feature -->
-        <button id="tidyTextBtn" class="btn hidden" title="Auto-fit all labels" type="button">Tidy Text</button><!-- Hidden: unfinished feature -->
-        <button id="reset" type="button" class="hidden">Reset</button><!-- Hidden: unfinished feature -->
-      </div>
-      <div class="tb tb-view" role="group" aria-label="View">
-        <label><input id="toggleEdit" type="checkbox"> Edit</label>
-        <label><input id="toggleGrid" type="checkbox"> Grid</label>
-        <label><input id="snapToggle" type="checkbox" checked> Snap</label>
-        <label>Step
-          <select id="snapStep">
-            <option value="1">1× tile</option>
-            <option value="0.5">½× tile</option>
-          </select>
-        </label>
-        <label><input id="guideToggle" type="checkbox" checked> Guides</label>
-        <div class="hidden" aria-hidden="true">
-          <label title="Snap to 8px tiles"><input type="checkbox" id="snapTiles" checked>tiles</label><!-- Hidden: unfinished feature -->
-          <label title="Snap edges to other edges"><input type="checkbox" id="snapEdges" checked>edges</label><!-- Hidden: unfinished feature -->
-          <label title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label><!-- Hidden: unfinished feature -->
+        <div class="tb tb-edit" role="group" aria-label="Edit">
+          <div class="tb-title">Edit</div>
+          <div class="tb-controls">
+            <div class="tb-row tb-row-actions">
+              <button id="undo" type="button">Undo</button>
+              <button id="redo" type="button">Redo</button>
+              <div id="histCount" class="tb-status">Undo: 0</div>
+            </div>
+            <div class="tb-row tb-row-actions">
+              <button id="delete" type="button">Delete</button>
+              <button id="openEditor" type="button">Block Editor</button>
+              <button id="lockSel" type="button" title="Lock/Unlock selection">Lock</button>
+            </div>
+            <div class="tb-row tb-row-field">
+              <label class="tb-field">Align
+                <select id="alignSel" aria-label="Align">
+                  <option value="">Align…</option>
+                  <option value="left">Left</option>
+                  <option value="centerX">Center X</option>
+                  <option value="right">Right</option>
+                  <option value="top">Top</option>
+                  <option value="middleY">Middle Y</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </label>
+              <button id="alignApply" type="button">Apply</button>
+            </div>
+            <div class="tb-row tb-row-field">
+              <label class="tb-field">Distribute
+                <select id="distSel" aria-label="Distribute">
+                  <option value="">Distribute…</option>
+                  <option value="h">Horizontal</option>
+                  <option value="v">Vertical</option>
+                </select>
+              </label>
+              <button id="distApply" type="button">Apply</button>
+            </div>
+            <div class="tb-row tb-row-single">
+              <button id="inspectorBtn" type="button">Inspector</button>
+            </div>
+            <button id="dupBlockBtn" class="btn hidden" title="Duplicate selected block" type="button">Duplicate</button><!-- Hidden: unfinished feature -->
+            <button id="fitLabelBtn" class="btn hidden" title="Shrink-to-fit label in selected block" type="button">Fit Label</button><!-- Hidden: unfinished feature -->
+            <button id="auditTextBtn" class="btn hidden" title="Scan labels for overflow" type="button">Audit Text</button><!-- Hidden: unfinished feature -->
+            <button id="tidyTextBtn" class="btn hidden" title="Auto-fit all labels" type="button">Tidy Text</button><!-- Hidden: unfinished feature -->
+            <button id="reset" type="button" class="hidden">Reset</button><!-- Hidden: unfinished feature -->
+          </div>
         </div>
-        <button id="helpBtn" type="button" title="Show help">?</button>
+        <div class="tb tb-view" role="group" aria-label="View">
+          <div class="tb-title">View</div>
+          <div class="tb-controls">
+            <div class="tb-row tb-row-toggles">
+              <label class="tb-toggle"><input id="toggleEdit" type="checkbox"> Edit</label>
+              <label class="tb-toggle"><input id="toggleGrid" type="checkbox"> Grid</label>
+              <label class="tb-toggle"><input id="snapToggle" type="checkbox" checked> Snap</label>
+            </div>
+            <div class="tb-row tb-row-field">
+              <label class="tb-field">Step
+                <select id="snapStep">
+                  <option value="1">1× tile</option>
+                  <option value="0.5">½× tile</option>
+                </select>
+              </label>
+              <label class="tb-toggle"><input id="guideToggle" type="checkbox" checked> Guides</label>
+            </div>
+            <div class="tb-row tb-row-single">
+              <button id="helpBtn" type="button" title="Show help">?</button>
+            </div>
+            <div class="tb-row hidden" aria-hidden="true">
+              <label class="tb-toggle" title="Snap to 8px tiles"><input type="checkbox" id="snapTiles" checked>tiles</label><!-- Hidden: unfinished feature -->
+              <label class="tb-toggle" title="Snap edges to other edges"><input type="checkbox" id="snapEdges" checked>edges</label><!-- Hidden: unfinished feature -->
+              <label class="tb-toggle" title="Snap centers to other centers"><input type="checkbox" id="snapCenters" checked>centers</label><!-- Hidden: unfinished feature -->
+            </div>
+          </div>
+        </div>
+        <div id="inspector" class="inspector-panel hidden" data-role="layout-inspector">
+          <div class="inspector-title">Inspector</div>
+          <div class="inspector-body">
+            <div><span class="tb-note">id:</span> <span data-field="id">—</span></div>
+            <div><span class="tb-note">kind:</span> <span data-field="kind">—</span></div>
+            <div><span class="tb-note">x:</span> <span data-field="x">—</span></div>
+            <div><span class="tb-note">y:</span> <span data-field="y">—</span></div>
+            <div><span class="tb-note">w:</span> <span data-field="w">—</span></div>
+            <div><span class="tb-note">h:</span> <span data-field="h">—</span></div>
+            <div><span class="tb-note">locked:</span> <span data-field="locked">—</span></div>
+          </div>
+          <div id="inspStatus" class="inspStatus" role="status" aria-live="polite"></div>
+          <div id="inspEdit" class="inspEdit">
+            <h4>Edit Layout</h4>
+            <label>X <input id="inspX" type="number" step="1"></label>
+            <label>Y <input id="inspY" type="number" step="1"></label>
+            <label>W <input id="inspW" type="number" step="1" min="1"></label>
+            <label>H <input id="inspH" type="number" step="1" min="1"></label>
+            <label class="tb-toggle"><input id="inspLock" type="checkbox"> Locked</label>
+            <h4>Meta (optional)</h4>
+            <label>cx <input id="inspCx" type="text" placeholder="50%"></label>
+            <label>cy <input id="inspCy" type="text" placeholder="50%"></label>
+            <label>padx <input id="inspPadx" type="text" placeholder="0px"></label>
+            <button id="inspApply" type="button">Apply</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -289,33 +374,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <div id="guides" class="guide-wrap" aria-hidden="true"></div>
       <div id="board" class="block boardSkin"><div class="grid" id="grid"></div><div class="handle"></div></div>
       <div id="ctrlZone" class="block ctrlSkin"><div class="handle"></div></div>
-    </div>
-  </div>
-
-  <div id="inspector" class="card hidden" data-role="layout-inspector" style="position:absolute;right:8px;top:56px;z-index:9999;width:220px;">
-    <div style="font-weight:700;color:#bcd2ff;">Inspector</div>
-    <div class="inspector-body" style="display:grid;gap:6px;font:11px/1.2 ui-monospace;">
-      <div><span style="opacity:.7;">id:</span> <span data-field="id">—</span></div>
-      <div><span style="opacity:.7;">kind:</span> <span data-field="kind">—</span></div>
-      <div><span style="opacity:.7;">x:</span> <span data-field="x">—</span></div>
-      <div><span style="opacity:.7;">y:</span> <span data-field="y">—</span></div>
-      <div><span style="opacity:.7;">w:</span> <span data-field="w">—</span></div>
-      <div><span style="opacity:.7;">h:</span> <span data-field="h">—</span></div>
-      <div><span style="opacity:.7;">locked:</span> <span data-field="locked">—</span></div>
-    </div>
-    <div id="inspStatus" class="inspStatus" role="status" aria-live="polite"></div>
-    <div id="inspEdit" class="inspEdit">
-      <h4>Edit Layout</h4>
-      <label>X <input id="inspX" type="number" step="1"></label>
-      <label>Y <input id="inspY" type="number" step="1"></label>
-      <label>W <input id="inspW" type="number" step="1" min="1"></label>
-      <label>H <input id="inspH" type="number" step="1" min="1"></label>
-      <label><input id="inspLock" type="checkbox"> Locked</label>
-      <h4>Meta (optional)</h4>
-      <label>cx <input id="inspCx" type="text" placeholder="50%"></label>
-      <label>cy <input id="inspCy" type="text" placeholder="50%"></label>
-      <label>padx <input id="inspPadx" type="text" placeholder="0px"></label>
-      <button id="inspApply" type="button">Apply</button>
     </div>
   </div>
 </div>
