@@ -29,6 +29,11 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 #layout-ui [data-role="block-palette"]{display:none}
 #layout-ui [data-role="layout-inspector"]{pointer-events:auto}
 #layout-ui [data-role="layout-inspector"].hidden{display:none!important}
+#layout-ui [data-role="layout-inspector"] .inspStatus{font-size:10px;line-height:1.4;color:#ffbcbc;background:rgba(0,0,0,0.35);padding:4px 6px;border-radius:4px;display:none}
+#layout-ui [data-role="layout-inspector"] .inspEdit.is-disabled{opacity:.45}
+#layout-ui [data-role="layout-inspector"] .inspEdit.is-locked{opacity:.6}
+#layout-ui [data-role="layout-inspector"] .inspEdit input:disabled,
+#layout-ui [data-role="layout-inspector"] .inspEdit button:disabled{opacity:.6}
 .palette{background:#0b1322;border:1px solid #2a3a54;border-radius:10px;padding:10px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;font:12px/1.2 system-ui,Arial,sans-serif}
 .pHead{font-weight:700;color:#bcd2ff; display:flex; align-items:center; justify-content:space-between; gap:8px}
 .pHead .right{display:flex; align-items:center; gap:6px}
@@ -296,13 +301,16 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       <div><span style="opacity:.7;">y:</span> <span data-field="y">—</span></div>
       <div><span style="opacity:.7;">w:</span> <span data-field="w">—</span></div>
       <div><span style="opacity:.7;">h:</span> <span data-field="h">—</span></div>
+      <div><span style="opacity:.7;">locked:</span> <span data-field="locked">—</span></div>
     </div>
+    <div id="inspStatus" class="inspStatus" role="status" aria-live="polite"></div>
     <div id="inspEdit" class="inspEdit">
       <h4>Edit Layout</h4>
       <label>X <input id="inspX" type="number" step="1"></label>
       <label>Y <input id="inspY" type="number" step="1"></label>
       <label>W <input id="inspW" type="number" step="1" min="1"></label>
       <label>H <input id="inspH" type="number" step="1" min="1"></label>
+      <label><input id="inspLock" type="checkbox"> Locked</label>
       <h4>Meta (optional)</h4>
       <label>cx <input id="inspCx" type="text" placeholder="50%"></label>
       <label>cy <input id="inspCy" type="text" placeholder="50%"></label>
