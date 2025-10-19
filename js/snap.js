@@ -1,4 +1,24 @@
 (function(){
+  window.clearGuides = window.clearGuides || function(){
+    const g = document.getElementById('guides');
+    if (g) g.innerHTML = '';
+  };
+
+  window.renderGuides = window.renderGuides || function(lines = []){
+    const g = document.getElementById('guides');
+    if (!g) return;
+    if (g.getAttribute('aria-hidden') === 'true'){ g.innerHTML = ''; return; }
+    g.innerHTML = '';
+    lines.forEach(ln => {
+      if (!ln || !ln.dir || typeof ln.pos !== 'number') return;
+      const d = document.createElement('div');
+      d.className = 'guide-line ' + (ln.dir === 'h' ? 'h' : 'v');
+      if (ln.dir === 'h') d.style.top = ln.pos + 'px';
+      else d.style.left = ln.pos + 'px';
+      g.appendChild(d);
+    });
+  };
+
   window.snapState = window.snapState || {
     enabled: true,
     step: 1,
@@ -70,23 +90,22 @@
     const state = window.snapState || {};
     let X = x;
     let Y = y;
-    const clear = typeof clearGuides === 'function' ? clearGuides : null;
-    if (clear) clear();
-    if (!state.enabled) return { x: X, y: Y };
-    if (!state.showGuides) return { x: X, y: Y };
-    if (!guides || !guides.xs || !guides.ys) return { x: X, y: Y };
-    if (ev && ev.altKey) return { x: X, y: Y };
+
+    if (!state.enabled) return { x: X, y: Y, guides: [] };
+    if (!state.showGuides || !guides || !guides.xs || !guides.ys || (ev && ev.altKey)){
+      return { x: X, y: Y, guides: [] };
+    }
 
     const useEdges = !snapEdgesEl || snapEdgesEl.checked;
     const useCenters = !snapCentersEl || snapCentersEl.checked;
-    if (!useEdges && !useCenters) return { x: X, y: Y };
+    if (!useEdges && !useCenters) return { x: X, y: Y, guides: [] };
 
     const threshold = typeof state.thresholdPx === 'number' ? state.thresholdPx : 6;
     const candX = [];
     const candY = [];
     if (useEdges){ candX.push(X, X + w); candY.push(Y, Y + h); }
     if (useCenters){ candX.push(X + w / 2); candY.push(Y + h / 2); }
-    if (!candX.length && !candY.length) return { x: X, y: Y };
+    if (!candX.length && !candY.length) return { x: X, y: Y, guides: [] };
 
     let bestDx = Infinity;
     let snapX = null;
@@ -99,13 +118,7 @@
         }
       });
     });
-    if (snapX !== null){
-      X = snapX;
-      if (state.showGuides && typeof drawGuideLine === 'function'){
-        drawGuideLine('v', X);
-        drawGuideLine('v', X + w);
-      }
-    }
+    if (snapX !== null) X = snapX;
 
     let bestDy = Infinity;
     let snapY = null;
@@ -118,18 +131,24 @@
         }
       });
     });
-    if (snapY !== null){
-      Y = snapY;
-      if (state.showGuides && typeof drawGuideLine === 'function'){
-        drawGuideLine('h', Y);
-        drawGuideLine('h', Y + h);
-      }
+    if (snapY !== null) Y = snapY;
+
+    const lines = [];
+    if (snapX !== null){
+      lines.push({ dir: 'v', pos: Math.round(X) });
+      lines.push({ dir: 'v', pos: Math.round(X + w) });
     }
+    if (snapY !== null){
+      lines.push({ dir: 'h', pos: Math.round(Y) });
+      lines.push({ dir: 'h', pos: Math.round(Y + h) });
+    }
+
     if (state.enabled){
       X = quantizePx(X);
       Y = quantizePx(Y);
     }
-    return { x: X, y: Y };
+
+    return { x: X, y: Y, guides: lines };
   }
 
   window.tileSize = tileSize;

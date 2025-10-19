@@ -1,4 +1,14 @@
 (function(){
+  window.updateInspector = window.updateInspector || function(forceSel = null) {
+    try {
+      if (typeof window.__updateInspectorCore === 'function') {
+        window.__updateInspectorCore(forceSel);
+      }
+    } catch (err) {
+      console.warn('updateInspector failed', err);
+    }
+  };
+
   const selSet = (window.selSet instanceof Set) ? window.selSet : new Set();
   window.selSet = selSet;
   if (!Array.isArray(window.CURRENT_SELECTION)) window.CURRENT_SELECTION = [];
@@ -10,9 +20,15 @@
   function dispatchSelectionChange(){
     syncSelectionCache();
     try {
+      if (typeof window.clearGuides === 'function') window.clearGuides();
+    } catch {}
+    try {
       document.dispatchEvent(new CustomEvent('sq-selection-change', {
         detail: { ids: window.CURRENT_SELECTION.slice() }
       }));
+    } catch {}
+    try {
+      window.dispatchEvent(new CustomEvent('selection:changed'));
     } catch {}
   }
 
@@ -25,7 +41,7 @@
     selSet.clear();
     $$('.block').forEach(b => b.classList.remove('sel'));
     try {
-      if (typeof clearGuides === 'function') clearGuides();
+      if (typeof window.clearGuides === 'function') window.clearGuides();
     } catch {}
     dispatchSelectionChange();
   }
@@ -46,7 +62,7 @@
 
   function setSingleSelection(el){
     try {
-      if (typeof clearGuides === 'function') clearGuides();
+      if (typeof window.clearGuides === 'function') window.clearGuides();
     } catch {}
     $$('.block').forEach(b => b.classList.remove('sel'));
     selSet.clear();
@@ -79,6 +95,12 @@
     document.addEventListener('DOMContentLoaded', setupSelectionListeners);
   } else {
     setupSelectionListeners();
+  }
+
+  if (!window.__inspBound) {
+    window.__inspBound = true;
+    window.addEventListener('selection:changed', () => window.updateInspector(null));
+    window.addEventListener('layout:changed', () => window.updateInspector(null));
   }
 
   window.syncSelectionCache = syncSelectionCache;

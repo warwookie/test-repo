@@ -318,6 +318,10 @@ $('#close').onclick=closeModal;
       window.updateHistoryUI(label);
     }
 
+    try {
+      window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'io' } }));
+    } catch {}
+
     return true;
   };
 
@@ -400,6 +404,9 @@ $('#close').onclick=closeModal;
           refreshLayoutSelect();
           alert('Layout import succeeded.');
           closeModal();
+          try {
+            window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'io' } }));
+          } catch {}
         } else {
           alert('Layout validated. Review the JSON in the textarea, then click Apply if desired.');
         }
