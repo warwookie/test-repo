@@ -15,6 +15,28 @@
     return window.snapCenters || document.getElementById('snapCenters');
   }
 
+  function snapWithinBounds(value, ev, min, max){
+    const limited = clamp(value, min, max);
+    if (typeof snapValuePx !== 'function') return limited;
+    const state = window.snapState || {};
+    if (!state.enabled || (ev && ev.altKey)) return limited;
+    let snapped = snapValuePx(limited, ev);
+    if ((snapped < min || snapped > max) && typeof snapStepPx === 'function'){
+      const step = snapStepPx();
+      if (step){
+        if (snapped > max){
+          const floored = Math.floor(max / step) * step;
+          if (Number.isFinite(floored)) snapped = floored;
+        }
+        if (snapped < min){
+          const ceiled = Math.ceil(min / step) * step;
+          if (Number.isFinite(ceiled)) snapped = ceiled;
+        }
+      }
+    }
+    return clamp(snapped, min, max);
+  }
+
   function isEditing(){
     try { return window.editing !== false; } catch { return true; }
   }
@@ -136,8 +158,10 @@
           }
           let nx = snapped.x;
           let ny = snapped.y;
-          nx = clamp(nx, 0, Math.max(0, shell.width - W));
-          ny = clamp(ny, 0, Math.max(0, shell.height - H));
+          const maxX = Math.max(0, shell.width - W);
+          const maxY = Math.max(0, shell.height - H);
+          nx = snapWithinBounds(nx, ev, 0, maxX);
+          ny = snapWithinBounds(ny, ev, 0, maxY);
           const baseInfo = start.map[el.id] || { l: start.l, t: start.t };
           const deltaX = nx - baseInfo.l;
           const deltaY = ny - baseInfo.t;
@@ -151,8 +175,10 @@
             const th = tr.height;
             let L = info.l + deltaX;
             let T = info.t + deltaY;
-            L = clamp(L, 0, Math.max(0, shell.width - tw));
-            T = clamp(T, 0, Math.max(0, shell.height - th));
+            const maxL = Math.max(0, shell.width - tw);
+            const maxT = Math.max(0, shell.height - th);
+            L = snapWithinBounds(L, ev, 0, maxL);
+            T = snapWithinBounds(T, ev, 0, maxT);
             t.style.left = Math.round(L) + 'px';
             t.style.top = Math.round(T) + 'px';
           });
@@ -168,11 +194,13 @@
           let H = Math.max(TILE(), start.h + deltaY);
           const snapToggle = getSnapToggle();
           if (snapToggle && snapToggle.checked && !ev.altKey){
-            const size = TILE();
-            L = Math.round(L / size) * size;
-            T = Math.round(T / size) * size;
-            W = Math.round(W / size) * size;
-            H = Math.round(H / size) * size;
+            const minSize = TILE();
+            const stageMaxL = Math.max(0, shell.width - minSize);
+            const stageMaxT = Math.max(0, shell.height - minSize);
+            L = snapWithinBounds(L, ev, 0, stageMaxL);
+            T = snapWithinBounds(T, ev, 0, stageMaxT);
+            W = snapWithinBounds(W, ev, minSize, shell.width);
+            H = snapWithinBounds(H, ev, minSize, shell.height);
           }
           const cur = {
             left: rr.left + L,
@@ -199,8 +227,10 @@
             CV.forEach(x => { if (Math.abs(cur.cx - x) < thr) L = x - rr.left - W / 2; });
             CH.forEach(y => { if (Math.abs(cur.cy - y) < thr) T = y - rr.top - H / 2; });
           }
-          L = clamp(L, 0, Math.max(0, shell.width - W));
-          T = clamp(T, 0, Math.max(0, shell.height - H));
+          const maxL = Math.max(0, shell.width - W);
+          const maxT = Math.max(0, shell.height - H);
+          L = snapWithinBounds(L, ev, 0, maxL);
+          T = snapWithinBounds(T, ev, 0, maxT);
           const availableWidth = Math.max(0, shell.width - L);
           const availableHeight = Math.max(0, shell.height - T);
           if (availableWidth < TILE()){
@@ -212,6 +242,18 @@
             H = availableHeight;
           } else {
             H = clamp(H, TILE(), availableHeight);
+          }
+          if (typeof snapValuePx === 'function' && (!ev || !ev.altKey)){
+            if (availableWidth >= TILE()){
+              W = snapWithinBounds(W, ev, TILE(), availableWidth);
+            }
+            if (availableHeight >= TILE()){
+              H = snapWithinBounds(H, ev, TILE(), availableHeight);
+            }
+            const finalMaxL = Math.max(0, shell.width - W);
+            const finalMaxT = Math.max(0, shell.height - H);
+            L = snapWithinBounds(L, ev, 0, finalMaxL);
+            T = snapWithinBounds(T, ev, 0, finalMaxT);
           }
           el.style.left = px(Math.round(L));
           el.style.top = px(Math.round(T));
