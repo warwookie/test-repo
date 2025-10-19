@@ -13,6 +13,19 @@
     return 8;
   }
 
+  function snapStepPx(){
+    const size = tileSize();
+    const state = window.snapState || {};
+    const step = (typeof state.step === 'number' && !Number.isNaN(state.step) && state.step > 0) ? state.step : 1;
+    return size * step;
+  }
+
+  function quantizePx(px){
+    const stepPx = snapStepPx();
+    if (!stepPx) return Math.round(px);
+    return Math.round(px / stepPx) * stepPx;
+  }
+
   function resolveControl(id){
     const el = document.getElementById(id);
     if (id === 'snapTiles') window.snapTiles = el;
@@ -29,9 +42,9 @@
     const state = window.snapState || {};
     if (ev && ev.altKey) return px;
     if (!state.enabled) return px;
-    const stepPx = tileSize() * (state.step || 1);
+    const stepPx = snapStepPx();
     if (!stepPx) return px;
-    return Math.round(px / stepPx) * stepPx;
+    return quantizePx(px);
   }
 
   function computeGuides(){
@@ -112,10 +125,16 @@
         drawGuideLine('h', Y + h);
       }
     }
+    if (state.enabled){
+      X = quantizePx(X);
+      Y = quantizePx(Y);
+    }
     return { x: X, y: Y };
   }
 
   window.tileSize = tileSize;
+  window.snapStepPx = snapStepPx;
+  window.quantizePx = quantizePx;
   window.snapValuePx = snapValuePx;
   window.computeGuides = computeGuides;
   window.snapToGuides = snapToGuides;
