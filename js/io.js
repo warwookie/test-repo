@@ -145,26 +145,53 @@ window.parseAndValidateLayoutText = function(text){
   const errs = [];
   let obj = null;
 
-  try { obj = JSON.parse(text); }
-  catch (e) { errs.push('JSON parse error'); }
-
+  try { obj = JSON.parse(text); } catch(e){ errs.push('JSON parse error'); }
   if (!obj || typeof obj !== 'object') errs.push('Root must be an object');
-  if (!('layout' in (obj || {})) || !Array.isArray(obj?.layout)) errs.push('Missing "layout" array');
-
-  if (Array.isArray(obj?.layout)){
-    obj.layout.forEach((it, idx) => {
-      if (typeof it?.kind !== 'string' || !it.kind.trim()) errs.push(`${idx}: invalid kind`);
-      ['x','y','w','h'].forEach(k => {
-        if (typeof it[k] !== 'number') errs.push(`${idx}: ${k} must be number (tiles)`);
-      });
-    });
-  }
+  if (!('layout' in (obj||{})) || !Array.isArray(obj.layout)) errs.push('Missing "layout" array');
 
   if (errs.length) {
-    const msg = 'Upload parse/validate failed:\n' + errs.map(e => `- ${e}`).join('\n');
+    const msg = 'Upload parse/validate failed:\n' + errs.map(e=>`- ${e}`).join('\n');
     throw new Error(msg);
   }
-  return obj;
+
+  const norm = { version: obj.version || 1, meta: obj.meta || {}, layout: [] };
+  let skippedUnknown = 0;
+  let fixedBounds = 0;
+
+  const TILE = 16;
+  const stageEl = document.getElementById('stage');
+  const stageW = stageEl ? stageEl.offsetWidth  : 360;
+  const stageH = stageEl ? stageEl.offsetHeight : 640;
+
+  obj.layout.forEach((it, idx) => {
+    if (typeof it?.kind !== 'string' || !it.kind.trim()) { skippedUnknown++; return; }
+    if (!window.isKnownKind || !window.isKnownKind(it.kind)) { skippedUnknown++; return; }
+
+    const nums = ['x','y','w','h'].every(k => typeof it[k] === 'number');
+    if (!nums) { skippedUnknown++; return; }
+
+    let x = Math.round(it.x * TILE);
+    let y = Math.round(it.y * TILE);
+    let w = Math.round(it.w * TILE);
+    let h = Math.round(it.h * TILE);
+
+    const maxX = Math.max(0, stageW - w);
+    const maxY = Math.max(0, stageH - h);
+    const cx = Math.min(Math.max(0, x), maxX);
+    const cy = Math.min(Math.max(0, y), maxY);
+    if (cx !== x || cy !== y) fixedBounds++;
+
+    norm.layout.push({
+      id: it.id || `${it.kind}-${idx}`,
+      kind: it.kind,
+      x: cx, y: cy, w, h,
+      locked: !!it.locked,
+      meta: it.meta || {}
+    });
+  });
+
+  norm.__importStats = { skippedUnknown, fixedBounds };
+  return norm;
 };
 
 window.saveLayoutNamed = function(name, json){
@@ -368,9 +395,19 @@ window.applyJsonFromTextarea = function(){
   const ta = document.getElementById('io');
   if (!ta) return;
   try {
-    const obj = window.parseAndValidateLayoutText(ta.value);
-    window.applyImportedLayout(obj);
-    if (typeof window.inspStatus === 'function') window.inspStatus('Applied JSON from textarea');
+    const norm = window.parseAndValidateLayoutText(ta.value);
+    if (typeof window.loadLayoutJSON === 'function') {
+      window.loadLayoutJSON(norm);
+    }
+    const s = norm.__importStats || { skippedUnknown:0, fixedBounds:0 };
+    const msg = `Imported ${norm.layout.length} block(s)` +
+                (s.skippedUnknown ? `, skipped ${s.skippedUnknown} unknown` : '') +
+                (s.fixedBounds ? `, clamped ${s.fixedBounds}` : '');
+    if (typeof window.inspStatus === 'function') window.inspStatus(msg);
+    try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'import-validated' } })); } catch(_){ }
+    if (typeof window.updateInspector === 'function') window.updateInspector(null);
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+    if (typeof window.historyPush === 'function') window.historyPush({ type:'import', note: msg });
   } catch (e) {
     alert(e.message || String(e));
     if (typeof window.inspStatus === 'function') window.inspStatus('Import failed');
