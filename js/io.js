@@ -114,14 +114,14 @@ window.exportLayoutClean = function(){
 
   const themeSel = document.getElementById('themeSel');
   const theme = themeSel ? themeSel.value : 'midnight';
-  const paletteVersion = (typeof window.setPaletteVersion === 'function') ?
-    (document.querySelector('.pHead > div')?.textContent?.match(/Palette\s+(\d+)/)?.[1] || null) : null;
+  const paletteVersion = (typeof window.getPaletteVersion === 'function') ?
+    window.getPaletteVersion() : null;
 
   const out = {
     version: EXPORT_SCHEMA_VERSION,
     meta: {
       theme,
-      paletteVersion: paletteVersion ? Number(paletteVersion) : undefined
+      paletteVersion: Number.isFinite(paletteVersion) ? paletteVersion : undefined
     },
     layout: items
   };

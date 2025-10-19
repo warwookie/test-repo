@@ -1,9 +1,31 @@
-window.setPaletteVersion = function(n) {
-  const el = document.querySelector('.pHead > div');
-  if (el) el.textContent = `Live UI — Palette ${n}`;
+window.getPaletteVersion = function(){
+  return window.__paletteVersion ?? null;
 };
 
-if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(17);
+window.setPaletteVersion = function(v){
+  const n = Number(v);
+  if (!Number.isFinite(n)) return;
+
+  if (typeof window.__paletteVersion === 'number' && n <= window.__paletteVersion) {
+    console.debug('[palette] ignore version', n, 'existing', window.__paletteVersion);
+    return;
+  }
+
+  window.__paletteVersion = n;
+
+  const el =
+    document.querySelector('#paletteHeader') ||
+    document.querySelector('.pHead .title') ||
+    document.querySelector('.pHead');
+
+  if (el) el.textContent = `Live UI — Palette ${n}`;
+
+  if (document.body && document.body.dataset) {
+    document.body.dataset.paletteVersion = String(n);
+  }
+
+  console.info('[palette] now', n);
+};
 
 window.snapState = window.snapState || {
   enabled: true,
@@ -416,5 +438,6 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-if (window.setPaletteVersion) window.setPaletteVersion(15);
+const PALETTE_VERSION = 17;
+if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 
