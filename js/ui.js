@@ -29,8 +29,10 @@ const snapToggleEl = $('#snapToggle');
 if (snapToggleEl){
   snapToggleEl.checked = snapState.enabled !== false;
   snapState.enabled = snapToggleEl.checked;
+  if (snapTiles) snapTiles.checked = snapToggleEl.checked;
   snapToggleEl.onchange = () => {
     snapState.enabled = snapToggleEl.checked;
+    if (snapTiles) snapTiles.checked = snapState.enabled;
     if (!snapState.enabled) clearGuides();
   };
 }
@@ -364,7 +366,7 @@ $('#alignApply').onclick=()=>{
     if(mode==='top') y=minY;
     if(mode==='bottom') y=maxY-b.h;
     if(mode==='middleY') y=Math.round(midY-b.h/2);
-    if(snapTiles.checked){ x=Math.round(x/TILE())*TILE(); y=Math.round(y/TILE())*TILE(); }
+    if(snapState.enabled){ x=Math.round(x/TILE())*TILE(); y=Math.round(y/TILE())*TILE(); }
     setPos(el,x,y);
   });
   snapshot();
@@ -388,7 +390,7 @@ $('#distApply').onclick=()=>{
     for(let i=1;i<items.length-1;i++){
       const it=items[i]; cursor+=gap;
       let x=cursor;
-      if(snapTiles.checked) x=Math.round(x/TILE())*TILE();
+      if(snapState.enabled) x=Math.round(x/TILE())*TILE();
       setPos(it.el,x,it.b.y);
       cursor+=it.b.w;
     }
@@ -401,7 +403,7 @@ $('#distApply').onclick=()=>{
     for(let i=1;i<items.length-1;i++){
       const it=items[i]; cursor+=gap;
       let y=cursor;
-      if(snapTiles.checked) y=Math.round(y/TILE())*TILE();
+      if(snapState.enabled) y=Math.round(y/TILE())*TILE();
       setPos(it.el,it.b.x,y);
       cursor+=it.b.h;
     }
