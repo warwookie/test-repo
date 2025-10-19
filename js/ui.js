@@ -6,7 +6,7 @@ window.snapState = window.snapState || {
 };
 
 const pHeadTitle = document.querySelector('.pHead > div');
-if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 1';
+if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 2';
 
 const snapTiles = window.snapTiles || document.getElementById('snapTiles');
 
