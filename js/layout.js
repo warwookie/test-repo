@@ -1,3 +1,5 @@
+window.TILE_PX = window.TILE_PX || 16;
+
 let editing=true; let selected=null;
 Object.defineProperty(window, 'editing', { get: () => editing, set: v => { editing = v; } });
 Object.defineProperty(window, 'selected', { get: () => selected, set: v => { selected = v; } });
@@ -130,6 +132,68 @@ function normalizeBlockContent(blockEl, opts = {}) {
     child.remove();
   }
 }
+
+window.renderLabelForBlock = function(el, meta = {}) {
+  if (!el) return;
+  if (typeof window.normalizeBlockContent === 'function') window.normalizeBlockContent(el);
+
+  const inner = el.querySelector(':scope > .innerHost');
+  const label = inner?.querySelector(':scope > .labelHost');
+  if (!label) return;
+
+  const setDS = (k, v) => { if (v !== undefined && v !== null) el.dataset[k] = String(v); };
+  setDS('labelText',  meta.text);
+  setDS('labelFontPx', meta.fontPx);
+  setDS('labelAlignH', meta.alignH);
+  setDS('labelAlignV', meta.alignV);
+  setDS('labelPadX',   meta.padX);
+  setDS('labelTx',     meta.tx);
+  setDS('labelTy',     meta.ty);
+  setDS('contentCx',   meta.cx);
+  setDS('contentCy',   meta.cy);
+
+  const text   = el.dataset.labelText ?? '';
+  const fontPx = Number(el.dataset.labelFontPx ?? 15);
+  const alignH = el.dataset.labelAlignH || 'left';
+  const alignV = el.dataset.labelAlignV || 'center';
+  const padX   = Number(el.dataset.labelPadX ?? 0);
+
+  const cx  = Number(el.dataset.contentCx ?? 0);
+  const cy  = Number(el.dataset.contentCy ?? 0);
+  const tx  = Number(el.dataset.labelTx   ?? 0);
+  const ty  = Number(el.dataset.labelTy   ?? 0);
+
+  label.innerHTML = '';
+  const lines = String(text).split('\n');
+  lines.forEach((ln, i) => {
+    const span = document.createElement('span');
+    span.className = 'labelLine';
+    span.textContent = ln;
+    label.appendChild(span);
+    if (i < lines.length - 1) label.appendChild(document.createElement('br'));
+  });
+
+  label.style.fontSize = fontPx + 'px';
+  label.style.padding   = '0 ' + Math.max(0, padX) + 'px';
+  label.style.display   = 'flex';
+  label.style.flexDirection = 'column';
+  label.style.justifyContent = (alignV === 'top') ? 'flex-start' : (alignV === 'bottom' ? 'flex-end' : 'center');
+  label.style.textAlign = (alignH === 'center') ? 'center' : (alignH === 'right' ? 'right' : 'left');
+  label.style.alignItems = (alignH === 'center') ? 'center' : (alignH === 'right' ? 'flex-end' : 'flex-start');
+
+  const host = inner;
+  const w = host.clientWidth  || el.offsetWidth;
+  const h = host.clientHeight || el.offsetHeight;
+
+  const gx = Math.round((cx / 100) * w);
+  const gy = Math.round((cy / 100) * h);
+  const fx = Math.round((tx / 100) * w);
+  const fy = Math.round((ty / 100) * h);
+
+  label.style.transform = `translate(${gx + fx}px, ${gy + fy}px)`;
+
+  if (typeof window.renderLayout === 'function') window.renderLayout();
+};
 function makeBlock(kind, forceId){
   const el=document.createElement('div'); el.className='block'; el.dataset.kind=kind; el.id=forceId||uid(kind); el.tabIndex=0;
   if(kind==='title'){ el.classList.add('titlePlaque'); const th=document.createElement('div'); th.className='txtHost'; th.textContent='S N E A K E R Q U E S T'; el.appendChild(th); }
