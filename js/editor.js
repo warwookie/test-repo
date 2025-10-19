@@ -18,7 +18,7 @@ const rowSingle=$('#row-single');
 const rowDual=$('#row-dual');
 const padX=$('#padX');
 
-function getTextHost(el){ return el.querySelector('.txtHost') || el.querySelector('.label') || el; }
+function getTextHost(el){ return el.querySelector('.labelHost') || el.querySelector('.txtHost') || el.querySelector('.label') || el; }
 function getScoreHosts(el){ const line1 = el.querySelector('#hudStageLabel'); const line2 = el.querySelector('.scoreBottom'); return line1 && line2 ? {line1, line2} : null; }
 function setSafeMultilineText(host, value){ host.textContent=''; const parts=String(value).split('\n'); parts.forEach((p,i)=>{ host.appendChild(document.createTextNode(p)); if(i<parts.length-1){ host.appendChild(document.createElement('br')); } }); }
 function autoFit(host){ host.classList.add('hasFS'); let size=parseInt(getComputedStyle(host).fontSize)||12; const min=8; const container=host.closest('.block')||host; const fits=()=> host.scrollWidth<=container.clientWidth && host.scrollHeight<=container.clientHeight; let guard=40; while(!fits() && size>min && guard-->0){ size-=1; host.style.setProperty('--fs-override', size+'px'); } }
@@ -29,6 +29,7 @@ function openEditor(el){
   try { _lastFocus = document.activeElement; } catch {}
   select(el);
   ensureInnerHost(el);
+  if (typeof normalizeBlockContent === 'function') normalizeBlockContent(el);
   buildPreviewFrom(el);
   editor.style.display = 'grid';
   editor.setAttribute('aria-hidden', 'false');
@@ -78,6 +79,7 @@ function buildPreviewFrom(el){
   clone.style.width='100%';
   clone.style.height='100%';
   const ih=clone.querySelector('.innerHost'); if(!ih){ const wrap=document.createElement('div'); wrap.className='innerHost'; [...clone.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); }); clone.appendChild(wrap); }
+  if(typeof normalizeBlockContent==='function') normalizeBlockContent(clone);
   previewWrap.appendChild(clone);
   enablePreviewInnerDrag(clone);
   applyZoom();
@@ -103,9 +105,14 @@ function preloadTextControls(el){
     rowSingle.style.display='flex';
     rowDual.style.display='none';
     const host=getTextHost(el);
-    txtLabel.value=(host.innerText||'').trim();
+    if(host && host.classList && host.classList.contains('labelHost')){
+      const lines=[...host.querySelectorAll(':scope > .labelLine')].map(node=>node.textContent||'');
+      txtLabel.value=lines.join('\n').trim();
+    } else {
+      txtLabel.value=(host && host.innerText ? host.innerText : '').trim();
+    }
   }
-  const host=getTextHost(el);
+  const host=score ? score.line1 : getTextHost(el);
   const fs=parseInt(getComputedStyle(host).fontSize)||12; txtSize.value=fs;
   const ta=(getComputedStyle(host).textAlign)||'center';
   txtAlignX.value=(ta==='start'?'left':ta);
@@ -113,7 +120,7 @@ function preloadTextControls(el){
 }
 function preloadInnerControls(el){ const cx = (el.style.getPropertyValue('--cx')||'50%').replace('%',''); const cy=(el.style.getPropertyValue('--cy')||'50%').replace('%',''); const pxv=(el.style.getPropertyValue('--padx')||'0px').replace('px',''); contentX.value=parseFloat(cx)||50; contentY.value=parseFloat(cy)||50; padX.value=parseInt(pxv)||0; snapInner.checked=(localStorage.getItem(SNAP_INNER_KEY)||'1')==='1'; }
 
-function liveApplyText(){ if(!selected) return; const score=getScoreHosts(selected); if(score){ score.line1.textContent=txtLine1.value; score.line2.textContent=txtLine2.value; autoFit(score.line1); autoFit(score.line2); } else { const host=getTextHost(selected); setSafeMultilineText(host, txtLabel.value); autoFit(host);} snapshot(); buildPreviewFrom(selected); }
+function liveApplyText(){ if(!selected) return; const score=getScoreHosts(selected); if(score){ score.line1.textContent=txtLine1.value; score.line2.textContent=txtLine2.value; autoFit(score.line1); autoFit(score.line2); } else { if(typeof normalizeBlockContent==='function'){ normalizeBlockContent(selected,{ text:txtLabel.value }); } const host=getTextHost(selected); if(host){ autoFit(host); } } snapshot(); buildPreviewFrom(selected); }
 function liveApplySize(){ if(!selected) return; const score=getScoreHosts(selected); if(score){ score.line1.classList.add('hasFS'); score.line2.classList.add('hasFS'); score.line1.style.setProperty('--fs-override', (parseInt(txtSize.value)||12)+'px'); score.line2.style.setProperty('--fs-override', (parseInt(txtSize2.value)||12)+'px'); autoFit(score.line1); autoFit(score.line2); } else { const host=getTextHost(selected); host.classList.add('hasFS'); host.style.setProperty('--fs-override', (parseInt(txtSize.value)||12)+'px'); autoFit(host);} snapshot(); buildPreviewFrom(selected); }
 function liveApplyAlign(){ if(!selected) return; applyAlign(selected, txtAlignX.value, txtAlignY.value); snapshot(); buildPreviewFrom(selected); }
 
