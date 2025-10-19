@@ -17,6 +17,143 @@ const snapInner=$('#snapInner');
 const rowSingle=$('#row-single');
 const rowDual=$('#row-dual');
 const padX=$('#padX');
+const edX=document.getElementById('edX')||document.getElementById('layX');
+const edY=document.getElementById('edY')||document.getElementById('layY');
+const edW=document.getElementById('edW')||document.getElementById('layW');
+const edH=document.getElementById('edH')||document.getElementById('layH');
+
+const tileBasePx=()=>{
+  if (typeof window.TILE_PX === 'number' && !Number.isNaN(window.TILE_PX)) return window.TILE_PX;
+  return 16;
+};
+
+const tilesToPxVal=(t)=>{
+  if (typeof window.tilesToPx === 'function') return window.tilesToPx(t);
+  return Math.round(t * tileBasePx());
+};
+
+const pxToTilesVal=(px)=>{
+  if (typeof window.pxToTiles === 'function') return window.pxToTiles(px);
+  return Math.round((px / tileBasePx()) * 2) / 2;
+};
+
+const snapTilesVal=(t, stepPx)=>{
+  if (typeof window.snapTiles === 'function') return window.snapTiles(t, stepPx);
+  const stepTiles = stepPx ? (stepPx / tileBasePx()) : 1;
+  if (!stepTiles) return t;
+  return Math.round(t / stepTiles) * stepTiles;
+};
+
+const readFieldValue = (input) => {
+  if (!input) return Number.NaN;
+  const raw = (typeof input.value === 'string') ? input.value.trim() : '';
+  if (raw === '') return Number.NaN;
+  const num = Number(raw);
+  return Number.isNaN(num) ? Number.NaN : num;
+};
+
+function getActiveBlock(){
+  const set = (typeof window.getSelectionSet === 'function') ? window.getSelectionSet() : window.selSet;
+  if (set && typeof set.size === 'number' && set.size){
+    const ids = Array.from(set);
+    const id = ids[ids.length - 1] || ids[0];
+    if (id){
+      const found = document.getElementById(id);
+      if (found) return found;
+    }
+  }
+  if (window.selected && window.selected.classList && window.selected.classList.contains('block')) return window.selected;
+  return null;
+}
+
+function readTilesSafe(el){
+  if (!el) return { xT: 0, yT: 0, wT: 0, hT: 0 };
+  const x = Number(el.style.left?.replace('px','') || el.dataset.x || 0);
+  const y = Number(el.style.top?.replace('px','') || el.dataset.y || 0);
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  return { xT: pxToTilesVal(x), yT: pxToTilesVal(y), wT: pxToTilesVal(w), hT: pxToTilesVal(h) };
+}
+
+let beDebounce;
+function beScheduleApply(){
+  if (beDebounce) clearTimeout(beDebounce);
+  beDebounce=setTimeout(applyFromFields,80);
+}
+
+[edX,edY,edW,edH].forEach(input=>{
+  if (!input) return;
+  input.addEventListener('input', beScheduleApply);
+  input.addEventListener('change', beScheduleApply);
+});
+
+function applyFromFields(){
+  const el=getActiveBlock();
+  if (!el) return;
+  if (el.classList && el.classList.contains('locked')) return;
+
+  const before=readTilesSafe(el);
+  const snapPx=(typeof getSnapStep==='function')?getSnapStep():((typeof snapStepPx==='function')?snapStepPx():tileBasePx());
+
+  let xT=readFieldValue(edX);
+  let yT=readFieldValue(edY);
+  let wT=readFieldValue(edW);
+  let hT=readFieldValue(edH);
+
+  if ([xT,yT,wT,hT].some(v=>Number.isNaN(v))){
+    const cur=readTilesSafe(el);
+    xT=Number.isNaN(xT)?cur.xT:xT;
+    yT=Number.isNaN(yT)?cur.yT:yT;
+    wT=Number.isNaN(wT)?cur.wT:wT;
+    hT=Number.isNaN(hT)?cur.hT:hT;
+  }
+
+  xT=snapTilesVal(xT,snapPx);
+  yT=snapTilesVal(yT,snapPx);
+  wT=Math.max(1,snapTilesVal(wT,snapPx));
+  hT=Math.max(1,snapTilesVal(hT,snapPx));
+
+  let nx=tilesToPxVal(xT);
+  let ny=tilesToPxVal(yT);
+  let nw=tilesToPxVal(wT);
+  let nh=tilesToPxVal(hT);
+
+  if (typeof clampToStage==='function'){
+    const c=clampToStage(nx,ny,nw,nh)||{};
+    if (typeof c.x==='number') nx=c.x;
+    if (typeof c.y==='number') ny=c.y;
+  }
+
+  el.style.width=`${nw}px`;
+  el.style.height=`${nh}px`;
+  if (typeof setBlockPos==='function') setBlockPos(el,nx,ny);
+  else {
+    el.style.left=`${nx}px`;
+    el.style.top=`${ny}px`;
+    el.dataset.x=String(nx);
+    el.dataset.y=String(ny);
+  }
+
+  const after=readTilesSafe(el);
+
+  if (edX) edX.value=after.xT;
+  if (edY) edY.value=after.yT;
+  if (edW) edW.value=after.wT;
+  if (edH) edH.value=after.hT;
+
+  const changed=['xT','yT','wT','hT'].some(key=>before[key]!==after[key]);
+
+  if (!changed) return;
+
+  if (typeof window.renderLayout==='function') window.renderLayout();
+  if (typeof window.updateInspector==='function') window.updateInspector(null);
+  if (typeof window.refreshSelectionUI==='function') window.refreshSelectionUI();
+  try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'blockEditor' } })); } catch(_){ }
+  if (typeof buildPreviewFrom==='function') buildPreviewFrom(el);
+  if (typeof window.snapshot==='function') window.snapshot();
+  if (typeof window.historyPush==='function') window.historyPush({ type:'edit', note:'Block Editor Layout' });
+}
+
 
 function getTextHost(el){ return el.querySelector('.labelHost') || el.querySelector('.txtHost') || el.querySelector('.label') || el; }
 function getScoreHosts(el){ const line1 = el.querySelector('#hudStageLabel'); const line2 = el.querySelector('.scoreBottom'); return line1 && line2 ? {line1, line2} : null; }
@@ -91,7 +228,17 @@ edTabs.addEventListener('click', e=>{ const t=e.target.closest('.tab'); if(!t) r
 edClose.onclick=closeEditor;
 editor.addEventListener('click',e=>{ if(e.target===editor) closeEditor(); });
 
-function syncLayoutFields(el){ const rr=root.getBoundingClientRect(), r=el.getBoundingClientRect(); $('#layX').value=Math.round((r.left-rr.left)/TILE()); $('#layY').value=Math.round((r.top-rr.top)/TILE()); $('#layW').value=Math.round(r.width/TILE()); $('#layH').value=Math.round(r.height/TILE()); }
+function syncLayoutFields(el){
+  if (typeof window.populateBlockEditorLayout === 'function'){
+    window.populateBlockEditorLayout(el || null);
+    return;
+  }
+  const rr=root.getBoundingClientRect(), r=el.getBoundingClientRect();
+  $('#layX').value=Math.round((r.left-rr.left)/TILE());
+  $('#layY').value=Math.round((r.top-rr.top)/TILE());
+  $('#layW').value=Math.round(r.width/TILE());
+  $('#layH').value=Math.round(r.height/TILE());
+}
 
 function preloadTextControls(el){
   const score = getScoreHosts(el);
@@ -161,6 +308,29 @@ function enablePreviewInnerDrag(blockClone){
   });
   blockClone.addEventListener('pointerup',e=>{ if(!dragging) return; dragging=false; try{ ih.releasePointerCapture(e.pointerId); }catch{} snapshot(); });
 }
+
+window.populateBlockEditorLayout = function(target){
+  const fields=[edX,edY,edW,edH].filter(Boolean);
+  if (!fields.length) return;
+  const block = target || getActiveBlock();
+  if (!block){
+    fields.forEach(inp => { inp.value = ''; });
+    return;
+  }
+  const cur=readTilesSafe(block);
+  if (edX) edX.value=cur.xT;
+  if (edY) edY.value=cur.yT;
+  if (edW) edW.value=cur.wT;
+  if (edH) edH.value=cur.hT;
+};
+
+if (!window.__beLayoutBound){
+  window.__beLayoutBound=true;
+  window.addEventListener('selection:changed', ()=>window.populateBlockEditorLayout());
+  window.addEventListener('layout:changed',   ()=>window.populateBlockEditorLayout());
+}
+
+window.populateBlockEditorLayout(getActiveBlock());
 
 window.getTextHost = getTextHost;
 window.getScoreHosts = getScoreHosts;

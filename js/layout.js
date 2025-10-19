@@ -2,6 +2,57 @@ let editing=true; let selected=null;
 Object.defineProperty(window, 'editing', { get: () => editing, set: v => { editing = v; } });
 Object.defineProperty(window, 'selected', { get: () => selected, set: v => { selected = v; } });
 
+(function(){
+  if (typeof window.TILE_PX !== 'number' || Number.isNaN(window.TILE_PX)){
+    window.TILE_PX = 16;
+  }
+
+  if (typeof window.tilesToPx !== 'function'){
+    window.tilesToPx = (t) => Math.round(t * window.TILE_PX);
+  }
+
+  if (typeof window.pxToTiles !== 'function'){
+    window.pxToTiles = (px) => Math.round((px / window.TILE_PX) * 2) / 2;
+  }
+
+  const snapControl = (typeof window.snapTiles === 'object' && window.snapTiles !== null && 'checked' in window.snapTiles)
+    ? window.snapTiles
+    : null;
+
+  if (snapControl && !window.snapTilesControl) window.snapTilesControl = snapControl;
+
+  const withControlBridge = (fn) => {
+    if (!snapControl) return fn;
+    try {
+      Object.defineProperty(fn, 'checked', {
+        configurable: true,
+        enumerable: false,
+        get(){ return snapControl.checked; },
+        set(v){ snapControl.checked = v; }
+      });
+    } catch {}
+    if (typeof snapControl.addEventListener === 'function' && typeof fn.addEventListener !== 'function'){
+      fn.addEventListener = snapControl.addEventListener.bind(snapControl);
+    }
+    if (typeof snapControl.removeEventListener === 'function' && typeof fn.removeEventListener !== 'function'){
+      fn.removeEventListener = snapControl.removeEventListener.bind(snapControl);
+    }
+    fn.control = snapControl;
+    return fn;
+  };
+
+  if (typeof window.snapTiles !== 'function'){
+    const snapFn = (t, stepPx) => {
+      const stepTiles = stepPx ? (stepPx / window.TILE_PX) : 1;
+      if (!stepTiles) return t;
+      return Math.round(t / stepTiles) * stepTiles;
+    };
+    window.snapTiles = withControlBridge(snapFn);
+  } else if (!('control' in window.snapTiles) && snapControl){
+    withControlBridge(window.snapTiles);
+  }
+})();
+
 let seq=0; const uid=p=>`${p}_${++seq}`;
 function ensureInnerHost(el){ if(el.querySelector('.innerHost')) return; const wrap=document.createElement('div'); wrap.className='innerHost';
   [...el.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); });
