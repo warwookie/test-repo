@@ -5,6 +5,9 @@ window.snapState = window.snapState || {
   thresholdPx: 6
 };
 
+const pHeadTitle = document.querySelector('.pHead > div');
+if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 1';
+
 const snapTiles = window.snapTiles || document.getElementById('snapTiles');
 
 function clearGuides(){
