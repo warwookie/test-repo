@@ -389,5 +389,7 @@ if (distSel && distApply) {
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
 
-if (window.setPaletteVersion) window.setPaletteVersion(9);
+if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
+
+if (window.setPaletteVersion) window.setPaletteVersion(10);
 
