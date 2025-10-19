@@ -77,6 +77,17 @@ window.exportLayoutClean = function(){
     if (label){
       meta.text = Array.from(label.querySelectorAll('.labelLine')).map(n=>n.textContent).join('\n') || label.textContent || '';
     }
+    if (Object.prototype.hasOwnProperty.call(el.dataset, 'labelText')) {
+      meta.text  = el.dataset.labelText   || undefined;
+    }
+    meta.fontPx  = Number(el.dataset.labelFontPx || 15);
+    meta.alignH  = el.dataset.labelAlignH || 'left';
+    meta.alignV  = el.dataset.labelAlignV || 'center';
+    meta.padX    = Number(el.dataset.labelPadX || 0);
+    meta.cx      = Number(el.dataset.contentCx || 0);
+    meta.cy      = Number(el.dataset.contentCy || 0);
+    meta.tx      = Number(el.dataset.labelTx   || 0);
+    meta.ty      = Number(el.dataset.labelTy   || 0);
     const hostChildCount = icons?.children?.length || 0;
     meta.iconType  = el.dataset.iconType  || undefined;
     meta.iconCount = Number(el.dataset.iconCount || hostChildCount || 0);
@@ -334,24 +345,19 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
     const meta = metaMap[el.id];
     const inner = ensureHosts(el);
 
-    if (meta && typeof meta.text === 'string') {
-      let label = inner.querySelector(':scope > .labelHost');
-      if (!label) {
-        if (typeof window.normalizeBlockContent === 'function') {
-          try { window.normalizeBlockContent(el); } catch {}
-        }
-        label = inner.querySelector(':scope > .labelHost');
-      }
-      if (label) {
-        label.innerHTML = '';
-        const lines = meta.text.split(/\r?\n/);
-        lines.forEach(line => {
-          const span = document.createElement('span');
-          span.className = 'labelLine';
-          span.textContent = line;
-          label.appendChild(span);
-        });
-      }
+    if (meta) {
+      el.dataset.labelText   = meta.text   ?? el.dataset.labelText;
+      el.dataset.labelFontPx = meta.fontPx ?? el.dataset.labelFontPx;
+      el.dataset.labelAlignH = meta.alignH ?? el.dataset.labelAlignH;
+      el.dataset.labelAlignV = meta.alignV ?? el.dataset.labelAlignV;
+      el.dataset.labelPadX   = meta.padX   ?? el.dataset.labelPadX;
+      el.dataset.contentCx   = meta.cx     ?? el.dataset.contentCx;
+      el.dataset.contentCy   = meta.cy     ?? el.dataset.contentCy;
+      el.dataset.labelTx     = meta.tx     ?? el.dataset.labelTx;
+      el.dataset.labelTy     = meta.ty     ?? el.dataset.labelTy;
+      if (typeof window.renderLabelForBlock === 'function') window.renderLabelForBlock(el, meta);
+    } else if (typeof window.renderLabelForBlock === 'function') {
+      window.renderLabelForBlock(el, {});
     }
 
     const hasRenderer = typeof window.renderIconsForBlock === 'function';
