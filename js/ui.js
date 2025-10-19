@@ -119,6 +119,27 @@ if (guideToggle && guidesHost){
   };
 })();
 
+(function(){
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInp = document.getElementById('uploadJson');
+
+  if (fileInp) {
+    fileInp.setAttribute('disabled', 'true');
+    fileInp.style.display = 'none';
+  }
+
+  if (uploadBtn && !uploadBtn.__boundTextApply) {
+    uploadBtn.__boundTextApply = true;
+    uploadBtn.textContent = 'Apply (from text)';
+    uploadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof window.applyJsonFromTextarea === 'function') {
+        window.applyJsonFromTextarea();
+      }
+    });
+  }
+})();
+
 addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'){ toggleGrid(); }
   if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){
@@ -393,5 +414,5 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-if (window.setPaletteVersion) window.setPaletteVersion(12);
+if (window.setPaletteVersion) window.setPaletteVersion(13);
 

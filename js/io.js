@@ -141,6 +141,32 @@ window.saveLayouts = function(map){
   }
 };
 
+window.parseAndValidateLayoutText = function(text){
+  const errs = [];
+  let obj = null;
+
+  try { obj = JSON.parse(text); }
+  catch (e) { errs.push('JSON parse error'); }
+
+  if (!obj || typeof obj !== 'object') errs.push('Root must be an object');
+  if (!('layout' in (obj || {})) || !Array.isArray(obj?.layout)) errs.push('Missing "layout" array');
+
+  if (Array.isArray(obj?.layout)){
+    obj.layout.forEach((it, idx) => {
+      if (typeof it?.kind !== 'string' || !it.kind.trim()) errs.push(`${idx}: invalid kind`);
+      ['x','y','w','h'].forEach(k => {
+        if (typeof it[k] !== 'number') errs.push(`${idx}: ${k} must be number (tiles)`);
+      });
+    });
+  }
+
+  if (errs.length) {
+    const msg = 'Upload parse/validate failed:\n' + errs.map(e => `- ${e}`).join('\n');
+    throw new Error(msg);
+  }
+  return obj;
+};
+
 window.saveLayoutNamed = function(name, json){
   const map = window.loadSavedLayouts();
   map[name] = json;
@@ -152,6 +178,30 @@ window.deleteLayoutNamed = function(name){
   delete map[name];
   window.saveLayouts(map);
 };
+
+function applyTileLayoutPayload(data){
+  const TILE = 16;
+  const dup = JSON.parse(JSON.stringify(data));
+
+  dup.layout.forEach(it => {
+    if (!it || typeof it !== 'object') return;
+    it.x = Math.round(it.x * TILE);
+    it.y = Math.round(it.y * TILE);
+    it.w = Math.round(it.w * TILE);
+    it.h = Math.round(it.h * TILE);
+  });
+
+  if (typeof window.loadLayoutJSON === 'function') {
+    window.loadLayoutJSON(dup);
+    try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'import' } })); } catch(_){ }
+    if (typeof window.updateInspector === 'function') window.updateInspector(null);
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+    if (typeof window.historyPush === 'function') window.historyPush({ type:'import' });
+    return true;
+  }
+
+  return dup;
+}
 
 window.applyImportedLayout = window.applyImportedLayout || function(payload){
   if (!payload) return;
@@ -167,6 +217,16 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
   }
 
   if (!data || typeof data !== 'object') return;
+
+  if (Array.isArray(data.layout) && data.layout.every(it => it && typeof it === 'object' && typeof it.kind === 'string')) {
+    const tileResult = applyTileLayoutPayload(data);
+    if (tileResult === true) return;
+    if (tileResult && typeof tileResult === 'object') {
+      data = tileResult;
+    } else {
+      return;
+    }
+  }
 
   const layoutEntries = Array.isArray(data.layout) ? data.layout : [];
   const layoutMap = {};
@@ -302,6 +362,19 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
     try { window.updateLayoutUI(); } catch {}
   }
   return true;
+};
+
+window.applyJsonFromTextarea = function(){
+  const ta = document.getElementById('io');
+  if (!ta) return;
+  try {
+    const obj = window.parseAndValidateLayoutText(ta.value);
+    window.applyImportedLayout(obj);
+    if (typeof window.inspStatus === 'function') window.inspStatus('Applied JSON from textarea');
+  } catch (e) {
+    alert(e.message || String(e));
+    if (typeof window.inspStatus === 'function') window.inspStatus('Import failed');
+  }
 };
 
 function openModal(txt){
@@ -644,63 +717,6 @@ $('#close').onclick=closeModal;
     try {
       window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'reset' }}));
     } catch (e) {}
-  };
-})();
-
-(function(){
-  const fileInput = document.getElementById('uploadJson');
-  const uploadBtn = document.getElementById('uploadBtn');
-  if (!fileInput || !uploadBtn) return;
-
-  uploadBtn.onclick = () => {
-    const f = fileInput.files && fileInput.files[0];
-    if (!f) { alert('Choose a .json file first.'); return; }
-    const reader = new FileReader();
-    reader.onerror = () => alert('Failed to read file.');
-    reader.onload = () => {
-      try {
-        const txt = String(reader.result || '');
-        const obj = JSON.parse(txt);
-        if (obj && obj.theme) {
-          const name = String(obj.theme).replace(/^theme-/, '');
-          setTheme(name);
-          applyTheme(name);
-        }
-        try { io.value = JSON.stringify(obj, null, 2); } catch {}
-        const res = validateLayoutPayload(obj);
-        if (!res.ok) {
-          alert('Upload parse/validate failed:\n\n' + res.errors.join('\n'));
-          return;
-        }
-        if (confirm('Valid layout. Apply it now?')) {
-          applyStrict(reconcileLayout(res.layout), true);
-          if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
-          if (res.meta && typeof res.meta === 'object') {
-            try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
-            Object.entries(res.meta).forEach(([id, m]) => {
-              const el = document.getElementById(id);
-              if (el && m) {
-                if (m.cx) el.style.setProperty('--cx', m.cx);
-                if (m.cy) el.style.setProperty('--cy', m.cy);
-                if (m.padx) el.style.setProperty('--padx', m.padx);
-              }
-            });
-          }
-          snapshot();
-          refreshLayoutSelect();
-          alert('Layout import succeeded.');
-          closeModal();
-          try {
-            window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'io' } }));
-          } catch {}
-        } else {
-          alert('Layout validated. Review the JSON in the textarea, then click Apply if desired.');
-        }
-      } catch {
-        alert('Invalid JSON in file.');
-      }
-    };
-    reader.readAsText(f);
   };
 })();
 
