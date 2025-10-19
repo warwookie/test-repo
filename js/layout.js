@@ -202,3 +202,60 @@ window.alignSelected = function(kind){
   try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{source:'align', kind} })); } catch(_){ }
 };
 
+window.distributeSelected = function(mode){
+  const blocks = (window.getSelectionBlocks && window.getSelectionBlocks()) ? window.getSelectionBlocks() : [];
+  if (!blocks || blocks.length < 3) return;
+
+  const snap = (typeof getSnapStep === 'function') ? getSnapStep() : 16;
+  const clamp = (typeof clampToStage === 'function') ? clampToStage : (x,y,w,h)=>({x,y});
+  const bounds = window.getSelectionBounds(blocks);
+  if (!bounds) return;
+
+  const items = blocks.map(el => {
+    const pos = window.getBlockXY ? window.getBlockXY(el) : { x: Number(el.style.left.replace('px','')||0), y: Number(el.style.top.replace('px','')||0) };
+    return { el, x: pos.x, y: pos.y, w: el.offsetWidth, h: el.offsetHeight };
+  });
+
+  if (mode === 'h') {
+    items.sort((a,b)=> a.x - b.x);
+
+    const totalW = items.reduce((sum,i)=> sum + i.w, 0);
+    const span   = bounds.w;
+    const gaps   = items.length - 1;
+    const gapW   = (span - totalW) / gaps;
+
+    let cursor = bounds.x;
+    for (let i=0;i<items.length;i++){
+      const it = items[i];
+      let nx = Math.round(cursor / snap) * snap;
+      let ny = it.y;
+      const c = clamp(nx, ny, it.w, it.h) || { x: nx, y: ny };
+      window.setBlockPos(it.el, c.x, c.y);
+      cursor += it.w + gapW;
+    }
+  } else if (mode === 'v') {
+    items.sort((a,b)=> a.y - b.y);
+
+    const totalH = items.reduce((sum,i)=> sum + i.h, 0);
+    const span   = bounds.h;
+    const gaps   = items.length - 1;
+    const gapH   = (span - totalH) / gaps;
+
+    let cursor = bounds.y;
+    for (let i=0;i<items.length;i++){
+      const it = items[i];
+      let nx = it.x;
+      let ny = Math.round(cursor / snap) * snap;
+      const c = clamp(nx, ny, it.w, it.h) || { x: nx, y: ny };
+      window.setBlockPos(it.el, c.x, c.y);
+      cursor += it.h + gapH;
+    }
+  }
+
+  if (typeof window.renderLayout    === 'function') window.renderLayout();
+  if (typeof window.updateInspector === 'function') window.updateInspector(null);
+  if (typeof window.historyPush     === 'function') window.historyPush({ type:'distribute', mode });
+  else if (typeof window.pushHistory=== 'function') window.pushHistory('distribute-'+mode);
+  try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'distribute', mode } })); } catch(_){ }
+};
+
