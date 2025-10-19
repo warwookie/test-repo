@@ -307,6 +307,7 @@ $('#close').onclick=closeModal;
     }
 
     applyStrict(reconcileLayout(res.layout), true);
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
     snapshot();
     refreshLayoutSelect();
 
@@ -348,6 +349,8 @@ $('#close').onclick=closeModal;
     if (typeof window.updateLayoutUI === 'function') window.updateLayoutUI();
 
     // 4) Record history + update the history UI if available
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+
     if (typeof window.historyPush === 'function') {
       window.historyPush({ type: 'reset', note: 'Reset to strict default' });
     } else if (typeof window.pushHistory === 'function') {
@@ -389,6 +392,7 @@ $('#close').onclick=closeModal;
         }
         if (confirm('Valid layout. Apply it now?')) {
           applyStrict(reconcileLayout(res.layout), true);
+          if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
           if (res.meta && typeof res.meta === 'object') {
             try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
             Object.entries(res.meta).forEach(([id, m]) => {

@@ -414,6 +414,7 @@
         if (typeof el.releasePointerCapture === 'function'){
           try { el.releasePointerCapture(e.pointerId); } catch {}
         }
+        if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
         try {
           window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'drop' } }));
         } catch {}

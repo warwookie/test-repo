@@ -9,6 +9,44 @@
     }
   };
 
+  window.refreshSelectionUI = function() {
+    const source = (window.getSelectionSet && window.getSelectionSet()) || window.selSet;
+    const list = [];
+    if (source instanceof Set) {
+      source.forEach(id => list.push(id));
+    } else if (Array.isArray(source)) {
+      source.forEach(id => list.push(id));
+    } else if (source && typeof source.forEach === 'function') {
+      source.forEach((value, key) => {
+        if (typeof value === 'string' || typeof value === 'number') {
+          list.push(String(value));
+        } else if (typeof key === 'string' || typeof key === 'number') {
+          list.push(String(key));
+        }
+      });
+    } else if (source && typeof source === 'object') {
+      Object.keys(source).forEach(id => list.push(id));
+    }
+    const selectedIds = new Set(list.filter(Boolean));
+    const isSelected = (el) => selectedIds.has(el.id);
+
+    document.querySelectorAll('.block.sel').forEach(el => el.classList.remove('sel'));
+
+    if (selectedIds.size) {
+      selectedIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('sel');
+      });
+    }
+
+    document.querySelectorAll('.block').forEach(el => {
+      const handle = el.querySelector(':scope > .handle');
+      if (!handle) return;
+      const locked = el.classList.contains('locked');
+      handle.style.display = (isSelected(el) && !locked) ? '' : 'none';
+    });
+  };
+
   const selSet = (window.selSet instanceof Set) ? window.selSet : new Set();
   window.selSet = selSet;
   if (!Array.isArray(window.CURRENT_SELECTION)) window.CURRENT_SELECTION = [];
@@ -39,7 +77,7 @@
 
   function clearSelection(){
     selSet.clear();
-    $$('.block').forEach(b => b.classList.remove('sel'));
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
     try {
       if (typeof window.clearGuides === 'function') window.clearGuides();
     } catch {}
@@ -49,14 +87,14 @@
   function addToSelection(el){
     if (!el) return;
     selSet.add(el.id);
-    el.classList.add('sel');
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
     dispatchSelectionChange();
   }
 
   function removeFromSelection(el){
     if (!el) return;
     selSet.delete(el.id);
-    el.classList.remove('sel');
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
     dispatchSelectionChange();
   }
 
@@ -64,12 +102,11 @@
     try {
       if (typeof window.clearGuides === 'function') window.clearGuides();
     } catch {}
-    $$('.block').forEach(b => b.classList.remove('sel'));
     selSet.clear();
     if (el){
       selSet.add(el.id);
-      el.classList.add('sel');
     }
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
     dispatchSelectionChange();
   }
 
@@ -103,6 +140,12 @@
     window.addEventListener('layout:changed', () => window.updateInspector(null));
   }
 
+  if (!window.__selUiBound) {
+    window.__selUiBound = true;
+    window.addEventListener('selection:changed', () => window.refreshSelectionUI());
+    window.addEventListener('layout:changed', () => window.refreshSelectionUI());
+  }
+
   window.syncSelectionCache = syncSelectionCache;
   window.dispatchSelectionChange = dispatchSelectionChange;
   window.getSelection = getSelection;
@@ -111,4 +154,5 @@
   window.removeFromSelection = removeFromSelection;
   window.setSingleSelection = setSingleSelection;
   window.setupSelectionListeners = setupSelectionListeners;
+  if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
 })();
