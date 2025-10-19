@@ -109,6 +109,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
 .pauseIcon:before,.pauseIcon:after{content:"";display:inline-block;width:18%;height:45%;background:#bcd2ff;margin:0 6%}
 .overlay{position:absolute;left:8px;top:8px;z-index:5;display:none}
 .overlay button{background:#13213b;color:#e6f0ff;border:1px solid #4d5e85;border-radius:6px;padding:4px 8px;cursor:pointer;font:10px/1.2 ui-monospace,monospace}
+.inspEdit label{display:inline-block;margin:2px 6px;}
+.inspEdit input{width:64px;text-align:center;}
 
 /* IO Modal */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center}
@@ -523,10 +525,120 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
     <div><span style="opacity:.7;">w:</span> <span data-field="w">—</span></div>
     <div><span style="opacity:.7;">h:</span> <span data-field="h">—</span></div>
   </div>
+  <div id="inspEdit" class="inspEdit">
+    <h4>Edit Layout</h4>
+    <label>X <input id="inspX" type="number" step="1"></label>
+    <label>Y <input id="inspY" type="number" step="1"></label>
+    <label>W <input id="inspW" type="number" step="1" min="1"></label>
+    <label>H <input id="inspH" type="number" step="1" min="1"></label>
+    <h4>Meta (optional)</h4>
+    <label>cx <input id="inspCx" type="text" placeholder="50%"></label>
+    <label>cy <input id="inspCy" type="text" placeholder="50%"></label>
+    <label>padx <input id="inspPadx" type="text" placeholder="0px"></label>
+    <button id="inspApply" type="button">Apply</button>
+  </div>
 </div>
 
 
 <script>
+const inspX=document.getElementById('inspX');
+const inspY=document.getElementById('inspY');
+const inspW=document.getElementById('inspW');
+const inspH=document.getElementById('inspH');
+const inspCx=document.getElementById('inspCx');
+const inspCy=document.getElementById('inspCy');
+const inspPadx=document.getElementById('inspPadx');
+const inspApply=document.getElementById('inspApply');
+
+function fillInspectorFields(block){
+  if(!inspX||!inspY||!inspW||!inspH||!inspCx||!inspCy||!inspPadx) return;
+  if(!block||!block.id){
+    inspX.value='';
+    inspY.value='';
+    inspW.value='';
+    inspH.value='';
+    inspCx.value='';
+    inspCy.value='';
+    inspPadx.value='';
+    return;
+  }
+  let layoutData={};
+  try{ layoutData=(typeof collect==='function')?collect():{}; }
+  catch{ layoutData={}; }
+  const entry=layoutData && block.id ? layoutData[block.id] : null;
+  if(entry){
+    inspX.value = entry.x ?? '';
+    inspY.value = entry.y ?? '';
+    inspW.value = entry.w ?? '';
+    inspH.value = entry.h ?? '';
+  } else {
+    inspX.value='';
+    inspY.value='';
+    inspW.value='';
+    inspH.value='';
+  }
+  let metaStore={};
+  try{ metaStore=JSON.parse(localStorage.getItem('SQ_BLOCK_META_V1')||'{}')||{}; }
+  catch{ metaStore={}; }
+  const meta=(block && block.id && metaStore[block.id])||{};
+  inspCx.value=meta.cx||'';
+  inspCy.value=meta.cy||'';
+  inspPadx.value=meta.padx||'';
+}
+
+function applyInspectorChanges(){
+  if(!inspX||!inspY||!inspW||!inspH) return;
+  const baseSel=Array.isArray(window.CURRENT_SELECTION)?window.CURRENT_SELECTION.slice():[];
+  let sel=baseSel.filter(id=>typeof id==='string'&&id);
+  if(!sel.length&&window.selSet&&window.selSet.size){ sel=Array.from(window.selSet); }
+  if(!sel.length&&typeof getSelection==='function'){ sel=getSelection().map(el=>el&&el.id).filter(Boolean); }
+  if(!sel.length){ alert('No block selected'); return; }
+  const dx=parseInt(inspX.value,10);
+  const dy=parseInt(inspY.value,10);
+  const dw=parseInt(inspW.value,10);
+  const dh=parseInt(inspH.value,10);
+  if([dx,dy,dw,dh].some(v=>isNaN(v))) return alert('Enter valid numbers');
+  const valid=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const xVal=valid(dx,0,17);
+  const yVal=valid(dy,0,31);
+  const wVal=valid(dw,1,18);
+  const hVal=valid(dh,1,32);
+  const cxRaw=inspCx&&typeof inspCx.value==='string'?inspCx.value.trim():'';
+  const cyRaw=inspCy&&typeof inspCy.value==='string'?inspCy.value.trim():'';
+  const padxRaw=inspPadx&&typeof inspPadx.value==='string'?inspPadx.value.trim():'';
+  sel.forEach(id=>{
+    const blockEl=document.getElementById(id);
+    if(!blockEl) return;
+    if(typeof place==='function') place(blockEl,xVal,yVal,wVal,hVal);
+    else {
+      const tileSize=typeof TILE==='function'?TILE():8;
+      blockEl.style.left=(xVal*tileSize)+'px';
+      blockEl.style.top=(yVal*tileSize)+'px';
+      blockEl.style.width=(wVal*tileSize)+'px';
+      blockEl.style.height=(hVal*tileSize)+'px';
+    }
+    const meta={
+      cx: cxRaw||undefined,
+      cy: cyRaw||undefined,
+      padx: padxRaw||undefined
+    };
+    if(meta.cx!==undefined) blockEl.style.setProperty('--cx', meta.cx);
+    else blockEl.style.removeProperty('--cx');
+    if(meta.cy!==undefined) blockEl.style.setProperty('--cy', meta.cy);
+    else blockEl.style.removeProperty('--cy');
+    if(meta.padx!==undefined) blockEl.style.setProperty('--padx', meta.padx);
+    else blockEl.style.removeProperty('--padx');
+    if(typeof persistMeta==='function') persistMeta(id, {...meta});
+  });
+  if(typeof snapshot==='function') snapshot();
+  const panel=document.getElementById('inspector');
+  if(panel&&typeof panel.__updateInspector==='function'){
+    try{ panel.__updateInspector(); }
+    catch{}
+  }
+}
+
+if(inspApply) inspApply.onclick=applyInspectorChanges;
 (function(){
   // DISABLED duplicate dgGenerate binding (conflict).
   window.__disabledHandlerReport && window.__disabledHandlerReport.push({name:'#dgGenerate', reason:'legacy generator blocked'});
@@ -2789,6 +2901,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       if(!btn || !panel) return;
       const fields={};
       panel.querySelectorAll('[data-field]').forEach(el=>{ fields[el.dataset.field]=el; });
+      if(inspApply) inspApply.onclick=applyInspectorChanges;
 
       function getSelectedBlock(){
         if(window.selected && window.selected.classList && window.selected.classList.contains('block')) return window.selected;
@@ -2832,9 +2945,17 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         });
       }
 
+      const updateInspector=()=>{
+        applyMetrics();
+        try{ fillInspectorFields(getSelectedBlock()); }
+        catch{}
+      };
+
+      panel.__updateInspector=updateInspector;
+
       btn.addEventListener('click',()=>{
         panel.classList.toggle('hidden');
-        applyMetrics();
+        updateInspector();
       });
 
       function wrapSelect(){
@@ -2843,7 +2964,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
         const original=window.select;
         const wrapped=function(){
           const result=original.apply(this, arguments);
-          try{ applyMetrics(); }catch(e){}
+          try{ updateInspector(); }catch(e){}
           return result;
         };
         wrapped.__inspectorWrapped=true;
@@ -2852,12 +2973,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       }
 
       wrapSelect();
-      applyMetrics();
+      updateInspector();
 
-      document.addEventListener('keydown',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
-      document.addEventListener('pointerup',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
-      document.addEventListener('pointercancel',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
-      window.addEventListener('resize',()=>{ if(!panel.classList.contains('hidden')) applyMetrics(); });
+      document.addEventListener('keydown',()=>{ if(!panel.classList.contains('hidden')) updateInspector(); });
+      document.addEventListener('pointerup',()=>{ if(!panel.classList.contains('hidden')) updateInspector(); });
+      document.addEventListener('pointercancel',()=>{ if(!panel.classList.contains('hidden')) updateInspector(); });
+      window.addEventListener('resize',()=>{ if(!panel.classList.contains('hidden')) updateInspector(); });
+      document.addEventListener('sq-selection-change',()=>{ updateInspector(); });
     }
 
     function reportAudits(){
@@ -2894,6 +3016,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
       } catch {}
     });
   })();
+  try{
+    console.assert(typeof applyInspectorChanges==='function','inspector edit apply');
+    console.assert(document.getElementById('inspX') && document.getElementById('inspApply'),'inspector inputs present');
+  }catch{}
   </script>
 </body>
 </html>
