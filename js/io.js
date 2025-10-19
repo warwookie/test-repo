@@ -32,6 +32,79 @@ function releaseFocus(container){
   if(h){ document.removeEventListener('keydown', h, true); delete container.__trapFocusHandler; }
 }
 
+const EXPORT_SCHEMA_VERSION = 1;
+const BASE_TILE_PX = 16; // 1× tile in pixels (matches snap base)
+
+function readXY(el){
+  return {
+    x: Number(el.style.left?.replace('px','') || el.dataset.x || 0),
+    y: Number(el.style.top?.replace('px','') || el.dataset.y || 0),
+  };
+}
+
+window.exportLayoutClean = function(){
+  const blocks = Array.from(document.querySelectorAll('.block'));
+  const snap = (typeof getSnapStep === 'function') ? getSnapStep() : BASE_TILE_PX;
+
+  const items = blocks.map(el => {
+    const id = el.id || '';
+    const kind = el.dataset.kind || el.getAttribute('data-kind') || '';
+    const { x, y } = readXY(el);
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+
+    let nx = Math.round(x / snap) * snap;
+    let ny = Math.round(y / snap) * snap;
+
+    if (typeof clampToStage === 'function'){
+      const c = clampToStage(nx, ny, w, h);
+      nx = c.x; ny = c.y;
+    }
+
+    const toTiles = (px) => Math.round((px / BASE_TILE_PX) * 2) / 2;
+
+    const meta = {};
+    const inner = el.querySelector(':scope > .innerHost');
+    const label = inner?.querySelector(':scope > .labelHost');
+    if (label){
+      meta.text = Array.from(label.querySelectorAll('.labelLine')).map(n => n.textContent).join('\n') || label.textContent || '';
+    }
+    const icons = inner?.querySelector(':scope > .iconsHost');
+    if (icons){
+      meta.iconCount = icons.children.length || 0;
+    }
+
+    return {
+      id,
+      kind,
+      x: toTiles(nx),
+      y: toTiles(ny),
+      w: toTiles(w),
+      h: toTiles(h),
+      locked: el.classList.contains('locked') || false,
+      meta
+    };
+  });
+
+  const themeSel = document.getElementById('themeSel');
+  const theme = themeSel ? themeSel.value : 'midnight';
+  const paletteVersion = (typeof window.setPaletteVersion === 'function') ?
+    (document.querySelector('.pHead > div')?.textContent?.match(/Palette\s+(\d+)/)?.[1] || null) : null;
+
+  const out = {
+    version: EXPORT_SCHEMA_VERSION,
+    meta: {
+      theme,
+      paletteVersion: paletteVersion ? Number(paletteVersion) : undefined
+    },
+    layout: items
+  };
+
+  if (out.meta.paletteVersion === undefined) delete out.meta.paletteVersion;
+
+  return out;
+};
+
 function lockScroll(){ try{ document.body.dataset._preOverflow = document.body.style.overflow || ''; document.body.style.overflow = 'hidden'; }catch{} }
 function unlockScroll(){ try{ document.body.style.overflow = document.body.dataset._preOverflow || ''; delete document.body.dataset._preOverflow; }catch{} }
 
@@ -207,7 +280,6 @@ function validateLayoutPayload(input) {
   return out;
 }
 
-$('#export').onclick=()=>{ const payload=buildExportPayload(); openModal('// Export schema: version, meta, layout, metaPerBlock, coords\n'+JSON.stringify(payload,null,2)); };
 $('#import').onclick=()=>{ openModal('Paste JSON here, then press Apply. Supports {version,theme,layout} or layout-only.'); };
 $('#copy').onclick=()=>{ navigator.clipboard.writeText(io.value).catch(()=>{}); };
 $('#pasteApply').onclick=()=>{
@@ -249,21 +321,37 @@ $('#pasteApply').onclick=()=>{
     alert('Invalid JSON. Parse error.');
   }
 };
-['downloadJson','downloadJsonModal'].forEach(id=>{
-  const btn=document.getElementById(id);
-  if(!btn) return;
-  btn.onclick=()=>{
-    const data=io.value&&(()=>{ try{ return JSON.parse(io.value); }catch{ return null; } })();
-    const payload=data||buildExportPayload();
-    const ts=((payload.meta&&payload.meta.exportedAt)||new Date().toISOString()).replace(/[:]/g,'');
-    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='sq-ui-layout-'+ts+'.json';
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  };
-});
+
+const dlBtn = document.getElementById('downloadJson') || document.getElementById('downloadJsonModal');
+function downloadJsonBlob(obj, filename='layout.json'){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+if (dlBtn){
+  dlBtn.addEventListener('click', () => {
+    const json = window.exportLayoutClean();
+    downloadJsonBlob(json, 'layout.json');
+  });
+}
+
+const exportBtn = document.getElementById('export');
+const ioTA = document.getElementById('io');
+if (exportBtn && ioTA && modal){
+  exportBtn.addEventListener('click', () => {
+    const json = window.exportLayoutClean();
+    const pretty = JSON.stringify(json, null, 2);
+    if (typeof openModal === 'function'){
+      openModal();
+      ioTA.value = pretty;
+    } else {
+      ioTA.value = pretty;
+    }
+  });
+}
+
 $('#close').onclick=closeModal;
 
 (function(){

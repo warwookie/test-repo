@@ -389,5 +389,5 @@ if (distSel && distApply) {
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
 
-if (window.setPaletteVersion) window.setPaletteVersion(8);
+if (window.setPaletteVersion) window.setPaletteVersion(9);
 
