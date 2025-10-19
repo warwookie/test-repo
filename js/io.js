@@ -123,25 +123,186 @@ const modal=$('#modal'), io=$('#io');
 let _lastFocus = null;
 Object.defineProperty(window, '_lastFocus', { get: () => _lastFocus, set: v => { _lastFocus = v; } });
 
-const SAVED_KEY = 'SQ_SAVED_LAYOUTS_V1';
+window.layoutsKey = 'hudLayouts:v1';
 
-function readSavedLayouts(){
-  try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '{}') || {}; }
-  catch { return {}; }
-}
+window.loadSavedLayouts = function(){
+  try {
+    return JSON.parse(localStorage.getItem(window.layoutsKey) || '{}') || {};
+  } catch {
+    return {};
+  }
+};
 
-function writeSavedLayouts(map){
-  try { localStorage.setItem(SAVED_KEY, JSON.stringify(map)); } catch {}
-}
+window.saveLayouts = function(map){
+  try {
+    localStorage.setItem(window.layoutsKey, JSON.stringify(map));
+  } catch (err) {
+    console.warn('saveLayouts: failed to persist layouts', err);
+  }
+};
 
-function refreshLayoutSelect(){
-  const sel = document.getElementById('layoutSel'); if(!sel) return;
-  const map = readSavedLayouts();
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">-- none --</option>' +
-    Object.keys(map).sort().map(n=>`<option value="${n}">${n}</option>`).join('');
-  if (cur && map[cur]) sel.value = cur;
-}
+window.saveLayoutNamed = function(name, json){
+  const map = window.loadSavedLayouts();
+  map[name] = json;
+  window.saveLayouts(map);
+};
+
+window.deleteLayoutNamed = function(name){
+  const map = window.loadSavedLayouts();
+  delete map[name];
+  window.saveLayouts(map);
+};
+
+window.applyImportedLayout = window.applyImportedLayout || function(payload){
+  if (!payload) return;
+
+  let data = payload;
+  if (typeof payload === 'string') {
+    try {
+      data = JSON.parse(payload);
+    } catch (err) {
+      console.warn('applyImportedLayout: invalid JSON payload', err);
+      return;
+    }
+  }
+
+  if (!data || typeof data !== 'object') return;
+
+  const layoutEntries = Array.isArray(data.layout) ? data.layout : [];
+  const layoutMap = {};
+  const metaMap = {};
+  const lockedIds = new Set();
+
+  const toNumber = (value, fallback) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : fallback;
+  };
+
+  layoutEntries.forEach((entry, idx) => {
+    if (!entry || typeof entry !== 'object') return;
+    const rawId = typeof entry.id === 'string' ? entry.id.trim() : '';
+    const id = rawId || `item_${idx}`;
+    const kind = typeof entry.kind === 'string' && entry.kind ? entry.kind : (typeof entry.k === 'string' ? entry.k : '');
+    if (!kind) return;
+
+    layoutMap[id] = {
+      k: kind,
+      x: toNumber(entry.x, 0),
+      y: toNumber(entry.y, 0),
+      w: toNumber(entry.w, 1),
+      h: toNumber(entry.h, 1)
+    };
+
+    if (entry.locked) lockedIds.add(id);
+    if (entry.meta && typeof entry.meta === 'object') metaMap[id] = entry.meta;
+  });
+
+  if (!Object.keys(layoutMap).length) return;
+
+  if (data.meta && typeof data.meta === 'object') {
+    if (data.meta.theme) {
+      const themeName = String(data.meta.theme).replace(/^theme-/, '');
+      if (typeof window.setTheme === 'function') window.setTheme(themeName);
+      if (typeof window.applyTheme === 'function') window.applyTheme(themeName);
+    }
+    if (data.meta.paletteVersion && typeof window.setPaletteVersion === 'function') {
+      const pv = Number(data.meta.paletteVersion);
+      if (Number.isFinite(pv)) window.setPaletteVersion(pv);
+    }
+  }
+
+  if (typeof window.reconcileLayout === 'function' && typeof window.applyStrict === 'function') {
+    try {
+      const reconciled = window.reconcileLayout(layoutMap);
+      window.applyStrict(reconciled, true);
+    } catch (err) {
+      console.warn('applyImportedLayout: failed to apply layout', err);
+      return;
+    }
+  }
+
+  const blocks = document.querySelectorAll('.block');
+  blocks.forEach(el => {
+    if (!el || !el.id) return;
+    if (lockedIds.has(el.id)) {
+      el.classList.add('locked');
+      el.dataset.locked = '1';
+    } else {
+      el.classList.remove('locked');
+      delete el.dataset.locked;
+    }
+  });
+
+  const ensureHosts = (el) => {
+    if (typeof window.normalizeBlockContent === 'function') {
+      try { window.normalizeBlockContent(el); } catch {}
+    }
+    return el.querySelector(':scope > .innerHost') || el;
+  };
+
+  Object.entries(metaMap).forEach(([id, meta]) => {
+    const el = document.getElementById(id);
+    if (!el || !meta || typeof meta !== 'object') return;
+    const inner = ensureHosts(el);
+
+    if (typeof meta.text === 'string') {
+      let label = inner.querySelector(':scope > .labelHost');
+      if (!label) {
+        if (typeof window.normalizeBlockContent === 'function') {
+          try { window.normalizeBlockContent(el); } catch {}
+        }
+        label = inner.querySelector(':scope > .labelHost');
+      }
+      if (label) {
+        label.innerHTML = '';
+        const lines = meta.text.split(/\r?\n/);
+        lines.forEach(line => {
+          const span = document.createElement('span');
+          span.className = 'labelLine';
+          span.textContent = line;
+          label.appendChild(span);
+        });
+      }
+    }
+
+    if (typeof meta.iconCount === 'number') {
+      let icons = inner.querySelector(':scope > .iconsHost');
+      if (!icons) {
+        if (typeof window.normalizeBlockContent === 'function') {
+          try { window.normalizeBlockContent(el); } catch {}
+        }
+        icons = inner.querySelector(':scope > .iconsHost');
+      }
+      if (icons) {
+        const count = Math.max(0, Math.floor(meta.iconCount));
+        icons.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const dot = document.createElement('span');
+          dot.className = 'iconToken';
+          icons.appendChild(dot);
+        }
+        icons.dataset.count = String(count);
+      }
+    }
+  });
+
+  if (typeof window.snapshot === 'function') {
+    try { window.snapshot(); } catch {}
+  }
+  if (typeof window.refreshSelectionUI === 'function') {
+    try { window.refreshSelectionUI(); } catch {}
+  }
+  if (typeof window.updateInspector === 'function') {
+    try { window.updateInspector(null); } catch {}
+  }
+  if (typeof window.renderLayout === 'function') {
+    try { window.renderLayout(); } catch {}
+  }
+  if (typeof window.updateLayoutUI === 'function') {
+    try { window.updateLayoutUI(); } catch {}
+  }
+  return true;
+};
 
 function openModal(txt){
   try { _lastFocus = document.activeElement; } catch {}
@@ -563,8 +724,24 @@ window.closeModal = closeModal;
 window.buildExportPayload = buildExportPayload;
 window.buildSavePayload = buildSavePayload;
 window.validateLayoutPayload = validateLayoutPayload;
-window.readSavedLayouts = readSavedLayouts;
-window.writeSavedLayouts = writeSavedLayouts;
-window.refreshLayoutSelect = refreshLayoutSelect;
+window.readSavedLayouts = window.loadSavedLayouts;
+window.writeSavedLayouts = window.saveLayouts;
+window.refreshLayoutSelect = function(){
+  if (typeof window.refreshLayoutDropdown === 'function') {
+    window.refreshLayoutDropdown();
+    return;
+  }
+
+  const dd = document.getElementById('layoutSel');
+  if (!dd) return;
+  const map = typeof window.loadSavedLayouts === 'function' ? window.loadSavedLayouts() : {};
+  dd.innerHTML = '<option value="">-- none --</option>';
+  Object.keys(map).sort().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    dd.appendChild(opt);
+  });
+};
 
 
