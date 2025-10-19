@@ -58,6 +58,22 @@ if (guideToggleEl){
 }
 
 (function(){
+  const resetBtn = document.getElementById('reset');
+  if (!resetBtn) return;
+
+  resetBtn.classList.remove('hidden');
+  resetBtn.removeAttribute('aria-hidden');
+
+  resetBtn.addEventListener('click', () => {
+    if (typeof window.resetToStrictDefault === 'function') {
+      window.resetToStrictDefault();
+    } else {
+      console.warn('resetToStrictDefault() not found');
+    }
+  });
+})();
+
+(function(){
   const btn = document.getElementById('helpBtn');
   const modal = document.getElementById('helpOverlay');
   const close = document.getElementById('helpClose');

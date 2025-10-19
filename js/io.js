@@ -267,6 +267,82 @@ $('#pasteApply').onclick=()=>{
 $('#close').onclick=closeModal;
 
 (function(){
+  window.applyPresetById = window.applyPresetById || function(presetId, options){
+    const id = String(presetId || '');
+    if (!id) return false;
+
+    const presets = (typeof window.PRESETS === 'object' && window.PRESETS) || {};
+    const presetFn = presets[id];
+    if (typeof presetFn !== 'function') {
+      alert('Preset unavailable.');
+      return false;
+    }
+
+    let layout;
+    try {
+      layout = presetFn();
+    } catch (err) {
+      console.warn('Failed to build preset', id, err);
+      alert('Preset unavailable.');
+      return false;
+    }
+
+    if (!layout || typeof layout !== 'object') {
+      alert('Preset unavailable.');
+      return false;
+    }
+
+    const payload = {
+      version: EXPORT_VERSION,
+      meta: { exportedAt: new Date().toISOString(), theme: getTheme(), source: 'sq-ui-editor' },
+      layout
+    };
+
+    try { io.value = JSON.stringify(payload, null, 2); } catch {}
+
+    const res = validateLayoutPayload(payload);
+    if (!res.ok) {
+      alert('Preset validation failed:\n\n' + res.errors.join('\n'));
+      return false;
+    }
+
+    applyStrict(reconcileLayout(res.layout), true);
+    snapshot();
+    refreshLayoutSelect();
+
+    if (typeof window.updateInspector === 'function') window.updateInspector(null);
+    if (typeof window.renderLayout === 'function') window.renderLayout();
+    if (typeof window.updateLayoutUI === 'function') window.updateLayoutUI();
+    if (typeof window.updateHistoryUI === 'function') {
+      const label = options && options.historyLabel ? options.historyLabel : `Applied preset: ${id}`;
+      window.updateHistoryUI(label);
+    }
+
+    return true;
+  };
+
+  window.resetToStrictDefault = function(){
+    const applied = typeof window.applyPresetById === 'function' && window.applyPresetById('strictDefault', {
+      historyLabel: 'Reset to strict default'
+    });
+    if (!applied) return;
+
+    if (window.selection && typeof window.selection.clear === 'function') {
+      window.selection.clear();
+    } else if (typeof window.clearSelection === 'function') {
+      window.clearSelection();
+    } else {
+      const selEls = document.querySelectorAll('.block.sel');
+      selEls.forEach(el => el.classList.remove('sel'));
+    }
+
+    if (typeof window.updateInspector === 'function') window.updateInspector(null);
+    if (typeof window.renderLayout === 'function') window.renderLayout();
+    if (typeof window.updateLayoutUI === 'function') window.updateLayoutUI();
+  };
+})();
+
+(function(){
   const fileInput = document.getElementById('uploadJson');
   const uploadBtn = document.getElementById('uploadBtn');
   if (!fileInput || !uploadBtn) return;
@@ -319,26 +395,15 @@ $('#close').onclick=closeModal;
   };
 })();
 
-(function(){
+document.getElementById('applyPreset')?.addEventListener('click', () => {
   const sel = document.getElementById('presetSel');
-  const btn = document.getElementById('applyPreset');
-  if (!sel || !btn) return;
-
-  btn.onclick = () => {
-    const key = sel.value;
-    if (!key) { alert('Choose a preset.'); return; }
-    const fn = PRESETS[key];
-    if (typeof fn !== 'function') { alert('Preset unavailable.'); return; }
-    const layout = fn();
-    const payload = {
-      version: EXPORT_VERSION,
-      meta: { exportedAt: new Date().toISOString(), theme: getTheme(), source: 'sq-ui-editor' },
-      layout
-    };
-    io.value = JSON.stringify(payload, null, 2);
-    alert('Preset loaded into the JSON box. Click Apply to use it.');
-  };
-})();
+  const id = sel ? sel.value : '';
+  if (!id) {
+    alert('Choose a preset.');
+    return;
+  }
+  window.applyPresetById(id);
+});
 
 window.getTabbables = getTabbables;
 window.trapFocus = trapFocus;
