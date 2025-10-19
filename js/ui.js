@@ -1,12 +1,14 @@
+window.setPaletteVersion = function(n) {
+  const el = document.querySelector('.pHead > div');
+  if (el) el.textContent = `Live UI — Palette ${n}`;
+};
+
 window.snapState = window.snapState || {
   enabled: true,
   step: 1,
   showGuides: true,
   thresholdPx: 6
 };
-
-const pHeadTitle = document.querySelector('.pHead > div');
-if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 5';
 
 const snapTiles = window.snapTiles || document.getElementById('snapTiles');
 
@@ -418,4 +420,6 @@ $('#distApply').onclick=()=>{
 
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
+
+window.setPaletteVersion(5);
 
