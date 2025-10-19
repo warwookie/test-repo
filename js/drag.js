@@ -15,6 +15,11 @@
     return window.snapCenters || document.getElementById('snapCenters');
   }
 
+  function getPixelStep(e){
+    const base = (typeof getSnapStep === 'function') ? getSnapStep() : 16;
+    return e && e.shiftKey ? (base / 2) : base;
+  }
+
   function snapWithinBounds(value, ev, min, max){
     const limited = clamp(value, min, max);
     if (typeof snapValuePx !== 'function') return limited;
@@ -404,6 +409,80 @@
       window.addEventListener('pointerup', onUp);
       e.preventDefault();
     });
+  }
+
+  if (!window.__hudKeybindsBound){
+    window.__hudKeybindsBound = true;
+    const handleKeyNudge = (e) => {
+      const code = e && e.code;
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code)) return;
+      const sel = (typeof window.getSelectionSet === 'function') ? window.getSelectionSet() : window.selSet;
+      if (!sel) return;
+      const step = getPixelStep(e);
+      let dx = 0;
+      let dy = 0;
+      if (code === 'ArrowLeft') dx = -step;
+      if (code === 'ArrowRight') dx = step;
+      if (code === 'ArrowUp') dy = -step;
+      if (code === 'ArrowDown') dy = step;
+      const moved = [];
+      let ids = [];
+      if (sel instanceof Set || Array.isArray(sel)){
+        ids = Array.from(sel);
+      } else if (sel && typeof sel.forEach === 'function'){
+        const tmp = [];
+        sel.forEach((value) => tmp.push(value));
+        ids = tmp;
+      }
+      if (!ids.length) return;
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || el.classList.contains('locked')) return;
+        const curX = Number(el.style.left?.replace('px', '') || el.dataset.x || 0);
+        const curY = Number(el.style.top?.replace('px', '') || el.dataset.y || 0);
+        let nx = curX + dx;
+        let ny = curY + dy;
+        if (typeof clampToStage === 'function'){
+          try {
+            const c = clampToStage(nx, ny, el.offsetWidth, el.offsetHeight) || {};
+            if (typeof c.x === 'number') nx = c.x;
+            if (typeof c.y === 'number') ny = c.y;
+          } catch {}
+        }
+        const finalX = Math.round(nx);
+        const finalY = Math.round(ny);
+        if (typeof setBlockPos === 'function'){
+          setBlockPos(el, finalX, finalY);
+        } else {
+          el.style.left = finalX + 'px';
+          el.style.top = finalY + 'px';
+        }
+        if (el.dataset){
+          el.dataset.x = String(finalX);
+          el.dataset.y = String(finalY);
+        }
+        moved.push(el);
+      });
+      if (moved.length){
+        if (typeof window.renderLayout === 'function') window.renderLayout();
+        if (typeof window.updateInspector === 'function') window.updateInspector(null);
+        if (typeof window.historyPush === 'function'){
+          window.historyPush({ type: 'nudge', note: code, count: moved.length });
+        } else if (typeof window.pushHistory === 'function'){
+          window.pushHistory('nudge-' + code, { count: moved.length });
+        }
+        if (typeof window.updateHistoryUI === 'function') window.updateHistoryUI('Nudge');
+        try {
+          window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'nudge' } }));
+        } catch {}
+      }
+    };
+    try {
+      window.addEventListener('keydown', handleKeyNudge, { passive: false });
+    } catch {
+      window.addEventListener('keydown', handleKeyNudge);
+    }
   }
 
   window.attachBlockInteractions = attachBlockInteractions;
