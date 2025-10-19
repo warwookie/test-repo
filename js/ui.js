@@ -6,27 +6,9 @@ window.snapState = window.snapState || {
 };
 
 const pHeadTitle = document.querySelector('.pHead > div');
-if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 4';
+if (pHeadTitle) pHeadTitle.textContent = 'Live UI — Palette 5';
 
 const snapTiles = window.snapTiles || document.getElementById('snapTiles');
-
-function clearGuides(){
-  const g = $('#guides');
-  if (g) g.innerHTML = '';
-}
-window.clearGuides = clearGuides;
-
-function drawGuideLine(kind, posPx){
-  if (!snapState.showGuides) return;
-  const g = $('#guides');
-  if (!g) return;
-  const div = document.createElement('div');
-  div.className = 'guide-line ' + (kind === 'h' ? 'h' : 'v');
-  if (kind === 'h') div.style.top = Math.round(posPx) + 'px';
-  else div.style.left = Math.round(posPx) + 'px';
-  g.appendChild(div);
-}
-window.drawGuideLine = drawGuideLine;
 
 const snapToggleEl = $('#snapToggle');
 if (snapToggleEl){
@@ -36,7 +18,7 @@ if (snapToggleEl){
   snapToggleEl.onchange = () => {
     snapState.enabled = snapToggleEl.checked;
     if (snapTiles) snapTiles.checked = snapState.enabled;
-    if (!snapState.enabled) clearGuides();
+    if (!snapState.enabled && typeof window.clearGuides === 'function') window.clearGuides();
   };
 }
 
@@ -50,14 +32,18 @@ if (snapStepEl){
   };
 }
 
-const guideToggleEl = $('#guideToggle');
-if (guideToggleEl){
-  guideToggleEl.checked = snapState.showGuides !== false;
-  snapState.showGuides = guideToggleEl.checked;
-  guideToggleEl.onchange = () => {
-    snapState.showGuides = guideToggleEl.checked;
-    clearGuides();
+const guideToggle = document.getElementById('guideToggle');
+const guidesHost = document.getElementById('guides');
+if (guideToggle && guidesHost){
+  guideToggle.checked = snapState.showGuides !== false;
+  const syncGuidesVisibility = () => {
+    const on = guideToggle.checked;
+    snapState.showGuides = on;
+    guidesHost.setAttribute('aria-hidden', on ? 'false' : 'true');
+    if (!on && typeof window.clearGuides === 'function') window.clearGuides();
   };
+  guideToggle.addEventListener('change', syncGuidesVisibility);
+  syncGuidesVisibility();
 }
 
 (function(){

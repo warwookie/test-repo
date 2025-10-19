@@ -208,8 +208,14 @@
           const snapCentersEl = getSnapCenters();
           if (guides && ((snapEdgesEl && snapEdgesEl.checked) || (snapCentersEl && snapCentersEl.checked))){
             snapped = snapToGuides(baseL, baseT, W, H, ev, guides);
-          } else if (typeof clearGuides === 'function'){
-            try { clearGuides(); } catch {}
+            if (typeof window.renderGuides === 'function'){
+              const lines = Array.isArray(snapped && snapped.guides) ? snapped.guides : [];
+              window.renderGuides(lines);
+            }
+          } else if (typeof window.renderGuides === 'function'){
+            window.renderGuides([]);
+          } else if (typeof window.clearGuides === 'function'){
+            try { window.clearGuides(); } catch {}
           }
           let nx = snapped.x;
           let ny = snapped.y;
@@ -265,8 +271,10 @@
             }
           }
         } else {
-          if (typeof clearGuides === 'function'){
-            try { clearGuides(); } catch {}
+          if (typeof window.renderGuides === 'function'){
+            window.renderGuides([]);
+          } else if (typeof window.clearGuides === 'function'){
+            try { window.clearGuides(); } catch {}
           }
           const deltaX = pointerX - start.x;
           const deltaY = pointerY - start.y;
@@ -343,6 +351,11 @@
           el.style.height = px(Math.round(H));
         }
         moved = true;
+        const selCount = (window.selSet instanceof Set) ? window.selSet.size : (Array.isArray(window.CURRENT_SELECTION) ? window.CURRENT_SELECTION.length : 0);
+        if (typeof window.updateInspector === 'function' && selCount === 1) window.updateInspector(null);
+        try {
+          window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'drag' } }));
+        } catch {}
         if (pendingEvent){
           rafId = requestAnimationFrame(processMove);
         }
@@ -369,13 +382,14 @@
       const onUp = () => {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
         if (rafId){
           cancelAnimationFrame(rafId);
           rafId = null;
         }
         pendingEvent = null;
         try {
-          if (typeof clearGuides === 'function') clearGuides();
+          if (typeof window.clearGuides === 'function') window.clearGuides();
         } catch {}
         if (mode === 'move' && dragSelection.length){
           let overlapped = false;
@@ -400,6 +414,9 @@
         if (typeof el.releasePointerCapture === 'function'){
           try { el.releasePointerCapture(e.pointerId); } catch {}
         }
+        try {
+          window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'drop' } }));
+        } catch {}
       };
       try {
         window.addEventListener('pointermove', onMove, { passive: false });
@@ -407,6 +424,7 @@
         window.addEventListener('pointermove', onMove);
       }
       window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
       e.preventDefault();
     });
   }
