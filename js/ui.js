@@ -261,76 +261,78 @@ if(toggleGridInput){
 }
 
 (function(){
-  const sel = document.getElementById('layoutSel');
-  const btnSave = document.getElementById('layoutSave');
-  const btnLoad = document.getElementById('layoutLoad');
-  const btnDel  = document.getElementById('layoutDelete');
-  if (!sel || !btnSave || !btnLoad || !btnDel) return;
+  const dd = document.getElementById('layoutSel');
+  const saveBtn = document.getElementById('layoutSave');
+  const loadBtn = document.getElementById('layoutLoad');
+  const delBtn  = document.getElementById('layoutDelete');
+  if (!dd || !saveBtn || !loadBtn || !delBtn) return;
 
-  refreshLayoutSelect();
+  function refreshLayoutDropdown(){
+    if (!dd) return;
+    const map = window.loadSavedLayouts ? window.loadSavedLayouts() : {};
+    const current = dd.value;
+    dd.innerHTML = '<option value="">-- none --</option>';
+    Object.keys(map).sort().forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      dd.appendChild(opt);
+    });
+    if (current && map[current]) dd.value = current;
+  }
 
-  btnSave.onclick = () => {
-    const name = prompt('Save layout as name:');
+  window.refreshLayoutDropdown = refreshLayoutDropdown;
+  window.refreshLayoutSelect = refreshLayoutDropdown;
+
+  saveBtn.addEventListener('click', () => {
+    const name = prompt('Save layout as (name):');
     if (!name) return;
-    const trimmed = name.trim().slice(0,64);
-    if (!trimmed) return;
+    if (typeof window.exportLayoutClean !== 'function') return;
+    const json = window.exportLayoutClean();
+    window.saveLayoutNamed(name, json);
+    refreshLayoutDropdown();
+    dd.value = name;
+    if (typeof window.inspStatus === 'function') window.inspStatus(`Saved "${name}"`);
+  });
 
-    const map = readSavedLayouts();
-    if (map[trimmed] && !confirm('Name exists. Overwrite?')) return;
+  loadBtn.addEventListener('click', () => {
+    const name = dd?.value || '';
+    if (!name) return;
+    const map = window.loadSavedLayouts ? window.loadSavedLayouts() : {};
+    const json = map[name];
+    if (!json) return;
 
-    const payload = buildSavePayload();
-    map[trimmed] = payload;
-    writeSavedLayouts(map);
-    refreshLayoutSelect();
-    sel.value = trimmed;
-    alert('Layout saved as "' + trimmed + '".');
-  };
-
-  btnLoad.onclick = () => {
-    const key = sel.value;
-    if (!key) { alert('Choose a saved layout.'); return; }
-    const map = readSavedLayouts();
-    const data = map[key];
-    if (!data) { alert('Not found.'); return; }
-
-    if (data.theme){
-      const name = String(data.theme).replace(/^theme-/, '');
-      setTheme(name); applyTheme(name);
-    }
-
-    const res = validateLayoutPayload({ layout: data.layout, meta: data.metaPerBlock || undefined });
-    if (!res.ok) { alert('Saved layout failed validation:\n\n' + res.errors.join('\n')); return; }
-
-    applyStrict(reconcileLayout(res.layout), true);
-    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
-
-    if (res.meta && typeof res.meta === 'object') {
-      try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
-      Object.entries(res.meta).forEach(([id, m]) => {
-        const el = document.getElementById(id);
-        if (el && m) {
-          if (m.cx) el.style.setProperty('--cx', m.cx);
-          if (m.cy) el.style.setProperty('--cy', m.cy);
-          if (m.padx) el.style.setProperty('--padx', m.padx);
+    if (typeof window.applyImportedLayout === 'function') {
+      window.applyImportedLayout(json);
+    } else if (typeof window.loadLayoutJSON === 'function') {
+      window.loadLayoutJSON(json);
+    } else if (typeof window.validateLayoutPayload === 'function' && typeof window.applyStrict === 'function') {
+      try {
+        const res = window.validateLayoutPayload(json);
+        if (res && res.ok && res.layout) {
+          const layout = (typeof window.reconcileLayout === 'function') ? window.reconcileLayout(res.layout) : res.layout;
+          window.applyStrict(layout, true);
         }
-      });
+      } catch (err) {
+        console.warn('Failed to load layout', err);
+      }
     }
 
-    snapshot();
-    alert('Layout "' + key + '" loaded.');
-  };
+    if (typeof window.inspStatus === 'function') window.inspStatus(`Loaded "${name}"`);
+    try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{source:'load-named', name} })); } catch(_){ }
+  });
 
-  btnDel.onclick = () => {
-    const key = sel.value;
-    if (!key) { alert('Choose a saved layout.'); return; }
-    if (!confirm('Delete "' + key + '"?')) return;
-    const map = readSavedLayouts();
-    delete map[key];
-    writeSavedLayouts(map);
-    refreshLayoutSelect();
-    sel.value = '';
-    alert('Deleted.');
-  };
+  delBtn.addEventListener('click', () => {
+    const name = dd?.value || '';
+    if (!name) return;
+    if (!confirm(`Delete saved layout "${name}"?`)) return;
+    window.deleteLayoutNamed(name);
+    refreshLayoutDropdown();
+    dd.value = '';
+    if (typeof window.inspStatus === 'function') window.inspStatus(`Deleted "${name}"`);
+  });
+
+  refreshLayoutDropdown();
 })();
 
 $('#undo').onclick=()=>{ const s=hist.undo(); if(s){ applyStrict(s,true); if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI(); updateHistCounter(); } };
@@ -391,5 +393,5 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-if (window.setPaletteVersion) window.setPaletteVersion(11);
+if (window.setPaletteVersion) window.setPaletteVersion(12);
 
