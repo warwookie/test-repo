@@ -41,6 +41,34 @@
     try { return window.editing !== false; } catch { return true; }
   }
 
+  function getBlockRect(el){
+    if (!el) return { x: 0, y: 0, w: 0, h: 0 };
+    const x = Number(el.style.left?.replace('px','') || el.dataset.x || 0);
+    const y = Number(el.style.top?.replace('px','') || el.dataset.y || 0);
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    return { x, y, w, h };
+  }
+
+  function rectsOverlap(a, b){
+    return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+  }
+
+  function overlapsAny(el, allEls){
+    const me = getBlockRect(el);
+    for (const other of allEls){
+      if (other === el) continue;
+      if (rectsOverlap(me, getBlockRect(other))) return true;
+    }
+    return false;
+  }
+
+  function setBlockPos(el, x, y){
+    if (!el) return;
+    el.style.left = Math.round(x) + 'px';
+    el.style.top = Math.round(y) + 'px';
+  }
+
   function updateSelectedFromSet(){
     const selList = (typeof getSelection === 'function') ? getSelection() : [];
     window.selected = selList.length ? selList[selList.length - 1] : null;
@@ -100,6 +128,19 @@
         start.map[t.id] = { l: tr.left - rr.left, t: tr.top - rr.top };
       });
 
+      const dragSelection = targets
+        .filter(t => t && !t.classList.contains('locked'))
+        .map(t => {
+          const info = start.map[t.id] || { l: start.l, t: start.t };
+          return { el: t, startX: info.l, startY: info.t };
+        });
+
+      const allBlocks = Array.from(document.querySelectorAll('.block'));
+      let lastSafePositions = new Map();
+      for (const item of dragSelection){
+        lastSafePositions.set(item.el, { x: item.startX, y: item.startY });
+      }
+
       const capturePositions = () => {
         const shell = stage.getBoundingClientRect();
         return targets
@@ -143,7 +184,7 @@
         const pointerX = clamp(ev.clientX, shell.left, shell.right);
         const pointerY = clamp(ev.clientY, shell.top, shell.bottom);
         if (mode === 'move'){
-          const movingTargets = getSelection().length ? getSelection() : [el];
+          const movingTargets = dragSelection.length ? dragSelection.map(item => item.el) : [el];
           const isMultiDrag = movingTargets.length > 1;
           const dx = pointerX - start.x;
           const dy = pointerY - start.y;
@@ -207,6 +248,17 @@
               t.style.top = Math.round(T) + 'px';
             }
           });
+
+          let anyOverlap = false;
+          for (const item of dragSelection){
+            if (overlapsAny(item.el, allBlocks)){ anyOverlap = true; break; }
+          }
+          if (!anyOverlap){
+            for (const item of dragSelection){
+              const rect = getBlockRect(item.el);
+              lastSafePositions.set(item.el, { x: rect.x, y: rect.y });
+            }
+          }
         } else {
           if (typeof clearGuides === 'function'){
             try { clearGuides(); } catch {}
@@ -320,6 +372,24 @@
         try {
           if (typeof clearGuides === 'function') clearGuides();
         } catch {}
+        if (mode === 'move' && dragSelection.length){
+          let overlapped = false;
+          for (const item of dragSelection){
+            if (overlapsAny(item.el, allBlocks)){ overlapped = true; break; }
+          }
+          if (overlapped){
+            for (const item of dragSelection){
+              const safe = lastSafePositions.get(item.el);
+              if (safe){
+                setBlockPos(item.el, safe.x, safe.y);
+              }
+            }
+            if (typeof window.inspStatus === 'function'){
+              window.inspStatus('Reverted: overlap detected');
+            }
+          }
+        }
+        lastSafePositions = null;
         if (moved && typeof snapshot === 'function') snapshot();
         console.debug('drag:end', capturePositions());
         if (typeof el.releasePointerCapture === 'function'){
