@@ -353,31 +353,17 @@ $('#lockSel').onclick=()=>{
   snapshot();
 };
 
-$('#alignApply').onclick=()=>{
-  const mode=$('#alignSel').value;
-  const list=getSelection().filter(b=>!b.classList.contains('locked'));
-  if(!mode || list.length<2){ alert('Select 2+ blocks and an align mode.'); return; }
-  const boxes=list.map(getBBoxRelative);
-  const minX=Math.min(...boxes.map(b=>b.x));
-  const maxX=Math.max(...boxes.map(b=>b.x+b.w));
-  const midX=(minX+maxX)/2;
-  const minY=Math.min(...boxes.map(b=>b.y));
-  const maxY=Math.max(...boxes.map(b=>b.y+b.h));
-  const midY=(minY+maxY)/2;
-  list.forEach((el,i)=>{
-    const b=boxes[i];
-    let x=b.x,y=b.y;
-    if(mode==='left') x=minX;
-    if(mode==='right') x=maxX-b.w;
-    if(mode==='centerX') x=Math.round(midX-b.w/2);
-    if(mode==='top') y=minY;
-    if(mode==='bottom') y=maxY-b.h;
-    if(mode==='middleY') y=Math.round(midY-b.h/2);
-    if(snapState.enabled){ x=Math.round(x/TILE())*TILE(); y=Math.round(y/TILE())*TILE(); }
-    setPos(el,x,y);
-  });
-  snapshot();
-};
+const alignSel = document.getElementById('alignSel');
+const alignApply = document.getElementById('alignApply');
+if (alignApply){
+  alignApply.onclick = () => {
+    const mode = alignSel ? alignSel.value : '';
+    if (!mode){ alert('Select an align mode.'); return; }
+    const blocks = (typeof window.getSelectionBlocks === 'function') ? window.getSelectionBlocks() : getSelection().filter(b=>!b.classList.contains('locked'));
+    if (!blocks || blocks.length < 2){ alert('Select at least two unlocked blocks to align.'); return; }
+    if (typeof window.alignSelected === 'function') window.alignSelected(mode);
+  };
+}
 
 $('#distApply').onclick=()=>{
   const mode=$('#distSel').value;
@@ -421,5 +407,5 @@ $('#distApply').onclick=()=>{
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
 
-window.setPaletteVersion(5);
+window.setPaletteVersion(6);
 
