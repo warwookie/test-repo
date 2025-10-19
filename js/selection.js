@@ -57,6 +57,30 @@
     dispatchSelectionChange();
   }
 
+  function setupSelectionListeners(){
+    const stage = document.getElementById('stage');
+    if (!stage) return;
+
+    stage.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('.hud-block')) {
+        if (window.selection && typeof window.selection.clear === 'function') {
+          try { window.selection.clear(); } catch { clearSelection(); }
+        } else {
+          clearSelection();
+        }
+        try {
+          if (typeof renderSelection === 'function') renderSelection();
+        } catch {}
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSelectionListeners);
+  } else {
+    setupSelectionListeners();
+  }
+
   window.syncSelectionCache = syncSelectionCache;
   window.dispatchSelectionChange = dispatchSelectionChange;
   window.getSelection = getSelection;
@@ -64,4 +88,5 @@
   window.addToSelection = addToSelection;
   window.removeFromSelection = removeFromSelection;
   window.setSingleSelection = setSingleSelection;
+  window.setupSelectionListeners = setupSelectionListeners;
 })();
