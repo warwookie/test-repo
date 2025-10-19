@@ -1,3 +1,4 @@
+const inspectorPanel=document.getElementById('inspector');
 const inspX=document.getElementById('inspX');
 const inspY=document.getElementById('inspY');
 const inspW=document.getElementById('inspW');
@@ -6,96 +7,339 @@ const inspCx=document.getElementById('inspCx');
 const inspCy=document.getElementById('inspCy');
 const inspPadx=document.getElementById('inspPadx');
 const inspApply=document.getElementById('inspApply');
+const inspStatus=document.getElementById('inspStatus');
+const inspLock=document.getElementById('inspLock');
+const inspEdit=document.getElementById('inspEdit');
 
-function fillInspectorFields(block){
-  if(!inspX||!inspY||!inspW||!inspH||!inspCx||!inspCy||!inspPadx) return;
-  if(!block||!block.id){
-    inspX.value='';
-    inspY.value='';
-    inspW.value='';
-    inspH.value='';
-    inspCx.value='';
-    inspCy.value='';
-    inspPadx.value='';
-    return;
-  }
-  let layoutData={};
-  try{ layoutData=(typeof collect==='function')?collect():{}; }
-  catch{ layoutData={}; }
-  const entry=layoutData && block.id ? layoutData[block.id] : null;
-  if(entry){
-    inspX.value = entry.x ?? '';
-    inspY.value = entry.y ?? '';
-    inspW.value = entry.w ?? '';
-    inspH.value = entry.h ?? '';
-  } else {
-    inspX.value='';
-    inspY.value='';
-    inspW.value='';
-    inspH.value='';
-  }
-  let metaStore={};
-  try{ metaStore=JSON.parse(localStorage.getItem('SQ_BLOCK_META_V1')||'{}')||{}; }
-  catch{ metaStore={}; }
-  const meta=(block && block.id && metaStore[block.id])||{};
-  inspCx.value=meta.cx||'';
-  inspCy.value=meta.cy||'';
-  inspPadx.value=meta.padx||'';
+const inspectorNumeric=[inspX,inspY,inspW,inspH].filter(Boolean);
+const inspectorMeta=[inspCx,inspCy,inspPadx].filter(Boolean);
+
+const inspectorState={syncing:false,messageOverride:'',refreshPending:false};
+
+function resolveTileSize(){
+  try{
+    if(typeof TILE==='function'){
+      const size=Number(TILE());
+      if(!Number.isNaN(size) && size>0) return size;
+    }
+  }catch{}
+  return 8;
 }
 
-function applyInspectorChanges(){
-  if(!inspX||!inspY||!inspW||!inspH) return;
-  const baseSel=Array.isArray(window.CURRENT_SELECTION)?window.CURRENT_SELECTION.slice():[];
-  let sel=baseSel.filter(id=>typeof id==='string'&&id);
-  if(!sel.length&&window.selSet&&window.selSet.size){ sel=Array.from(window.selSet); }
-  if(!sel.length&&typeof getSelection==='function'){ sel=getSelection().map(el=>el&&el.id).filter(Boolean); }
-  if(!sel.length){ alert('No block selected'); return; }
-  const dx=parseInt(inspX.value,10);
-  const dy=parseInt(inspY.value,10);
-  const dw=parseInt(inspW.value,10);
-  const dh=parseInt(inspH.value,10);
-  if([dx,dy,dw,dh].some(v=>isNaN(v))) return alert('Enter valid numbers');
-  const valid=(v,min,max)=>Math.max(min,Math.min(max,v));
-  const xVal=valid(dx,0,17);
-  const yVal=valid(dy,0,31);
-  const wVal=valid(dw,1,18);
-  const hVal=valid(dh,1,32);
-  const cxRaw=inspCx&&typeof inspCx.value==='string'?inspCx.value.trim():'';
-  const cyRaw=inspCy&&typeof inspCy.value==='string'?inspCy.value.trim():'';
-  const padxRaw=inspPadx&&typeof inspPadx.value==='string'?inspPadx.value.trim():'';
-  sel.forEach(id=>{
-    const blockEl=document.getElementById(id);
-    if(!blockEl) return;
-    if(typeof place==='function') place(blockEl,xVal,yVal,wVal,hVal);
-    else {
-      const tileSize=typeof TILE==='function'?TILE():8;
-      blockEl.style.left=(xVal*tileSize)+'px';
-      blockEl.style.top=(yVal*tileSize)+'px';
-      blockEl.style.width=(wVal*tileSize)+'px';
-      blockEl.style.height=(hVal*tileSize)+'px';
+function getStageRoot(){
+  if(typeof root!=='undefined' && root) return root;
+  return document.getElementById('root');
+}
+
+function pxValue(n){ return (Math.round(n*100)/100)+'px'; }
+
+function formatTileValue(v){
+  if(!Number.isFinite(v)) return '';
+  const str=(Math.round(v*1000)/1000).toFixed(3);
+  return str.replace(/\.0+$/,'').replace(/(\.\d*?[1-9])0+$/,'$1');
+}
+
+function setNumberInput(input,value){
+  if(!input) return;
+  const next=value===null||value===undefined?'' : formatTileValue(value);
+  if(input.value!==next) input.value=next;
+}
+
+function setTextInput(input,value){
+  if(!input) return;
+  const next=value||'';
+  if(input.value!==next) input.value=next;
+}
+
+function clearInspectorInputs(){
+  inspectorNumeric.forEach(inp=>{ if(inp) inp.value=''; });
+  inspectorMeta.forEach(inp=>{ if(inp) inp.value=''; });
+  if(inspLock) inspLock.checked=false;
+}
+
+function getInspectorSelection(){
+  if(typeof getSelection==='function'){
+    try{ const list=getSelection(); if(Array.isArray(list)) return list.filter(Boolean); }
+    catch{}
+  }
+  const fallback=[];
+  if(window.selected && window.selected.classList && window.selected.classList.contains('block')) fallback.push(window.selected);
+  const extra=Array.from(document.querySelectorAll('.block.sel'));
+  extra.forEach(el=>{ if(!fallback.includes(el)) fallback.push(el); });
+  return fallback;
+}
+
+function computeBlockMetrics(block){
+  const stage=getStageRoot();
+  if(!stage||!block) return {x:0,y:0,w:0,h:0};
+  const tile=resolveTileSize();
+  const stageRect=stage.getBoundingClientRect();
+  const rect=block.getBoundingClientRect();
+  return {
+    x:(rect.left-stageRect.left)/tile,
+    y:(rect.top-stageRect.top)/tile,
+    w:rect.width/tile,
+    h:rect.height/tile
+  };
+}
+
+function setInspectorAvailability(mode, locked){
+  const disableAll=mode!=='single';
+  const disableLayout=disableAll||locked;
+  inspectorNumeric.forEach(inp=>{ if(inp) inp.disabled=disableLayout; });
+  inspectorMeta.forEach(inp=>{ if(inp) inp.disabled=disableAll; });
+  if(inspApply) inspApply.disabled=disableAll||locked;
+  if(inspLock) inspLock.disabled=disableAll;
+  if(inspEdit){
+    inspEdit.classList.toggle('is-disabled', disableAll);
+    inspEdit.classList.toggle('is-locked', !disableAll&&locked);
+  }
+}
+
+function setInspectorMessage(msg){
+  if(!inspStatus) return;
+  if(msg){
+    inspStatus.textContent=msg;
+    inspStatus.style.display='block';
+  } else {
+    inspStatus.textContent='';
+    inspStatus.style.display='none';
+  }
+}
+
+function refreshInspectorMessage(mode, locked){
+  let msg=inspectorState.messageOverride||'';
+  if(!msg){
+    if(mode==='none') msg='Select a block to edit.';
+    else if(mode==='multi') msg='Multi-edit not supported.';
+    else if(locked) msg='Block is locked.';
+  }
+  setInspectorMessage(msg);
+}
+
+function refreshInspectorSoon(){
+  if(inspectorState.refreshPending) return;
+  inspectorState.refreshPending=true;
+  const run=()=>{
+    inspectorState.refreshPending=false;
+    const panel=inspectorPanel||document.getElementById('inspector');
+    if(panel&&typeof panel.__updateInspector==='function'){
+      try{ panel.__updateInspector(); }
+      catch{}
     }
-    const meta={
+  };
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(run);
+  else setTimeout(run,16);
+}
+
+function fillInspectorFields(block, context){
+  if(inspectorState.syncing) return;
+  const selection=(context&&Array.isArray(context.selection))?context.selection:getInspectorSelection();
+  let mode='none';
+  if(selection.length>1) mode='multi';
+  else if(selection.length===1 && block) mode='single';
+  const locked=mode==='single' && block && block.classList.contains('locked');
+  inspectorState.syncing=true;
+  try{
+    setInspectorAvailability(mode, locked);
+    if(mode==='single' && block){
+      const metrics=computeBlockMetrics(block);
+      setNumberInput(inspX, metrics.x);
+      setNumberInput(inspY, metrics.y);
+      setNumberInput(inspW, metrics.w);
+      setNumberInput(inspH, metrics.h);
+      const style=block.style;
+      setTextInput(inspCx, style.getPropertyValue('--cx')||'');
+      setTextInput(inspCy, style.getPropertyValue('--cy')||'');
+      setTextInput(inspPadx, style.getPropertyValue('--padx')||'');
+      if(inspLock) inspLock.checked=locked;
+    } else {
+      clearInspectorInputs();
+    }
+  } finally {
+    inspectorState.syncing=false;
+  }
+  if(mode!=='single') inspectorState.messageOverride='';
+  refreshInspectorMessage(mode, locked);
+}
+
+function parseTileInput(input, fallback){
+  if(!input) return fallback;
+  const raw=(typeof input.value==='string')?input.value.trim():'';
+  if(raw==='') return fallback;
+  const num=parseFloat(raw);
+  return Number.isFinite(num)?num:fallback;
+}
+
+function readMetaInput(input){
+  if(!input||typeof input.value!=='string') return '';
+  return input.value.trim();
+}
+
+function applyInspectorMeta(block){
+  if(!block) return {changed:false};
+  const before={
+    cx:block.style.getPropertyValue('--cx')||'',
+    cy:block.style.getPropertyValue('--cy')||'',
+    padx:block.style.getPropertyValue('--padx')||''
+  };
+  const cxRaw=readMetaInput(inspCx);
+  const cyRaw=readMetaInput(inspCy);
+  const padxRaw=readMetaInput(inspPadx);
+  let changed=false;
+  if(before.cx!== (cxRaw||'')){
+    changed=true;
+    if(cxRaw) block.style.setProperty('--cx', cxRaw);
+    else block.style.removeProperty('--cx');
+  }
+  if(before.cy!== (cyRaw||'')){
+    changed=true;
+    if(cyRaw) block.style.setProperty('--cy', cyRaw);
+    else block.style.removeProperty('--cy');
+  }
+  if(before.padx!== (padxRaw||'')){
+    changed=true;
+    if(padxRaw) block.style.setProperty('--padx', padxRaw);
+    else block.style.removeProperty('--padx');
+  }
+  if(block.id && typeof persistMeta==='function'){
+    persistMeta(block.id, {
       cx: cxRaw||undefined,
       cy: cyRaw||undefined,
       padx: padxRaw||undefined
-    };
-    if(meta.cx!==undefined) blockEl.style.setProperty('--cx', meta.cx);
-    else blockEl.style.removeProperty('--cx');
-    if(meta.cy!==undefined) blockEl.style.setProperty('--cy', meta.cy);
-    else blockEl.style.removeProperty('--cy');
-    if(meta.padx!==undefined) blockEl.style.setProperty('--padx', meta.padx);
-    else blockEl.style.removeProperty('--padx');
-    if(typeof persistMeta==='function') persistMeta(id, {...meta});
-  });
-  if(typeof snapshot==='function') snapshot();
-  const panel=document.getElementById('inspector');
-  if(panel&&typeof panel.__updateInspector==='function'){
-    try{ panel.__updateInspector(); }
-    catch{}
+    });
   }
+  return {changed};
 }
 
-if(inspApply) inspApply.onclick=applyInspectorChanges;
+function writeBlockFromInspector(block, options){
+  if(!block) return null;
+  const opts=options||{};
+  const stage=getStageRoot();
+  const tile=resolveTileSize();
+  if(!stage||!tile) return null;
+  const metrics=computeBlockMetrics(block);
+  let changedLayout=false;
+  let resultMetrics={...metrics};
+  if(!opts.skipLayout){
+    const stageRect=stage.getBoundingClientRect();
+    let xTiles=parseTileInput(inspX, metrics.x);
+    let yTiles=parseTileInput(inspY, metrics.y);
+    let wTiles=parseTileInput(inspW, Math.max(metrics.w,1));
+    let hTiles=parseTileInput(inspH, Math.max(metrics.h,1));
+    wTiles=Math.max(1,wTiles);
+    hTiles=Math.max(1,hTiles);
+    let xPx=xTiles*tile;
+    let yPx=yTiles*tile;
+    let wPx=wTiles*tile;
+    let hPx=hTiles*tile;
+    const snapEnabled=!window.snapState || window.snapState.enabled!==false;
+    const applySnap=val=>{
+      if(!snapEnabled) return val;
+      if(typeof snapValuePx==='function'){
+        try{ return snapValuePx(val); }
+        catch{}
+      }
+      return Math.round(val/tile)*tile;
+    };
+    xPx=applySnap(xPx);
+    yPx=applySnap(yPx);
+    wPx=applySnap(wPx);
+    hPx=applySnap(hPx);
+    const stageW=stageRect.width;
+    const stageH=stageRect.height;
+    const minSize=tile;
+    wPx=clamp(wPx, minSize, stageW);
+    hPx=clamp(hPx, minSize, stageH);
+    xPx=clamp(xPx, 0, Math.max(0, stageW-wPx));
+    yPx=clamp(yPx, 0, Math.max(0, stageH-hPx));
+    const newX=xPx/tile;
+    const newY=yPx/tile;
+    const newW=wPx/tile;
+    const newH=hPx/tile;
+    if(Math.abs(metrics.x-newX)>1e-3||Math.abs(metrics.y-newY)>1e-3||Math.abs(metrics.w-newW)>1e-3||Math.abs(metrics.h-newH)>1e-3){
+      changedLayout=true;
+    }
+    resultMetrics={x:newX,y:newY,w:newW,h:newH};
+    block.style.left=pxValue(xPx);
+    block.style.top=pxValue(yPx);
+    block.style.width=pxValue(wPx);
+    block.style.height=pxValue(hPx);
+    setNumberInput(inspX, newX);
+    setNumberInput(inspY, newY);
+    setNumberInput(inspW, newW);
+    setNumberInput(inspH, newH);
+  }
+  const metaResult=applyInspectorMeta(block);
+  return {
+    changedLayout,
+    changedMeta:metaResult.changed,
+    changed:changedLayout||metaResult.changed,
+    metrics:resultMetrics
+  };
+}
+
+function applyInspectorChanges(options){
+  const opts=options||{};
+  const selection=getInspectorSelection();
+  if(selection.length!==1){
+    refreshInspectorMessage(selection.length>1?'multi':'none', false);
+    refreshInspectorSoon();
+    return false;
+  }
+  const block=selection[0];
+  const locked=block.classList.contains('locked');
+  const result=writeBlockFromInspector(block,{skipLayout:locked});
+  if(!result) return false;
+  if(result.changedLayout && !opts.live && typeof snapshot==='function') snapshot();
+  if(result.changed) inspectorState.messageOverride='';
+  refreshInspectorMessage('single', locked);
+  refreshInspectorSoon();
+  return result.changed;
+}
+
+function handleInspectorInput(){
+  if(inspectorState.syncing) return;
+  applyInspectorChanges({live:true});
+}
+
+function handleInspectorChange(){
+  if(inspectorState.syncing) return;
+  const changed=applyInspectorChanges({live:false});
+  if(!changed) refreshInspectorSoon();
+}
+
+inspectorNumeric.forEach(inp=>{
+  if(!inp) return;
+  inp.addEventListener('input', handleInspectorInput);
+  inp.addEventListener('change', handleInspectorChange);
+});
+inspectorMeta.forEach(inp=>{
+  if(!inp) return;
+  inp.addEventListener('input', handleInspectorInput);
+  inp.addEventListener('change', handleInspectorChange);
+});
+
+if(inspLock){
+  inspLock.addEventListener('change',()=>{
+    if(inspectorState.syncing) return;
+    const selection=getInspectorSelection();
+    if(selection.length!==1){
+      refreshInspectorSoon();
+      return;
+    }
+    const block=selection[0];
+    const locked=!!inspLock.checked;
+    block.classList.toggle('locked', locked);
+    if(block.dataset) block.dataset.locked=locked?'1':'0';
+    inspectorState.messageOverride='';
+    refreshInspectorMessage('single', locked);
+    if(typeof snapshot==='function') snapshot();
+    refreshInspectorSoon();
+  });
+}
+
+if(inspApply) inspApply.onclick=()=>applyInspectorChanges({live:false});
 (function(){
   // DISABLED duplicate dgGenerate binding (conflict).
   window.__disabledHandlerReport && window.__disabledHandlerReport.push({name:'#dgGenerate', reason:'legacy generator blocked'});
@@ -2284,24 +2528,26 @@ if(inspApply) inspApply.onclick=applyInspectorChanges;
       if(!btn || !panel) return;
       const fields={};
       panel.querySelectorAll('[data-field]').forEach(el=>{ fields[el.dataset.field]=el; });
-      if(inspApply) inspApply.onclick=applyInspectorChanges;
 
-      function getSelectedBlock(){
-        if(window.selected && window.selected.classList && window.selected.classList.contains('block')) return window.selected;
-        return document.querySelector('.block.sel');
+      function getSelectedBlocks(){
+        return getInspectorSelection();
       }
 
-      function computeMetrics(){
-        const defaults={id:'—',kind:'—',x:'—',y:'—',w:'—',h:'—'};
-        const sel=getSelectedBlock();
-        if(!sel || !(sel instanceof HTMLElement)) return defaults;
+      function computeMetrics(selection){
+        const defaults={id:'—',kind:'—',x:'—',y:'—',w:'—',h:'—',locked:'—'};
+        if(!Array.isArray(selection) || !selection.length) return defaults;
+        if(selection.length>1){
+          return {...defaults, id:`${selection.length} selected`, locked:'—'};
+        }
+        const sel=selection[0];
+        if(!(sel instanceof HTMLElement)) return defaults;
         let layoutData=null;
         try{
           layoutData=typeof collect==='function'?collect():null;
         }catch(e){ layoutData=null; }
         const entry=sel.id && layoutData && layoutData[sel.id] ? layoutData[sel.id] : null;
-        const tileSize=(typeof TILE==='function' && Number(TILE())) ? Number(TILE()) : 1;
-        const rootEl=typeof root!=='undefined' && root && root.getBoundingClientRect ? root : document.getElementById('root');
+        const tileSize=resolveTileSize();
+        const rootEl=getStageRoot();
         const rootRect=rootEl && rootEl.getBoundingClientRect ? rootEl.getBoundingClientRect() : {left:0,top:0};
         const rect=sel.getBoundingClientRect();
         const metrics=entry||{
@@ -2317,20 +2563,22 @@ if(inspApply) inspApply.onclick=applyInspectorChanges;
           x: Number.isFinite(metrics && metrics.x) ? metrics.x : '—',
           y: Number.isFinite(metrics && metrics.y) ? metrics.y : '—',
           w: Number.isFinite(metrics && metrics.w) ? metrics.w : '—',
-          h: Number.isFinite(metrics && metrics.h) ? metrics.h : '—'
+          h: Number.isFinite(metrics && metrics.h) ? metrics.h : '—',
+          locked: sel.classList.contains('locked') ? 'yes' : 'no'
         };
       }
 
-      function applyMetrics(){
-        const info=computeMetrics();
+      function applyMetrics(selection){
+        const info=computeMetrics(selection);
         Object.entries(fields).forEach(([key,el])=>{
           if(el) el.textContent = info[key] ?? '—';
         });
       }
 
       const updateInspector=()=>{
-        applyMetrics();
-        try{ fillInspectorFields(getSelectedBlock()); }
+        const selection=getSelectedBlocks();
+        applyMetrics(selection);
+        try{ fillInspectorFields(selection.length===1?selection[0]:null,{selection}); }
         catch{}
       };
 
