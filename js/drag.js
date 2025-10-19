@@ -66,7 +66,7 @@
     el.addEventListener('pointerdown', handleDoubleTap(el));
 
     el.addEventListener('pointerdown', e => {
-      const toggle = (e.ctrlKey || e.metaKey) === true;
+      const toggle = (e.ctrlKey || e.metaKey || e.shiftKey) === true;
       if (toggle){
         if (window.selSet && window.selSet.has(el.id)) removeFromSelection(el);
         else addToSelection(el);
