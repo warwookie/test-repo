@@ -391,5 +391,5 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-if (window.setPaletteVersion) window.setPaletteVersion(10);
+if (window.setPaletteVersion) window.setPaletteVersion(11);
 

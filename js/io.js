@@ -43,33 +43,40 @@ function readXY(el){
 }
 
 window.exportLayoutClean = function(){
-  const blocks = Array.from(document.querySelectorAll('.block'));
-  const snap = (typeof getSnapStep === 'function') ? getSnapStep() : BASE_TILE_PX;
+  // Collect ONLY real HUD blocks that declare a kind
+  const allEls = Array.from(document.querySelectorAll('.block[data-kind]'));
+  const snap   = (typeof getSnapStep === 'function') ? getSnapStep() : BASE_TILE_PX;
 
-  const items = blocks.map(el => {
+  let skipped = 0;
+  const items = allEls.map(el => {
+    const kind = (el.dataset && typeof el.dataset.kind === 'string') ? el.dataset.kind.trim() : '';
+    if (!kind) { skipped++; return null; }
+
     const id = el.id || '';
-    const kind = el.dataset.kind || el.getAttribute('data-kind') || '';
     const { x, y } = readXY(el);
     const w = el.offsetWidth;
     const h = el.offsetHeight;
 
+    // snap/clamp
     let nx = Math.round(x / snap) * snap;
     let ny = Math.round(y / snap) * snap;
-
     if (typeof clampToStage === 'function'){
       const c = clampToStage(nx, ny, w, h);
       nx = c.x; ny = c.y;
     }
 
+    // convert to tiles (allow halves)
     const toTiles = (px) => Math.round((px / BASE_TILE_PX) * 2) / 2;
 
-    const meta = {};
+    // minimal optional meta
     const inner = el.querySelector(':scope > .innerHost');
     const label = inner?.querySelector(':scope > .labelHost');
-    if (label){
-      meta.text = Array.from(label.querySelectorAll('.labelLine')).map(n => n.textContent).join('\n') || label.textContent || '';
-    }
     const icons = inner?.querySelector(':scope > .iconsHost');
+
+    const meta = {};
+    if (label){
+      meta.text = Array.from(label.querySelectorAll('.labelLine')).map(n=>n.textContent).join('\n') || label.textContent || '';
+    }
     if (icons){
       meta.iconCount = icons.children.length || 0;
     }
@@ -84,7 +91,11 @@ window.exportLayoutClean = function(){
       locked: el.classList.contains('locked') || false,
       meta
     };
-  });
+  }).filter(Boolean);
+
+  if (skipped && typeof window.inspStatus === 'function') {
+    window.inspStatus(`Export: skipped ${skipped} non-HUD node(s)`);
+  }
 
   const themeSel = document.getElementById('themeSel');
   const theme = themeSel ? themeSel.value : 'midnight';
