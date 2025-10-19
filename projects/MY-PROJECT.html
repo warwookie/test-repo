@@ -516,7 +516,32 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
           <p style="opacity:.7;margin-top:6px">Tip: drag the content inside the <b>preview</b> to reposition. Sliders update too.</p>
         </div>
         <div class="pane" id="pane-icons">
-          <p>Icon controls placeholder. Types, counts, size, gap, align. (Task 11).</p>
+          <div id="iconsForm" class="icons-form">
+            <label>Type
+              <select id="icoType">
+                <option value="dot">dot</option>
+                <option value="square">square</option>
+                <option value="heart">heart</option>
+                <option value="shoe">shoe</option>
+              </select>
+            </label>
+            <label>Count
+              <input id="icoCount" type="number" min="0" max="12" step="1" value="3"/>
+            </label>
+            <label>Size (px)
+              <input id="icoSize" type="number" min="6" max="64" step="1" value="12"/>
+            </label>
+            <label>Gap (px)
+              <input id="icoGap" type="number" min="0" max="32" step="1" value="4"/>
+            </label>
+            <label>Align
+              <select id="icoAlign">
+                <option value="start">start</option>
+                <option value="center">center</option>
+                <option value="end">end</option>
+              </select>
+            </label>
+          </div>
         </div>
         <div class="pane" id="pane-layout">
           <div class="edRow">

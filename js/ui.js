@@ -3,6 +3,8 @@ window.setPaletteVersion = function(n) {
   if (el) el.textContent = `Live UI — Palette ${n}`;
 };
 
+if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(16);
+
 window.snapState = window.snapState || {
   enabled: true,
   step: 1,
