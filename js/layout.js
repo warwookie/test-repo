@@ -194,6 +194,51 @@ window.setBlockPos = window.setBlockPos || function(el, x, y){
   el.dataset.y = String(y);
 };
 
+window.renderIconsForBlock = function(el, meta = {}) {
+  if (!el) return;
+  if (typeof window.normalizeBlockContent === 'function') {
+    try { window.normalizeBlockContent(el); } catch(_){}
+  }
+
+  const inner = el.querySelector(':scope > .innerHost');
+  const host = inner?.querySelector(':scope > .iconsHost');
+  if (!host) return;
+
+  const typeRaw  = meta.iconType  || el.dataset.iconType  || 'dot';
+  const countRaw = Number(meta.iconCount ?? el.dataset.iconCount ?? 0) | 0;
+  const sizeRaw  = Number(meta.iconSize  ?? el.dataset.iconSize  ?? 12) | 0;
+  const gapRaw   = Number(meta.iconGap   ?? el.dataset.iconGap   ?? 4)  | 0;
+  const alignRaw = meta.iconAlign || el.dataset.iconAlign || 'start';
+
+  const type  = String(typeRaw || 'dot');
+  const count = Math.max(0, countRaw);
+  const size  = Math.max(6, sizeRaw);
+  const gap   = Math.max(0, gapRaw);
+  const align = String(alignRaw || 'start');
+
+  el.dataset.iconType  = type;
+  el.dataset.iconCount = String(count);
+  el.dataset.iconSize  = String(size);
+  el.dataset.iconGap   = String(gap);
+  el.dataset.iconAlign = align;
+
+  host.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const iEl = document.createElement('i');
+    iEl.className = `iconToken icon-${type}`;
+    iEl.style.width = size + 'px';
+    iEl.style.height = size + 'px';
+    if (i > 0) iEl.style.marginLeft = gap + 'px';
+    host.appendChild(iEl);
+  }
+
+  host.style.display = 'flex';
+  host.style.alignItems = 'center';
+  host.style.justifyContent = (align === 'center') ? 'center' : (align === 'end' ? 'flex-end' : 'flex-start');
+
+  if (typeof window.renderLayout === 'function') window.renderLayout();
+};
+
 window.getSelectionBlocks = function(){
   const ids = (window.getSelectionSet && window.getSelectionSet()) || window.selSet;
   if (!ids || !ids.size) return [];

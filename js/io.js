@@ -77,9 +77,13 @@ window.exportLayoutClean = function(){
     if (label){
       meta.text = Array.from(label.querySelectorAll('.labelLine')).map(n=>n.textContent).join('\n') || label.textContent || '';
     }
-    if (icons){
-      meta.iconCount = icons.children.length || 0;
-    }
+    const hostChildCount = icons?.children?.length || 0;
+    meta.iconType  = el.dataset.iconType  || undefined;
+    meta.iconCount = Number(el.dataset.iconCount || hostChildCount || 0);
+    meta.iconSize  = Number(el.dataset.iconSize  || 12);
+    meta.iconGap   = Number(el.dataset.iconGap   || 4);
+    meta.iconAlign = el.dataset.iconAlign || 'start';
+    Object.keys(meta).forEach(key => { if (meta[key] === undefined) delete meta[key]; });
 
     return {
       id,
@@ -308,18 +312,6 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
     }
   }
 
-  const blocks = document.querySelectorAll('.block');
-  blocks.forEach(el => {
-    if (!el || !el.id) return;
-    if (lockedIds.has(el.id)) {
-      el.classList.add('locked');
-      el.dataset.locked = '1';
-    } else {
-      el.classList.remove('locked');
-      delete el.dataset.locked;
-    }
-  });
-
   const ensureHosts = (el) => {
     if (typeof window.normalizeBlockContent === 'function') {
       try { window.normalizeBlockContent(el); } catch {}
@@ -327,12 +319,22 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
     return el.querySelector(':scope > .innerHost') || el;
   };
 
-  Object.entries(metaMap).forEach(([id, meta]) => {
-    const el = document.getElementById(id);
-    if (!el || !meta || typeof meta !== 'object') return;
+  const blocks = document.querySelectorAll('.block');
+  blocks.forEach(el => {
+    if (!el || !el.id) return;
+
+    if (lockedIds.has(el.id)) {
+      el.classList.add('locked');
+      el.dataset.locked = '1';
+    } else {
+      el.classList.remove('locked');
+      delete el.dataset.locked;
+    }
+
+    const meta = metaMap[el.id];
     const inner = ensureHosts(el);
 
-    if (typeof meta.text === 'string') {
+    if (meta && typeof meta.text === 'string') {
       let label = inner.querySelector(':scope > .labelHost');
       if (!label) {
         if (typeof window.normalizeBlockContent === 'function') {
@@ -352,7 +354,19 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
       }
     }
 
-    if (typeof meta.iconCount === 'number') {
+    const hasRenderer = typeof window.renderIconsForBlock === 'function';
+    if (hasRenderer) {
+      if (meta && typeof meta === 'object') {
+        if (meta.iconType  !== undefined) el.dataset.iconType  = meta.iconType;
+        if (meta.iconCount !== undefined) el.dataset.iconCount = String(meta.iconCount);
+        if (meta.iconSize  !== undefined) el.dataset.iconSize  = String(meta.iconSize);
+        if (meta.iconGap   !== undefined) el.dataset.iconGap   = String(meta.iconGap);
+        if (meta.iconAlign !== undefined) el.dataset.iconAlign = meta.iconAlign;
+        window.renderIconsForBlock(el, meta);
+      } else {
+        window.renderIconsForBlock(el, {});
+      }
+    } else if (meta && typeof meta.iconCount === 'number') {
       let icons = inner.querySelector(':scope > .iconsHost');
       if (!icons) {
         if (typeof window.normalizeBlockContent === 'function') {

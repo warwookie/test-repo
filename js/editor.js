@@ -181,6 +181,7 @@ function openEditor(el){
   syncLayoutFields(el);
   preloadTextControls(el);
   preloadInnerControls(el);
+  if (typeof window.populateIconsForm === 'function') window.populateIconsForm();
 }
 
 function closeEditor(){
@@ -331,6 +332,66 @@ if (!window.__beLayoutBound){
 }
 
 window.populateBlockEditorLayout(getActiveBlock());
+
+function beGetActiveEl(){
+  const sel = (typeof window.getSelectionSet === 'function') ? window.getSelectionSet() : window.selSet;
+  if (!sel || !sel.size) return null;
+  const ids = Array.from(sel);
+  const id = ids[ids.length - 1] || ids[0];
+  return id ? document.getElementById(id) : null;
+}
+
+const icoType  = document.getElementById('icoType');
+const icoCount = document.getElementById('icoCount');
+const icoSize  = document.getElementById('icoSize');
+const icoGap   = document.getElementById('icoGap');
+const icoAlign = document.getElementById('icoAlign');
+
+function iconsApplyFromForm(){
+  const el = beGetActiveEl();
+  if (!el) return;
+  if (el.classList && el.classList.contains('locked')) return;
+
+  const meta = {
+    iconType:  icoType?.value || 'dot',
+    iconCount: Number(icoCount?.value || 0),
+    iconSize:  Number(icoSize?.value || 12),
+    iconGap:   Number(icoGap?.value || 4),
+    iconAlign: icoAlign?.value || 'start',
+  };
+
+  if (typeof window.renderIconsForBlock === 'function') window.renderIconsForBlock(el, meta);
+  if (typeof window.buildPreviewFrom === 'function') window.buildPreviewFrom(el);
+
+  if (typeof window.updateInspector === 'function') window.updateInspector(null);
+  try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'blockEditor-icons' } })); } catch(_){ }
+  if (typeof window.snapshot === 'function') window.snapshot();
+  if (typeof window.historyPush === 'function') window.historyPush({ type:'edit', note:'Block Editor Icons' });
+}
+
+[icoType, icoCount, icoSize, icoGap, icoAlign].forEach(ctrl => {
+  if (!ctrl) return;
+  ctrl.addEventListener('input', iconsApplyFromForm);
+  ctrl.addEventListener('change', iconsApplyFromForm);
+});
+
+window.populateIconsForm = function(){
+  const el = beGetActiveEl();
+  if (!el) return;
+  if (icoType)  icoType.value  = el.dataset.iconType  || 'dot';
+  if (icoCount) icoCount.value = el.dataset.iconCount || '0';
+  if (icoSize)  icoSize.value  = el.dataset.iconSize  || '12';
+  if (icoGap)   icoGap.value   = el.dataset.iconGap   || '4';
+  if (icoAlign) icoAlign.value = el.dataset.iconAlign || 'start';
+};
+
+if (!window.__iconsTabBound){
+  window.__iconsTabBound = true;
+  window.addEventListener('selection:changed', () => window.populateIconsForm());
+  window.addEventListener('layout:changed',    () => window.populateIconsForm());
+}
+
+window.populateIconsForm();
 
 window.getTextHost = getTextHost;
 window.getScoreHosts = getScoreHosts;
