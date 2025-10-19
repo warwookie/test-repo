@@ -66,17 +66,23 @@
     el.addEventListener('pointerdown', handleDoubleTap(el));
 
     el.addEventListener('pointerdown', e => {
+      const blockEl = e.currentTarget || el;
+      const isLocked = !!(blockEl && blockEl.classList && blockEl.classList.contains('locked'));
       const toggle = (e.ctrlKey || e.metaKey || e.shiftKey) === true;
       if (toggle){
-        if (window.selSet && window.selSet.has(el.id)) removeFromSelection(el);
-        else addToSelection(el);
+        if (window.selSet && window.selSet.has(blockEl.id)) removeFromSelection(blockEl);
+        else addToSelection(blockEl);
       } else {
-        setSingleSelection(el);
+        setSingleSelection(blockEl);
       }
       e.__handledSelection = true;
       updateSelectedFromSet();
       if (!isEditing()) return;
-      if (el.classList.contains('locked')) return;
+      if (isLocked){
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
 
       const handle = e.target.classList.contains('handle');
       const mode = handle ? 'resize' : 'move';
@@ -131,6 +137,7 @@
         pendingEvent = null;
         rafId = null;
         if (!ev) return;
+        if (el && el.classList && el.classList.contains('locked')) return;
 
         const shell = stage.getBoundingClientRect();
         const pointerX = clamp(ev.clientX, shell.left, shell.right);
