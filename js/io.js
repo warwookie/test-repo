@@ -322,20 +322,42 @@ $('#pasteApply').onclick=()=>{
   }
 };
 
-const dlBtn = document.getElementById('downloadJson') || document.getElementById('downloadJsonModal');
-function downloadJsonBlob(obj, filename='layout.json'){
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-if (dlBtn){
-  dlBtn.addEventListener('click', () => {
-    const json = window.exportLayoutClean();
-    downloadJsonBlob(json, 'layout.json');
+window.__saveJsonBlob = window.__saveJsonBlob || function(obj, filename='layout.json'){
+  try {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Download failed:', err);
+  }
+};
+
+window.bindDownloadButtons = function(){
+  const ids = ['downloadJson', 'downloadJsonModal'];
+  ids.forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    if (btn.__dlBound) return;
+    btn.__dlBound = true;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof window.exportLayoutClean !== 'function') {
+        console.warn('exportLayoutClean() not found');
+        return;
+      }
+      const json = window.exportLayoutClean();
+      window.__saveJsonBlob(json, 'layout.json');
+    });
   });
-}
+};
 
 const exportBtn = document.getElementById('export');
 const ioTA = document.getElementById('io');
