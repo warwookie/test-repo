@@ -136,6 +136,8 @@
         const pointerX = clamp(ev.clientX, shell.left, shell.right);
         const pointerY = clamp(ev.clientY, shell.top, shell.bottom);
         if (mode === 'move'){
+          const movingTargets = getSelection().length ? getSelection() : [el];
+          const isMultiDrag = movingTargets.length > 1;
           const dx = pointerX - start.x;
           const dy = pointerY - start.y;
           const base = start.map[el.id] || { l: start.l, t: start.t };
@@ -165,7 +167,16 @@
           const baseInfo = start.map[el.id] || { l: start.l, t: start.t };
           const deltaX = nx - baseInfo.l;
           const deltaY = ny - baseInfo.t;
-          const movingTargets = getSelection().length ? getSelection() : [el];
+          let sharedDX = deltaX;
+          let sharedDY = deltaY;
+          if (isMultiDrag){
+            const snapOn = typeof isSnapEnabled === 'function' ? isSnapEnabled() : true;
+            const step = typeof getSnapStep === 'function' ? getSnapStep() : 16;
+            if (snapOn && !ev.altKey){
+              sharedDX = Math.round(sharedDX / step) * step;
+              sharedDY = Math.round(sharedDY / step) * step;
+            }
+          }
           movingTargets.forEach(t => {
             if (t.classList.contains('locked')) return;
             const info = start.map[t.id];
@@ -173,14 +184,21 @@
             const tr = t.getBoundingClientRect();
             const tw = tr.width;
             const th = tr.height;
-            let L = info.l + deltaX;
-            let T = info.t + deltaY;
+            let L = info.l + sharedDX;
+            let T = info.t + sharedDY;
             const maxL = Math.max(0, shell.width - tw);
             const maxT = Math.max(0, shell.height - th);
-            L = snapWithinBounds(L, ev, 0, maxL);
-            T = snapWithinBounds(T, ev, 0, maxT);
-            t.style.left = Math.round(L) + 'px';
-            t.style.top = Math.round(T) + 'px';
+            if (isMultiDrag){
+              L = clamp(L, 0, maxL);
+              T = clamp(T, 0, maxT);
+              t.style.left = L + 'px';
+              t.style.top = T + 'px';
+            } else {
+              L = snapWithinBounds(L, ev, 0, maxL);
+              T = snapWithinBounds(T, ev, 0, maxT);
+              t.style.left = Math.round(L) + 'px';
+              t.style.top = Math.round(T) + 'px';
+            }
           });
         } else {
           if (typeof clearGuides === 'function'){
