@@ -121,9 +121,26 @@ if (guideToggle && guidesHost){
 
 addEventListener('keydown',e=>{
   if(e.key.toLowerCase()==='g'){ toggleGrid(); }
-  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); const s=hist.undo(); if(s) applyStrict(s,true); updateHistCounter(); return; }
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z'){
+    e.preventDefault();
+    const s=hist.undo();
+    if(s){
+      applyStrict(s,true);
+      if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+    }
+    updateHistCounter();
+    return;
+  }
   if(((e.metaKey||e.ctrlKey) && (e.key.toLowerCase()==='y' || (e.shiftKey && e.key.toLowerCase()==='z')))){
-    e.preventDefault(); const s=hist.redo(); if(s) applyStrict(s,true); updateHistCounter(); return; }
+    e.preventDefault();
+    const s=hist.redo();
+    if(s){
+      applyStrict(s,true);
+      if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+    }
+    updateHistCounter();
+    return;
+  }
   if(e.key==='Escape'){ closeEditor(); }
   if(!editing) return;
   const selList=getSelection();
@@ -285,6 +302,7 @@ if(toggleGridInput){
     if (!res.ok) { alert('Saved layout failed validation:\n\n' + res.errors.join('\n')); return; }
 
     applyStrict(reconcileLayout(res.layout), true);
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
 
     if (res.meta && typeof res.meta === 'object') {
       try { localStorage.setItem(META_KEY, JSON.stringify(res.meta)); } catch {}
@@ -315,10 +333,10 @@ if(toggleGridInput){
   };
 })();
 
-$('#undo').onclick=()=>{ const s=hist.undo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
-$('#redo').onclick=()=>{ const s=hist.redo(); if(s){ applyStrict(s,true); updateHistCounter(); } };
+$('#undo').onclick=()=>{ const s=hist.undo(); if(s){ applyStrict(s,true); if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI(); updateHistCounter(); } };
+$('#redo').onclick=()=>{ const s=hist.redo(); if(s){ applyStrict(s,true); if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI(); updateHistCounter(); } };
 $('#delete').onclick=()=>{ if(deleteSelection()) snapshot(); };
-$('#reset').onclick=()=>{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(META_KEY); applyStrict(STRICT_LAYOUT,true); select(null); hist.stack=[]; hist.cursor=-1; snapshot(); };
+$('#reset').onclick=()=>{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(META_KEY); applyStrict(STRICT_LAYOUT,true); if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI(); select(null); hist.stack=[]; hist.cursor=-1; snapshot(); };
 $('#openEditor').onclick=()=>{
   let target=selected;
   if(!target){
@@ -371,5 +389,5 @@ if (distSel && distApply) {
 window.setGridUI = setGridUI;
 window.toggleGrid = toggleGrid;
 
-window.setPaletteVersion(7);
+if (window.setPaletteVersion) window.setPaletteVersion(8);
 

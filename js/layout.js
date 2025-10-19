@@ -199,6 +199,7 @@ window.alignSelected = function(kind){
   if (typeof window.updateInspector=== 'function') window.updateInspector(null);
   if (typeof window.historyPush    === 'function') window.historyPush({type:'align', note:kind});
   else if (typeof window.pushHistory=== 'function') window.pushHistory('align-'+kind);
+  if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
   try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{source:'align', kind} })); } catch(_){ }
 };
 
@@ -256,6 +257,7 @@ window.distributeSelected = function(mode){
   if (typeof window.updateInspector === 'function') window.updateInspector(null);
   if (typeof window.historyPush     === 'function') window.historyPush({ type:'distribute', mode });
   else if (typeof window.pushHistory=== 'function') window.pushHistory('distribute-'+mode);
+  if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
   try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'distribute', mode } })); } catch(_){ }
 };
 
