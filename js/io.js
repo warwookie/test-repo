@@ -321,24 +321,40 @@ $('#close').onclick=closeModal;
     return true;
   };
 
-  window.resetToStrictDefault = function(){
-    const applied = typeof window.applyPresetById === 'function' && window.applyPresetById('strictDefault', {
-      historyLabel: 'Reset to strict default'
-    });
-    if (!applied) return;
+  window.resetToStrictDefault = function() {
+    // 1) Apply the strict default preset using the shared path
+    if (typeof window.applyPresetById === 'function') {
+      window.applyPresetById('strictDefault');
+    } else {
+      console.warn('applyPresetById() not found');
+    }
 
+    // 2) Clear selection safely
     if (window.selection && typeof window.selection.clear === 'function') {
       window.selection.clear();
     } else if (typeof window.clearSelection === 'function') {
       window.clearSelection();
     } else {
-      const selEls = document.querySelectorAll('.block.sel');
-      selEls.forEach(el => el.classList.remove('sel'));
+      document.querySelectorAll('.block.sel').forEach(el => el.classList.remove('sel'));
     }
 
+    // 3) Refresh inspector/UI (call whatever exists)
     if (typeof window.updateInspector === 'function') window.updateInspector(null);
     if (typeof window.renderLayout === 'function') window.renderLayout();
     if (typeof window.updateLayoutUI === 'function') window.updateLayoutUI();
+
+    // 4) Record history + update the history UI if available
+    if (typeof window.historyPush === 'function') {
+      window.historyPush({ type: 'reset', note: 'Reset to strict default' });
+    } else if (typeof window.pushHistory === 'function') {
+      window.pushHistory('reset', { preset: 'strictDefault' });
+    }
+    if (typeof window.updateHistoryUI === 'function') window.updateHistoryUI('Reset');
+
+    // 5) Notify any listeners
+    try {
+      window.dispatchEvent(new CustomEvent('layout:changed', { detail: { source: 'reset' }}));
+    } catch (e) {}
   };
 })();
 
