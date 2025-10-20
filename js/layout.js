@@ -428,3 +428,62 @@ window.distributeSelected = function(mode){
   try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'distribute', mode } })); } catch(_){ }
 };
 
+window.pruneGhostBlocks = function(){
+  const removed = [];
+  document.querySelectorAll('.block').forEach(el => {
+    const kind = el.dataset?.kind;
+    const id = el.id;
+    if (!id || !kind) {
+      removed.push({ id: id || '(no-id)', kind: kind || '(no-kind)' });
+      el.remove();
+    }
+  });
+  return removed;
+};
+
+window.ensureUniqueBlockIds = function(){
+  const seen = new Map();
+  const renamed = [];
+  document.querySelectorAll('.block[id]').forEach(el => {
+    const id = el.id.trim();
+    if (!id) return;
+
+    if (!seen.has(id)) {
+      seen.set(id, 1);
+      return;
+    }
+
+    const nth = seen.get(id) + 1;
+    seen.set(id, nth);
+    const newId = `${id}-${nth}`;
+    const oldId = el.id;
+
+    el.id = newId;
+    renamed.push({ from: oldId, to: newId });
+
+    if (window.selSet && window.selSet.has(oldId)) {
+      window.selSet.delete(oldId);
+      window.selSet.add(newId);
+    }
+  });
+  return renamed;
+};
+
+window.sanitizeLayoutOnce = function(source = 'startup'){
+  const removed = window.pruneGhostBlocks();
+  const renamed = window.ensureUniqueBlockIds();
+
+  if (removed.length || renamed.length) {
+    if (typeof window.inspStatus === 'function') {
+      window.inspStatus(`Sanitized: removed ${removed.length} ghost(s), renamed ${renamed.length} duplicate id(s)`);
+    }
+    if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+    if (typeof window.updateInspector === 'function') window.updateInspector(null);
+    try {
+      window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source: `sanitize:${source}`, removed, renamed } }));
+    } catch(_){ }
+    if (typeof window.historyPush === 'function') window.historyPush({ type:'sanitize', source, removed, renamed });
+  }
+  return { removed, renamed };
+};
+
