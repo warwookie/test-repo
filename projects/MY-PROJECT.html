@@ -279,7 +279,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
             </div>
             <div class="tb-row tb-row-field">
               <label class="tb-field">Align
-                <select id="alignSel" aria-label="Align">
+                <select id="alignSelect" aria-label="Align">
                   <option value="">Align…</option>
                   <option value="left">Left</option>
                   <option value="centerX">Center X</option>
@@ -287,6 +287,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
                   <option value="top">Top</option>
                   <option value="middleY">Middle Y</option>
                   <option value="bottom">Bottom</option>
+                  <option value="baselineY">Baseline Y</option>
+                  <option value="equalH">Equal Height</option>
                 </select>
               </label>
               <button id="alignApply" type="button">Apply</button>
@@ -688,6 +690,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Pres
   <script src="../js/layout.js"></script>
   <script src="../js/io.js"></script>
   <script src="../js/editor.js"></script>
+  <script src="../js/align.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/init.js"></script>
   
