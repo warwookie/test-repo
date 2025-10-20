@@ -411,16 +411,40 @@ $('#lockSel').onclick=()=>{
   snapshot();
 };
 
-const alignSel = document.getElementById('alignSel');
-const alignApply = document.getElementById('alignApply');
-if (alignApply){
-  alignApply.onclick = () => {
-    const mode = alignSel ? alignSel.value : '';
-    if (!mode){ alert('Select an align mode.'); return; }
-    const blocks = (typeof window.getSelectionBlocks === 'function') ? window.getSelectionBlocks() : getSelection().filter(b=>!b.classList.contains('locked'));
-    if (!blocks || blocks.length < 2){ alert('Select at least two unlocked blocks to align.'); return; }
-    if (typeof window.alignSelected === 'function') window.alignSelected(mode);
-  };
+const alignSelect = document.getElementById('alignSelect');
+const alignApply  = document.getElementById('alignApply');
+
+if (alignApply && !alignApply.__boundBaseline){
+  alignApply.__boundBaseline = true;
+  alignApply.addEventListener('click', ()=>{
+    const mode = alignSelect?.value || '';
+    if (!mode) return;
+    const sel  = (window.getSelectionArray && window.getSelectionArray()) ||
+                 (window.getSelectionSet ? Array.from(window.getSelectionSet()) :
+                 (window.selSet ? Array.from(window.selSet) : []));
+    const els  = sel
+      .map(id => document.getElementById(id))
+      .filter(el => el && !el.classList.contains('locked'));
+    if (!els.length) return;
+
+    let ops = null;
+    if (mode === 'baselineY' && typeof window.alignBaselineY === 'function') {
+      ops = window.alignBaselineY(els);
+    } else if (mode === 'equalH' && typeof window.alignEqualH === 'function') {
+      ops = window.alignEqualH(els);
+    } else if (typeof window.alignSelected === 'function') {
+      window.alignSelected(mode);
+      return;
+    }
+
+    if (ops){
+      if (typeof window.updateInspector === 'function') window.updateInspector(null);
+      if (typeof window.refreshSelectionUI === 'function') window.refreshSelectionUI();
+      try { window.dispatchEvent(new CustomEvent('layout:changed', { detail:{ source:'align', mode } })); } catch(_){ }
+      if (typeof window.historyPush === 'function') window.historyPush({ type:'align', mode, ops });
+      if (typeof window.inspStatus === 'function') window.inspStatus(`Align: ${mode} on ${els.length} block(s)`);
+    }
+  });
 }
 
 const distSel = document.getElementById('distSel');
@@ -438,6 +462,6 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-const PALETTE_VERSION = 17;
+const PALETTE_VERSION = 18;
 if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 
