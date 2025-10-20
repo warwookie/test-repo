@@ -1,239 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
 
-// SneakerQuest Retro-Futuristic v2 Canvas â€” DRAG + RESIZE + Export/Import + Undo/Redo + Snap Toggle
-// All visual chrome preserved. All elements editable. Info bar now uses its own editable state.
-
-const SNAP = 8;
-const hardSnap = (n: number) => Math.round(n / SNAP) * SNAP;
-
-type Box = { x: number; y: number; w: number; h: number };
-
-type HudConfig = {
-  label: string;
-  icon: string;
-  count: number;        // emoji repeat count
-  font: number;         // label font px
-  iconSize: number;     // icon font px
-  showCount: boolean;   // show separate count text
-  countText: string;    // e.g. "x 5" or "x 0000"
-  // Absolute positioning inside the box (px from top-left)
-  textX: number; textY: number;
-  iconX: number; iconY: number;
-  countX: number; countY: number;
-};
-
-// Info bar editable content
-type InfoConfig = {
-  stageLeft: string;   // e.g., "STAGE â€” ONE"
-  chevron: string;     // e.g., "â–¸"
-  timer: string;       // e.g., "00:00:00:0"
-  scoreLabel: string;  // e.g., "SCORE"
-  score: string;       // e.g., "000000"
-  font: number;        // main font size
-  subFont: number;     // score subline font size
-};
-
-function useDrag(
-  pos: { x: number; y: number },
-  setPos: (p: { x: number; y: number }) => void,
-  snapper: (n: number) => number,
-  onStart?: () => void
-) {
-  const dragging = useRef(false);
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!dragging.current) return;
-      setPos({ x: snapper(pos.x + e.movementX), y: snapper(pos.y + e.movementY) });
-    };
-    const onUp = () => { dragging.current = false; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-  }, [pos.x, pos.y, setPos, snapper]);
-  const onMouseDown = () => { if (!dragging.current) onStart && onStart(); dragging.current = true; };
-  return { onMouseDown };
-}
-
-function useResize(
-  box: { w: number; h: number; x: number; y: number },
-  setBox: (b: { w: number; h: number; x: number; y: number }) => void,
-  snapper: (n: number) => number,
-  onStart?: () => void
-) {
-  const mode = useRef<null | { h: string }>(null);
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!mode.current) return;
-      const handle = mode.current.h as "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
-      let { x, y, w, h } = box;
-      const dx = e.movementX, dy = e.movementY;
-      if (handle.includes("n")) { y = snapper(y + dy); h = snapper(h - dy); }
-      if (handle.includes("s")) { h = snapper(h + dy); }
-      if (handle.includes("w")) { x = snapper(x + dx); w = snapper(w - dx); }
-      if (handle.includes("e")) { w = snapper(w + dx); }
-      w = Math.max(40, w); h = Math.max(24, h);
-      setBox({ x, y, w, h });
-    };
-    const onUp = () => { mode.current = null; };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-  }, [box, setBox, snapper]);
-  const onDown = (h: string) => { onStart && onStart(); mode.current = { h }; };
-  return { onDown };
-}
-
-function Handles({ onDown }: { onDown: (h: string) => void }) {
-  const base: React.CSSProperties = { position: "absolute", width: 10, height: 10, background: "#ff9d00", border: "2px solid #332d23", borderRadius: 2 };
-  return (<>
-    <div style={{ ...base, left: -5, top: -5, cursor: "nwse-resize" }} onMouseDown={() => onDown("nw")} />
-    <div style={{ ...base, left: "50%", transform: "translateX(-50%)", top: -5, cursor: "ns-resize" }} onMouseDown={() => onDown("n")} />
-    <div style={{ ...base, right: -5, top: -5, cursor: "nesw-resize" }} onMouseDown={() => onDown("ne")} />
-    <div style={{ ...base, right: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" }} onMouseDown={() => onDown("e")} />
-    <div style={{ ...base, right: -5, bottom: -5, cursor: "nwse-resize" }} onMouseDown={() => onDown("se")} />
-    <div style={{ ...base, left: "50%", transform: "translateX(-50%)", bottom: -5, cursor: "ns-resize" }} onMouseDown={() => onDown("s")} />
-    <div style={{ ...base, left: -5, bottom: -5, cursor: "nesw-resize" }} onMouseDown={() => onDown("sw")} />
-    <div style={{ ...base, left: -5, top: "50%", transform: "translateY(-50%)", cursor: "ew-resize" }} onMouseDown={() => onDown("w")} />
-  </>);
-}
-
-export default function SneakerQuestRetroV2() {
-  // Snap toggle and history stacks
-  const [snapOn, setSnapOn] = useState(true);
-  const snapper = (n: number) => (snapOn ? hardSnap(n) : n);
-  const [past, setPast] = useState<any[]>([]);
-  const [future, setFuture] = useState<any[]>([]);
-
-  // Game font selection
-  const [gameFont, setGameFont] = useState<'ps2p' | 'vt323' | 'mono'>('ps2p');
-  const gameFontFamily = gameFont === 'ps2p' ? '"Press Start 2P", monospace' : gameFont === 'vt323' ? '"VT323", monospace' : 'monospace';
-
-  // Positions and sizes (initialized to original V2)
-  const [title, setTitle] = useState<Box>({ x: 8, y: 8, w: 304, h: 32 });
-  const [infobar, setInfobar] = useState<Box>({ x: 8, y: 48, w: 304, h: 32 });
-  const [crt, setCrt] = useState<Box>({ x: 8, y: 88, w: 304, h: 200 });
-  const [life, setLife] = useState<Box>({ x: 8, y: 296, w: 72, h: 40 });
-  const [fire, setFire] = useState<Box>({ x: 88, y: 296, w: 72, h: 40 });
-  const [sneakers, setSneakers] = useState<Box>({ x: 168, y: 296, w: 72, h: 40 });
-  const [boxes, setBoxes] = useState<Box>({ x: 248, y: 296, w: 72, h: 40 });
-  const [power, setPower] = useState<Box>({ x: 248, y: 344, w: 64, h: 32 });
-  const [btnA, setBtnA] = useState<Box>({ x: 8, y: 480, w: 96, h: 32 });
-  const [btnB, setBtnB] = useState<Box>({ x: 8, y: 520, w: 96, h: 32 });
-  const [stick, setStick] = useState<Box>({ x: 192, y: 456, w: 120, h: 120 });
-  const [badge, setBadge] = useState<Box>({ x: 280, y: 552, w: 32, h: 16 });
-
-  // Editor state for ALL boxes
-  const [configs, setConfigs] = useState<Record<string, HudConfig>>({
-    // HUD row
-    life:     { label: "LIFE", icon: "â¤ï¸", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 0, countY: 0 },
-    fire:     { label: "FIRE", icon: "ðŸ”¥", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 5", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
-    sneakers: { label: "SNEAKERS", icon: "ðŸ‘Ÿ", count: 5, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 72, iconY: 10, countX: 0, countY: 0 },
-    boxes:    { label: "BOX", icon: "ðŸ“¦", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 0000", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
-    power:    { label: "", icon: "âš¡", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 10, iconX: 20, iconY: 8, countX: 0, countY: 0 },
-    // Title plaque
-    title:    { label: "SNEAKERQUEST", icon: "", count: 0, font: 14, iconSize: 12, showCount: false, countText: "", textX: 0, textY: 0, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-    // CRT pause overlay
-    crt:      { label: "II", icon: "", count: 0, font: 24, iconSize: 12, showCount: false, countText: "", textX: 144, textY: 88, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-    // Buttons
-    btnA:     { label: "", icon: "", count: 0, font: 12, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 8, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-    btnB:     { label: "BOMB", icon: "", count: 0, font: 12, iconSize: 12, showCount: false, countText: "", textX: 28, textY: 8, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-    // Joystick label (optional)
-    stick:    { label: "", icon: "", count: 0, font: 10, iconSize: 12, showCount: false, countText: "", textX: 0, textY: 0, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-    // Badge text
-    badge:    { label: "SQ-01", icon: "", count: 0, font: 8,  iconSize: 12, showCount: false, countText: "", textX: 4, textY: 2, iconX: 0, iconY: 0, countX: 0, countY: 0 },
-  });
-
-  // Info bar state and draft
-  const [infoCfg, setInfoCfg] = useState<InfoConfig>({ stageLeft: "STAGE â€” ONE", chevron: "â–¸", timer: "00:00:00:0", scoreLabel: "SCORE", score: "000000", font: 10, subFont: 9 });
-  const [draftInfo, setDraftInfo] = useState<InfoConfig | null>(null);
-
-  const [editId, setEditId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<HudConfig | null>(null);
-
-  const openEditor = (id: string) => {
-    if (id === 'infobar') { setDraftInfo({ ...infoCfg }); setEditId(id); return; }
-    if (!configs[id]) return;
-    setDraft({ ...configs[id] });
-    setEditId(id);
-  };
-  const applyEditor = () => {
-    if (editId === 'infobar') {
-      if (!draftInfo) return;
-      setInfoCfg({ ...draftInfo });
-      commit();
-      setEditId(null);
-      setDraftInfo(null);
-      return;
-    }
-    if (!editId || !draft) return;
-    setConfigs((c) => ({ ...c, [editId]: { ...draft } }));
-    commit();
-    setEditId(null);
-    setDraft(null);
-  };
-
-  // History helpers
-  const snapshot = () => ({ title, infobar, crt, life, fire, sneakers, boxes, power, btnA, btnB, stick, badge, configs, infoCfg });
-  const applySnapshot = (s: any) => {
-    if (!s) return;
-    setTitle(s.title); setInfobar(s.infobar); setCrt(s.crt);
-    setLife(s.life); setFire(s.fire); setSneakers(s.sneakers); setBoxes(s.boxes); setPower(s.power);
-    setBtnA(s.btnA); setBtnB(s.btnB); setStick(s.stick); setBadge(s.badge);
-    if (s.configs) setConfigs(s.configs);
-    if (s.infoCfg) setInfoCfg(s.infoCfg);
-  };
-  const commit = () => { setPast((p) => [...p, snapshot()]); setFuture([]); };
-  const undo = () => { setPast((p) => { if (p.length === 0) return p; const prev = p[p.length - 1]; setFuture((f) => [snapshot(), ...f]); applySnapshot(prev); return p.slice(0, -1); }); };
-  const redo = () => { setFuture((f) => { if (f.length === 0) return f; const next = f[0]; setPast((p) => [...p, snapshot()]); applySnapshot(next); return f.slice(1); }); };
-
-  // Drag hooks (commit history on start)
-  const dTitle = useDrag(title, (p) => setTitle((v) => ({ ...v, ...p })), snapper, commit);
-  const dInfo = useDrag(infobar, (p) => setInfobar((v) => ({ ...v, ...p })), snapper, commit);
-  const dCrt = useDrag(crt, (p) => setCrt((v) => ({ ...v, ...p })), snapper, commit);
-  const dLife = useDrag(life, (p) => setLife((v) => ({ ...v, ...p })), snapper, commit);
-  const dFire = useDrag(fire, (p) => setFire((v) => ({ ...v, ...p })), snapper, commit);
-  const dSnk = useDrag(sneakers, (p) => setSneakers((v) => ({ ...v, ...p })), snapper, commit);
-  const dBox = useDrag(boxes, (p) => setBoxes((v) => ({ ...v, ...p })), snapper, commit);
-  const dPow = useDrag(power, (p) => setPower((v) => ({ ...v, ...p })), snapper, commit);
-  const dA = useDrag(btnA, (p) => setBtnA((v) => ({ ...v, ...p })), snapper, commit);
-  const dB = useDrag(btnB, (p) => setBtnB((v) => ({ ...v, ...p })), snapper, commit);
-  const dStick = useDrag(stick, (p) => setStick((v) => ({ ...v, ...p })), snapper, commit);
-  const dBadge = useDrag(badge, (p) => setBadge((v) => ({ ...v, ...p })), snapper, commit);
-
-  // Resize hooks (commit history on start)
-  const rTitle = useResize(title, setTitle, snapper, commit);
-  const rInfo = useResize(infobar, setInfobar, snapper, commit);
-  const rCrt = useResize(crt, setCrt, snapper, commit);
-  const rLife = useResize(life, setLife, snapper, commit);
-  const rFire = useResize(fire, setFire, snapper, commit);
-  const rSnk = useResize(sneakers, setSneakers, snapper, commit);
-  const rBox = useResize(boxes, setBoxes, snapper, commit);
-  const rPow = useResize(power, setPower, snapper, commit);
-  const rA = useResize(btnA, setBtnA, snapper, commit);
-  const rB = useResize(btnB, setBtnB, snapper, commit);
-  const rStick = useResize(stick, setStick, snapper, commit);
-  const rBadge = useResize(badge, setBadge, snapper, commit);
-
-  // Export/Import state
-  const [showExport, setShowExport] = useState(false);
-  const [showImport, setShowImport] = useState(false);
-  const [importText, setImportText] = useState("");
-
-  // --- Export: Static standalone HTML snapshot ---
-  const download = (filename: string, text: string) => {
-    const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  };
-  const buildStaticHTML = () => {
-    // Helper to style blocks
-    const s = (b: Box) => `position:absolute;left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px;`;
-    const esc = (t: string) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const c = (id: keyof typeof configs) => configs[id];
-    const iconSeq = (icon: string, n: number) => Array.from({length:n}).map(()=>icon).join('');
-    return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -261,380 +27,71 @@ export default function SneakerQuestRetroV2() {
 </head>
 <body>
   <div class="device">
-    <div class="plaque abs" style="${s(title)};font-size:${c('title').font}px">
-      ${esc(c('title').label)}
+    <div class="plaque abs" style="position:absolute;left:8px;top:8px;width:304px;height:32px;;font-size:14px">
+      SNEAKERQUEST
       <div class="led" style="left:4px"></div>
       <div class="led" style="right:4px"></div>
     </div>
 
-    <div class="bar abs" style="${s(infobar)};font-size:${infoCfg.font}px">
-      <div>${esc(infoCfg.stageLeft)}</div>
-      <div style="color:#77ff99">${esc(infoCfg.chevron)}</div>
+    <div class="bar abs" style="position:absolute;left:8px;top:48px;width:304px;height:32px;;font-size:10px">
+      <div>STAGE — ONE</div>
+      <div style="color:#77ff99">▸</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1">
-        <span>${esc(infoCfg.timer)}</span>
-        <span style="color:#bfb79f;font-size:${infoCfg.subFont}px">${esc(infoCfg.scoreLabel)} ${esc(infoCfg.score)}</span>
+        <span>00:00:00:0</span>
+        <span style="color:#bfb79f;font-size:9px">SCORE 000000</span>
       </div>
     </div>
 
-    <div class="crt abs" style="${s(crt)}">
+    <div class="crt abs" style="position:absolute;left:8px;top:88px;width:304px;height:200px;">
       <div class="scan"></div>
-      <div class="abs" style="left:${configs.crt.textX}px;top:${configs.crt.textY}px;font-size:${configs.crt.font}px;color:#d2c7a7">${esc(configs.crt.label)}</div>
+      <div class="abs" style="left:144px;top:88px;font-size:24px;color:#d2c7a7">II</div>
     </div>
 
-    <div class="hud abs" style="${s(life)}">
-      <span style="position:absolute;left:${c('life').textX}px;top:${c('life').textY}px;font-size:${c('life').font}px">${esc(c('life').label)}</span>
-      <span style="position:absolute;left:${c('life').iconX}px;top:${c('life').iconY}px;font-size:${c('life').iconSize}px">${iconSeq(c('life').icon,c('life').count)}</span>
+    <div class="hud abs" style="position:absolute;left:8px;top:296px;width:72px;height:40px;">
+      <span style="position:absolute;left:8px;top:12px;font-size:10px">LIFE</span>
+      <span style="position:absolute;left:44px;top:10px;font-size:12px">❤️❤️❤️</span>
     </div>
 
-    <div class="hud abs" style="${s(fire)}">
-      <span style="position:absolute;left:${c('fire').textX}px;top:${c('fire').textY}px;font-size:${c('fire').font}px">${esc(c('fire').label)}</span>
-      <span style="position:absolute;left:${c('fire').iconX}px;top:${c('fire').iconY}px;font-size:${c('fire').iconSize}px">${iconSeq(c('fire').icon,c('fire').count)}</span>
-      <span style="position:absolute;left:${c('fire').countX}px;top:${c('fire').countY}px;font-size:${c('fire').font}px">${esc(c('fire').countText)}</span>
+    <div class="hud abs" style="position:absolute;left:88px;top:296px;width:72px;height:40px;">
+      <span style="position:absolute;left:8px;top:12px;font-size:10px">FIRE</span>
+      <span style="position:absolute;left:44px;top:10px;font-size:12px">🔥</span>
+      <span style="position:absolute;left:60px;top:12px;font-size:10px">x 5</span>
     </div>
 
-    <div class="hud abs" style="${s(sneakers)}">
-      <span style="position:absolute;left:${c('sneakers').textX}px;top:${c('sneakers').textY}px;font-size:${c('sneakers').font}px">${esc(c('sneakers').label)}</span>
-      <span style="position:absolute;left:${c('sneakers').iconX}px;top:${c('sneakers').iconY}px;font-size:${c('sneakers').iconSize}px">${iconSeq(c('sneakers').icon,c('sneakers').count)}</span>
+    <div class="hud abs" style="position:absolute;left:168px;top:296px;width:72px;height:40px;">
+      <span style="position:absolute;left:8px;top:12px;font-size:10px">SNEAKERS</span>
+      <span style="position:absolute;left:72px;top:10px;font-size:12px">👟👟👟👟👟</span>
     </div>
 
-    <div class="hud abs" style="${s(boxes)}">
-      <span style="position:absolute;left:${c('boxes').textX}px;top:${c('boxes').textY}px;font-size:${c('boxes').font}px">${esc(c('boxes').label)}</span>
-      <span style="position:absolute;left:${c('boxes').iconX}px;top:${c('boxes').iconY}px;font-size:${c('boxes').iconSize}px">${iconSeq(c('boxes').icon,c('boxes').count)}</span>
-      <span style="position:absolute;left:${c('boxes').countX}px;top:${c('boxes').countY}px;font-size:${c('boxes').font}px">${esc(c('boxes').countText)}</span>
+    <div class="hud abs" style="position:absolute;left:248px;top:296px;width:72px;height:40px;">
+      <span style="position:absolute;left:8px;top:12px;font-size:10px">BOX</span>
+      <span style="position:absolute;left:44px;top:10px;font-size:12px">📦</span>
+      <span style="position:absolute;left:60px;top:12px;font-size:10px">x 0000</span>
     </div>
 
-    <div class="hud abs" style="${s(power)}">
-      <span style="position:absolute;left:${c('power').iconX}px;top:${c('power').iconY}px;font-size:${c('power').iconSize}px">${iconSeq(c('power').icon,c('power').count)}</span>
+    <div class="hud abs" style="position:absolute;left:248px;top:344px;width:64px;height:32px;">
+      <span style="position:absolute;left:20px;top:8px;font-size:12px">⚡⚡⚡</span>
     </div>
 
-    <div class="btn abs" style="${s(btnA)};font-size:${c('btnA').font}px">
-      ${esc(c('btnA').label)}
+    <div class="btn abs" style="position:absolute;left:8px;top:480px;width:96px;height:32px;;font-size:12px">
+      JUMP
       <div class="pip"></div>
     </div>
 
-    <div class="btn abs" style="${s(btnB)};font-size:${c('btnB').font}px">
-      <div style="position:absolute;left:${c('btnB').textX}px;top:${c('btnB').textY}px">${esc(c('btnB').label)}</div>
+    <div class="btn abs" style="position:absolute;left:8px;top:520px;width:96px;height:32px;;font-size:12px">
+      <div style="position:absolute;left:28px;top:8px">BOMB</div>
       <div class="pip"></div>
     </div>
 
-    <div class="abs joystick" style="${s(stick)};">
+    <div class="abs joystick" style="position:absolute;left:176px;top:456px;width:120px;height:120px;;">
       <div class="stick"></div>
-      <div class="arw" style="top:6px;left:50%;transform:translateX(-50%)">â–²</div>
-      <div class="arw" style="bottom:6px;left:50%;transform:translateX(-50%)">â–¼</div>
-      <div class="arw" style="left:6px;top:50%;transform:translateY(-50%)">â—€</div>
-      <div class="arw" style="right:6px;top:50%;transform:translateY(-50%)">â–¶</div>
+      <div class="arw" style="top:6px;left:50%;transform:translateX(-50%)">▲</div>
+      <div class="arw" style="bottom:6px;left:50%;transform:translateX(-50%)">▼</div>
+      <div class="arw" style="left:6px;top:50%;transform:translateY(-50%)">◀</div>
+      <div class="arw" style="right:6px;top:50%;transform:translateY(-50%)">▶</div>
     </div>
 
-    <div class="abs badge" style="${s(badge)};font-size:${c('badge').font}px">${esc(c('badge').label)}</div>
+    <div class="abs badge" style="position:absolute;left:280px;top:552px;width:32px;height:16px;;font-size:8px">SQ-01</div>
   </div>
 </body>
-</html>`;
-  };
-  const exportHTML = () => download('SneakerQuest_Retro_Futuristic_V2.html', buildStaticHTML());
-
-  // JSON helpers (layout only)
-  const toJSON = () => ({
-    theme: "theme-dmg",
-    blocks: [
-      { id: "title", ...title }, { id: "infobar", ...infobar }, { id: "crt", ...crt },
-      { id: "life", ...life }, { id: "fire", ...fire }, { id: "sneakers", ...sneakers }, { id: "boxes", ...boxes },
-      { id: "power", ...power }, { id: "btnA", ...btnA }, { id: "btnB", ...btnB }, { id: "stick", ...stick }, { id: "badge", ...badge },
-    ],
-  });
-  const applyJSON = (obj: any) => {
-    if (!obj || !Array.isArray(obj.blocks)) return alert("Invalid JSON: missing blocks");
-    const map: Record<string, any> = {};
-    obj.blocks.forEach((b: any) => {
-      if (!b?.id) return;
-      map[b.id] = { x: hardSnap(b.x ?? 0), y: hardSnap(b.y ?? 0), w: Math.max(40, hardSnap(b.w ?? 40)), h: Math.max(24, hardSnap(b.h ?? 24)) };
-    });
-    commit();
-    if (map.title) setTitle((v) => ({ ...v, ...map.title }));
-    if (map.infobar) setInfobar((v) => ({ ...v, ...map.infobar }));
-    if (map.crt) setCrt((v) => ({ ...v, ...map.crt }));
-    if (map.life) setLife((v) => ({ ...v, ...map.life }));
-    if (map.fire) setFire((v) => ({ ...v, ...map.fire }));
-    if (map.sneakers) setSneakers((v) => ({ ...v, ...map.sneakers }));
-    if (map.boxes) setBoxes((v) => ({ ...v, ...map.boxes }));
-    if (map.power) setPower((v) => ({ ...v, ...map.power }));
-    if (map.btnA) setBtnA((v) => ({ ...v, ...map.btnA }));
-    if (map.btnB) setBtnB((v) => ({ ...v, ...map.btnB }));
-    if (map.stick) setStick((v) => ({ ...v, ...map.stick }));
-    if (map.badge) setBadge((v) => ({ ...v, ...map.badge }));
-  };
-
-  // Generic HUD content
-  const HudContent = ({ id }: { id: keyof typeof configs }) => {
-    const c = editId === id && draft ? draft : configs[id];
-    if (!c) return null as any;
-    const labelColor = (id === 'life' || id === 'fire' || id === 'sneakers' || id === 'boxes' || id === 'power' || id === 'crt') ? '#d2c7a7' : 'inherit';
-    return (
-      <div className="relative w-full h-full">
-        {c.label && (
-          <span style={{ position: 'absolute', left: c.textX, top: c.textY, fontFamily: gameFontFamily, fontSize: c.font, color: labelColor }}>{c.label}</span>
-        )}
-        <span style={{ position: 'absolute', left: c.iconX, top: c.iconY, fontSize: c.iconSize }}>
-          {c.count > 0 ? Array.from({ length: c.count }).map((_, i) => <span key={i}>{c.icon}</span>) : null}
-        </span>
-        {c.showCount && (
-          <span style={{ position: 'absolute', left: c.countX, top: c.countY, fontFamily: gameFontFamily, fontSize: c.font, color: labelColor }}>{c.countText}</span>
-        )}
-      </div>
-    );
-  };
-
-  // Docked editor panel
-  const EditorPanel = () => {
-    if (!editId) return null;
-
-    // Info bar editor
-    if (editId === 'infobar') {
-      if (!draftInfo) return null;
-      const setI = (k: keyof InfoConfig, v: any) => setDraftInfo((d) => (d ? { ...d, [k]: v } : d));
-      const NumI = ({ label, k, min = 8, max = 16 }: { label: string; k: keyof InfoConfig; min?: number; max?: number }) => (
-        <label className="flex items-center justify-between gap-2 text-[#e6e6e6] text-xs md:text-sm font-mono">
-          <span className="truncate pr-2">{label}</span>
-          <input type="number" className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-24" value={Number(draftInfo[k] as any)} min={min} max={max} onChange={(e) => setI(k, Number(e.target.value))} />
-        </label>
-      );
-      return (
-        <div className="flex flex-col gap-2">
-          <div className="text-white text-sm font-mono">Edit: INFO BAR</div>
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2">
-            <span className="w-20">Stage</span>
-            <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draftInfo.stageLeft} onChange={(e)=>setI('stageLeft', e.target.value)} />
-          </label>
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2">
-            <span className="w-20">Chevron</span>
-            <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draftInfo.chevron} onChange={(e)=>setI('chevron', e.target.value)} />
-          </label>
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2">
-            <span className="w-20">Timer</span>
-            <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draftInfo.timer} onChange={(e)=>setI('timer', e.target.value)} />
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2">
-              <span className="w-20">Score lbl</span>
-              <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draftInfo.scoreLabel} onChange={(e)=>setI('scoreLabel', e.target.value)} />
-            </label>
-            <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2">
-              <span className="w-16">Score</span>
-              <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draftInfo.score} onChange={(e)=>setI('score', e.target.value)} />
-            </label>
-          </div>
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#333]">
-            <NumI label="Font" k="font" min={8} max={14} />
-            <NumI label="Sub font" k="subFont" min={8} max={14} />
-          </div>
-          <div className="flex gap-2 justify-end sticky bottom-0 bg-[#1b1b1b] pt-2">
-            <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => { setEditId(null); setDraftInfo(null); }}>Cancel</button>
-            <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={applyEditor}>Apply</button>
-          </div>
-        </div>
-      );
-    }
-
-    if (!draft) return null;
-    const set = (k: keyof HudConfig, v: any) => setDraft((d) => (d ? { ...d, [k]: v } : d));
-    const Num = ({ label, k, min = 0, max = 128 }: { label: string; k: keyof HudConfig; min?: number; max?: number }) => (
-      <label className="flex items-center justify-between gap-2 text-[#e6e6e6] text-xs md:text-sm font-mono min-w-0">
-        <span className="truncate pr-2">{label}</span>
-        <input type="number" className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full max-w-[120px]" value={Number(draft[k] as any)} min={min} max={max} onChange={(e) => set(k, Number(e.target.value))} />
-      </label>
-    );
-    return (
-      <div className="flex flex-col gap-2 min-w-0">
-        <div className="text-white text-sm font-mono">Edit: {editId.toUpperCase()}</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center justify-between gap-2 min-w-0">
-            <span>Label</span>
-            <input className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full min-w-0" value={draft.label} onChange={(e) => set("label", e.target.value)} />
-          </label>
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center justify-between gap-2 min-w-0">
-            <span>Icon</span>
-            <input className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full min-w-0" value={draft.icon} onChange={(e) => set("icon", e.target.value)} />
-          </label>
-          <Num label="Icon count" k="count" min={0} max={12} />
-          <Num label="Label font" k="font" min={8} max={32} />
-          <Num label="Icon size" k="iconSize" min={8} max={32} />
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center justify-between gap-2 min-w-0">
-            <span>Show count</span>
-            <input type="checkbox" checked={draft.showCount} onChange={(e) => set("showCount", e.target.checked)} />
-          </label>
-          <label className="col-span-2 text-[#e6e6e6] text-xs font-mono flex items-center justify-between gap-2">
-            <span>Count text</span>
-            <input className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full min-w-0" value={draft.countText} onChange={(e) => set("countText", e.target.value)} />
-          </label>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2 border-t border-[#333]">
-          <Num label="Label X" k="textX" min={0} max={256} />
-          <Num label="Label Y" k="textY" min={0} max={128} />
-          <div />
-          <Num label="Icon X" k="iconX" min={0} max={256} />
-          <Num label="Icon Y" k="iconY" min={0} max={128} />
-          <div />
-          <Num label="Count X" k="countX" min={0} max={256} />
-          <Num label="Count Y" k="countY" min={0} max={128} />
-        </div>
-        <div className="flex gap-2 justify-end sticky bottom-0 bg-[#1b1b1b] pt-2">
-          <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => { setEditId(null); setDraft(null); }}>Cancel</button>
-          <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={applyEditor}>Apply</button>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="w-full h-full flex items-start justify-center bg-[#1a1a1a] p-6 select-none">
-      {/* Load pixel fonts */}
-      <style>{"@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');"}</style>
-      {/* LEFT DOCK: buttons + editor */}
-      <div className="sticky top-6 mr-4 w-[clamp(200px,24vw,320px)] max-h-[calc(100vh-48px)] overflow-auto bg-[#1b1b1b] border border-[#333] rounded p-3 flex flex-col gap-2">
-        <div className="text-[#e6e6e6] font-mono text-sm">Tools</div>
-        <div className="flex flex-col gap-2">
-          <label className="w-full text-[#e6e6e6] font-mono text-xs flex items-center justify-between gap-2">
-            <span>Game font</span>
-            <select className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={gameFont} onChange={(e)=> setGameFont(e.target.value as any)}>
-              <option value="ps2p">Press Start 2P</option>
-              <option value="vt323">VT323</option>
-              <option value="mono">System Mono</option>
-            </select>
-          </label>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => setShowExport((v)=>!v)}>Export JSON</button>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={exportHTML}>Export HTML (static)</button>
-          {showExport && (
-            <textarea className="w-full h-28 md:h-40 bg-[#0e0e0e] text-[#e6e6e6] p-2 font-mono text-[12px] rounded min-w-0" readOnly value={JSON.stringify(toJSON(), null, 2)} />
-          )}
-          {showExport && (
-            <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => navigator.clipboard?.writeText(JSON.stringify(toJSON(), null, 2))}>Copy</button>
-          )}
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => setShowImport((v)=>!v)}>Import JSON</button>
-          {showImport && (
-            <>
-              <textarea className="w-full h-28 md:h-40 bg-[#0e0e0e] text-[#e6e6e6] p-2 font-mono text-[12px] rounded min-w-0" placeholder="Paste layout JSON here" value={importText} onChange={(e)=> setImportText(e.target.value)} />
-              <div className="flex gap-2">
-                <button className="flex-1 px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={()=>{ try{ applyJSON(JSON.parse(importText)); } catch{ alert('Invalid JSON'); } }}>Apply</button>
-                <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={()=> setImportText("")}>Clear</button>
-              </div>
-            </>
-          )}
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={undo}>Undo</button>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={redo}>Redo</button>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => setSnapOn((s) => !s)}>Snap: {snapOn ? "On" : "Off"}</button>
-        </div>
-
-        {/* Docked editor appears below tools when a box is opened */}
-        {editId && (draft || draftInfo) && (
-          <div className="mt-2 pt-2 border-t border-[#333]">
-            <EditorPanel />
-          </div>
-        )}
-      </div>
-
-      {/* GAME DEVICE */}
-      <div className="relative w-[320px] h-[576px] rounded-[16px] bg-[#c9bfa6] border-[4px] border-[#443f35] shadow-[inset_0_0_0_2px_#a09479,0_4px_0_#2a2a2a]" style={{ fontFamily: gameFontFamily }}>
-        {/* Header plaque */}
-        <div onMouseDown={dTitle.onMouseDown} onDoubleClick={() => openEditor('title')} style={{ position: 'absolute', left: title.x, top: title.y, width: title.w, height: title.h }}>
-          <div className="w-full h-full rounded-[8px] bg-[#d47c2e] flex items-center justify-center border-[2px] border-[#332d23] shadow-[inset_0_1px_0_#ffb86b] font-mono text-[#1a1a1a] font-bold tracking-[2px] relative" style={{ fontFamily: gameFontFamily }}>
-            <span style={{ fontSize: (editId==='title'&&draft?draft.font:configs.title.font) }}>{(editId==='title'&&draft?draft.label:configs.title.label)}</span>
-            <div className="absolute left-[4px] w-[6px] h-[6px] rounded-full bg-[#ff9d00]" />
-            <div className="absolute right-[4px] w-[6px] h-[6px] rounded-full bg-[#ff9d00]" />
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rTitle.onDown} /></div>
-        </div>
-
-        {/* Info bar (editable) */}
-        <div onMouseDown={dInfo.onMouseDown} onDoubleClick={() => openEditor('infobar')} style={{ position: 'absolute', left: infobar.x, top: infobar.y, width: infobar.w, height: infobar.h }}>
-          {(() => { const c = editId==='infobar' && draftInfo ? draftInfo : infoCfg; return (
-            <div className="w-full h-full bg-[#2e2d29] border-[2px] border-[#131313] rounded-[6px] flex items-center justify-between px-3 text-[#d2c7a7] font-mono" style={{ fontSize: c.font, fontFamily: gameFontFamily }}>
-              <div>{c.stageLeft}</div>
-              <div className="text-[#77ff99]">{c.chevron}</div>
-              <div className="flex flex-col items-end leading-tight">
-                <span>{c.timer}</span>
-                <span className="text-[#bfb79f]" style={{ fontSize: c.subFont }}>{c.scoreLabel} {c.score}</span>
-              </div>
-            </div>
-          ); })()}
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rInfo.onDown} /></div>
-        </div>
-
-        {/* CRT Display + editable overlay */}
-        <div onMouseDown={dCrt.onMouseDown} onDoubleClick={() => openEditor('crt')} style={{ position: 'absolute', left: crt.x, top: crt.y, width: crt.w, height: crt.h }}>
-          <div className="w-full h-full bg-[#1a2b1a] rounded-[10px] border-[3px] border-[#0a0f0a] shadow-[inset_0_0_20px_#0d1b0d] overflow-hidden flex items-center justify-center relative">
-            <div className="absolute inset-0 opacity-20 bg-[linear-gradient(transparent_95%,rgba(255,255,255,0.05)_100%)] bg-[length:100%_2px]" />
-            <div className="absolute inset-0"><HudContent id="crt" /></div>
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rCrt.onDown} /></div>
-        </div>
-
-        {/* HUD boxes */}
-        <div onMouseDown={dLife.onMouseDown} onDoubleClick={() => openEditor('life')} style={{ position: 'absolute', left: life.x, top: life.y, width: life.w, height: life.h }}>
-          <div className="w-full h-full bg-[#2e2d29] border border-[#131313] rounded-[6px] px-2 py-1"> <HudContent id="life" /> </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rLife.onDown} /></div>
-        </div>
-
-        <div onMouseDown={dFire.onMouseDown} onDoubleClick={() => openEditor('fire')} style={{ position: 'absolute', left: fire.x, top: fire.y, width: fire.w, height: fire.h }}>
-          <div className="w-full h-full bg-[#2e2d29] border border-[#131313] rounded-[6px] px-2 py-1"> <HudContent id="fire" /> </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rFire.onDown} /></div>
-        </div>
-
-        <div onMouseDown={dSnk.onMouseDown} onDoubleClick={() => openEditor('sneakers')} style={{ position: 'absolute', left: sneakers.x, top: sneakers.y, width: sneakers.w, height: sneakers.h }}>
-          <div className="w-full h-full bg-[#2e2d29] border border-[#131313] rounded-[6px] px-2 py-1"> <HudContent id="sneakers" /> </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rSnk.onDown} /></div>
-        </div>
-
-        <div onMouseDown={dBox.onMouseDown} onDoubleClick={() => openEditor('boxes')} style={{ position: 'absolute', left: boxes.x, top: boxes.y, width: boxes.w, height: boxes.h }}>
-          <div className="w-full h-full bg-[#2e2d29] border border-[#131313] rounded-[6px] px-2 py-1"> <HudContent id="boxes" /> </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rBox.onDown} /></div>
-        </div>
-
-        {/* Power-ups */}
-        <div onMouseDown={dPow.onMouseDown} onDoubleClick={() => openEditor('power')} style={{ position: 'absolute', left: power.x, top: power.y, width: power.w, height: power.h }}>
-          <div className="w-full h-full bg-[#2e2d29] border border-[#131313] rounded-[6px] px-3 py-1 flex items-center justify-center"> <HudContent id="power" /> </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rPow.onDown} /></div>
-        </div>
-
-        {/* Buttons */}
-        <div onMouseDown={dA.onMouseDown} onDoubleClick={() => openEditor('btnA')} style={{ position: 'absolute', left: btnA.x, top: btnA.y, width: btnA.w, height: btnA.h }}>
-          <div className="w-full h-full rounded-[12px] bg-[#2e2d29] border border-[#131313] shadow-[inset_0_1px_2px_#00000050] relative flex items-center justify-center text-[#d2c7a7] font-mono" style={{ fontSize: (editId==='btnA'&&draft?draft.font:configs.btnA.font) }}>
-            {(editId==='btnA'&&draft?draft.label:configs.btnA.label)}
-            <div className="absolute top-[4px] right-[6px] w-[6px] h-[6px] rounded-full bg-[#ff9d00]" />
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rA.onDown} /></div>
-        </div>
-
-        <div onMouseDown={dB.onMouseDown} onDoubleClick={() => openEditor('btnB')} style={{ position: 'absolute', left: btnB.x, top: btnB.y, width: btnB.w, height: btnB.h }}>
-          <div className="w-full h-full rounded-[12px] bg-[#2e2d29] border border-[#131313] shadow-[inset_0_1px_2px_#00000050] flex items-center justify-center text-[#d2c7a7] font-mono relative">
-            {/* Editable overlay like other boxes */}
-            <div className="absolute inset-0"><HudContent id="btnB" /></div>
-            <div className="absolute top-[4px] right-[6px] w-[6px] h-[6px] rounded-full bg-[#ff9d00]" />
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rB.onDown} /></div>
-        </div>
-
-        {/* Joystick with optional overlay label */}
-        <div onMouseDown={dStick.onMouseDown} onDoubleClick={() => openEditor('stick')} style={{ position: 'absolute', left: stick.x, top: stick.y, width: stick.w, height: stick.h }}>
-          <div className="w-full h-full rounded-full bg-[#2e2d29] border-[2px] border-[#131313] flex items-center justify-center ml-[24px] shadow-[inset_0_2px_4px_#00000080] relative">
-            <div className="absolute w-[80px] h-[80px] rounded-full bg-[#3a3a3a] border-[2px] border-[#191919] shadow-[inset_0_0_6px_#000000]" />
-            <div className="absolute text-[#777] text-[10px] font-mono">
-              <div className="absolute top-[6px] left-[50%] -translate-x-1/2">â–²</div>
-              <div className="absolute bottom-[6px] left-[50%] -translate-x-1/2">â–¼</div>
-              <div className="absolute left-[6px] top-[50%] -translate-y-1/2">â—€</div>
-              <div className="absolute right-[6px] top-[50%] -translate-y-1/2">â–¶</div>
-            </div>
-            <div className="absolute inset-0 pointer-events-none"><HudContent id="stick" /></div>
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rStick.onDown} /></div>
-        </div>
-
-        {/* Badge */}
-        <div onMouseDown={dBadge.onMouseDown} onDoubleClick={() => openEditor('badge')} style={{ position: 'absolute', left: badge.x, top: badge.y, width: badge.w, height: badge.h }}>
-          <div className="w-full h-full text-[8px] text-[#2e2d29] font-mono flex items-center justify-center relative" style={{ fontSize: (editId==='badge'&&draft?draft.font:configs.badge.font) }}>
-            {(editId==='badge'&&draft?draft.label:configs.badge.label)}
-          </div>
-          <div style={{ position: 'absolute', inset: 0 }}><Handles onDown={rBadge.onDown} /></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+</html>
