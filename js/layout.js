@@ -181,8 +181,12 @@ function normalizeBlockContent(blockEl, opts = {}) {
   }
 }
 
-window.renderLabelForBlock = function(el, meta = {}) {
+window.renderLabelForBlock = function(el, meta = {}, opts = {}) {
   if (!el) return;
+  const isPreview = !!(opts && opts.preview);
+  if (isPreview && el && typeof window.attachPreviewTag === 'function') {
+    window.attachPreviewTag(el);
+  }
   if (typeof window.normalizeBlockContent === 'function') window.normalizeBlockContent(el);
 
   const inner = el.querySelector(':scope > .innerHost');
@@ -240,7 +244,41 @@ window.renderLabelForBlock = function(el, meta = {}) {
 
   label.style.transform = `translate(${gx + fx}px, ${gy + fy}px)`;
 
-  if (typeof window.renderLayout === 'function') window.renderLayout();
+  if (!isPreview && typeof window.renderLayout === 'function') window.renderLayout();
+};
+
+const __origRenderLabel = window.renderLabelForBlock;
+window.renderLabelForBlock = function(el, meta = {}, opts = {}){
+  return __origRenderLabel ? __origRenderLabel(el, meta, opts) : undefined;
+};
+
+// Ensure board exists and is bottom-most, locked
+window.ensureBoardBlock = function(){
+  // Expected id/kind for the game field
+  let board = document.getElementById('board');
+  if (!board) {
+    // Create a minimal board block if it doesn't exist
+    board = document.createElement('div');
+    board.id = 'board';
+    board.className = 'block';
+    board.dataset.kind = '_board';
+    // Basic size defaults (override if your preset differs)
+    board.dataset.x = String(2 * (window.TILE_PX||16));
+    board.dataset.y = String(5 * (window.TILE_PX||16));
+    board.style.position = 'absolute';
+    const stage = document.getElementById('stage');
+    if (stage) stage.appendChild(board);
+    if (typeof window.normalizeBlockContent === 'function') window.normalizeBlockContent(board);
+  }
+
+  // Lock and send to back
+  board.classList.add('locked');
+  board.style.zIndex = '1';
+  // Bring all others above
+  document.querySelectorAll('.block').forEach(b=>{
+    if (b === board) return;
+    b.style.zIndex = '2';
+  });
 };
 function makeBlock(kind, forceId){
   const el=document.createElement('div'); el.className='block'; el.dataset.kind=kind; el.id=forceId||uid(kind); el.tabIndex=0;
