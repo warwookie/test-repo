@@ -1,0 +1,10 @@
+/* Board baseline: light panel look (keeps rest of theme intact) */
+#stage .block.board-layer {
+  background: #ECE6D9;    /* soft white/beige */
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25);
+}
+
+/* If the board has an inner host, keep it clean */
+#stage .block.board-layer .innerHost {
+  background: transparent;
+}

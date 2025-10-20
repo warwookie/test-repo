@@ -103,6 +103,75 @@ window.purgePreImport = function(source = 'startup'){
   return { removedEls, scrubbed };
 };
 
+// Remove any visual preview/ghost artifacts that slipped into the stage.
+// Heuristics:
+//  - node has data-preview="1", OR
+//  - .block with no id or no data-kind, OR
+//  - .block whose .labelHost text matches the common ghost label ("SNEAKER" or "ST") AND missing data-kind.
+window.postLoadVisualPurge = function(source='post-load'){
+  const doomed = [];
+
+  // 1) Any explicitly tagged preview nodes
+  document.querySelectorAll('.be-preview-node, .block[data-preview="1"]').forEach(n => {
+    doomed.push({ why: 'tagged-preview', node: n });
+  });
+
+  // 2) Blocks missing id or kind
+  document.querySelectorAll('#stage .block').forEach(el=>{
+    const id = el.id?.trim();
+    const kind = el.dataset?.kind;
+    if (!id || !kind) {
+      // Optional: if it clearly looks like a ghost label (SNEAKER/ST), we can cull confidently.
+      const label = el.querySelector('.labelHost');
+      const txt = (label?.textContent || '').trim().replace(/\s+/g,' ');
+      const looksLikeGhost = /(^SNEAKER\b|^ST$)/i.test(txt);
+      doomed.push({ why: (!id||!kind) ? 'no-id-or-kind' : 'ghost-text', node: el, txt, looksLikeGhost });
+    }
+  });
+
+  doomed.forEach(d => { try { d.node.remove(); } catch(_){} });
+
+  if (typeof window.inspStatus === 'function'){
+    window.inspStatus(`Visual purge (${source}): removed ${doomed.length} node(s)`);
+  }
+  return doomed.length;
+};
+
+
+// Ensure the game board exists, is locked, and is bottom-most.
+// Uses tile geometry (defaults align with prior JSON: x:2,y:5,w:24,h:21 tiles).
+window.ensureBoardLayer = function(){
+  const TILE = window.TILE_PX || 16;
+  const stage = document.getElementById('stage');
+  if (!stage) return;
+
+  let board = document.getElementById('board');
+  if (!board) {
+    board = document.createElement('div');
+    board.id = 'board';
+    board.className = 'block';
+    board.dataset.kind = '_board';
+    stage.appendChild(board);
+    if (typeof window.normalizeBlockContent === 'function') window.normalizeBlockContent(board);
+  }
+
+  // Default geometry in tiles if none set
+  if (!board.dataset.x) board.dataset.x = String(2 * TILE);
+  if (!board.dataset.y) board.dataset.y = String(5 * TILE);
+  if (!board.style.width)  board.style.width  = String(24 * TILE) + 'px';
+  if (!board.style.height) board.style.height = String(21 * TILE) + 'px';
+
+  // Lock and send behind everything
+  board.classList.add('locked');
+  board.style.zIndex = '1';
+  document.querySelectorAll('#stage .block').forEach(b=>{
+    if (b !== board) b.style.zIndex = '2';
+  });
+
+  // Skin hint for CSS to paint the board white
+  board.classList.add('board-layer');
+};
+
 let seq=0; const uid=p=>`${p}_${++seq}`;
 function ensureInnerHost(el){ if(el.querySelector('.innerHost')) return; const wrap=document.createElement('div'); wrap.className='innerHost';
   [...el.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); });
@@ -252,34 +321,6 @@ window.renderLabelForBlock = function(el, meta = {}, opts = {}){
   return __origRenderLabel ? __origRenderLabel(el, meta, opts) : undefined;
 };
 
-// Ensure board exists and is bottom-most, locked
-window.ensureBoardBlock = function(){
-  // Expected id/kind for the game field
-  let board = document.getElementById('board');
-  if (!board) {
-    // Create a minimal board block if it doesn't exist
-    board = document.createElement('div');
-    board.id = 'board';
-    board.className = 'block';
-    board.dataset.kind = '_board';
-    // Basic size defaults (override if your preset differs)
-    board.dataset.x = String(2 * (window.TILE_PX||16));
-    board.dataset.y = String(5 * (window.TILE_PX||16));
-    board.style.position = 'absolute';
-    const stage = document.getElementById('stage');
-    if (stage) stage.appendChild(board);
-    if (typeof window.normalizeBlockContent === 'function') window.normalizeBlockContent(board);
-  }
-
-  // Lock and send to back
-  board.classList.add('locked');
-  board.style.zIndex = '1';
-  // Bring all others above
-  document.querySelectorAll('.block').forEach(b=>{
-    if (b === board) return;
-    b.style.zIndex = '2';
-  });
-};
 function makeBlock(kind, forceId){
   const el=document.createElement('div'); el.className='block'; el.dataset.kind=kind; el.id=forceId||uid(kind); el.tabIndex=0;
   if(kind==='title'){ el.classList.add('titlePlaque'); const th=document.createElement('div'); th.className='txtHost'; th.textContent='S N E A K E R Q U E S T'; el.appendChild(th); }
