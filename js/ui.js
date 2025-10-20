@@ -30,7 +30,10 @@ window.setPaletteVersion = function(v){
 if (typeof window.purgePreImport === 'function') window.purgePreImport('startup');
 
 if (typeof window.cleanupPreviewArtifacts === 'function') window.cleanupPreviewArtifacts();
-if (typeof window.ensureBoardBlock === 'function') window.ensureBoardBlock();
+
+// Run once at startup (after DOM ready)
+if (typeof window.postLoadVisualPurge === 'function') window.postLoadVisualPurge('startup');
+if (typeof window.ensureBoardLayer     === 'function') window.ensureBoardLayer();
 
 window.__wrapApplyLayoutOnce = (function(){
   if (window.__applyLayoutWrapped) return true;
@@ -505,14 +508,23 @@ if (!window.__sanitizeBound) {
   });
 }
 
-if (!window.__previewCleanupBound){
-  window.__previewCleanupBound = true;
-  window.addEventListener('layout:changed', () => {
+// Also run after any layout change so ghosts can’t linger
+if (!window.__palette23_hooks){
+  window.__palette23_hooks = true;
+  window.addEventListener('layout:changed', ()=>{
     if (typeof window.cleanupPreviewArtifacts === 'function') window.cleanupPreviewArtifacts();
-    if (typeof window.ensureBoardBlock === 'function') window.ensureBoardBlock();
+    if (typeof window.postLoadVisualPurge === 'function') window.postLoadVisualPurge('layout:changed');
+    if (typeof window.ensureBoardLayer     === 'function') window.ensureBoardLayer();
+  });
+
+  // When Block Editor closes, purge in case a preview slipped through
+  window.addEventListener('blockEditor:close', ()=>{
+    if (typeof window.cleanupPreviewArtifacts === 'function') window.cleanupPreviewArtifacts();
+    if (typeof window.postLoadVisualPurge === 'function') window.postLoadVisualPurge('editor-close');
+    if (typeof window.ensureBoardLayer     === 'function') window.ensureBoardLayer();
   });
 }
 
-const PALETTE_VERSION = 22;
+const PALETTE_VERSION = 23;
 if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 
