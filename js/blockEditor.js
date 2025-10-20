@@ -76,3 +76,39 @@ if (!window.__textTabBound){
   window.addEventListener('selection:changed', window.populateTextForm);
   window.addEventListener('layout:changed',    window.populateTextForm);
 }
+
+// Ensure we have a single preview root in the modal, never the stage.
+window.getBePreviewRoot = function(){
+  let root = document.getElementById('bePreviewRoot');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'bePreviewRoot';
+    root.style.position = 'relative';
+    // The modal code should append this into the Block Editor preview column.
+    // If your markup already creates the preview area, just ensure the ID exists.
+  }
+  return root;
+};
+
+// Remove any preview artifacts that accidentally got appended to stage.
+window.cleanupPreviewArtifacts = function(){
+  // Anything we mark as preview: .be-preview-node OR [data-preview="1"]
+  document.querySelectorAll('.be-preview-node, .block[data-preview="1"]').forEach(n => n.remove());
+};
+
+// Wrap any preview node creation to ALWAYS tag them and keep off-stage.
+window.attachPreviewTag = function(node){
+  try {
+    node.classList && node.classList.add('be-preview-node');
+    node.setAttribute && node.setAttribute('data-preview','1');
+  } catch(_){ }
+  return node;
+};
+
+// Call cleanup when the Block Editor opens/closes or switches tabs
+if (!window.__bePreviewHooks){
+  window.__bePreviewHooks = true;
+  window.addEventListener('blockEditor:open',  ()=>window.cleanupPreviewArtifacts());
+  window.addEventListener('blockEditor:close', ()=>window.cleanupPreviewArtifacts());
+  window.addEventListener('blockEditor:tab',   ()=>window.cleanupPreviewArtifacts());
+}

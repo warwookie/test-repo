@@ -29,6 +29,9 @@ window.setPaletteVersion = function(v){
 
 if (typeof window.purgePreImport === 'function') window.purgePreImport('startup');
 
+if (typeof window.cleanupPreviewArtifacts === 'function') window.cleanupPreviewArtifacts();
+if (typeof window.ensureBoardBlock === 'function') window.ensureBoardBlock();
+
 window.__wrapApplyLayoutOnce = (function(){
   if (window.__applyLayoutWrapped) return true;
   window.__applyLayoutWrapped = true;
@@ -502,6 +505,14 @@ if (!window.__sanitizeBound) {
   });
 }
 
-const PALETTE_VERSION = 21;
+if (!window.__previewCleanupBound){
+  window.__previewCleanupBound = true;
+  window.addEventListener('layout:changed', () => {
+    if (typeof window.cleanupPreviewArtifacts === 'function') window.cleanupPreviewArtifacts();
+    if (typeof window.ensureBoardBlock === 'function') window.ensureBoardBlock();
+  });
+}
+
+const PALETTE_VERSION = 22;
 if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 
