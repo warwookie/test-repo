@@ -462,6 +462,16 @@ window.toggleGrid = toggleGrid;
 
 if (typeof window.bindDownloadButtons === 'function') window.bindDownloadButtons();
 
-const PALETTE_VERSION = 18;
+if (typeof window.sanitizeLayoutOnce === 'function') window.sanitizeLayoutOnce('startup');
+
+if (!window.__sanitizeBound) {
+  window.__sanitizeBound = true;
+  window.addEventListener('layout:changed', (e) => {
+    const src = (e && e.detail && e.detail.source) || 'unknown';
+    if (typeof window.sanitizeLayoutOnce === 'function') window.sanitizeLayoutOnce(src);
+  });
+}
+
+const PALETTE_VERSION = 19;
 if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 
