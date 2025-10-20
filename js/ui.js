@@ -27,6 +27,36 @@ window.setPaletteVersion = function(v){
   console.info('[palette] now', n);
 };
 
+if (typeof window.purgePreImport === 'function') window.purgePreImport('startup');
+
+window.__wrapApplyLayoutOnce = (function(){
+  if (window.__applyLayoutWrapped) return true;
+  window.__applyLayoutWrapped = true;
+
+  const wrap = (fn) => {
+    if (typeof fn !== 'function') return fn;
+    const wrapped = function(json, src = 'import') {
+      if (typeof window.purgePreImport === 'function') window.purgePreImport(src);
+      return fn.call(this, json);
+    };
+    wrapped.__wrappedOriginal = fn;
+    return wrapped;
+  };
+
+  const origApplyImportedLayout = window.applyImportedLayout;
+  if (typeof origApplyImportedLayout === 'function') {
+    window.applyImportedLayout = wrap(origApplyImportedLayout);
+  } else {
+    Object.defineProperty(window, 'applyImportedLayout', {
+      configurable: true,
+      enumerable: true,
+      get(){ return this.__wrappedApplyImportedLayout; },
+      set(fn){ this.__wrappedApplyImportedLayout = wrap(fn); }
+    });
+  }
+  return true;
+})();
+
 window.snapState = window.snapState || {
   enabled: true,
   step: 1,
@@ -472,6 +502,6 @@ if (!window.__sanitizeBound) {
   });
 }
 
-const PALETTE_VERSION = 19;
+const PALETTE_VERSION = 21;
 if (typeof window.setPaletteVersion === 'function') window.setPaletteVersion(PALETTE_VERSION);
 

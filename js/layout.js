@@ -55,6 +55,54 @@ Object.defineProperty(window, 'selected', { get: () => selected, set: v => { sel
   }
 })();
 
+// Remove orphan .block nodes and stale cache refs BEFORE any import/apply.
+window.purgePreImport = function(source = 'startup'){
+  const removedEls = [];
+
+  // 1) Remove DOM orphans: missing id OR missing data-kind
+  document.querySelectorAll('.block').forEach(el => {
+    const id = el.id?.trim();
+    const kind = el.dataset?.kind;
+    if (!id || !kind) {
+      removedEls.push({ id: id || '(no-id)', kind: kind || '(no-kind)' });
+      el.remove();
+    }
+  });
+
+  // 2) Scrub localStorage caches that may rehydrate ghosts
+  const ls = window.localStorage;
+  const keys = ['liveLayoutCache', 'liveLayoutPreset', 'layout:last'];
+  const scrubbed = [];
+  keys.forEach(k => {
+    const raw = ls.getItem(k);
+    if (!raw) return;
+    try {
+      const json = JSON.parse(raw);
+      if (json && Array.isArray(json.layout)) {
+        const before = json.layout.length;
+        json.layout = json.layout.filter(it => it && it.id && it.kind && typeof it.x === 'number' && typeof it.y === 'number');
+        if (json.layout.length !== before) {
+          ls.setItem(k, JSON.stringify(json));
+          scrubbed.push({ key: k, removed: before - json.layout.length });
+        }
+      }
+    } catch (_) {}
+  });
+
+  // UI feedback
+  if (typeof window.inspStatus === 'function') {
+    const r = removedEls.length;
+    const s = scrubbed.reduce((a, b) => a + b.removed, 0);
+    window.inspStatus(`Pre-import purge: domRemoved=${r}, cacheRemoved=${s}`);
+  }
+  try {
+    window.dispatchEvent(new CustomEvent('layout:changed', {
+      detail: { source: `purge:${source}`, removedEls, scrubbed }
+    }));
+  } catch (_) {}
+  return { removedEls, scrubbed };
+};
+
 let seq=0; const uid=p=>`${p}_${++seq}`;
 function ensureInnerHost(el){ if(el.querySelector('.innerHost')) return; const wrap=document.createElement('div'); wrap.className='innerHost';
   [...el.childNodes].forEach(n=>{ if(n.classList && n.classList.contains('handle')) return; if(n.classList && n.classList.contains('grid')) return; wrap.appendChild(n); });

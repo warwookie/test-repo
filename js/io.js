@@ -245,6 +245,10 @@ function applyTileLayoutPayload(data){
   return dup;
 }
 
+function isKnownKindSafe(kind){
+  return (typeof window.isKnownKind === 'function') ? window.isKnownKind(kind) : !!kind;
+}
+
 window.applyImportedLayout = window.applyImportedLayout || function(payload){
   if (!payload) return;
 
@@ -259,6 +263,20 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
   }
 
   if (!data || typeof data !== 'object') return;
+
+  if (Array.isArray(data.layout)) {
+    data.layout = data.layout.filter(it => {
+      if (!it || !it.id || !it.kind) return false;
+      if (!isKnownKindSafe(it.kind)) return false;
+      const dims = ['x', 'y', 'w', 'h'];
+      for (const key of dims) {
+        const num = Number(it[key]);
+        if (!Number.isFinite(num)) return false;
+        it[key] = num;
+      }
+      return true;
+    });
+  }
 
   if (Array.isArray(data.layout) && data.layout.every(it => it && typeof it === 'object' && typeof it.kind === 'string')) {
     const tileResult = applyTileLayoutPayload(data);
@@ -393,6 +411,10 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
     }
   });
 
+  if (typeof window.sanitizeLayoutOnce === 'function') {
+    try { window.sanitizeLayoutOnce('post-import'); } catch {}
+  }
+
   if (typeof window.snapshot === 'function') {
     try { window.snapshot(); } catch {}
   }
@@ -414,6 +436,7 @@ window.applyImportedLayout = window.applyImportedLayout || function(payload){
 window.applyJsonFromTextarea = function(){
   const ta = document.getElementById('io');
   if (!ta) return;
+  if (typeof window.purgePreImport === 'function') window.purgePreImport('textarea');
   try {
     const norm = window.parseAndValidateLayoutText(ta.value);
     if (typeof window.loadLayoutJSON === 'function') {
