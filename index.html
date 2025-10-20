@@ -573,28 +573,55 @@ export default function SneakerQuestRetroV2() {
             <span>Icon</span>
             <input className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full min-w-0" value={draft.icon} onChange={(e) => set("icon", e.target.value)} />
           </label>
-          <Num label="Icon count" k="count" min={0} max={12} />
-          <Num label="Label font" k="font" min={8} max={32} />
-          <Num label="Icon size" k="iconSize" min={8} max={32} />
-          <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center justify-between gap-2 min-w-0">
-            <span>Show count</span>
-            <input type="checkbox" checked={draft.showCount} onChange={(e) => set("showCount", e.target.checked)} />
-          </label>
-          <label className="col-span-2 text-[#e6e6e6] text-xs font-mono flex items-center justify-between gap-2">
-            <span>Count text</span>
-            <input className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1 w-full min-w-0" value={draft.countText} onChange={(e) => set("countText", e.target.value)} />
-          </label>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2 border-t border-[#333]">
-          <Num label="Label X" k="textX" min={-100} max={256} />
-          <Num label="Label Y" k="textY" min={-100} max={128} />
-          <div />
-          <Num label="Icon X" k="iconX" min={-100} max={256} />
-          <Num label="Icon Y" k="iconY" min={-100} max={128} />
-          <div />
-          <Num label="Count X" k="countX" min={-100} max={256} />
-          <Num label="Count Y" k="countY" min={-100} max={128} />
+        <div className="grid grid-cols-2 gap-2">
+          <Num label="Count" k="count" min={0} max={10} />
+          <Num label="Font Size (px)" k="font" min={8} max={32} />
+          <Num label="Icon Size (px)" k="iconSize" min={8} max={32} />
+          {/* This is for elements like Fire/Boxes that track a separate count value */}
+          {(editId === 'fire' || editId === 'boxes') && (
+            <label className="flex items-center justify-between gap-2 text-[#e6e6e6] text-xs md:text-sm font-mono col-span-2 pt-2 border-t border-[#333]">
+              <span className="truncate pr-2">Show Count Text</span>
+              <input type="checkbox" className="w-4 h-4 bg-[#0e0e0e] border border-[#333] rounded" checked={draft.showCount} onChange={(e) => set('showCount', e.target.checked)} />
+            </label>
+          )}
+          {(editId === 'fire' || editId === 'boxes') && draft.showCount && (
+            <label className="text-[#e6e6e6] text-xs md:text-sm font-mono flex items-center gap-2 col-span-2">
+              <span className="w-24">Count Text Value</span>
+              <input className="flex-1 bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={draft.countText} onChange={(e) => set("countText", e.target.value)} />
+            </label>
+          )}
         </div>
+
+        <div className="pt-3 border-t border-[#333]">
+          <div className="text-[#bfb79f] text-xs mb-1">Absolute Position (X/Y from block top-left)</div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="col-span-1">
+              <div className="text-white text-xs mb-1 text-center">Label</div>
+              <div className="flex gap-2">
+                <Num label="X" k="textX" min={0} max={256} />
+                <Num label="Y" k="textY" min={0} max={256} />
+              </div>
+            </div>
+            <div className="col-span-1">
+              <div className="text-white text-xs mb-1 text-center">Icon</div>
+              <div className="flex gap-2">
+                <Num label="X" k="iconX" min={0} max={256} />
+                <Num label="Y" k="iconY" min={0} max={256} />
+              </div>
+            </div>
+            {(editId === 'fire' || editId === 'boxes') && draft.showCount && (
+              <div className="col-span-2 md:col-span-1">
+                <div className="text-white text-xs mb-1 text-center">Count Text</div>
+                <div className="flex gap-2">
+                  <Num label="X" k="countX" min={0} max={256} />
+                  <Num label="Y" k="countY" min={0} max={256} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="flex gap-2 justify-end sticky bottom-0 bg-[#1b1b1b] pt-2">
           <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => { setEditId(null); setDraft(null); }}>Cancel</button>
           <button className="px-2 py-1 bg-[#ff9d00] text-[#1a1a1a] border border-[#d47c2e] rounded font-bold" onClick={applyEditor}>Apply</button>
@@ -603,86 +630,118 @@ export default function SneakerQuestRetroV2() {
     );
   };
 
+  // --- Main Render ---
+
+  // Custom styles for the device and editor panel
+  const customStyles = {
+    '--bg': '#1a1a1a',
+    '--beige': '#c9bfa6',
+    '--bezel': '#443f35',
+    '--panel': '#2e2d29',
+    '--ink': '#1a1a1a',
+    '--text': '#d2c7a7',
+  };
+
   return (
-    <div className="w-full h-full flex items-start justify-center bg-[#1a1a1a] p-6 select-none">
-      {/* Load pixel fonts */}
-      <style>{"@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');"}</style>
-      {/* LEFT DOCK: buttons + editor */}
-      <div className="sticky top-6 mr-4 w-[clamp(200px,24vw,320px)] max-h-[calc(100vh-48px)] overflow-auto bg-[#1b1b1b] border border-[#333] rounded p-3 flex flex-col gap-2">
-        <div className="text-[#e6e6e6] font-mono text-sm">Tools</div>
-        <div className="flex flex-col gap-2">
-          <label className="w-full text-[#e6e6e6] font-mono text-xs flex items-center justify-between gap-2">
-            <span>Game font</span>
-            <select className="bg-[#0e0e0e] border border-[#333] rounded px-2 py-1" value={gameFont} onChange={(e)=> setGameFont(e.target.value as any)}>
-              <option value="ps2p">Press Start 2P</option>
-              <option value="vt323">VT323</option>
-              <option value="mono">System Mono</option>
-            </select>
-          </label>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => setShowExport((v)=>!v)}>Export JSON</button>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={exportHTML}>Export HTML (static)</button>
-          {showExport && (
-            <textarea className="w-full h-28 md:h-40 bg-[#0e0e0e] text-[#e6e6e6] p-2 font-mono text-[12px] rounded min-w-0" readOnly value={JSON.stringify(toJSON(), null, 2)} />
-          )}
-          {showExport && (
-            <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => navigator.clipboard?.writeText(JSON.stringify(toJSON(), null, 2))}>Copy</button>
-          )}
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={() => setShowImport((v)=>!v)}>Import JSON</button>
-          {showImport && (
-            <>
-              <textarea className="w-full h-28 md:h-40 bg-[#0e0e0e] text-[#e6e6e6] p-2 font-mono text-[12px] rounded min-w-0" placeholder="Paste layout JSON here" value={importText} onChange={(e)=> setImportText(e.target.value)} />
-              <div className="flex gap-2">
-                <button className="flex-1 px-2 py-1 bg-[#ff9d00] text-[#1a1a1a] border border-[#d47c2e] rounded font-bold" onClick={()=>{ try{ applyJSON(JSON.parse(importText)); setShowImport(false); } catch(e){ console.error('Invalid JSON', e); } }}>Apply</button>
-                <button className="px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={()=> setImportText("")}>Clear</button>
-              </div>
-            </>
-          )}
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={undo} disabled={past.length === 0}>Undo ({past.length})</button>
-          <button className="w-full px-2 py-1 bg-[#2e2d29] text-[#d2c7a7] border border-[#131313] rounded" onClick={redo} disabled={future.length === 0}>Redo ({future.length})</button>
+    <div className="min-h-screen bg-gray-900 p-4 flex flex-col items-center gap-4" style={customStyles}>
+      {/* Control Bar */}
+      <div className="w-full max-w-sm bg-[#1b1b1b] p-3 rounded-lg shadow-xl flex flex-col gap-2">
+        <div className="flex justify-between items-center gap-2 text-xs font-mono">
           <button
-            className={`w-full px-2 py-1 border rounded font-mono text-xs font-bold transition-colors ${snapOn ? 'bg-[#ff9d00] text-[#1a1a1a] border-[#d47c2e]' : 'bg-[#2e2d29] text-[#d2c7a7] border-[#131313]'}`}
-            onClick={() => setSnapOn((v) => !v)}
+            className={`px-3 py-1 rounded text-white font-bold transition-colors ${past.length > 0 ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-700 cursor-not-allowed'}`}
+            onClick={undo} disabled={past.length === 0}
           >
-            SNAP: {snapOn ? 'ON' : 'OFF'} ({SNAP}px)
+            Undo ({past.length})
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-white font-bold transition-colors ${future.length > 0 ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-700 cursor-not-allowed'}`}
+            onClick={redo} disabled={future.length === 0}
+          >
+            Redo ({future.length})
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-white font-bold transition-colors ${snapOn ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-800'}`}
+            onClick={() => { setSnapOn(s => !s); commit(); }}
+          >
+            Snap: {snapOn ? 'ON' : 'OFF'}
           </button>
         </div>
-        {/* Editor Panel */}
-        {editId && <div className="mt-4 pt-4 border-t border-[#333]"><EditorPanel /></div>}
+        <div className="flex justify-between items-center gap-2 text-xs font-mono pt-2 border-t border-gray-700">
+          <label className="text-white flex items-center gap-2">
+            Font:
+            <select
+              value={gameFont}
+              onChange={(e) => setGameFont(e.target.value as 'ps2p' | 'vt323' | 'mono')}
+              className="bg-gray-800 text-white rounded p-1"
+            >
+              <option value="ps2p">Press Start 2P</option>
+              <option value="vt323">VT323</option>
+              <option value="mono">Monospace</option>
+            </select>
+          </label>
+          <button className="px-3 py-1 rounded bg-blue-600 text-white font-bold hover:bg-blue-700" onClick={exportHTML}>Export HTML</button>
+          {/* <button className="px-3 py-1 rounded bg-purple-600 text-white font-bold hover:bg-purple-700" onClick={() => setShowImport(true)}>Import JSON</button> */}
+        </div>
       </div>
 
-      {/* CANVAS: Device Frame */}
-      <div className="device relative w-[320px] h-[576px] border-[4px] border-[#443f35] bg-[#c9bfa6] rounded-[16px] shadow-[inset_0_0_0_2px_#a09479,0_4px_0_#2a2a2a] flex-shrink-0" style={{ fontFamily: gameFontFamily }}>
-        {/* All Draggable/Resizable Blocks */}
-        {([
-          { id: 'title', box: title, drag: dTitle, resize: rTitle, className: "plaque bg-[#d47c2e] text-[#1a1a1a] border-[2px] border-[#332d23] rounded-lg flex items-center justify-center font-bold tracking-[2px]" },
-          { id: 'infobar', box: infobar, drag: dInfo, resize: rInfo, className: "bar bg-[#2e2d29] text-[#d2c7a7] border-[2px] border-[#131313] rounded-md flex items-center justify-between px-3" },
-          { id: 'crt', box: crt, drag: dCrt, resize: rCrt, className: "crt bg-[#1a2b1a] border-[3px] border-[#0a0f0a] rounded-[10px] shadow-[inset_0_0_20px_#0d1b0d] relative overflow-hidden" },
-          { id: 'life', box: life, drag: dLife, resize: rLife, className: "hud bg-[#2e2d29] border border-[#131313] rounded-md p-2 text-[#d2c7a7]" },
-          { id: 'fire', box: fire, drag: dFire, resize: rFire, className: "hud bg-[#2e2d29] border border-[#131313] rounded-md p-2 text-[#d2c7a7]" },
-          { id: 'sneakers', box: sneakers, drag: dSnk, resize: rSnk, className: "hud bg-[#2e2d29] border border-[#131313] rounded-md p-2 text-[#d2c7a7]" },
-          { id: 'boxes', box: boxes, drag: dBox, resize: rBox, className: "hud bg-[#2e2d29] border border-[#131313] rounded-md p-2 text-[#d2c7a7]" },
-          { id: 'power', box: power, drag: dPow, resize: rPow, className: "hud bg-[#2e2d29] border border-[#131313] rounded-md p-2 text-[#d2c7a7]" },
-          { id: 'btnA', box: btnA, drag: dA, resize: rA, className: "btn bg-[#2e2d29] border border-[#131313] rounded-[12px] flex items-center justify-center text-[#d2c7a7]" },
-          { id: 'btnB', box: btnB, drag: dB, resize: rB, className: "btn bg-[#2e2d29] border border-[#131313] rounded-[12px] flex items-center justify-center text-[#d2c7a7]" },
-          { id: 'stick', box: stick, drag: dStick, resize: rStick, className: "joystick bg-[#2e2d29] border-[2px] border-[#131313] rounded-full flex items-center justify-center" },
-          { id: 'badge', box: badge, drag: dBadge, resize: rBadge, className: "badge text-[#2e2d29] text-[8px] flex items-center justify-center" },
-        ] as const).map(({ id, box, drag, resize, className }) => (
-          <BoxComponent
-            key={id}
-            id={id as keyof typeof configs | 'infobar'}
-            box={box}
-            dragHandlers={drag}
-            resizeHandlers={resize}
-            className={className}
-            openEditor={openEditor}
-            HudContent={HudContent}
-            InfoContent={InfoContent}
-            gameFontFamily={gameFontFamily}
-            infoCfg={infoCfg}
-            configs={configs}
-          />
-        ))}
+      {/* Main UI/Editor Layout */}
+      <div className="flex gap-4 w-full max-w-5xl">
+        {/* Device Container (320px wide) */}
+        <div className="device relative w-[320px] h-[576px] border-[4px] border-[var(--bezel)] bg-[var(--beige)] rounded-[16px] shadow-[inset_0_0_0_2px_#a09479,0_4px_0_#2a2a2a] flex-shrink-0">
+          {/* Blocks */}
+          <BoxComponent id="title" box={title} dragHandlers={dTitle} resizeHandlers={rTitle} className="plaque bg-[#d47c2e] text-[#1a1a1a] border-2 border-[#332d23] rounded-lg flex items-center justify-center font-bold tracking-widest" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="infobar" box={infobar} dragHandlers={dInfo} resizeHandlers={rInfo} className="bar bg-[var(--panel)] text-[var(--text)] border-2 border-[#131313] rounded-md px-3" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="crt" box={crt} dragHandlers={dCrt} resizeHandlers={rCrt} className="crt bg-[#1a2b1a] border-[3px] border-[#0a0f0a] rounded-[10px] shadow-[inset_0_0_20px_#0d1b0d] flex items-center justify-center overflow-hidden" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+
+          <BoxComponent id="life" box={life} dragHandlers={dLife} resizeHandlers={rLife} className="hud bg-[var(--panel)] border border-[#131313] rounded-md" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="fire" box={fire} dragHandlers={dFire} resizeHandlers={rFire} className="hud bg-[var(--panel)] border border-[#131313] rounded-md" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="sneakers" box={sneakers} dragHandlers={dSnk} resizeHandlers={rSnk} className="hud bg-[var(--panel)] border border-[#131313] rounded-md" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="boxes" box={boxes} dragHandlers={dBox} resizeHandlers={rBox} className="hud bg-[var(--panel)] border border-[#131313] rounded-md" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="power" box={power} dragHandlers={dPow} resizeHandlers={rPow} className="hud bg-[var(--panel)] border border-[#131313] rounded-md flex items-center justify-center" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+
+          <BoxComponent id="btnA" box={btnA} dragHandlers={dA} resizeHandlers={rA} className="btn bg-[var(--panel)] border border-[#131313] rounded-xl flex items-center justify-center font-bold" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="btnB" box={btnB} dragHandlers={dB} resizeHandlers={rB} className="btn bg-[var(--panel)] border border-[#131313] rounded-xl flex items-center justify-center font-bold" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+
+          <BoxComponent id="stick" box={stick} dragHandlers={dStick} resizeHandlers={rStick} className="joystick bg-[var(--panel)] border-2 border-[#131313] rounded-full flex items-center justify-center" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+          <BoxComponent id="badge" box={badge} dragHandlers={dBadge} resizeHandlers={rBadge} className="badge bg-[var(--beige)] text-[#2e2d29] flex items-center justify-center" openEditor={openEditor} HudContent={HudContent} InfoContent={InfoContent} gameFontFamily={gameFontFamily} infoCfg={infoCfg} configs={configs} />
+        </div>
+
+        {/* Editor Panel (right side) */}
+        {editId && (
+          <div className="w-full max-w-sm bg-[#1b1b1b] p-4 rounded-lg shadow-xl overflow-y-auto max-h-[576px] sticky top-4">
+            <EditorPanel />
+          </div>
+        )}
       </div>
+
+      {/* Import Modal (simplified as a docked panel for the canvas) */}
+      {showImport && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-[#1b1b1b] p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl text-white mb-4">Import Layout (JSON)</h2>
+            <textarea
+              className="w-full h-40 bg-[#0e0e0e] border border-[#333] rounded p-3 text-white font-mono text-sm resize-none"
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              placeholder="Paste your exported JSON here..."
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="px-3 py-1 rounded bg-[#2e2d29] text-[#d2c7a7] border border-[#131313]" onClick={() => setShowImport(false)}>Cancel</button>
+              <button className="px-3 py-1 rounded bg-purple-600 text-white font-bold hover:bg-purple-700" onClick={() => {
+                try {
+                  const obj = JSON.parse(importText);
+                  applyJSON(obj);
+                  setShowImport(false);
+                  setImportText("");
+                } catch (e) {
+                  console.error("Failed to parse JSON", e);
+                  // In a real app, show a user-facing error message here
+                }
+              }}>Import</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
