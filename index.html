@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-// SneakerQuest Retro-Futuristic v2 Canvas — DRAG + RESIZE + Export/Import + Undo/Redo + Snap Toggle
+// SneakerQuest Retro-Futuristic v2 Canvas â€” DRAG + RESIZE + Export/Import + Undo/Redo + Snap Toggle
 // All visual chrome preserved. All elements editable. Info bar now uses its own editable state.
 
 const SNAP = 8;
@@ -24,8 +24,8 @@ type HudConfig = {
 
 // Info bar editable content
 type InfoConfig = {
-  stageLeft: string;   // e.g., "STAGE — ONE"
-  chevron: string;     // e.g., "▸"
+  stageLeft: string;   // e.g., "STAGE â€” ONE"
+  chevron: string;     // e.g., "â–¸"
   timer: string;       // e.g., "00:00:00:0"
   scoreLabel: string;  // e.g., "SCORE"
   score: string;       // e.g., "000000"
@@ -125,11 +125,11 @@ export default function SneakerQuestRetroV2() {
   // Editor state for ALL boxes
   const [configs, setConfigs] = useState<Record<string, HudConfig>>({
     // HUD row
-    life:     { label: "LIFE", icon: "❤️", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 0, countY: 0 },
-    fire:     { label: "FIRE", icon: "🔥", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 5", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
-    sneakers: { label: "SNEAKERS", icon: "👟", count: 5, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 72, iconY: 10, countX: 0, countY: 0 },
-    boxes:    { label: "BOX", icon: "📦", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 0000", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
-    power:    { label: "", icon: "⚡", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 10, iconX: 20, iconY: 8, countX: 0, countY: 0 },
+    life:     { label: "LIFE", icon: "â¤ï¸", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 0, countY: 0 },
+    fire:     { label: "FIRE", icon: "ðŸ”¥", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 5", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
+    sneakers: { label: "SNEAKERS", icon: "ðŸ‘Ÿ", count: 5, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 12, iconX: 72, iconY: 10, countX: 0, countY: 0 },
+    boxes:    { label: "BOX", icon: "ðŸ“¦", count: 1, font: 10, iconSize: 12, showCount: true,  countText: "x 0000", textX: 8, textY: 12, iconX: 44, iconY: 10, countX: 60, countY: 12 },
+    power:    { label: "", icon: "âš¡", count: 3, font: 10, iconSize: 12, showCount: false, countText: "", textX: 8, textY: 10, iconX: 20, iconY: 8, countX: 0, countY: 0 },
     // Title plaque
     title:    { label: "SNEAKERQUEST", icon: "", count: 0, font: 14, iconSize: 12, showCount: false, countText: "", textX: 0, textY: 0, iconX: 0, iconY: 0, countX: 0, countY: 0 },
     // CRT pause overlay
@@ -144,7 +144,7 @@ export default function SneakerQuestRetroV2() {
   });
 
   // Info bar state and draft
-  const [infoCfg, setInfoCfg] = useState<InfoConfig>({ stageLeft: "STAGE — ONE", chevron: "▸", timer: "00:00:00:0", scoreLabel: "SCORE", score: "000000", font: 10, subFont: 9 });
+  const [infoCfg, setInfoCfg] = useState<InfoConfig>({ stageLeft: "STAGE â€” ONE", chevron: "â–¸", timer: "00:00:00:0", scoreLabel: "SCORE", score: "000000", font: 10, subFont: 9 });
   const [draftInfo, setDraftInfo] = useState<InfoConfig | null>(null);
 
   const [editId, setEditId] = useState<string | null>(null);
@@ -319,10 +319,10 @@ export default function SneakerQuestRetroV2() {
 
     <div class="abs joystick" style="${s(stick)};">
       <div class="stick"></div>
-      <div class="arw" style="top:6px;left:50%;transform:translateX(-50%)">▲</div>
-      <div class="arw" style="bottom:6px;left:50%;transform:translateX(-50%)">▼</div>
-      <div class="arw" style="left:6px;top:50%;transform:translateY(-50%)">◀</div>
-      <div class="arw" style="right:6px;top:50%;transform:translateY(-50%)">▶</div>
+      <div class="arw" style="top:6px;left:50%;transform:translateX(-50%)">â–²</div>
+      <div class="arw" style="bottom:6px;left:50%;transform:translateX(-50%)">â–¼</div>
+      <div class="arw" style="left:6px;top:50%;transform:translateY(-50%)">â—€</div>
+      <div class="arw" style="right:6px;top:50%;transform:translateY(-50%)">â–¶</div>
     </div>
 
     <div class="abs badge" style="${s(badge)};font-size:${c('badge').font}px">${esc(c('badge').label)}</div>
@@ -617,10 +617,10 @@ export default function SneakerQuestRetroV2() {
           <div className="w-full h-full rounded-full bg-[#2e2d29] border-[2px] border-[#131313] flex items-center justify-center ml-[24px] shadow-[inset_0_2px_4px_#00000080] relative">
             <div className="absolute w-[80px] h-[80px] rounded-full bg-[#3a3a3a] border-[2px] border-[#191919] shadow-[inset_0_0_6px_#000000]" />
             <div className="absolute text-[#777] text-[10px] font-mono">
-              <div className="absolute top-[6px] left-[50%] -translate-x-1/2">▲</div>
-              <div className="absolute bottom-[6px] left-[50%] -translate-x-1/2">▼</div>
-              <div className="absolute left-[6px] top-[50%] -translate-y-1/2">◀</div>
-              <div className="absolute right-[6px] top-[50%] -translate-y-1/2">▶</div>
+              <div className="absolute top-[6px] left-[50%] -translate-x-1/2">â–²</div>
+              <div className="absolute bottom-[6px] left-[50%] -translate-x-1/2">â–¼</div>
+              <div className="absolute left-[6px] top-[50%] -translate-y-1/2">â—€</div>
+              <div className="absolute right-[6px] top-[50%] -translate-y-1/2">â–¶</div>
             </div>
             <div className="absolute inset-0 pointer-events-none"><HudContent id="stick" /></div>
           </div>
