@@ -1,325 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNEAKERQUEST Handheld</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Google Fonts for a retro feel: VT323 for screen, Press Start 2P for title -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <style>
-        /* Define the custom color palette and dimensions */
-        :root {
-            /* Case Colors (Beige/Browns) */
-            --color-case-light: #e6d8c6; /* Outer Beige */
-            --color-plastic-dark: #4f463f; /* Dark Brown Plastic/Recess */
-            --color-button-mid: #776d63; /* Mid Brown Buttons */
-            --color-text-rust: #c67f47; /* SNEAKERQUEST Title Text */
-            --color-bezel-recess: #3b352f; /* Darker tone for the screen recess */
-            
-            /* Screen Colors (CRT Green) */
-            --color-screen-bg: #101c13; /* Very Dark Green-Black */
-            --color-screen-grid: rgba(76, 156, 76, 0.15); /* Faint Green Grid */
-            --color-led-green: #4c9c4c; /* Bright Green LED */
-            
-            /* General Shadow effects for plastic molding */
-            --shadow-screen-inset: inset 0 6px 8px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5); /* Deeper, softer screen inset */
-            --shadow-outset-light: 0 4px 10px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.5); /* Softer overall lift */
-            --shadow-button-press: inset 0 1px 3px rgba(0, 0, 0, 0.8);
-            --shadow-bezel-lift: 0 0 0 8px var(--color-plastic-dark) inset; /* Soft inner bevel */
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SneakerQuest Device — Ghost Toy 15‑bit + DMD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --color-case-light:#c7b69c;
+      --color-dark-panel:#4a4a4a;
+      --color-screen-recess:#333333;
+      --color-screen-bg:#101c13;
+      --color-led-green:#81d46f;
+      --color-accent-orange:#e87c0e;
+      --color-title-text:#f0f0f0;
+      --color-amber:#ffb400;
+      --color-slime:#7bff5e;
+      --dmd-amber:#ff8a1f; /* pinball DMD orange */
+      --dmd-amber-hot:#ffb15a;
+    }
 
-            /* CRT Effect */
-            --color-crt-glow: rgba(76, 156, 76, 0.5);
-        }
+    html,body{height:100%;background:#0a0a0a}
 
-        body {
-            background-color: #262626;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-        }
+    .bit-15{image-rendering:pixelated;filter:contrast(1.05) saturate(1.05)}
+    .dither{background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 2px, transparent 2px 4px), repeating-linear-gradient(135deg, rgba(0,0,0,.06) 0 2px, transparent 2px 4px)}
 
-        /* --- KEY ADDITION: PLASTIC NOISE FILTER --- */
-        .device::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            /* Generate a randomized noise texture */
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAIElEQVQIW2NkwA9gYGBgeGYgYvBngnZgZkAAgABo0o+Wwz8cAAAAAElFTkSuQmCC');
-            opacity: 0.1; /* Very subtle transparency */
-            border-radius: 1.5rem;
-            mix-blend-mode: overlay; /* Helps blend the texture with colors */
-        }
+    .device{width:min(400px,92vw);aspect-ratio:9/18.5;background:linear-gradient(180deg,#cfbea6 0%, #c7b69c 40%, #b9a47f 100%);border-radius:1.25rem;position:relative;padding:1.1rem;box-shadow:0 22px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -3px 6px rgba(0,0,0,.25);border:5px solid #221f1a;overflow:hidden;isolation:isolate}
 
-        /* The main device container to enforce the aspect ratio */
-        .device {
-            background-color: var(--color-case-light);
-            width: 100%;
-            max-width: 400px; 
-            aspect-ratio: 9 / 18.5;
-            border-radius: 1.5rem;
-            padding: 1rem;
-            box-shadow: 
-                0 0 0 4px var(--color-plastic-dark), /* Dark outer border */
-                0 15px 40px rgba(0, 0, 0, 0.9), /* Deeper, softer lift shadow */
-                var(--shadow-bezel-lift); 
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            position: relative; /* Needed for the ::before noise element */
-            overflow: hidden; /* Keep noise contained */
-        }
+    .bolt{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #888 0 40%, #555 41% 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 2px 3px rgba(0,0,0,.6)}
+    .bolt::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:2px;background:#2b2b2b;box-shadow:0 1px 0 rgba(255,255,255,.25) inset}
+    .bolt.tl{top:10px;left:10px}.bolt.tr{top:10px;right:10px}.bolt.bl{bottom:10px;left:10px}.bolt.br{bottom:10px;right:10px}
 
-        /* --- TOP HEADER / TITLE SECTION --- */
-        .header-panel {
-            background-color: var(--color-plastic-dark);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            /* Softer inset shadow */
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 5px 10px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .stack>section{margin-bottom:1rem}.stack>section:last-child{margin-bottom:0}
 
-        .title-plaque {
-            background-color: var(--color-bezel-recess);
-            border: 2px solid #2e2824;
-            border-radius: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            box-shadow: 
-                inset 0 1px 3px rgba(0, 0, 0, 0.7), 
-                0 1px 0 rgba(255, 255, 255, 0.1);
-            font-family: 'Press Start 2P', monospace;
-            color: var(--color-text-rust);
-            text-shadow: 1px 1px 0 #000;
-            letter-spacing: 0.15em;
-            font-size: 0.9rem;
-        }
-        
-        .progress-bar-container {
-            width: 100%;
-            height: 6px;
-            margin-top: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 3px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .progress-bar {
-            width: 80%; /* Example progress */
-            height: 100%;
-            background-color: var(--color-led-green);
-            /* Add subtle glow */
-            box-shadow: 0 0 8px var(--color-led-green), inset 0 0 4px rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-        
-        /* --- CRT SCREEN SECTION --- */
-        .screen-housing {
-            background-color: var(--color-plastic-dark);
-            border-radius: 0.75rem;
-            padding: 0.5rem;
-            /* Softer outset shadow */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7);
-            flex-grow: 1; 
-        }
+    .recess{position:relative;background:linear-gradient(180deg,#515151,#444);border-radius:.55rem;padding:1rem;box-shadow:inset 0 10px 16px rgba(0,0,0,.65), inset 0 -6px 10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08)}    
+    .inner-recess{position:relative;background:linear-gradient(180deg,#3a3a3a,#2e2e2e);border-radius:.4rem;padding:.7rem;box-shadow:inset 0 14px 22px rgba(0,0,0,.9), inset 0 -16px 20px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06)}    
 
-        .screen-recess {
-            background-color: var(--color-bezel-recess);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9); /* Deeper, more realistic recess shadow */
-            height: 100%;
-        }
+    /* removed plaque styles */
+    .plaque:before,.plaque:after{content:"";position:absolute;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #d0c6b6 0 40%, #8c7c62 41% 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.6)}
+    .plaque:before{left:6px}.plaque:after{right:6px}
 
-        .screen {
-            background-color: var(--color-screen-bg);
-            border-radius: 0.35rem;
-            width: 100%;
-            height: 100%;
-            box-shadow: var(--shadow-screen-inset); 
-            overflow: hidden;
-            position: relative;
-            color: #d7e4d8;
-            font-family: 'VT323', monospace;
-            font-size: 1.5rem;
-            padding: 1rem;
-            /* Add gentle glow to screen */
-            text-shadow: 0 0 5px var(--color-crt-glow);
-            filter: brightness(1.1) contrast(1.1); /* Slight analog filter */
-        }
-        
-        /* CRT Flicker/Pulse Animation */
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.98; }
-        }
-        
-        .screen {
-            animation: flicker 0.1s infinite alternate;
-        }
+    /* ======================= DMD LED Panel ======================= */
+    .dmd{position:relative;margin-top:.0rem;height:76px;border-radius:.5rem;padding:.45rem;background:linear-gradient(#2b2b2b,#1c1c1c);box-shadow:inset 0 3px 0 rgba(255,255,255,.06), inset 0 -6px 12px rgba(0,0,0,.8), inset 0 0 0 1px #111}
+    /* smoked glass cover */
+    .dmd::before{content:"";position:absolute;inset:0;border-radius:.5rem;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 22%,rgba(0,0,0,.25) 70%,rgba(0,0,0,.6));mix-blend-mode:screen;pointer-events:none}
+    /* ribs like real DMD lens */
+    .dmd::after{content:"";position:absolute;inset:2px;border-radius:.45rem;background:repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, rgba(0,0,0,0) 2px 6px);opacity:.2;pointer-events:none}
 
-        /* CRT Grid/Scanline Effect */
-        .screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(to right, var(--color-screen-grid) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--color-screen-grid) 1px, transparent 1px);
-            background-size: 10% 10%, 10% 10%;
-            opacity: 0.9;
-            pointer-events: none;
-            /* Add subtle screen curvature */
-            border-radius: 0.35rem;
-            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Scanlines */
-        .screen::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0.4) 50%, rgba(0, 0, 0, 0.6) 50%); 
-            background-size: 100% 3px;
-            pointer-events: none;
-        }
+    .matrix{position:absolute;inset:.45rem;border-radius:.35rem;background:#000;overflow:hidden;perspective:600px;transform-style:preserve-3d}
 
+    /* base unlit dots grid */
+    .dots{position:absolute;inset:0;background:radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px), radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px);background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;opacity:1}
 
-        /* --- CONTROL PANEL SECTION --- */
-        .control-panel-housing {
-            background-color: var(--color-plastic-dark);
-            border-radius: 0.75rem;
-            padding: 0.75rem;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7); /* Softer overall lift */
-        }
+    /* glowing text composed of lit dots via background-clip */
+    .dmd-text{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(12deg);font-family:'Press Start 2P', monospace;font-size:22px;letter-spacing:2px;color:transparent;background:
+      radial-gradient(circle at 3px 3px, var(--dmd-amber-hot) 0 1.7px, transparent 1.8px),
+      radial-gradient(circle at 3px 3px, var(--dmd-amber) 0 1.6px, transparent 1.7px);
+      background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 6px #ff9d3d) drop-shadow(0 0 14px rgba(255,138,31,.7))}
 
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 0.75rem;
-            height: 10rem;
-        }
+    /* floating depth motion inside panel */
+    .float{animation:floaty 3.8s ease-in-out infinite}
+    @keyframes floaty{0%{transform:translate(-50%,-54%) rotateX(12deg)}50%{transform:translate(-50%,-46%) rotateX(12deg)}100%{transform:translate(-50%,-54%) rotateX(12deg)}}
+    @keyframes marquee{0%{transform:translate(40%, -50%) rotateX(12deg)}100%{transform:translate(-140%, -50%) rotateX(12deg)}}
 
-        .button-placeholder {
-            background-color: var(--color-button-mid);
-            border-radius: 0.4rem;
-            /* Softer button shadow */
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1); 
-            height: 100%; 
-            min-height: 2rem;
-            cursor: pointer;
-            transition: all 0.05s ease;
-        }
+    /* blooming random sparkles around text */
+    .spark{position:absolute;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#ffc77a 0 45%, transparent 46%);filter:blur(.2px) drop-shadow(0 0 6px #ff9d3d);opacity:.8;animation:spark 1.6s ease-in-out infinite}
+    .spark:nth-child(odd){animation-delay:.6s}.spark:nth-child(3n){animation-delay:1s}
+    @keyframes spark{0%,100%{transform:translateZ(0) scale(.7);opacity:.35}50%{transform:translateZ(30px) scale(1.2);opacity:1}}
 
-        .button-placeholder:active {
-            box-shadow: var(--shadow-button-press);
-            transform: translateY(1px);
-        }
-        
-        .btn-span-2 { grid-column: span 2; }
-        .btn-row-span-2 { grid-row: span 2; }
+    /* ============================================================= */
 
-        .dpad-slot {
-            grid-column: 3 / 4;
-            grid-row: 3 / 5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
+    .screen{position:relative;height:100%;min-height:0;background:var(--color-screen-bg);border-radius:.35rem;overflow:hidden;box-shadow:inset 0 -35px 55px rgba(0,0,0,.9), inset 0 35px 55px rgba(0,0,0,.6)}    
+    .screen::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to bottom, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 2px), radial-gradient(120% 80% at 90% 10%, rgba(255,255,255,.35) 0, rgba(255,255,255,.12) 22%, rgba(255,255,255,.04) 35%, transparent 60%);mix-blend-mode:screen;pointer-events:none}
+    .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(124,91,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(124,91,255,.12) 1px, transparent 1px);background-size:22px 22px;opacity:.35;pointer-events:none}
+    .crt-text{position:absolute;left:1rem;bottom:1rem;font-family:'VT323', monospace;color:#b8f6b0;font-size:1.06rem;text-shadow:0 0 5px rgba(129,212,111,.8)}
 
-        .dpad {
-            background-color: var(--color-button-mid);
-            width: 4.5rem;
-            height: 4.5rem;
-            border-radius: 50%;
-            /* Deep, realistic inset for the D-Pad */
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        
-        .dpad-center {
-            width: 1.5rem;
-            height: 1.5rem;
-            background-color: var(--color-plastic-dark);
-            border-radius: 50%;
-            box-shadow: var(--shadow-button-press);
-            border: 2px solid var(--color-case-light);
-        }
-    </style>
+    .control-recess{background:var(--color-dark-panel);border-radius:.35rem;padding:1rem;box-shadow:inset 0 12px 16px rgba(0,0,0,.8), inset 0 -10px 16px rgba(0,0,0,.8)}    
+    .vents{height:12px;border-radius:8px;background:linear-gradient(#565656,#404040);box-shadow:inset 0 2px 3px rgba(0,0,0,.8);display:grid;grid-template-columns:repeat(18,1fr);gap:6px;margin-bottom:.8rem}
+    .vents i{display:block;height:100%;border-radius:4px;background:linear-gradient(180deg,#1f1f1f,#0e0e0e);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1.75rem;gap:1rem;align-items:center}
+
+    .btn{position:relative;background:linear-gradient(#585858,#444);border-radius:.35rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 3px 6px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08);height:1.75rem;overflow:hidden}
+    .btn:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);background-size:6px 6px;opacity:.35}
+    .btn::after{content:attr(data-label);position:absolute;left:8px;top:-14px;font-family:'VT323', monospace;font-size:.8rem;color:#d8d8d8;letter-spacing:.02em;text-shadow:0 1px 0 #000}
+
+    .btn.w-3rem{width:3rem}.btn.long{grid-column:1/span 2;width:6.5rem}.btn.right{justify-self:end;width:3rem}
+
+    .dpad-slot{grid-column:3;grid-row:3 / span 2;justify-self:end;align-self:end;width:4.7rem;height:4.7rem;border-radius:999px;background:var(--color-dark-panel);position:relative;box-shadow:inset 0 12px 16px rgba(0,0,0,.95), inset 0 -8px 16px rgba(0,0,0,.8)}    
+    .dpad-ring{position:absolute;inset:.5rem;border-radius:999px;background:#5c5c5c;box-shadow:inset 0 2px 3px rgba(255,255,255,.18), inset 0 -6px 10px rgba(0,0,0,.7)}    
+    .dpad-cross{position:absolute;inset:0;display:grid;place-items:center}
+    .cross-core{position:relative;width:1.5rem;height:1.5rem;background:linear-gradient(#545454,#434343);border-radius:.5rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.15), 0 3px 6px rgba(0,0,0,.65)}
+    .cross-core::before,.cross-core::after{content:"";position:absolute;background:linear-gradient(#545454,#434343)}
+    .cross-core::before{left:50%;top:-.8rem;transform:translateX(-50%);width:.38rem;height:3.1rem;border-radius:.25rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 6px rgba(0,0,0,.55)}
+    .cross-core::after{top:50%;left:-.8rem;transform:translateY(-50%);height:.38rem;width:3.1rem;border-radius:.25rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 6px rgba(0,0,0,.55)}
+
+    .screen-wrap{height:52%}.header-wrap{height:22%}.controls-wrap{height:26%}
+  </style>
 </head>
-<body class="bg-gray-900">
+<body class="min-h-screen grid place-items-center py-6 bit-15">
+  <main class="device dither">
+    <span class="bolt tl"></span><span class="bolt tr"></span><span class="bolt bl"></span><span class="bolt br"></span>
 
-    <div class="device">
-        <!-- 1. HEADER PANEL -->
-        <div class="header-panel">
-            <div class="title-plaque">SNEAKERQUEST</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar"></div>
+    <div class="stack h-full flex flex-col">
+      <!-- Header with DMD panel -->      <!-- Header with two LED DMD panels -->
+      <section class="recess header-wrap">
+        <div class="h-full flex flex-col gap-3">
+          <!-- TITLE DMD (larger, floating) -->
+          <div class="dmd dmd-title" style="height:96px;">
+            <div class="matrix">
+              <div class="dots"></div>
+              <div class="dmd-text float title">SNEAKERQUEST</div>
             </div>
-        </div>
+          </div>
 
-        <!-- 2. SCREEN SECTION (Multi-layer bezel) -->
-        <div class="screen-housing">
-            <div class="screen-recess">
-                <div class="screen">
-                    <!-- Screen content matching the empty grid in the image -->
-                </div>
+          <!-- STATUS DMD (two-line readout) -->
+          <div class="dmd dmd-status" style="height:72px;">
+            <div class="matrix">
+              <div class="dots"></div>
+              <div class="dmd-text line1" style="font-size:14px; letter-spacing:1px; top:40%; transform:translate(-50%,-50%)">STAGE - 01 | 00:00:00:0</div>
+              <div class="dmd-text line2" style="font-size:16px; letter-spacing:2px; top:72%; transform:translate(-50%,-50%)">SCORE 000000</div>
             </div>
+          </div>
         </div>
-        
-        <!-- 3. CONTROL PANEL -->
-        <div class="control-panel-housing">
-            <div class="button-grid">
-                
-                <!-- Row 1 -->
-                <div class="button-placeholder"></div>
-                <div class="button-placeholder"></div>
-                <div class="button-placeholder"></div>
-                
-                <!-- Row 2 -->
-                <div class="button-placeholder"></div>
-                <div class="button-placeholder"></div>
-                <div class="button-placeholder"></div>
+      </section>
 
-                <!-- Row 3 -->
-                <div class="button-placeholder btn-span-2"></div>
-                
-                <!-- D-Pad Slot (takes up rows 3 & 4 in column 3) -->
-                <div class="dpad-slot btn-row-span-2">
-                    <div class="dpad">
-                         <div class="dpad-center"></div>
-                    </div>
-                </div>
-
-                <!-- Row 4 -->
-                <div class="button-placeholder btn-span-2"></div>
-
-            </div>
+      <!-- Screen -->
+      <section class="recess screen-wrap relative">
+        <div class="inner-recess fill relative">
+          <div class="screen">
+            <div class="grid-overlay"></div>
+            <div class="crt-text">TRAP MODE: ARMED ▌</div>
+          </div>
         </div>
+      </section>
 
+      <!-- Controls -->
+      <section class="controls-wrap">
+        <div class="control-recess h-full">
+          <div class="vents">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <div class="controls h-[calc(100%-1.1rem)]">
+            <div class="btn w-3rem" data-label="PK‑E"></div>
+            <div class="btn w-3rem" data-label="SCAN"></div>
+            <div class="btn right" data-label="TRAP"></div>
+            <div class="btn long" style="grid-row:2; grid-column:1 / span 2" data-label="FIRE"></div>
+            <div class="btn right" style="grid-row:2; grid-column:3" data-label="MODE"></div>
+            <div class="btn long" style="grid-row:3; grid-column:1 / span 2" data-label="STABILIZE"></div>
+            <div class="btn right" style="grid-row:3; grid-column:3" data-label="SET"></div>
+            <div class="btn long" style="grid-row:4; grid-column:1 / span 2" data-label="POWER"></div>
+            <div class="dpad-slot"><div class="dpad-ring"></div><div class="dpad-cross"><div class="cross-core"></div></div></div>
+          </div>
+        </div>
+      </section>
     </div>
-
+  </main>
 </body>
 </html>
