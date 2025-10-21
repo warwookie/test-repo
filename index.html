@@ -1,254 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SneakerQuest Retro Futuristic v2 — Minimal Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
-<style>
-  :root{ --bg:#1a1a1a; --beige:#c9bfa6; --bezel:#443f35; --panel:#2e2d29; --ink:#1a1a1a; --text:#d2c7a7; --accent:#ff9d00 }
-  *{ box-sizing:border-box }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEAKERQUEST Handheld</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Fonts for a retro feel: VT323 for screen, Press Start 2P for title -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* Define the custom color palette and dimensions */
+        :root {
+            /* Case Colors (Beige/Browns) */
+            --color-case-light: #e6d8c6; /* Outer Beige */
+            --color-plastic-dark: #4f463f; /* Dark Brown Plastic/Recess */
+            --color-button-mid: #776d63; /* Mid Brown Buttons */
+            --color-text-rust: #c67f47; /* SNEAKERQUEST Title Text */
+            --color-bezel-recess: #3b352f; /* Darker tone for the screen recess */
+            
+            /* Screen Colors (CRT Green) */
+            --color-screen-bg: #101c13; /* Very Dark Green-Black */
+            --color-screen-grid: rgba(76, 156, 76, 0.15); /* Faint Green Grid */
+            --color-led-green: #4c9c4c; /* Bright Green LED */
+            
+            /* General Shadow effects for plastic molding */
+            --shadow-screen-inset: inset 0 6px 8px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5); /* Deeper, softer screen inset */
+            --shadow-outset-light: 0 4px 10px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.5); /* Softer overall lift */
+            --shadow-button-press: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+            --shadow-bezel-lift: 0 0 0 8px var(--color-plastic-dark) inset; /* Soft inner bevel */
 
-  /* Layout uses CSS Grid so dock and stage never overlap */
-  body{
-    margin:0; background:#1a1a1a; color:#e6e6e6; font-family:'Press Start 2P', monospace;
-    display:grid; grid-template-columns:minmax(240px, 28vw) 1fr; gap:16px; padding:24px; align-items:start;
-  }
-  @media (max-width:900px){ body{ grid-template-columns:1fr } }
+            /* CRT Effect */
+            --color-crt-glow: rgba(76, 156, 76, 0.5);
+        }
 
-  .dock{ position:sticky; top:24px; width:100%; max-height:calc(100vh - 48px); overflow:auto; background:#1b1b1b; border:1px solid #333; border-radius:12px; padding:12px }
-  .dock h2{ font-size:12px; margin:0 0 8px 0 }
-  .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 }
-  .btn{ cursor:pointer; background:#2e2d29; color:#d2c7a7; border:1px solid #131313; border-radius:10px; padding:8px 10px; font-size:11px }
-  .btn.primary{ background:var(--accent); color:#1a1a1a; border-color:#d47c2e; font-weight:700 }
-  .btn.block{ width:100% }
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
-  .muted{ color:#a7a29a; font-size:10px }
-  .sep{ height:1px; background:#333; margin:10px 0 }
+        body {
+            background-color: #262626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
 
-  /* Stage + device */
-  .stage{ display:flex; align-items:flex-start; justify-content:center; width:100% }
-  .device-wrap{ position:relative; width:100%; max-width:100%; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) }
-  .device{ position:relative; width:320px; height:576px; border:4px solid var(--bezel); background:var(--beige); border-radius:16px; box-shadow:inset 0 0 0 2px #a09479, 0 4px 0 #2a2a2a; user-select:none; transform-origin: top center }
-  #device, .selectable{ touch-action:none }
+        /* --- KEY ADDITION: PLASTIC NOISE FILTER --- */
+        .device::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Generate a randomized noise texture */
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAIElEQVQIW2NkwA9gYGBgeGYgYvBngnZgZkAAgABo0o+Wwz8cAAAAAElFTkSuQmCC');
+            opacity: 0.1; /* Very subtle transparency */
+            border-radius: 1.5rem;
+            mix-blend-mode: overlay; /* Helps blend the texture with colors */
+        }
 
-  /* Visuals */
-  .abs{ position:absolute }
-  .plaque{ background:#d47c2e; color:#1a1a1a; border:2px solid #332d23; border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; font-weight:700; letter-spacing:2px }
-  .led{ position:absolute; top:4px; width:6px; height:6px; border-radius:9999px; background:#ff9d00 }
-  .bar{ background:#2e2d29; color:#d2c7a7; border:2px solid #131313; border-radius:6px; display:flex; align-items:center; justify-content:space-between; padding:0 12px }
-  .crt{ background:#1a2b1a; border:3px solid #0a0f0a; border-radius:10px; box-shadow:inset 0 0 20px #0d1b0d; position:relative; overflow:hidden }
-  .scan{ position:absolute; inset:0; opacity:.2; background:linear-gradient(transparent 95%, rgba(255,255,255,.05) 100%); background-size:100% 2px }
-  .hud{ background:#2e2d29; border:1px solid #131313; border-radius:6px; padding:4px 8px; color:#d2c7a7; position:relative }
-  .btnpad{ background:#2e2d29; border:1px solid #131313; border-radius:12px; position:relative; display:flex; align-items:center; justify-content:center; color:#d2c7a7 }
-  .pip{ position:absolute; right:6px; top:4px; width:6px; height:6px; border-radius:9999px; background:#ff9d00 }
-  .joystick{ background:#2e2d29; border:2px solid #131313; border-radius:9999px; position:relative; display:flex; align-items:center; justify-content:center }
-  .stick{ width:80px; height:80px; border-radius:9999px; background:#3a3a3a; border:2px solid #191919; box-shadow:inset 0 0 6px #000 }
-  .arw{ position:absolute; color:#777; font-size:10px }
-  .badge{ color:#2e2d29; font-size:8px; display:flex; align-items:center; justify-content:center }
+        /* The main device container to enforce the aspect ratio */
+        .device {
+            background-color: var(--color-case-light);
+            width: 100%;
+            max-width: 400px; 
+            aspect-ratio: 9 / 18.5;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            box-shadow: 
+                0 0 0 4px var(--color-plastic-dark), /* Dark outer border */
+                0 15px 40px rgba(0, 0, 0, 0.9), /* Deeper, softer lift shadow */
+                var(--shadow-bezel-lift); 
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative; /* Needed for the ::before noise element */
+            overflow: hidden; /* Keep noise contained */
+        }
 
-  /* Editor chrome */
-  .selectable{ cursor:move }
-  .chrome{ position:absolute; inset:0; border:2px dashed var(--accent); border-radius:8px; opacity:0; transition:opacity .12s; z-index:10; pointer-events:none }
-  .selectable:hover .chrome, .selectable.active .chrome{ opacity:1 }
-  .tag{ position:absolute; top:2px; left:2px; background:var(--accent); color:#1a1a1a; font-size:8px; font-weight:700; padding:2px 4px; border-radius:4px }
-  .editBtn{ position:absolute; top:2px; right:2px; background:#d47c2e; color:#1a1a1a; font-size:8px; font-weight:700; padding:2px 4px; border-radius:4px; cursor:pointer; pointer-events:auto }
-  .hdl{ position:absolute; width:10px; height:10px; background:var(--accent); border:2px solid #332d23; border-radius:2px; pointer-events:auto }
-  .hdl.nw{ left:-5px; top:-5px; cursor:nwse-resize } .hdl.n{ left:50%; transform:translateX(-50%); top:-5px; cursor:ns-resize }
-  .hdl.ne{ right:-5px; top:-5px; cursor:nesw-resize } .hdl.e{ right:-5px; top:50%; transform:translateY(-50%); cursor:ew-resize }
-  .hdl.se{ right:-5px; bottom:-5px; cursor:nwse-resize } .hdl.s{ left:50%; transform:translateX(-50%); bottom:-5px; cursor:ns-resize }
-  .hdl.sw{ left:-5px; bottom:-5px; cursor:nesw-resize } .hdl.w{ left:-5px; top:50%; transform:translateY(-50%) ; cursor:ew-resize }
+        /* --- TOP HEADER / TITLE SECTION --- */
+        .header-panel {
+            background-color: var(--color-plastic-dark);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            /* Softer inset shadow */
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 5px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-  /* Panel */
-  .panel{ position:fixed; right:24px; bottom:24px; width:min(520px, calc(100vw - 48px)); max-height:min(70vh, 540px); overflow:auto; background:#1b1b1b; border:1px solid #333; border-radius:12px; padding:12px; box-shadow:0 10px 24px rgba(0,0,0,.4); display:none }
-  .panel.open{ display:block }
-  .panel h3{ margin:0 0 8px 0; font-size:12px }
-  .panel .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 }
+        .title-plaque {
+            background-color: var(--color-bezel-recess);
+            border: 2px solid #2e2824;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            box-shadow: 
+                inset 0 1px 3px rgba(0, 0, 0, 0.7), 
+                0 1px 0 rgba(255, 255, 255, 0.1);
+            font-family: 'Press Start 2P', monospace;
+            color: var(--color-text-rust);
+            text-shadow: 1px 1px 0 #000;
+            letter-spacing: 0.15em;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            margin-top: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-bar {
+            width: 80%; /* Example progress */
+            height: 100%;
+            background-color: var(--color-led-green);
+            /* Add subtle glow */
+            box-shadow: 0 0 8px var(--color-led-green), inset 0 0 4px rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        /* --- CRT SCREEN SECTION --- */
+        .screen-housing {
+            background-color: var(--color-plastic-dark);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            /* Softer outset shadow */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7);
+            flex-grow: 1; 
+        }
 
-  @media (max-width:768px){ .hdl{ width:16px; height:16px; border-width:3px } }
-</style>
+        .screen-recess {
+            background-color: var(--color-bezel-recess);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9); /* Deeper, more realistic recess shadow */
+            height: 100%;
+        }
+
+        .screen {
+            background-color: var(--color-screen-bg);
+            border-radius: 0.35rem;
+            width: 100%;
+            height: 100%;
+            box-shadow: var(--shadow-screen-inset); 
+            overflow: hidden;
+            position: relative;
+            color: #d7e4d8;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            padding: 1rem;
+            /* Add gentle glow to screen */
+            text-shadow: 0 0 5px var(--color-crt-glow);
+            filter: brightness(1.1) contrast(1.1); /* Slight analog filter */
+        }
+        
+        /* CRT Flicker/Pulse Animation */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.98; }
+        }
+        
+        .screen {
+            animation: flicker 0.1s infinite alternate;
+        }
+
+        /* CRT Grid/Scanline Effect */
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, var(--color-screen-grid) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--color-screen-grid) 1px, transparent 1px);
+            background-size: 10% 10%, 10% 10%;
+            opacity: 0.9;
+            pointer-events: none;
+            /* Add subtle screen curvature */
+            border-radius: 0.35rem;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Scanlines */
+        .screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0.4) 50%, rgba(0, 0, 0, 0.6) 50%); 
+            background-size: 100% 3px;
+            pointer-events: none;
+        }
+
+
+        /* --- CONTROL PANEL SECTION --- */
+        .control-panel-housing {
+            background-color: var(--color-plastic-dark);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.7); /* Softer overall lift */
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 0.75rem;
+            height: 10rem;
+        }
+
+        .button-placeholder {
+            background-color: var(--color-button-mid);
+            border-radius: 0.4rem;
+            /* Softer button shadow */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1); 
+            height: 100%; 
+            min-height: 2rem;
+            cursor: pointer;
+            transition: all 0.05s ease;
+        }
+
+        .button-placeholder:active {
+            box-shadow: var(--shadow-button-press);
+            transform: translateY(1px);
+        }
+        
+        .btn-span-2 { grid-column: span 2; }
+        .btn-row-span-2 { grid-row: span 2; }
+
+        .dpad-slot {
+            grid-column: 3 / 4;
+            grid-row: 3 / 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .dpad {
+            background-color: var(--color-button-mid);
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 50%;
+            /* Deep, realistic inset for the D-Pad */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .dpad-center {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: var(--color-plastic-dark);
+            border-radius: 50%;
+            box-shadow: var(--shadow-button-press);
+            border: 2px solid var(--color-case-light);
+        }
+    </style>
 </head>
-<body>
-  <!-- Left tools dock -->
-  <aside class="dock" id="dock">
-    <h2>Tools</h2>
-    <div class="row">
-      <label>Game font</label>
-      <select id="fontSel">
-        <option value="ps2p">Press Start 2P</option>
-        <option value="vt323">VT323</option>
-        <option value="mono">System Mono</option>
-      </select>
+<body class="bg-gray-900">
+
+    <div class="device">
+        <!-- 1. HEADER PANEL -->
+        <div class="header-panel">
+            <div class="title-plaque">SNEAKERQUEST</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- 2. SCREEN SECTION (Multi-layer bezel) -->
+        <div class="screen-housing">
+            <div class="screen-recess">
+                <div class="screen">
+                    <!-- Screen content matching the empty grid in the image -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3. CONTROL PANEL -->
+        <div class="control-panel-housing">
+            <div class="button-grid">
+                
+                <!-- Row 1 -->
+                <div class="button-placeholder"></div>
+                <div class="button-placeholder"></div>
+                <div class="button-placeholder"></div>
+                
+                <!-- Row 2 -->
+                <div class="button-placeholder"></div>
+                <div class="button-placeholder"></div>
+                <div class="button-placeholder"></div>
+
+                <!-- Row 3 -->
+                <div class="button-placeholder btn-span-2"></div>
+                
+                <!-- D-Pad Slot (takes up rows 3 & 4 in column 3) -->
+                <div class="dpad-slot btn-row-span-2">
+                    <div class="dpad">
+                         <div class="dpad-center"></div>
+                    </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="button-placeholder btn-span-2"></div>
+
+            </div>
+        </div>
+
     </div>
-    <div class="row grid2">
-      <button class="btn" id="btnUndo">Undo <span id="uCount" class="muted">(0)</span></button>
-      <button class="btn" id="btnRedo">Redo <span id="rCount" class="muted">(0)</span></button>
-    </div>
-    <div class="row">
-      <button class="btn block" id="btnSnap">SNAP: ON (8px)</button>
-    </div>
-    <div class="sep"></div>
-    <div class="row"><button class="btn block" id="btnExportJSON">Export JSON</button></div>
-    <div class="row" id="jsonWrap" style="display:none"><textarea id="jsonOut" style="width:100%;height:140px;background:#0e0e0e;color:#e6e6e6;border:1px solid #333;border-radius:8px;padding:6px 8px;font-family:inherit;font-size:12px" readonly></textarea></div>
-    <div class="row"><button class="btn block" id="btnCopyJSON">Copy JSON</button></div>
-    <div class="sep"></div>
-    <div class="row"><button class="btn block" id="btnToggleImport">Import JSON</button></div>
-    <div class="row" id="importWrap" style="display:none"><textarea id="jsonIn" placeholder='{"blocks":[{"id":"title","x":8,"y":8,"w":304,"h":32}]}' style="width:100%;height:140px;background:#0e0e0e;color:#e6e6e6;border:1px solid #333;border-radius:8px;padding:6px 8px;font-family:inherit;font-size:12px"></textarea></div>
-    <div class="row grid2">
-      <button class="btn primary" id="btnApplyImport">Apply</button>
-      <button class="btn" id="btnClearImport">Clear</button>
-    </div>
-  </aside>
 
-  <!-- Canvas area -->
-  <main class="stage">
-    <div class="device-wrap" id="wrap">
-      <div class="device" id="device"><!-- Blocks injected by JS --></div>
-    </div>
-  </main>
-
-  <!-- Element editor panel -->
-  <section class="panel" id="editPanel">
-    <h3 id="panelTitle">Edit</h3>
-    <div class="sep"></div>
-    <div id="panelBody"></div>
-    <div class="sep"></div>
-    <div class="row" style="justify-content:flex-end; gap:8px">
-      <button class="btn" id="btnCancelEdit">Cancel</button>
-      <button class="btn primary" id="btnApplyEdit">Apply</button>
-    </div>
-  </section>
-
-<script>
-(function(){
-  /* Core */
-  const SNAP=8; let snapOn=true; const hard=n=>Math.round(n/SNAP)*SNAP; const snap=n=>snapOn?hard(n):n;
-  const fontSel=document.getElementById('fontSel'); let gameFont='ps2p';
-  const fontFamily=()=>gameFont==='ps2p'?"'Press Start 2P', monospace":(gameFont==='vt323'?"'VT323', monospace":'monospace');
-
-  /* Boxes */
-  const boxes={ title:{x:8,y:8,w:304,h:32}, infobar:{x:8,y:48,w:304,h:32}, crt:{x:8,y:88,w:304,h:200}, life:{x:8,y:296,w:72,h:40}, fire:{x:88,y:296,w:72,h:40}, sneakers:{x:168,y:296,w:72,h:40}, boxes:{x:248,y:296,w:72,h:40}, power:{x:248,y:344,w:64,h:32}, btnA:{x:8,y:480,w:96,h:32}, btnB:{x:8,y:520,w:96,h:32}, stick:{x:192,y:456,w:120,h:120}, badge:{x:280,y:552,w:32,h:16} };
-
-  /* HUD config */
-  const cfg={
-    life:{label:'LIFE',icon:'❤️',count:3,font:10,iconSize:12,showCount:false,countText:'',textX:8,textY:12,iconX:44,iconY:10,countX:0,countY:0},
-    fire:{label:'FIRE',icon:'🔥',count:1,font:10,iconSize:12,showCount:true,countText:'x 5',textX:8,textY:12,iconX:44,iconY:10,countX:60,countY:12},
-    sneakers:{label:'SNEAKERS',icon:'👟',count:5,font:10,iconSize:12,showCount:false,countText:'',textX:8,textY:12,iconX:72,iconY:10,countX:0,countY:0},
-    boxes:{label:'BOX',icon:'📦',count:1,font:10,iconSize:12,showCount:true,countText:'x 0000',textX:8,textY:12,iconX:44,iconY:10,countX:60,countY:12},
-    power:{label:'',icon:'⚡',count:3,font:10,iconSize:12,showCount:false,countText:'',textX:8,textY:10,iconX:20,iconY:8,countX:0,countY:0},
-    title:{label:'SNEAKERQUEST',icon:'',count:0,font:14,iconSize:12,showCount:false,countText:'',textX:0,textY:0,iconX:0,iconY:0,countX:0,countY:0},
-    crt:{label:'II',icon:'',count:0,font:24,iconSize:12,showCount:false,countText:'',textX:144,textY:88,iconX:0,iconY:0,countX:0,countY:0},
-    btnA:{label:'JUMP',icon:'',count:0,font:12,iconSize:12,showCount:false,countText:'',textX:24,iconX:0,iconY:0,textY:8,countX:0,countY:0},
-    btnB:{label:'BOMB',icon:'',count:0,font:12,iconSize:12,showCount:false,countText:'',textX:28,iconX:0,iconY:0,textY:8,countX:0,countY:0},
-    stick:{label:'',icon:'',count:0,font:10,iconSize:12,showCount:false,countText:'',textX:0,textY:0,iconX:0,iconY:0,countX:0,countY:0},
-    badge:{label:'SQ-01',icon:'',count:0,font:8,iconSize:12,showCount:false,countText:'',textX:4,textY:2,iconX:0,iconY:0,countX:0,countY:0}
-  };
-
-  /* Info bar */
-  const info={ stageLeft:'STAGE — ONE', chevron:'▸', timer:'00:00:00:0', scoreLabel:'SCORE', score:'000000', font:10, subFont:9 };
-
-  /* History */
-  const past=[], future=[]; const snapShot=()=>JSON.stringify({boxes,cfg,info,gameFont,snapOn});
-  const applySnap=s=>{ try{const v=JSON.parse(s);Object.assign(boxes,v.boxes);Object.assign(cfg,v.cfg);Object.assign(info,v.info);gameFont=v.gameFont;snapOn=v.snapOn;}catch{} };
-  const setCounts=()=>{uCount.textContent=`(${past.length})`;rCount.textContent=`(${future.length})`};
-  const commit=()=>{ past.push(snapShot()); future.length=0; setCounts(); };
-  const undo=()=>{ if(!past.length) return; const p=past.pop(); future.unshift(snapShot()); applySnap(p); renderAll(); setCounts(); };
-  const redo=()=>{ if(!future.length) return; const n=future.shift(); past.push(snapShot()); applySnap(n); renderAll(); setCounts(); };
-
-  /* DOM helpers */
-  const dev=document.getElementById('device'), wrap=document.getElementById('wrap');
-  const mk=(t,c,h)=>{const e=document.createElement(t); if(c) e.className=c; if(h!=null) e.innerHTML=h; return e;};
-  const setBox=(el,b)=>{ if(!el||!b) return; el.style.left=b.x+'px'; el.style.top=b.y+'px'; el.style.width=b.w+'px'; el.style.height=b.h+'px'; };
-
-  /* Fit (throttled) */
-  let currentScale=1;
-  function fit(){ const W=320,H=576; const r=wrap.getBoundingClientRect(); const s=Math.max(.2,Math.min(r.width/W,(window.innerHeight-r.top-8)/H)); currentScale=s; dev.style.transform=`scale(${s})`; }
-  let raf=0; const scheduleFit=()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; fit(); }); };
-  addEventListener('resize',scheduleFit); addEventListener('orientationchange',scheduleFit);
-  const ro=new ResizeObserver(()=>scheduleFit()); ro.observe(wrap);
-
-  /* Drag + resize account for scale */
-  let drag=null, rs=null; const pos=e=>({x:e.clientX,y:e.clientY}); let dragEl=null;
-  function startDrag(id,e){ if(!boxes[id]) return; e.preventDefault(); commit(); const p=pos(e); drag={id:id,x:p.x,y:p.y}; dragEl=document.getElementById('blk-'+id); if(dragEl){ dragEl.classList.add('active'); } }
-  function moveDrag(e){ if(!drag||!drag.id||!boxes[drag.id]) return; const p=pos(e); const b=boxes[drag.id]; const dx=(p.x-drag.x)/currentScale, dy=(p.y-drag.y)/currentScale; b.x=snap(b.x+dx); b.y=snap(b.y+dy); drag=p; const el=dragEl||document.getElementById('blk-'+drag.id); setBox(el,b); }
-  function startResize(id,h,e){ if(!boxes[id]) return; e.preventDefault(); e.stopPropagation(); commit(); const p=pos(e); rs={id:id, h:h, x:p.x, y:p.y}; }
-  function moveResize(e){ if(!rs||!boxes[rs.id]) return; const p=pos(e); const b=boxes[rs.id]; let {x,y,w,h}=b; const dx=(p.x-rs.x)/currentScale, dy=(p.y-rs.y)/currentScale; rs.x=p.x; rs.y=p.y; if(/n/.test(rs.h)){ y=snap(y+dy); h=snap(h-dy);} if(/s/.test(rs.h)){ h=snap(h+dy);} if(/w/.test(rs.h)){ x=snap(x+dx); w=snap(w-dx);} if(/e/.test(rs.h)){ w=snap(w+dx);} b.x=x; b.y=y; b.w=Math.max(40,w); b.h=Math.max(24,h); const el=document.getElementById('blk-'+rs.id); setBox(el,b); }
-  document.addEventListener('mousemove',e=>{ moveDrag(e); moveResize(e); },{passive:false}); document.addEventListener('mouseup',()=>{ if(dragEl){ dragEl.classList.remove('active'); dragEl=null; } drag=null; rs=null; });
-  document.addEventListener('pointermove',e=>{ moveDrag(e); moveResize(e); },{passive:false}); document.addEventListener('pointerup',()=>{ if(dragEl){ dragEl.classList.remove('active'); dragEl=null; } drag=null; rs=null; }); window.addEventListener('mouseleave',()=>{ if(dragEl){ dragEl.classList.remove('active'); dragEl=null; } drag=null; rs=null; });
-
-  /* Render */
-  const handles=['nw','n','ne','e','se','s','sw','w'];
-  const hHTML=(id)=>`<div class="chrome"><div class="tag">${id.toUpperCase()}</div><div class="editBtn" data-id="${id}">EDIT</div>${handles.map(h=>`<div class=\\\"hdl ${h}\\\" data-id=\\\"${id}\\\" data-h=\\\"${h}\\\"></div>`).join('')}</div>`;
-  function hudHTML(id){ const c=cfg[id]; const color=['life','fire','sneakers','boxes','power','crt'].includes(id)?'#d2c7a7':'inherit'; const label=c.label?`<span style="position:absolute;left:${c.textX}px;top:${c.textY}px;font-size:${c.font}px;color:${color}">${c.label}</span>`:''; const icons=c.count>0?`<span style="position:absolute;left:${c.iconX}px;top:${c.iconY}px;font-size:${c.iconSize}px">${Array.from({length:c.count}).map(()=>c.icon).join('')}</span>`:''; const count=c.showCount?`<span style="position:absolute;left:${c.countX}px;top:${c.countY}px;font-size:${c.font}px;color:${color}">${c.countText}</span>`:''; return `<div style="position:relative;width:100%;height:100%">${label}${icons}${count}</div>`; }
-  function renderBlock(id){ const b=boxes[id]; let el=document.getElementById('blk-'+id); const ff=fontFamily(); if(!el){ el=mk('div','selectable',''); el.id='blk-'+id; el.style.position='absolute'; el.style.fontFamily=ff; el.dataset.id=id; el.setAttribute('draggable','false'); dev.appendChild(el); }
-    /* Per-block listeners to kick off drag */
-    if(!el.dataset.bound){
-      el.addEventListener('pointerdown',e=>{ if(e.target && (e.target.closest && (e.target.closest('.hdl')||e.target.closest('.editBtn')))) return; startDrag(id,e); });
-      el.addEventListener('mousedown',e=>{ if(e.target && (e.target.closest && (e.target.closest('.hdl')||e.target.closest('.editBtn')))) return; startDrag(id,e); });
-      el.dataset.bound='1';
-    }
-    el.className='selectable';
-    if(id==='title'){ el.classList.add('plaque'); el.innerHTML=hHTML(id)+`${cfg.title.label}<div class="led" style="left:4px"></div><div class="led" style="right:4px"></div>`; el.style.fontSize=cfg.title.font+'px'; }
-    else if(id==='infobar'){ el.classList.add('bar'); el.innerHTML=hHTML(id)+`<div>${info.stageLeft}</div><div style="color:#77ff99">${info.chevron}</div><div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1"><span>${info.timer}</span><span style="color:#bfb79f;font-size:${info.subFont}px">${info.scoreLabel} ${info.score}</span></div>`; el.style.fontSize=info.font+'px'; }
-    else if(id==='crt'){ el.classList.add('crt'); el.innerHTML=hHTML(id)+`<div class="scan"></div><div class="abs" style="left:${cfg.crt.textX}px;top:${cfg.crt.textY}px;font-size:${cfg.crt.font}px;color:#d2c7a7">${cfg.crt.label}</div>`; }
-    else if(['life','fire','sneakers','boxes','power'].includes(id)){ el.classList.add('hud'); el.innerHTML=hHTML(id)+hudHTML(id); }
-    else if(id==='btnA'||id==='btnB'){ el.classList.add('btnpad'); el.innerHTML=hHTML(id)+`<div style="position:absolute;left:${cfg[id].textX}px;top:${cfg[id].textY}px;font-size:${cfg[id].font}px">${cfg[id].label}</div><div class="pip"></div>`; }
-    else if(id==='stick'){ el.classList.add('joystick'); el.innerHTML=hHTML(id)+`<div class="stick"></div><div class="arw" style="top:6px;left:50%;transform:translateX(-50%)">▲</div><div class="arw" style="bottom:6px;left:50%;transform:translateX(-50%)">▼</div><div class="arw" style="left:6px;top:50%;transform:translateY(-50%)">◀</div><div class="arw" style="right:6px;top:50%;transform:translateY(-50%)">▶</div>`; }
-    else if(id==='badge'){ el.classList.add('badge'); el.style.display='flex'; el.style.alignItems='center'; el.style.justifyContent='center'; el.innerHTML=hHTML(id)+cfg.badge.label; el.style.fontSize=cfg.badge.font+'px'; }
-    el.style.fontFamily=ff; setBox(el,b);
-    el.querySelectorAll('.hdl').forEach(h=>{ h.addEventListener('mousedown',e=>{ e.stopPropagation(); startResize(h.dataset.id,h.dataset.h,e); }); h.addEventListener('pointerdown',e=>{ e.stopPropagation(); startResize(h.dataset.id,h.dataset.h,e); }); });
-    el.querySelectorAll('.editBtn').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); openEditor(btn.dataset.id); }));
-    el.ondblclick=()=>openEditor(id);
-  }
-  function renderAll(){ dev.innerHTML=''; ['title','infobar','crt','life','fire','sneakers','boxes','power','btnA','btnB','stick','badge'].forEach(renderBlock); dev.style.fontFamily=fontFamily(); scheduleFit(); }
-
-  /* Editor panel */
-  const panel=document.getElementById('editPanel'), body=document.getElementById('panelBody'), title=document.getElementById('panelTitle'); let editing=null, draft=null, previewSnap=null;
-  function live(){ if(!editing||!draft) return; if(editing==='infobar'){ Object.assign(info,draft); } else { Object.assign(cfg[editing],draft); } renderBlock(editing); }
-  function openEditor(id){ editing=id; previewSnap=snapShot(); panel.classList.add('open'); title.textContent='Edit: '+id.toUpperCase(); body.innerHTML=''; if(id==='infobar'){ draft={...info};
-      gRow('Stage',text(draft.stageLeft,v=>{draft.stageLeft=v; live();}));
-      gRow('Chevron',text(draft.chevron,v=>{draft.chevron=v; live();}));
-      gRow('Timer',text(draft.timer,v=>{draft.timer=v; live();}));
-      grid([num('Font',draft.font,v=>{draft.font=clamp(v,8,14); live();}), num('Sub',draft.subFont,v=>{draft.subFont=clamp(v,8,14); live();}), text('Score lbl',draft.scoreLabel,v=>{draft.scoreLabel=v; live();}), text('Score',draft.score,v=>{draft.score=v; live();})]);
-    } else { draft={...cfg[id]};
-      gRow('Label',text(draft.label,v=>{draft.label=v; live();})); gRow('Icon',text(draft.icon,v=>{draft.icon=v; live();}));
-      grid([num('Count',draft.count,v=>{draft.count=clamp(v,0,12); live();}), num('L font',draft.font,v=>{draft.font=clamp(v,8,32); live();}), num('I size',draft.iconSize,v=>{draft.iconSize=clamp(v,8,32); live();}), check('Show',draft.showCount,v=>{draft.showCount=v; live();})]);
-      gRow('Count text',text(draft.countText,v=>{draft.countText=v; live();}));
-      grid([num('LX',draft.textX,v=>{draft.textX=lim(v); live();}), num('LY',draft.textY,v=>{draft.textY=lim(v,128); live();}), num('IX',draft.iconX,v=>{draft.iconX=lim(v); live();}), num('IY',draft.iconY,v=>{draft.iconY=lim(v,128); live();}), num('CX',draft.countX,v=>{draft.countX=lim(v); live();}), num('CY',draft.countY,v=>{draft.countY=lim(v,128); live();})]);
-    } }
-  function lim(v,max=256){return clamp(v,-100,max)}
-  function clamp(v,lo,hi){v=Number(v||0);return Math.max(lo,Math.min(hi,v));}
-  function el(t){return document.createElement(t)}
-  function text(val,on){const i=el('input'); i.value=val; i.addEventListener('input',()=>{on(i.value);}); return i}
-  function num(lbl,val,on){const i=el('input'); i.type='number'; i.value=val; i.addEventListener('input',()=>{on(i.value);}); const c=el('div'); c.className='row'; c.appendChild(document.createTextNode(lbl)); c.appendChild(i); return c}
-  function check(lbl,val,on){const i=el('input'); i.type='checkbox'; i.checked=!!val; i.addEventListener('change',()=>{on(i.checked);}); const c=el('div'); c.className='row'; c.appendChild(document.createTextNode(lbl)); c.appendChild(i); return c}
-  function gRow(lbl,input){const r=el('div'); r.className='row'; const s=el('span'); s.textContent=lbl; r.appendChild(s); r.appendChild(input); body.appendChild(r)}
-  function grid(items){const g=el('div'); g.className='grid2'; items.forEach(x=>g.appendChild(x)); body.appendChild(g)}
-
-  document.getElementById('btnApplyEdit').onclick=()=>{ if(!editing) return; commit(); if(editing==='infobar'){ Object.assign(info,draft); } else { Object.assign(cfg[editing],draft); } panel.classList.remove('open'); previewSnap=null; renderAll(); };
-  document.getElementById('btnCancelEdit').onclick=()=>{ panel.classList.remove('open'); if(previewSnap){ applySnap(previewSnap); previewSnap=null; renderAll(); } };
-
-  /* Dock */
-  const uCount=document.getElementById('uCount'), rCount=document.getElementById('rCount');
-  document.getElementById('btnUndo').onclick=undo; document.getElementById('btnRedo').onclick=redo;
-  document.getElementById('btnSnap').onclick=e=>{ snapOn=!snapOn; e.target.textContent=`SNAP: ${snapOn?'ON':'OFF'} (${SNAP}px)`; };
-  fontSel.onchange=()=>{ gameFont=fontSel.value; renderAll(); };
-
-  /* JSON export/import */
-  const toJSON=()=>({ blocks:Object.entries(boxes).map(([id,b])=>({id,...b})) });
-  const jsonWrap=document.getElementById('jsonWrap'); const jsonOut=document.getElementById('jsonOut');
-  document.getElementById('btnExportJSON').onclick=()=>{ jsonOut.value=JSON.stringify(toJSON(),null,2); jsonWrap.style.display='block'; };
-  document.getElementById('btnCopyJSON').onclick=()=>{ navigator.clipboard && navigator.clipboard.writeText(jsonOut.value||JSON.stringify(toJSON(),null,2)); };
-  const importWrap=document.getElementById('importWrap'); const jsonIn=document.getElementById('jsonIn');
-  document.getElementById('btnToggleImport').onclick=()=>{ importWrap.style.display=importWrap.style.display==='none'?'block':'none'; };
-  document.getElementById('btnApplyImport').onclick=()=>{ if(!jsonIn.value.trim()) return; try{ const obj=JSON.parse(jsonIn.value); if(!Array.isArray(obj.blocks)) throw new Error('missing blocks'); commit(); const map={}; obj.blocks.forEach(b=>{ if(!b||!b.id) return; map[b.id]={ x:snap(b.x||0), y:snap(b.y||0), w:Math.max(40,snap(b.w||40)), h:Math.max(24,snap(b.h||24)) }; }); Object.keys(map).forEach(id=>{ if(boxes[id]) Object.assign(boxes[id],map[id]); }); renderAll(); importWrap.style.display='none'; jsonIn.value=''; }catch(e){ console.error('Invalid JSON',e); } };
-  document.getElementById('btnClearImport').onclick=()=>{ jsonIn.value=''; };
-
-  /* Boot + self-check */
-  commit(); renderAll(); scheduleFit();
-  console.assert(document.getElementById('device'), 'device missing');
-  document.addEventListener('dragstart',e=>e.preventDefault());
-})();
-</script>
 </body>
 </html>
