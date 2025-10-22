@@ -54,13 +54,25 @@
     .dots{position:absolute;inset:0;background:radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px), radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px);background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;opacity:1}
 
     /* glowing text composed of lit dots via background-clip */
-    .dmd-text{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(12deg);font-family:'Press Start 2P', monospace;font-size:22px;letter-spacing:2px;color:transparent;background:
+    .dmd-text{z-index:2;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(12deg);font-family:'Press Start 2P', monospace;font-size:22px;letter-spacing:2px;color:transparent;background:
       radial-gradient(circle at 3px 3px, var(--dmd-amber-hot) 0 1.7px, transparent 1.8px),
       radial-gradient(circle at 3px 3px, var(--dmd-amber) 0 1.6px, transparent 1.7px);
       background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 6px #ff9d3d) drop-shadow(0 0 14px rgba(255,138,31,.7))}
 
-    /* floating depth motion inside panel */
-    .float{animation:floaty 3.8s ease-in-out infinite}
+    /* sparkle sweep across title every 30s */
+    .shine{position:absolute;top:50%;left:-10%;width:10px;height:10px;transform:translate(-50%,-50%) rotate(45deg);z-index:3;filter:drop-shadow(0 0 8px #ffb15a) drop-shadow(0 0 14px rgba(255,138,31,.6));opacity:0}
+    .shine::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,#ffd9a0 0 45%, rgba(255,217,160,.6) 60%, transparent 62%)}
+    .shine::after{content:"";position:absolute;left:50%;top:50%;width:64px;height:2px;transform:translate(-50%,-50%) rotate(-45deg);background:linear-gradient(90deg, transparent, rgba(255,177,90,.95), rgba(255,177,90,.4), transparent);opacity:.95}
+    @keyframes sweepStar{ 
+  0%   { left:-15%; top:50%; opacity:0 }
+  5%   { left:-10%; top:49%; opacity:1 }
+  35%  { left:50%;  top:50%; opacity:1 }
+  65%  { left:110%; top:51%; opacity:1 }
+  70%  { left:115%; top:51%; opacity:0 }
+  100% { left:115%; top:51%; opacity:0 }
+}
+    .dmd-title .shine{animation:sweepStar 5s ease-in-out infinite; will-change:left, top, opacity, transform}
+    {animation:sweep30 3s ease-in-out infinite; will-change:left, opacity, transform}
     @keyframes floaty{0%{transform:translate(-50%,-54%) rotateX(12deg)}50%{transform:translate(-50%,-46%) rotateX(12deg)}100%{transform:translate(-50%,-54%) rotateX(12deg)}}
     @keyframes marquee{0%{transform:translate(40%, -50%) rotateX(12deg)}100%{transform:translate(-140%, -50%) rotateX(12deg)}}
 
@@ -104,14 +116,15 @@
     <span class="bolt tl"></span><span class="bolt tr"></span><span class="bolt bl"></span><span class="bolt br"></span>
 
     <div class="stack h-full flex flex-col">
-      <!-- Header with DMD panel -->      <!-- Header with two LED DMD panels -->
+      <!-- Header with two LED DMD panels -->
       <section class="recess header-wrap">
         <div class="h-full flex flex-col gap-3">
           <!-- TITLE DMD (larger, floating) -->
           <div class="dmd dmd-title" style="height:96px;">
             <div class="matrix">
               <div class="dots"></div>
-              <div class="dmd-text float title">SNEAKERQUEST</div>
+              <div class="dmd-text title">SNEAKERQUEST</div>
+              <div class="shine"></div>
             </div>
           </div>
 
