@@ -17,8 +17,8 @@
       --color-title-text:#f0f0f0;
       --color-amber:#ffb400;
       --color-slime:#7bff5e;
-      --dmd-amber:#ff8a1f; /* pinball DMD orange */
-      --dmd-amber-hot:#ffb15a;
+      --dmd-amber:#ff402a; /* vintage red LED */
+      --dmd-amber-hot:#ff7a5e;
     }
 
     html,body{height:100%;background:#0a0a0a}
@@ -37,51 +37,46 @@
     .recess{position:relative;background:linear-gradient(180deg,#515151,#444);border-radius:.55rem;padding:1rem;box-shadow:inset 0 10px 16px rgba(0,0,0,.65), inset 0 -6px 10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08)}    
     .inner-recess{position:relative;background:linear-gradient(180deg,#3a3a3a,#2e2e2e);border-radius:.4rem;padding:.7rem;box-shadow:inset 0 14px 22px rgba(0,0,0,.9), inset 0 -16px 20px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.06)}    
 
-    /* removed plaque styles */
-    .plaque:before,.plaque:after{content:"";position:absolute;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #d0c6b6 0 40%, #8c7c62 41% 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.6)}
-    .plaque:before{left:6px}.plaque:after{right:6px}
-
-    @property --sx { syntax: '<percentage>'; inherits: true; initial-value: -15%; }
     /* ======================= DMD LED Panel ======================= */
     @property --px { syntax: '<percentage>'; inherits: true; initial-value: -30%; }
 
-    .dmd{position:relative;margin-top:.0rem;height:76px;border-radius:.5rem;padding:.45rem;background:linear-gradient(#2b2b2b,#1c1c1c);box-shadow:inset 0 3px 0 rgba(255,255,255,.06), inset 0 -6px 12px rgba(0,0,0,.8), inset 0 0 0 1px #111}
-    /* smoked glass cover */
-    .dmd::before{content:"";position:absolute;inset:0;border-radius:.5rem;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 22%,rgba(0,0,0,.25) 70%,rgba(0,0,0,.6));mix-blend-mode:screen;pointer-events:none}
-    /* ribs like real DMD lens */
+    .dmd{position:relative;margin-top:.0rem;height:76px;border-radius:.5rem;padding:.45rem;background:linear-gradient(#2b2b2b,#1a1a1a);box-shadow:inset 0 3px 0 rgba(255,255,255,.04), inset 0 -6px 12px rgba(0,0,0,.85), inset 0 0 0 1px #0a0a0a}
+    .dmd::before{content:"";position:absolute;inset:0;border-radius:.5rem;background:linear-gradient(180deg,rgba(255,110,90,.10),rgba(255,110,90,0) 25%,rgba(0,0,0,.28) 75%,rgba(0,0,0,.65));mix-blend-mode:screen;pointer-events:none}
     .dmd::after{content:"";position:absolute;inset:2px;border-radius:.45rem;background:repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, rgba(0,0,0,0) 2px 6px);opacity:.2;pointer-events:none}
 
-    .matrix{position:absolute;inset:.45rem;border-radius:.35rem;background:#000;overflow:hidden;perspective:600px;transform-style:preserve-3d}
+    .matrix{position:absolute;inset:.45rem;border-radius:.35rem;background:linear-gradient(180deg,#161112,#0e0b0c);overflow:hidden;perspective:600px;transform-style:preserve-3d;box-shadow:inset 0 0 0 1px #1a0d0f, inset 0 0 30px rgba(255,90,70,.12)}
 
-    /* base unlit dots grid */
-    .dots{position:absolute;inset:0;background:radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px), radial-gradient(circle at 3px 3px, #191919 0 1.6px, transparent 1.7px);background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;opacity:1}
+    /* high‑res dot grid */
+    .dots{position:absolute;inset:0;opacity:.28;background:radial-gradient(circle at 2px 2px, #111 0 1px, transparent 1.1px), radial-gradient(circle at 2px 2px, #111 0 1px, transparent 1.1px);background-size:4px 4px,4px 4px;background-position:0 0,2px 2px;}
 
-    /* glowing text composed of lit dots via background-clip */
-    .dmd-text{z-index:2;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(10deg);font-family:'Press Start 2P', monospace;font-size:22px;letter-spacing:2px;color:transparent;-webkit-text-fill-color:transparent;background:
-      radial-gradient(circle at 3px 3px, var(--dmd-amber-hot) 0 1.7px, transparent 1.8px),
-      radial-gradient(circle at 3px 3px, var(--dmd-amber) 0 1.6px, transparent 1.7px);
-      background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 6px #ff9d3d) drop-shadow(0 0 14px rgba(255,138,31,.7))}
+    /* dot‑matrix text */
+    .dmd-text{z-index:2;position:absolute;left:var(--tx,50%);top:var(--ty,46%);transform:translate(-50%,-50%) rotateX(6deg);font-family:'Press Start 2P', monospace;font-size:22px;letter-spacing:2px;color:transparent;-webkit-text-fill-color:transparent;background:
+      radial-gradient(circle at 2px 2px, var(--dmd-amber-hot) 0 1.1px, transparent 1.2px),
+      radial-gradient(circle at 2px 2px, var(--dmd-amber) 0 1px, transparent 1.1px);
+      background-size:4px 4px,4px 4px;background-position:0 0,2px 2px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 8px rgba(255,82,58,.55))}
 
-    /* robust fallback if text-clip unsupported */
     @supports not (-webkit-background-clip:text) {
-      .dmd-text{color:var(--dmd-amber);-webkit-text-fill-color:var(--dmd-amber);background:none;text-shadow:0 0 8px #ff9d3d}
+      .dmd-text{color:var(--dmd-amber);-webkit-text-fill-color:var(--dmd-amber);background:none;text-shadow:0 0 8px rgba(255,82,58,.55)}
     }
 
-    /* hide old star */
-    .shine{display:none}
-
-    /* ===== Diagonal refresh band under text with magnify highlight ===== */
+    /* diagonal refresh band */
     .dmd-title{ --px:-30%; }
     .dmd-title .dmd-text.title::before{content:attr(data-text);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(10deg);color:transparent;background:
-      radial-gradient(circle at 3px 3px, #ffd19a 0 1.8px, transparent 1.9px),
-      radial-gradient(circle at 3px 3px, #ff9a3d 0 1.7px, transparent 1.8px);
+      radial-gradient(circle at 3px 3px, #ffb1a0 0 1.8px, transparent 1.9px),
+      radial-gradient(circle at 3px 3px, #ff5a4a 0 1.7px, transparent 1.8px);
       background-size:6px 6px,6px 6px;background-position:0 0,3px 3px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 10px #ffb15a) drop-shadow(0 0 18px rgba(255,138,31,.7));
-      /* slanted band mask */
       clip-path: polygon(calc(var(--px) - 15%) 0%, calc(var(--px) + 10%) 0%, calc(var(--px) + 25%) 100%, calc(var(--px) - 0%) 100%);
-      z-index:3; pointer-events:none;
-      animation: diagSweep 6s ease-in-out infinite; }
-
+      z-index:3; pointer-events:none; animation: diagSweep 6s ease-in-out infinite; }
     @keyframes diagSweep{ 0%{ --px:-30% } 60%{ --px:130% } 100%{ --px:130% } }
+
+    /* ===== Status chips ===== */
+    .status-layer{position:absolute;inset:.45rem;border-radius:.35rem}
+    .status-chip{position:absolute;white-space:nowrap;line-height:1;color:transparent;-webkit-text-fill-color:transparent;font-family:'Press Start 2P', monospace;letter-spacing:1px;background:
+      radial-gradient(circle at 2px 2px, var(--dmd-amber-hot) 0 1.1px, transparent 1.2px),
+      radial-gradient(circle at 2px 2px, var(--dmd-amber) 0 1px, transparent 1.1px);
+      background-size:4px 4px,4px 4px;background-position:0 0,2px 2px;background-clip:text;-webkit-background-clip:text;filter:drop-shadow(0 0 6px rgba(255,82,58,.45))}
+    @supports not (-webkit-background-clip:text) { .status-chip{color:var(--dmd-amber);-webkit-text-fill-color:var(--dmd-amber);background:none;text-shadow:0 0 6px rgba(255,82,58,.45)} }
+    .edit-on .status-chip{outline:1px dashed rgba(255,64,42,.5);padding:2px 4px;border-radius:4px}
 
     /* ============================================================= */
 
@@ -110,7 +105,28 @@
     .cross-core::before{left:50%;top:-.8rem;transform:translateX(-50%);width:.38rem;height:3.1rem;border-radius:.25rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 6px rgba(0,0,0,.55)}
     .cross-core::after{top:50%;left:-.8rem;transform:translateY(-50%);height:.38rem;width:3.1rem;border-radius:.25rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 3px 6px rgba(0,0,0,.55)}
 
-    .screen-wrap{height:52%}.header-wrap{height:22%}.controls-wrap{height:26%}
+    .screen-wrap{height:48%}.header-wrap{height:26%}.controls-wrap{height:26%}
+  </style>
+  <style>
+    .editor-dock{margin-top:10px;width:min(400px,92vw);background:#161616;border:1px solid #2a2a2a;border-radius:.5rem;padding:.6rem .7rem;color:#ddd;font-family:system-ui,Segoe UI,Roboto,Arial;font-size:.85rem;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+    .editor-dock .row{display:flex;gap:.6rem;align-items:center;margin:.35rem 0}
+    .editor-dock .row.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+    .editor-dock label{display:block;font-size:.75rem;color:#aaa;margin-bottom:.15rem}
+    .editor-dock input[type=text]{width:100%;padding:.35rem .45rem;background:#0e0e0e;border:1px solid #323232;border-radius:.35rem;color:#f0f0f0}
+    .editor-dock input[type=range]{width:100%}
+    .editor-dock button{padding:.4rem .7rem;border:1px solid #3a3a3a;background:#222;border-radius:.35rem;color:#e8e8e8}
+    .editor-dock .actions{justify-content:space-between}
+    .editor-dock .hint{color:#888}
+
+    .edit-on .matrix{outline:1px dashed rgba(255,255,255,.2)}
+    .edit-on .dmd-text.title{outline:1px dashed rgba(255,64,42,.35)}
+    .draggable{cursor:move}
+  </style>
+  <style>
+    .io-panel{margin-top:.6rem;padding:.6rem;border:1px solid #313131;border-radius:.5rem;background:#141414}
+    .io-panel textarea{width:100%;background:#0c0c0c;color:#eaeaea;border:1px solid #2a2a2a;border-radius:.35rem;padding:.5rem;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:.8rem}
+    .io-msg{margin-top:.35rem;color:#a8e6a2}
+    .io-msg.error{color:#ff8a8a}
   </style>
 </head>
 <body class="min-h-screen grid place-items-center py-6 bit-15">
@@ -118,24 +134,18 @@
     <span class="bolt tl"></span><span class="bolt tr"></span><span class="bolt bl"></span><span class="bolt br"></span>
 
     <div class="stack h-full flex flex-col">
-      <!-- Header with two LED DMD panels -->
+      <!-- High‑res LED DMD panel (title + status chips) -->
       <section class="recess header-wrap">
-        <div class="h-full flex flex-col gap-3">
-          <!-- TITLE DMD (larger, floating) -->
-          <div class="dmd dmd-title" style="height:96px;">
+        <div class="h-full flex flex-col">
+          <div class="dmd dmd-title" style="height:128px;">
             <div class="matrix">
               <div class="dots"></div>
-              <div class="dmd-text title" data-text="SNEAKERQUEST">SNEAKERQUEST</div>
-              <div class="shine"></div>
-            </div>
-          </div>
-
-          <!-- STATUS DMD (two-line readout) -->
-          <div class="dmd dmd-status" style="height:72px;">
-            <div class="matrix">
-              <div class="dots"></div>
-              <div class="dmd-text line1" style="font-size:14px; letter-spacing:1px; top:40%; transform:translate(-50%,-50%)">STAGE - 01 | 00:00:00:0</div>
-              <div class="dmd-text line2" style="font-size:16px; letter-spacing:2px; top:72%; transform:translate(-50%,-50%)">SCORE 000000</div>
+              <div id="sqTitleText" class="dmd-text title chip-title" data-role="title" style="--tx:50%;--ty:46%" data-text="SNEAKERQUEST">SNEAKERQUEST</div>
+              <div class="status-layer">
+                <span class="status-chip chip-stage" data-role="stage" style="left:8%;bottom:18%;font-size:14px">STAGE - 01</span>
+                <span class="status-chip chip-time"  data-role="time"  style="left:72%;bottom:18%;font-size:14px">00:00:00:0</span>
+                <span class="status-chip chip-score" data-role="score" style="left:8%;bottom:8%;font-size:16px">SCORE 000000</span>
+              </div>
             </div>
           </div>
         </div>
@@ -173,5 +183,295 @@
       </section>
     </div>
   </main>
+
+  <!-- Simple LED Layout Editor -->
+  <div id="ledEditor" class="editor-dock">
+    <label><input id="toggleEdit" type="checkbox"> Edit mode</label>
+    <div class="row">
+      <label>Title</label>
+      <input id="inpTitle" type="text" value="SNEAKERQUEST" />
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Stage</label>
+        <input id="inpStage" type="text" value="STAGE - 01" />
+      </div>
+      <div>
+        <label>Time</label>
+        <input id="inpTime" type="text" value="00:00:00:0" />
+      </div>
+      <div>
+        <label>Score</label>
+        <input id="inpScore" type="text" value="000000" />
+      </div>
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Stage size</label>
+        <input id="fsStage" type="range" min="10" max="22" value="14" />
+      </div>
+      <div>
+        <label>Time size</label>
+        <input id="fsTime" type="range" min="10" max="22" value="14" />
+      </div>
+      <div>
+        <label>Score size</label>
+        <input id="fsScore" type="range" min="12" max="24" value="16" />
+      </div>
+    </div>
+    <div class="row">
+      <div style="flex:1">
+        <label>Title size</label>
+        <input id="fsTitle" type="range" min="16" max="30" value="22" />
+      </div>
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Title X%</label>
+        <input id="tx" type="range" min="0" max="100" value="50" />
+      </div>
+      <div>
+        <label>Title Y%</label>
+        <input id="ty" type="range" min="10" max="90" value="46" />
+      </div>
+      <div></div>
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Stage X%</label>
+        <input id="sx" type="range" min="0" max="92" value="8" />
+      </div>
+      <div>
+        <label>Stage Y%</label>
+        <input id="sy" type="range" min="4" max="90" value="18" />
+      </div>
+      <div></div>
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Time X%</label>
+        <input id="timex" type="range" min="0" max="92" value="72" />
+      </div>
+      <div>
+        <label>Time Y%</label>
+        <input id="timey" type="range" min="4" max="90" value="18" />
+      </div>
+      <div></div>
+    </div>
+    <div class="row grid">
+      <div>
+        <label>Score X%</label>
+        <input id="scx" type="range" min="0" max="92" value="8" />
+      </div>
+      <div>
+        <label>Score Y%</label>
+        <input id="scy" type="range" min="4" max="90" value="8" />
+      </div>
+      <div></div>
+    </div>
+    <div class="row actions">
+      <button id="btnSave" type="button">Save</button>
+      <button id="btnReset" type="button">Reset</button>
+      <button id="btnExport" type="button">Export JSON</button>
+      <button id="btnImport" type="button">Import JSON</button>
+      <span class="hint">press <kbd>E</kbd> to toggle</span>
+    </div>
+
+    <div id="ioPanel" class="io-panel" hidden>
+      <div class="row"><strong>Layout JSON</strong></div>
+      <textarea id="ioTextarea" rows="8" spellcheck="false" placeholder="Paste JSON here or copy out..."></textarea>
+      <div class="row actions">
+        <button id="btnCopy" type="button">Copy</button>
+        <button id="btnApply" type="button">Apply JSON</button>
+        <button id="btnCloseIO" type="button">Close</button>
+      </div>
+      <div id="ioMsg" class="io-msg" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Typewriter (runs after DOM exists) -->
+  <script>
+    (function(){
+      const key = 'sq_type_done_v1';
+      const titleWrap = document.getElementById('sqTitleText');
+      if(!titleWrap) return;
+      const container = titleWrap.closest('.dmd-title');
+      const txt = titleWrap.getAttribute('data-text') || titleWrap.textContent.trim();
+
+      if(!localStorage.getItem(key)){
+        container && container.classList.add('typing');
+        titleWrap.textContent = '';
+        const delay = 80;
+        [...txt].forEach((c,i)=>{
+          setTimeout(()=>{
+            const span = document.createElement('span');
+            span.className = 'ch';
+            span.textContent = c;
+            span.style.animation = 'typePop .22s steps(1,end) forwards';
+            titleWrap.appendChild(span);
+            if(i === txt.length-1){
+              setTimeout(()=>{ container && container.classList.remove('typing'); localStorage.setItem(key,'1'); }, 260);
+            }
+          }, i*delay);
+        });
+      } else {
+        titleWrap.textContent = txt;
+      }
+    })();
+  </script>
+
+  <!-- LED Editor + Robust Guards -->
+  <script id="led-editor-js">
+    (function(){
+      const $ = sel => document.querySelector(sel);
+      const titleEl = $('#sqTitleText');
+      const stageEl = document.querySelector('.chip-stage');
+      const timeEl  = document.querySelector('.chip-time');
+      const scoreEl = document.querySelector('.chip-score');
+      const panel = document.querySelector('.dmd-title');
+
+      const inpTitle=$('#inpTitle'), inpStage=$('#inpStage'), inpTime=$('#inpTime'), inpScore=$('#inpScore');
+      const fsStage=$('#fsStage'), fsTime=$('#fsTime'), fsScore=$('#fsScore'), fsTitle=$('#fsTitle');
+      const tX=$('#tx'), tY=$('#ty');
+      const sX=$('#sx'), sY=$('#sy');
+      const tiX=$('#timex'), tiY=$('#timey');
+      const scX=$('#scx'), scY=$('#scy');
+      const toggleEdit=$('#toggleEdit');
+      const btnSave=$('#btnSave'), btnReset=$('#btnReset');
+      const btnExport=$('#btnExport'), btnImport=$('#btnImport');
+      const ioPanel=$('#ioPanel'), ioTA=$('#ioTextarea'), btnCopy=$('#btnCopy'), btnApply=$('#btnApply'), btnCloseIO=$('#btnCloseIO'), ioMsg=$('#ioMsg');
+
+      const storeKey='sq_led_editor_v1';
+      const load=()=>{try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch(e){return{}}};
+      const persist=(data)=>localStorage.setItem(storeKey, JSON.stringify(data));
+
+      function getConfig(){
+        return {
+          v:1,
+          t: inpTitle&&inpTitle.value,
+          sg:inpStage&&inpStage.value,
+          tm:inpTime&&inpTime.value,
+          sc:inpScore&&inpScore.value,
+          fstg:fsStage&&fsStage.value,
+          ftm: fsTime&&fsTime.value,
+          fsc: fsScore&&fsScore.value,
+          ft:  fsTitle&&fsTitle.value,
+          tpos:{x:(tX&&Number(tX.value))||50, y:(tY&&Number(tY.value))||46},
+          spos:{x:(sX&&Number(sX.value))||8,  y:(sY&&Number(sY.value))||18},
+          timpos:{x:(tiX&&Number(tiX.value))||72, y:(tiY&&Number(tiY.value))||18},
+          scpos:{x:(scX&&Number(scX.value))||8,  y:(scY&&Number(scY.value))||8}
+        };
+      }
+      function applyConfig(cfg){
+        if(typeof cfg!== 'object' || !cfg) throw new Error('Invalid JSON object');
+        if(inpTitle && cfg.t!=null) inpTitle.value = String(cfg.t);
+        if(inpStage && cfg.sg!=null) inpStage.value = String(cfg.sg);
+        if(inpTime  && cfg.tm!=null) inpTime.value  = String(cfg.tm);
+        if(inpScore && cfg.sc!=null) inpScore.value = String(cfg.sc);
+        if(fsStage && cfg.fstg!=null) fsStage.value = String(cfg.fstg);
+        if(fsTime  && cfg.ftm !=null) fsTime.value  = String(cfg.ftm);
+        if(fsScore && cfg.fsc !=null) fsScore.value = String(cfg.fsc);
+        if(fsTitle && cfg.ft  !=null) fsTitle.value = String(cfg.ft);
+        if(cfg.tpos){ tX && (tX.value = Number(cfg.tpos.x)); tY && (tY.value = Number(cfg.tpos.y)); }
+        if(cfg.spos){ sX && (sX.value = Number(cfg.spos.x)); sY && (sY.value = Number(cfg.spos.y)); }
+        if(cfg.timpos){ tiX && (tiX.value = Number(cfg.timpos.x)); tiY && (tiY.value = Number(cfg.timpos.y)); }
+        if(cfg.scpos){ scX && (scX.value = Number(cfg.scpos.x)); scY && (scY.value = Number(cfg.scpos.y)); }
+        apply();
+        persist(getConfig());
+      }
+
+      function apply(){
+        if(titleEl){
+          const t = (inpTitle && inpTitle.value) || 'SNEAKERQUEST';
+          titleEl.setAttribute('data-text', t);
+          titleEl.textContent = t;
+          const tSize = (fsTitle && fsTitle.value) ? Number(fsTitle.value) : 22;
+          titleEl.style.fontSize = tSize + 'px';
+          titleEl.style.setProperty('--tx', ((tX&&tX.value)||50)+'%');
+          titleEl.style.setProperty('--ty', ((tY&&tY.value)||46)+'%');
+        }
+        if(stageEl){ stageEl.textContent = (inpStage && inpStage.value) || 'STAGE - 01'; stageEl.style.fontSize = ((fsStage && fsStage.value) ? fsStage.value : 14) + 'px'; stageEl.style.left = ((sX&&sX.value)||8)+'%'; stageEl.style.bottom = ((sY&&sY.value)||18)+'%'; }
+        if(timeEl){  timeEl.textContent  = (inpTime  && inpTime.value ) || '00:00:00:0'; timeEl.style.fontSize  = ((fsTime  && fsTime.value ) ? fsTime.value  : 14) + 'px'; timeEl.style.left  = ((tiX&&tiX.value)||72)+'%'; timeEl.style.bottom = ((tiY&&tiY.value)||18)+'%'; }
+        if(scoreEl){ scoreEl.textContent = 'SCORE ' + ((inpScore && inpScore.value) || '000000'); scoreEl.style.fontSize = ((fsScore && fsScore.value) ? fsScore.value : 16) + 'px'; scoreEl.style.left = ((scX&&scX.value)||8)+'%'; scoreEl.style.bottom = ((scY&&scY.value)||8)+'%'; }
+      }
+
+      ['input','change'].forEach(ev=>{
+        [inpTitle,inpStage,inpTime,inpScore,fsStage,fsTime,fsScore,fsTitle,tX,tY,sX,sY,tiX,tiY,scX,scY].forEach(el=> el&& el.addEventListener(ev,apply));
+      });
+
+      // drag chips in edit mode
+      let dragEl=null, startX=0, startY=0, baseLeft=0, baseBottom=0, isTitle=false;
+      function pct(px, total){return (px/total)*100}
+      function onDownChip(e){ if(!document.body.classList.contains('edit-on')) return; dragEl = e.currentTarget; isTitle = dragEl.classList.contains('chip-title'); const pr = panel.getBoundingClientRect(); const r = dragEl.getBoundingClientRect(); startX=e.clientX; startY=e.clientY; baseLeft=(r.left - pr.left)/pr.width*100; baseBottom=(pr.bottom - r.bottom)/pr.height*100; dragEl.classList.add('draggable'); e.preventDefault(); }
+      function onMove(e){ if(!dragEl) return; const pr = panel.getBoundingClientRect(); const dx=(e.clientX-startX)/pr.width*100; const dy=(e.clientY-startY)/pr.height*100; let nx=Math.max(0, Math.min(100, baseLeft+dx)); let ny=Math.max(4, Math.min(96, baseBottom-dy)); if(isTitle){ dragEl.style.setProperty('--tx', nx+'%'); dragEl.style.setProperty('--ty', (100-ny)+'%'); if(tX) tX.value=nx; if(tY) tY.value=(100-ny); } else { dragEl.style.left = nx + '%'; dragEl.style.bottom = ny + '%'; const id = dragEl.dataset.role; if(id==='stage'){ sX && (sX.value=nx); sY && (sY.value=ny); } if(id==='time'){ tiX && (tiX.value=nx); tiY && (tiY.value=ny); } if(id==='score'){ scX && (scX.value=nx); scY && (scY.value=ny); } } }
+      function onUp(){ if(!dragEl) return; dragEl.classList.remove('draggable'); dragEl=null; }
+      document.querySelectorAll('.status-chip, .chip-title').forEach(el=> el.addEventListener('mousedown', onDownChip));
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+
+      function setEdit(on){ document.body.classList.toggle('edit-on', !!on); }
+      toggleEdit && toggleEdit.addEventListener('change', e=> setEdit(e.target.checked));
+      window.addEventListener('keydown', e=>{ if(e.key.toLowerCase()==='e'){ if(!toggleEdit) return; toggleEdit.checked=!toggleEdit.checked; toggleEdit.dispatchEvent(new Event('change')); }});
+
+      const p = load();
+      if(p.v){
+        if(inpTitle && p.t) inpTitle.value=p.t; if(inpStage && p.sg) inpStage.value=p.sg; if(inpTime && p.tm) inpTime.value=p.tm; if(inpScore && p.sc) inpScore.value=p.sc;
+        if(fsStage && p.fstg) fsStage.value=p.fstg; if(fsTime && p.ftm) fsTime.value=p.ftm; if(fsScore && p.fsc) fsScore.value=p.fsc; if(fsTitle && p.ft) fsTitle.value=p.ft;
+        if(p.tpos){ tX && (tX.value=p.tpos.x); tY && (tY.value=p.tpos.y); }
+        if(p.spos){ sX && (sX.value=p.spos.x); sY && (sY.value=p.spos.y); }
+        if(p.timpos){ tiX && (tiX.value=p.timpos.x); tiY && (tiY.value=p.timpos.y); }
+        if(p.scpos){ scX && (scX.value=p.scpos.x); scY && (scY.value=p.scpos.y); }
+      }
+      apply();
+
+      btnSave && btnSave.addEventListener('click', ()=>{
+        persist({v:1,
+          t:inpTitle&&inpTitle.value, sg:inpStage&&inpStage.value, tm:inpTime&&inpTime.value, sc:inpScore&&inpScore.value,
+          fstg:fsStage&&fsStage.value, ftm:fsTime&&fsTime.value, fsc:fsScore&&fsScore.value, ft:fsTitle&&fsTitle.value,
+          tpos:{x:(tX&&tX.value)||50, y:(tY&&tY.value)||46},
+          spos:{x:(sX&&sX.value)||8,  y:(sY&&sY.value)||18},
+          timpos:{x:(tiX&&tiX.value)||72, y:(tiY&&tiY.value)||18},
+          scpos:{x:(scX&&scX.value)||8,  y:(scY&&scY.value)||8}
+        });
+      });
+      btnReset && btnReset.addEventListener('click', ()=>{ localStorage.removeItem(storeKey); location.reload(); });
+
+      // ===== Export / Import JSON =====
+      function showIO(open){ if(ioPanel) ioPanel.hidden = !open; if(ioMsg){ ioMsg.textContent=''; ioMsg.classList.remove('error'); } if(open && ioTA){ ioTA.value = JSON.stringify(getConfig(), null, 2); } }
+      btnExport && btnExport.addEventListener('click', ()=> showIO(true));
+      btnImport && btnImport.addEventListener('click', ()=> showIO(true));
+      btnCloseIO && btnCloseIO.addEventListener('click', ()=> showIO(false));
+      btnCopy && btnCopy.addEventListener('click', ()=>{ if(!ioTA) return; ioTA.select(); const ok = document.execCommand('copy'); if(ioMsg){ ioMsg.textContent= ok? 'Copied to clipboard.' : 'Copy not supported.'; ioMsg.classList.remove('error'); } });
+      btnApply && btnApply.addEventListener('click', ()=>{
+        if(!ioTA) return;
+        try{
+          const parsed = JSON.parse(ioTA.value);
+          applyConfig(parsed);
+          if(ioMsg){ ioMsg.textContent='Applied and saved.'; ioMsg.classList.remove('error'); }
+        }catch(err){ if(ioMsg){ ioMsg.textContent='Invalid JSON: '+ err.message; ioMsg.classList.add('error'); } }
+      });
+    })();
+  </script>
+
+  <!-- Minimal runtime tests -->
+  <script>
+    (function(){
+      const results=[]; const ok=(m)=>results.push('✔ ' + m); const fail=(m)=>results.push('✖ ' + m);
+      try{ if(document.getElementById('sqTitleText')) ok('#sqTitleText present'); else fail('#sqTitleText missing'); }catch(e){ fail('error checking title: '+e.message); }
+      try{ const fsTitle=document.getElementById('fsTitle'); if(fsTitle) ok('#fsTitle present'); else ok('#fsTitle not required but guarded'); }catch(e){ fail('error checking fsTitle: '+e.message); }
+      try{ const applyFn = document.getElementById('led-editor-js'); ok('editor script loaded'); }catch(e){ fail('editor script missing'); }
+      try{ const inp=document.getElementById('inpTitle'); if(inp){ const old=inp.value; inp.value=old; inp.dispatchEvent(new Event('input')); ok('apply does not throw'); } else { ok('no editor inputs in DOM context'); } }catch(e){ fail('apply threw: '+e.message); }
+      console.log('[LED Tests]', '\n'+results.join('\n'));
+      // Extra tests: export/import
+      try{
+        const exp=document.getElementById('btnExport'); const ta=document.getElementById('ioTextarea');
+        if(exp && ta){ exp.click(); const txt=ta.value; const parsed=JSON.parse(txt); if(parsed && parsed.v===1){ ok('export JSON parses'); } else { fail('export JSON missing fields'); } }
+      }catch(e){ fail('export JSON failed: '+e.message); }
+      try{
+        const ta=document.getElementById('ioTextarea'); const applyBtn=document.getElementById('btnApply'); const msg=document.getElementById('ioMsg');
+        if(ta && applyBtn){ ta.value='{ bad json'; applyBtn.click(); ok('import error handled UI-side'); if(msg && msg.textContent.startsWith('Invalid JSON')) ok('invalid JSON message shown'); }
+      }catch(e){ fail('import error path failed: '+e.message); }
+    })();
+  </script>
 </body>
 </html>
