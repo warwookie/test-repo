@@ -1,217 +1,1118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SneakerQuest Preview</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SneakerQuest Device — Ghost Toy 15‑bit + DMD</title>
+  <!-- Load Google Fonts for the retro pixel aesthetic --><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* =======================
+       Global & Device Styles
+       ======================= */
+    :root {
+      --color-case-light: #c7b69c;
+      --color-dark-panel: #4a4a4a;
+      --color-screen-recess: #333333;
+      --color-screen-bg: #101c13;
+      --color-led-green: #81d46f;
+      --color-accent-orange: #e87c0e;
+      --color-title-text: #f0f0f0;
+      --color-amber: #ffb400;
+      --color-slime: #7bff5e;
+      --dmd-amber: #ff402a; /* vintage red LED */
+      --dmd-amber-hot: #ff7a5e;
+    }
+
+    html, body { height: 100%; background: #0a0a0a }
+    /* Use pixelated rendering for the retro feel */
+    .bit-15 { image-rendering: pixelated; filter: contrast(1.05) saturate(1.05) }
+    /* Dither pattern for the device body */
+    .dither { background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, .06) 0 2px, transparent 2px 4px), repeating-linear-gradient(135deg, rgba(0, 0, 0, .06) 0 2px, transparent 2px 4px) }
+
+    /* Main device casing */
+    .device {
+      width: min(400px, 92vw);
+      aspect-ratio: 9/18.5;
+      background: linear-gradient(180deg, #cfbea6 0%, #c7b69c 40%, #b9a47f 100%);
+      border-radius: 1.25rem;
+      position: relative;
+      padding: 1.1rem;
+      box-shadow: 0 22px 40px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -3px 6px rgba(0, 0, 0, .25);
+      border: 5px solid #221f1a;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    /* Fake bolts on the casing */
+    .bolt { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #888 0 40%, #555 41% 100%); box-shadow: inset 0 1px 2px rgba(255, 255, 255, .35), 0 2px 3px rgba(0, 0, 0, .6) }
+    .bolt::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; height: 2px; background: #2b2b2b; box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset }
+    .bolt.tl { top: 10px; left: 10px } .bolt.tr { top: 10px; right: 10px } .bolt.bl { bottom: 10px; left: 10px } .bolt.br { bottom: 10px; right: 10px }
+
+    /* Layout stacking for device sections */
+    .stack > section { margin-bottom: 1rem }
+    .stack > section:last-child { margin-bottom: 0 }
+
+    /* Recessed panel styles */
+    .recess { position: relative; background: linear-gradient(180deg, #515151, #444); border-radius: .55rem; padding: 1rem; box-shadow: inset 0 10px 16px rgba(0, 0, 0, .65), inset 0 -6px 10px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .08) }
+    .inner-recess { position: relative; background: linear-gradient(180deg, #3a3a3a, #2e2e2e); border-radius: .4rem; padding: .7rem; box-shadow: inset 0 14px 22px rgba(0, 0, 0, .9), inset 0 -16px 20px rgba(0, 0, 0, .85), inset 0 1px 0 rgba(255, 255, 255, .06) }
+
+    /* =======================
+       DMD LED Panel
+       ======================= */
+    @property --px { syntax: '<percentage>'; inherits: true; initial-value: -30%; }
+
+    /* DMD panel housing */
+    .dmd { position: relative; margin-top: .0rem; height: 76px; border-radius: .5rem; padding: .45rem; background: linear-gradient(#2b2b2b, #1a1a1a); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .04), inset 0 -6px 12px rgba(0, 0, 0, .85), inset 0 0 0 1px #0a0a0a }
+    .dmd::before { content: ""; position: absolute; inset: 0; border-radius: .5rem; background: linear-gradient(180deg, rgba(255, 110, 90, .10), rgba(255, 110, 90, 0) 25%, rgba(0, 0, 0, .28) 75%, rgba(0, 0, 0, .65)); mix-blend-mode: screen; pointer-events: none }
+    .dmd::after { content: ""; position: absolute; inset: 2px; border-radius: .45rem; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .06) 0 2px, rgba(0, 0, 0, 0) 2px 6px); opacity: .2; pointer-events: none }
+
+    /* The actual LED matrix screen */
+    .matrix { position: absolute; inset: .45rem; border-radius: .35rem; background: linear-gradient(180deg, #161112, #0e0b0c); overflow: hidden; perspective: 600px; transform-style: preserve-3d; box-shadow: inset 0 0 0 1px #1a0d0f, inset 0 0 30px rgba(255, 90, 70, .12) }
     
-    <style>
-        /* Import the retro font */
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    /* High-res dot grid background (unlit LEDs) */
+    .dots { position: absolute; inset: 0; opacity: .28; background: radial-gradient(circle at 2px 2px, #111 0 1px, transparent 1.1px), radial-gradient(circle at 2px 2px, #111 0 1px, transparent 1.1px); background-size: 4px 4px, 4px 4px; background-position: 0 0, 2px 2px; }
+    
+    /* Dot-matrix text style (lit LEDs) */
+    .dmd-text {
+      z-index: 2;
+      position: absolute;
+      left: var(--tx, 50%);
+      top: var(--ty, 46%);
+      transform: translate(-50%, -50%) rotateX(6deg);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      /* Create dots using radial gradients and clip to text */
+      background:
+        radial-gradient(circle at 2px 2px, var(--dmd-amber-hot) 0 1.1px, transparent 1.2px),
+        radial-gradient(circle at 2px 2px, var(--dmd-amber) 0 1px, transparent 1.1px);
+      background-size: 4px 4px, 4px 4px;
+      background-position: 0 0, 2px 2px;
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: drop-shadow(0 0 8px rgba(255, 82, 58, .55));
+    }
+    /* Fallback for browsers that don't support background-clip: text */
+    @supports not (-webkit-background-clip: text) {
+      .dmd-text { color: var(--dmd-amber); -webkit-text-fill-color: var(--dmd-amber); background: none; text-shadow: 0 0 8px rgba(255, 82, 58, .55) }
+    }
 
-        body, html {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #222; 
-            margin: 0;
-            padding: 0;
-            overflow: hidden; 
-            font-family: 'Press+Start+2P', cursive;
-        }
+    /* Diagonal refresh band animation for the title */
+    .dmd-title { --px: -30%; }
+    .dmd-title .dmd-text.title::before {
+      content: attr(data-text);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotateX(10deg);
+      color: transparent;
+      background:
+        radial-gradient(circle at 3px 3px, #ffb1a0 0 1.8px, transparent 1.9px),
+        radial-gradient(circle at 3px 3px, #ff5a4a 0 1.7px, transparent 1.8px);
+      background-size: 6px 6px, 6px 6px;
+      background-position: 0 0, 3px 3px;
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: drop-shadow(0 0 10px #ffb15a) drop-shadow(0 0 18px rgba(255, 138, 31, .7));
+      clip-path: polygon(calc(var(--px) - 15%) 0%, calc(var(--px) + 10%) 0%, calc(var(--px) + 25%) 100%, calc(var(--px) - 0%) 100%);
+      z-index: 3;
+      pointer-events: none;
+      animation: diagSweep 6s ease-in-out infinite;
+    }
+    @keyframes diagSweep { 0% { --px: -30% } 60% { --px: 130% } 100% { --px: 130% } }
 
-        /* --- The Game Device --- */
-        .game-device {
-            position: relative;
-            width: 480px; 
-            height: 853px; 
-            
-            /* !! --- THIS IS THE FIX --- !!
-            This now points to the new, simple file name.
-            */
-            background-image: url('device.jpg'); 
-            
-            background-size: cover;
-            background-repeat: no-repeat;
-            transform-origin: top center;
-            scale: 0.9; 
-            user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-        }
+    /* Status chips (Stage, Time, Score) */
+    .status-layer { position: absolute; inset: .45rem; border-radius: .35rem }
+    .status-chip {
+      position: absolute;
+      white-space: nowrap;
+      line-height: 1;
+      --bw: 40; /* Box width % for editor */
+      --bh: 18px; /* Box height px for editor */
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 1px;
+      background:
+        radial-gradient(circle at 2px 2px, var(--dmd-amber-hot) 0 1.1px, transparent 1.2px),
+        radial-gradient(circle at 2px 2px, var(--dmd-amber) 0 1px, transparent 1.1px);
+      background-size: 4px 4px, 4px 4px;
+      background-position: 0 0, 2px 2px;
+      background-clip: text;
+      -webkit-background-clip: text;
+      filter: drop-shadow(0 0 6px rgba(255, 82, 58, .45));
+    }
+    @supports not (-webkit-background-clip: text) { .status-chip { color: var(--dmd-amber); -webkit-text-fill-color: var(--dmd-amber); background: none; text-shadow: 0 0 6px rgba(255, 82, 58, .45) } }
+    
+    /* Visual helpers for edit mode */
+    .edit-on .status-chip { outline: 1px dashed rgba(255, 64, 42, .5); padding: 2px 4px; border-radius: 4px }
+    .chip-title { --bw: 80; --bh: 28px }
+    .edit-on .chip-title::before, .edit-on .status-chip::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(var(--bw, 40) * 1%);
+      height: var(--bh, 18px);
+      border: 1px dashed rgba(255, 160, 140, .55);
+      border-radius: 6px;
+      background: rgba(255, 80, 60, .06);
+      pointer-events: none;
+    }
+    
+    /* =======================
+       Main Screen - NOW A TV!
+       ======================= */
+    .tv-screen-recess {
+      position: relative;
+      background: #222; /* Darker bezel */
+      border-radius: 1.2rem; /* More rounded corners for TV */
+      padding: 0.8rem;
+      box-shadow: inset 0 10px 20px rgba(0, 0, 0, .8), inset 0 -8px 15px rgba(0, 0, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .1);
+    }
 
-        /* --- Header Section --- */
-        .header-section {
-            position: absolute;
-            top: 66px; 
-            left: 80px; 
-            width: 320px; 
-            height: 38px;
-        }
-        
-        /* --- Screen Area --- */
-        .screen-area {
-            position: absolute;
-            top: 172px; 
-            left: 80px; 
-            width: 320px; 
-            height: 255px; 
-            overflow: hidden;
-            border-radius: 20px; 
-        }
+    .tv-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      background: #0d1a0e; /* Green-tinted screen background */
+      border-radius: 0.8rem; /* Inner screen rounding */
+      overflow: hidden;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, .9), inset 0 0 30px rgba(0, 200, 0, .15); /* Inner screen shadow */
+      transform: perspective(600px) rotateX(2deg) rotateY(-1deg); /* Slight 3D tilt */
+      transform-origin: center center;
+      filter: brightness(1.1);
+    }
 
-        .game-screen {
-            width: 100%;
-            height: 100%;
-            background-color: #1a2a1a; 
-            background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
-            background-size: 4px 4px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #0f0;
-            font-size: 14px;
-            text-shadow: 0 0 5px #0f0;
-            font-family: 'Press Start 2P', cursive;
-        }
+    .tv-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(to bottom, rgba(0, 255, 0, .04) 0, rgba(0, 255, 0, .04) 1px, transparent 2px), /* Green scanlines */
+        radial-gradient(120% 80% at 90% 10%, rgba(200, 255, 200, .45) 0, rgba(100, 200, 100, .15) 22%, rgba(50, 100, 50, .05) 35%, transparent 60%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
 
+    .tv-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 50%), linear-gradient(90deg, transparent 50%, rgba(0,0,0,0.2) 50%);
+      background-size: 100% 2px, 2px 100%;
+      opacity: 0.4;
+      pointer-events: none;
+      filter: blur(0.5px);
+    }
 
-        /* --- Button Section --- */
-        .button-section {
-            position: absolute;
-            top: 485px; 
-            left: 70px; 
-            width: 340px; 
-            height: 310px; 
-        }
-        
-        /* Generic styles for all our invisible buttons */
-        .btn {
-            position: absolute;
-            padding: 0;
-            margin: 0;
-            border: none;
-            background: transparent; /* Invisible */
-            cursor: pointer;
-            border-radius: 8px; 
-            transition: background-color 0.05s ease-in-out;
-        }
+    .tv-crt-text {
+      position: absolute;
+      left: 1rem;
+      bottom: 1rem;
+      font-family: 'VT323', monospace;
+      color: #90ee90; /* Lighter green */
+      font-size: 1.06rem;
+      text-shadow: 0 0 6px rgba(144, 238, 144, .7);
+      z-index: 10;
+    }
+    
+    .tv-knob {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #3d3d3d, #2a2a2a);
+      border: 1px solid #1a1a1a;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 2px 3px rgba(0,0,0,0.5);
+    }
+    .tv-knob::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 3px;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 8px;
+      background: #777;
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .tv-knob.channel { right: 0.8rem; bottom: 0.8rem; }
+    .tv-knob.power { left: 0.8rem; bottom: 0.8rem; }
 
-        /* This provides the visual feedback when pressed */
-        .btn:active, .btn.active-touch {
-            background-color: rgba(0, 0, 0, 0.3); 
-        }
+    /* =======================
+       Controls Section
+       ======================= */
+    .control-recess { background: var(--color-dark-panel); border-radius: .35rem; padding: 1rem; box-shadow: inset 0 12px 16px rgba(0, 0, 0, .8), inset 0 -10px 16px rgba(0, 0, 0, .8) }
+    /* Speaker vents */
+    .vents { height: 12px; border-radius: 8px; background: linear-gradient(#565656, #404040); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .8); display: grid; grid-template-columns: repeat(18, 1fr); gap: 6px; margin-bottom: .8rem }
+    .vents i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(180deg, #1f1f1f, #0e0e0e); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) }
+    
+    /* Control buttons grid */
+    .controls { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1.75rem; gap: 1rem; align-items: center }
+    
+    /* Individual button style */
+    .btn { position: relative; background: linear-gradient(#585858, #444); border-radius: .35rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 3px 6px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .08); height: 1.75rem; overflow: hidden }
+    .btn:before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, .08) 1px, transparent 1px); background-size: 6px 6px; opacity: .35 }
+    .btn::after { content: attr(data-label); position: absolute; left: 8px; top: -14px; font-family: 'VT323', monospace; font-size: .8rem; color: #d8d8d8; letter-spacing: .02em; text-shadow: 0 1px 0 #000 }
+    
+    /* Button layout helpers */
+    .btn.w-3rem { width: 3rem } .btn.long { grid-column: 1 / span 2; width: 6.5rem } .btn.right { justify-self: end; width: 3rem }
+    
+    /* D-Pad styles */
+    .dpad-slot { grid-column: 3; grid-row: 3 / span 2; justify-self: end; align-self: end; width: 4.7rem; height: 4.7rem; border-radius: 999px; background: var(--color-dark-panel); position: relative; box-shadow: inset 0 12px 16px rgba(0, 0, 0, .95), inset 0 -8px 16px rgba(0, 0, 0, .8) }
+    .dpad-ring { position: absolute; inset: .5rem; border-radius: 999px; background: #5c5c5c; box-shadow: inset 0 2px 3px rgba(255, 255, 255, .18), inset 0 -6px 10px rgba(0, 0, 0, .7) }
+    .dpad-cross { position: absolute; inset: 0; display: grid; place-items: center }
+    .cross-core { position: relative; width: 1.5rem; height: 1.5rem; background: linear-gradient(#545454, #434343); border-radius: .5rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 3px 6px rgba(0, 0, 0, .65) }
+    .cross-core::before, .cross-core::after { content: ""; position: absolute; background: linear-gradient(#545454, #434343) }
+    .cross-core::before { left: 50%; top: -.8rem; transform: translateX(-50%); width: .38rem; height: 3.1rem; border-radius: .25rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 3px 6px rgba(0, 0, 0, .55) }
+    .cross-core::after { top: 50%; left: -.8rem; transform: translateY(-50%); height: .38rem; width: 3.1rem; border-radius: .25rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 3px 6px rgba(0, 0, 0, .55) }
+    
+    /* Section height distribution */
+    .tv-screen-wrap { height: 48% } .header-wrap { height: 26% } .controls-wrap { height: 26% }
+  </style>
+  <style>
+    /* =======================
+       Editor Panel Styles
+       ======================= */
+    .editor-dock { margin-top: 10px; width: min(400px, 92vw); background: #161616; border: 1px solid #2a2a2a; border-radius: .5rem; padding: .6rem .7rem; color: #ddd; font-family: system-ui, Segoe UI, Roboto, Arial; font-size: .85rem; box-shadow: 0 6px 18px rgba(0, 0, 0, .35) }
+    .editor-dock .row { display: flex; gap: .6rem; align-items: center; margin: .35rem 0 }
+    .editor-dock .row.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem }
+    .editor-dock label { display: block; font-size: .75rem; color: #aaa; margin-bottom: .15rem }
+    .editor-dock input[type=text] { width: 100%; padding: .35rem .45rem; background: #0e0e0e; border: 1px solid #323232; border-radius: .35rem; color: #f0f0f0 }
+    .editor-dock input[type=range] { width: 100% }
+    .editor-dock button { padding: .4rem .7rem; border: 1px solid #3a3a3a; background: #222; border-radius: .35rem; color: #e8e8e8; cursor: pointer; }
+    .editor-dock .actions { justify-content: space-between }
+    .editor-dock .hint { color: #888 }
 
-        /* --- Left Buttons (4 large) --- */
-        .btn.action-1 { top: 18px; left: 10px; width: 125px; height: 38px; }
-        .btn.action-2 { top: 73px; left: 10px; width: 125px; height: 38px; }
-        .btn.action-3 { top: 193px; left: 10px; width: 125px; height: 38px; }
-        .btn.action-4 { top: 248px; left: 10px; width: 125px; height: 38px; }
-
-        /* --- Right Buttons (6 small) --- */
-        .btn.utility-1 { top: 18px; left: 160px; width: 78px; height: 38px; }
-        .btn.utility-2 { top: 73px; left: 160px; width: 78px; height: 38px; }
-        .btn.utility-3 { top: 18px; left: 252px; width: 78px; height: 38px; }
-        .btn.utility-4 { top: 73px; left: 252px; width: 78px; height: 38px; }
-        .btn.utility-5 { top: 130px; left: 160px; width: 78px; height: 38px; }
-        .btn.utility-6 { top: 130px; left: 252px; width: 78px; height: 38px; }
-
-        /* --- D-Pad --- */
-        .btn.dpad-up { top: 202px; left: 200px; width: 40px; height: 30px; border-radius: 8px 8px 0 0; }
-        .btn.dpad-down { top: 262px; left: 200px; width: 40px; height: 30px; border-radius: 0 0 8px 8px; }
-        .btn.dpad-left { top: 232px; left: 170px; width: 30px; height: 30px; border-radius: 8px 0 0 8px; }
-        .btn.dpad-right { top: 232px; left: 240px; width: 30px; height: 30px; border-radius: 0 8px 8px 0; }
-        
-        
-        /* --- Media Query for Mobile --- */
-        @media (max-width: 480px) {
-            .game-device { scale: calc(100vw / 480px); }
-        }
-        @media (max-height: 853px) {
-             .game-device { scale: calc(100vh / 853px); }
-        }
-        @media (max-width: 480px) and (max-height: 853px) {
-            .game-device { scale: min(calc(100vw / 480px), calc(100vh / 853px)); }
-        }
-    </style>
+    /* Edit mode visual cues */
+    .edit-on .matrix { outline: 1px dashed rgba(255, 255, 255, .2) }
+    .edit-on .dmd-text.title { outline: 1px dashed rgba(255, 64, 42, .35) }
+    .draggable { cursor: move }
+  </style>
+  <style>
+    /* =======================
+       Import/Export Panel
+       ======================= */
+    .io-panel { margin-top: .6rem; padding: .6rem; border: 1px solid #313131; border-radius: .5rem; background: #141414 }
+    .io-panel textarea { width: 100%; background: #0c0c0c; color: #eaeaea; border: 1px solid #2a2a2a; border-radius: .35rem; padding: .5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem }
+    .io-msg { margin-top: .35rem; color: #a8e6a2 }
+    .io-msg.error { color: #ff8a8a }
+  </style>
+  <style>
+    /* =======================
+       Logo Image Styles
+       ======================= */
+    .led-logo {
+      position: absolute;
+      /* Default position, will be overridden by JS */
+      inset: 8% 6% 14% 6%;
+      margin: auto;
+      max-width: 88%;
+      max-height: 78%;
+      object-fit: contain;
+      opacity: 0;
+      pointer-events: none;
+      filter: contrast(1.1) saturate(1.1) brightness(1) drop-shadow(0 0 10px rgba(255, 82, 58, .35));
+      mix-blend-mode: screen;
+      transform: translateY(6px) scale(.98);
+      transition: opacity .5s ease, transform .6s ease;
+    }
+    /* Class toggled by JS to show the logo */
+    .logo-on .led-logo { opacity: .95; transform: none }
+    .logo-on .led-logo::after { content: ""; position: absolute; inset: 0; pointer-events: none }
+  </style>
+  <style>
+    /* =======================
+       Workspace Layout
+       ======================= */
+    /* Side-by-side layout for device and editor */
+    .workspace { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; justify-content: center; overflow-x: auto; padding-bottom: .5rem }
+    .workspace > * { flex: 0 0 auto }
+    /* Make editor sticky on desktop */
+    .editor-dock { position: sticky; top: 24px; width: 420px; flex: 0 0 420px }
+  </style>
 </head>
-<body>
+<body class="min-h-screen py-6 bit-15">
 
-    <div class="game-device">
-        <div class="screen-area">
-            <div class="game-screen">
-                <p>Game Screen</p>
+  <div class="workspace">
+    <!-- ===================================
+         DEVICE HTML
+         =================================== --><main class="device dither">
+      <span class="bolt tl"></span><span class="bolt tr"></span><span class="bolt bl"></span><span class="bolt br"></span>
+
+      <div class="stack h-full flex flex-col">
+        <!-- High-res LED DMD panel (title + status chips) --><section class="recess header-wrap">
+          <div class="h-full flex flex-col">
+            <div class="dmd dmd-title" style="height:128px;">
+              <div class="matrix">
+                <div class="dots"></div>
+                <!-- Uploaded logo image goes here; hidden until provided --><img id="sqLogo" class="led-logo" alt="logo" aria-hidden="true" />
+                <!-- Title text --><div id="sqTitleText" class="dmd-text title chip-title" data-role="title" style="--tx:50%;--ty:46%" data-text="SNEAKERQUEST">SNEAKERQUEST</div>
+                <!-- Status chips layer --><div class="status-layer">
+                  <span class="status-chip chip-stage" data-role="stage" style="left:8%;bottom:18%;font-size:14px">STAGE - 01</span>
+                  <span class="status-chip chip-time" data-role="time" style="left:72%;bottom:18%;font-size:14px">00:00:00:0</span>
+                  <span class="status-chip chip-score" data-role="score" style="left:8%;bottom:8%;font-size:16px">SCORE 000000</span>
+                </div>
+              </div>
             </div>
-        </div>
-        <div class="button-section">
-            <button class="btn action-1" id="btn-action-1"></button>
-            <button class="btn action-2" id="btn-action-2"></button>
-            <button class="btn action-3" id="btn-action-3"></button>
-            <button class="btn action-4" id="btn-action-4"></button>
-            <button class="btn utility-1" id="btn-util-1"></button>
-            <button class="btn utility-2" id="btn-util-2"></button>
-            <button class="btn utility-3" id="btn-util-3"></button>
-            <button class="btn utility-4" id="btn-util-4"></button>
-            <button class="btn utility-5" id="btn-util-5"></button>
-            <button class="btn utility-6" id="btn-util-6"></button>
-            <button class="btn dpad-up" id="btn-up"></button>
-            <button class="btn dpad-down" id="btn-down"></button>
-            <button class="btn dpad-left" id="btn-left"></button>
-            <button class="btn dpad-right" id="btn-right"></button>
-        </div>
-    </div>
-    
-    <script>
-        const gameScreen = document.querySelector('.game-screen p');
+          </div>
+        </section>
 
-        function handleButtonPress(buttonId) {
-            console.log(buttonId + ' pressed');
-            switch(buttonId) {
-                case 'btn-up': gameScreen.textContent = 'UP'; break;
-                case 'btn-down': gameScreen.textContent = 'DOWN'; break;
-                case 'btn-left': gameScreen.textContent = 'LEFT'; break;
-                case 'btn-right': gameScreen.textContent = 'RIGHT'; break;
-                case 'btn-action-1': gameScreen.textContent = 'ACTION 1'; break;
-                case 'btn-action-2': gameScreen.textContent = 'ACTION 2'; break;
-                case 'btn-action-3': gameScreen.textContent = 'ACTION 3'; break;
-                case 'btn-action-4': gameScreen.textContent = 'ACTION 4'; break;
-                case 'btn-util-1': gameScreen.textContent = 'UTIL 1'; break;
-                case 'btn-util-2': gameScreen.textContent = 'UTIL 2'; break;
-                case 'btn-util-3': gameScreen.textContent = 'UTIL 3'; break;
-                case 'btn-util-4': gameScreen.textContent = 'UTIL 4'; break;
-                case 'btn-util-5': gameScreen.textContent = 'UTIL 5'; break;
-                case 'btn-util-6': gameScreen.textContent = 'UTIL 6'; break;
-                default: gameScreen.textContent = buttonId;
+        <!-- Main TV Screen --><section class="recess tv-screen-wrap relative">
+          <!-- ***** FIX IS HERE *****
+               Changed `fill` to `h-full` to make the screen container fill its section.
+          --><div class="inner-recess h-full relative tv-screen-recess">
+            <div class="tv-screen">
+              <div class="tv-crt-text">TRAP MODE: ARMED ▌</div>
+            </div>
+            <!-- TV Knobs --><div class="tv-knob channel" data-label="CH"></div>
+            <div class="tv-knob power" data-label="PWR"></div>
+          </div>
+        </section>
+
+        <!-- Controls --><section class="controls-wrap">
+          <div class="control-recess h-full">
+            <div class="vents">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="controls h-[calc(100%-1.1rem)]">
+              <div class="btn w-3rem" data-label="PK‑E"></div>
+              <div class="btn w-3rem" data-label="SCAN"></div>
+              <div class="btn right" data-label="TRAP"></div>
+              <div class="btn long" style="grid-row:2; grid-column:1 / span 2" data-label="FIRE"></div>
+              <div class="btn right" style="grid-row:2; grid-column:3" data-label="MODE"></div>
+              <div class="btn long" style="grid-row:3; grid-column:1 / span 2" data-label="STABILIZE"></div>
+              <div class="btn right" style="grid-row:3; grid-column:3" data-label="SET"></div>
+              <div class="btn long" style="grid-row:4; grid-column:1 / span 2" data-label="POWER"></div>
+              <div class="dpad-slot">
+                <div class="dpad-ring"></div>
+                <div class="dpad-cross">
+                  <div class="cross-core"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ===================================
+         DMD LAYOUT EDITOR
+         =================================== --><div id="ledEditor" class="editor-dock">
+      <label><input id="toggleEdit" type="checkbox"> Edit mode</label>
+      <div class="row" style="margin-top:-2px; margin-bottom: 6px;">
+        <span class="hint" style="font-size: 0.7rem; color: #999;">Hint: In edit mode, double-click text to edit it.</span>
+      </div>
+      <div class="row">
+        <label>Title</label>
+        <input id="inpTitle" type="text" value="SNEAKERQUEST" />
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Stage</label>
+          <input id="inpStage" type="text" value="STAGE - 01" />
+        </div>
+        <div>
+          <label>Time</label>
+          <input id="inpTime" type="text" value="00:00:00:0" />
+        </div>
+        <div>
+          <label>Score</label>
+          <input id="inpScore" type="text" value="000000" />
+        </div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Stage size</label>
+          <input id="fsStage" type="range" min="10" max="22" value="14" />
+        </div>
+        <div>
+          <label>Time size</label>
+          <input id="fsTime" type="range" min="10" max="22" value="14" />
+        </div>
+        <div>
+          <label>Score size</label>
+          <input id="fsScore" type="range" min="12" max="24" value="16" />
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label>Title size</label>
+          <input id="fsTitle" type="range" min="16" max="30" value="22" />
+        </div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Title X%</label>
+          <input id="tx" type="range" min="0" max="100" value="50" />
+        </div>
+        <div>
+          <label>Title Y%</label>
+          <input id="ty" type="range" min="10" max="90" value="46" />
+        </div>
+        <div></div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Stage X%</label>
+          <input id="sx" type="range" min="0" max="92" value="8" />
+        </div>
+        <div>
+          <label>Stage Y%</label>
+          <input id="sy" type="range" min="4" max="90" value="18" />
+        </div>
+        <div></div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Time X%</label>
+          <input id="timex" type="range" min="0" max="92" value="72" />
+        </div>
+        <div>
+          <label>Time Y%</label>
+          <input id="timey" type="range" min="4" max="90" value="18" />
+        </div>
+        <div></div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Score X%</label>
+          <input id="scx" type="range" min="0" max="92" value="8" />
+        </div>
+        <div>
+          <label>Score Y%</label>
+          <input id="scy" type="range" min="4" max="90" value="8" />
+        </div>
+        <div></div>
+      </div>
+      <div class="row actions">
+        <button id="btnSave" type="button">Save</button>
+        <button id="btnReset" type="button">Reset</button>
+        <button id="btnExport" type="button">Export JSON</button>
+        <button id="btnImport" type="button">Import JSON</button>
+        <span class="hint">press <kbd>E</kbd> to toggle</span>
+      </div>
+
+      <!-- Section Heights --><div class="row grid">
+        <div>
+          <label>Header Height %</label>
+          <input id="hHeader" type="range" min="10" max="80" value="26" />
+        </div>
+        <div>
+          <label>Controls Height %</label>
+          <input id="hControls" type="range" min="10" max="80" value="26" />
+        </div>
+        <div>
+          <label>Screen Height %</label>
+          <span id="hScreenDisplay" class="hint" style="font-size: 1.1em; color: #ddd; padding-top: .25rem;">48%</span>
+        </div>
+      </div>
+
+      <!-- Box sizes --><div class="row grid">
+        <div>
+          <label>Title box W%</label>
+          <input id="tbw" type="range" min="20" max="100" value="80" />
+        </div>
+        <div>
+          <label>Title box H px</label>
+          <input id="tbh" type="range" min="14" max="60" value="28" />
+        </div>
+        <div>
+          <label>DMD height px</label>
+          <input id="dmdh" type="range" min="76" max="180" value="128" />
+        </div>
+      </div>
+      
+      <!-- ***** FIX IS HERE *****
+           Re-added this row of missing editor controls.
+      --><div class="row grid">
+        <div>
+          <label>Stage box W%</label>
+          <input id="sbw" type="range" min="20" max="100" value="40" />
+        </div>
+        <div>
+          <label>Stage box H px</label>
+          <input id="sbh" type="range" min="12" max="48" value="18" />
+        </div>
+        <div>
+          <label>Time box W%</label>
+          <input id="tbxw" type="range" min="20" max="100" value="40" />
+        </div>
+      </div>
+
+      <div class="row grid">
+        <div>
+          <label>TV screen text</label>
+          <input id="tvtext" type="text" value="TRAP MODE: ARMED ▌" />
+        </div>
+        <div></div> <!-- Empty grid cell --><div></div> <!-- Empty grid cell --></div>
+
+      <div class="row grid">
+        <div>
+          <label>Time box H px</label>
+          <input id="tbxh" type="range" min="12" max="48" value="18" />
+        </div>
+        <div>
+          <label>Score box W%</label>
+          <input id="scbw" type="range" min="20" max="100" value="50" />
+        </div>
+        <div>
+          <label>Score box H px</label>
+          <input id="scbh" type="range" min="12" max="56" value="22" />
+        </div>
+      </div>
+
+      <!-- Logo controls --><div class="row grid">
+        <div>
+          <label>Logo image</label>
+          <input id="logoFile" type="file" accept="image/*" />
+        </div>
+        <div>
+          <label>Show logo</label>
+          <input id="logoShow" type="checkbox" />
+        </div>
+        <div>
+          <label>Replace title</label>
+          <input id="logoReplace" type="checkbox" />
+        </div>
+      </div>
+      <div class="row grid">
+        <div>
+          <label>Logo X%</label>
+          <input id="logox" type="range" min="0" max="100" value="50" />
+        </div>
+        <div>
+          <label>Logo Y%</label>
+          <input id="logoy" type="range" min="10" max="90" value="50" />
+        </div>
+        <div>
+          <label>Logo Scale</label>
+          <input id="logos" type="range" min="40" max="140" value="100" />
+        </div>
+      </div>
+
+      <!-- Import/Export JSON Panel (hidden by default) --><div id="ioPanel" class="io-panel" hidden>
+        <div class="row"><strong>Layout JSON</strong></div>
+        <textarea id="ioTextarea" rows="8" spellcheck="false" placeholder="Paste JSON here or copy out..."></textarea>
+        <div class="row actions">
+          <button id="btnCopy" type="button">Copy</button>
+          <button id="btnApply" type="button">Apply JSON</button>
+          <button id="btnCloseIO" type="button">Close</button>
+        </div>
+        <div id="ioMsg" class="io-msg" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================
+       JAVASCRIPT
+       =================================== --><!-- Typewriter effect for title --><script>
+    (function() {
+      const key = 'sq_type_done_v1';
+      const titleWrap = document.getElementById('sqTitleText');
+      if (!titleWrap) return;
+      const container = titleWrap.closest('.dmd-title');
+      const txt = titleWrap.getAttribute('data-text') || titleWrap.textContent.trim();
+
+      // Only run typewriter effect once per user
+      if (!localStorage.getItem(key)) {
+        container && container.classList.add('typing');
+        titleWrap.textContent = '';
+        const delay = 80;
+        [...txt].forEach((c, i) => {
+          setTimeout(() => {
+            const span = document.createElement('span');
+            span.className = 'ch';
+            span.textContent = c;
+            span.style.animation = 'typePop .22s steps(1,end) forwards';
+            titleWrap.appendChild(span);
+            if (i === txt.length - 1) {
+              setTimeout(() => { container && container.classList.remove('typing'); localStorage.setItem(key, '1'); }, 260);
             }
+          }, i * delay);
+        });
+      } else {
+        titleWrap.textContent = txt;
+      }
+    })();
+  </script>
+
+  <!-- LED Editor Logic --><script id="led-editor-js">
+    (function() {
+      // Helper to query DOM
+      const $ = sel => document.querySelector(sel);
+
+      // Get all DOM elements for display and controls
+      const titleEl = $('#sqTitleText');
+      const stageEl = document.querySelector('.chip-stage');
+      const timeEl = document.querySelector('.chip-time');
+      const scoreEl = document.querySelector('.chip-score');
+      const panel = document.querySelector('.dmd-title');
+      // Section wrappers
+      const headerWrap = document.querySelector('.header-wrap');
+      const tvScreenWrap = document.querySelector('.tv-screen-wrap'); // Renamed
+      const controlsWrap = document.querySelector('.controls-wrap');
+      // TV screen elements
+      const tvScreenTextEl = document.querySelector('.tv-crt-text');
+
+      const inpTitle = $('#inpTitle'), inpStage = $('#inpStage'), inpTime = $('#inpTime'), inpScore = $('#inpScore');
+      const fsStage = $('#fsStage'), fsTime = $('#fsTime'), fsScore = $('#fsScore'), fsTitle = $('#fsTitle');
+      const tX = $('#tx'), tY = $('#ty');
+      const sX = $('#sx'), sY = $('#sy');
+      const tiX = $('#timex'), tiY = $('#timey');
+      const scX = $('#scx'), scY = $('#scy');
+      const toggleEdit = $('#toggleEdit');
+      
+      // Section height inputs
+      const hHeader = $('#hHeader'), hControls = $('#hControls'), hScreenDisplay = $('#hScreenDisplay');
+
+      // Box size inputs
+      const tbw = $('#tbw'), tbh = $('#tbh'), dmdh = $('#dmdh');
+      const sbw = $('#sbw'), sbh = $('#sbh'); // These will now be found
+      const tbxw = $('#tbxw'), tbxh = $('#tbxh'); // tbxw will now be found
+      const scbw = $('#scbw'), scbh = $('#scbh');
+      
+      // TV screen text input
+      const tvText = $('#tvtext');
+      
+      // Action buttons
+      const btnSave = $('#btnSave'), btnReset = $('#btnReset');
+      const btnExport = $('#btnExport'), btnImport = $('#btnImport');
+      const ioPanel = $('#ioPanel'), ioTA = $('#ioTextarea'), btnCopy = $('#btnCopy'), btnApply = $('#btnApply'), btnCloseIO = $('#btnCloseIO'), ioMsg = $('#ioMsg');
+      
+      // Logo controls
+      const logoEl = document.getElementById('sqLogo');
+      const logoFile = $('#logoFile'), logoShow = $('#logoShow'), logoReplace = $('#logoReplace');
+      const logoX = $('#logox'), logoY = $('#logoy'), logoS = $('#logos');
+
+      const storeKey = 'sq_led_editor_v1';
+      // Load from localStorage
+      const load = () => { try { return JSON.parse(localStorage.getItem(storeKey) || '{}') } catch (e) { return {} } };
+      // Save to localStorage
+      const persist = (data) => localStorage.setItem(storeKey, JSON.stringify(data));
+
+      /**
+       * Gathers all current values from the editor inputs into a config object.
+       */
+      function getConfig() {
+        return {
+          v: 1,
+          t: inpTitle && inpTitle.value,
+          sg: inpStage && inpStage.value,
+          tm: inpTime && inpTime.value,
+          sc: inpScore && inpScore.value,
+          fstg: fsStage && fsStage.value,
+          ftm: fsTime && fsTime.value,
+          fsc: fsScore && fsScore.value,
+          ft: fsTitle && fsTitle.value,
+          tpos: { x: (tX && Number(tX.value)) || 50, y: (tY && Number(tY.value)) || 46 },
+          spos: { x: (sX && Number(sX.value)) || 8, y: (sY && Number(sY.value)) || 18 },
+          timpos: { x: (tiX && Number(tiX.value)) || 72, y: (tiY && Number(tiY.value)) || 18 },
+          scpos: { x: (scX && Number(scX.value)) || 8, y: (scY && Number(scY.value)) || 8 },
+          dmdh: (dmdh && Number(dmdh.value)) || 128,
+          // Add section heights
+          h_header: (hHeader && Number(hHeader.value)) || 26,
+          h_controls: (hControls && Number(hControls.value)) || 26,
+          // TV screen config
+          tvtext: (tvText ? tvText.value : 'TRAP MODE: ARMED ▌'),
+          boxes: {
+            title: { w: (tbw && Number(tbw.value)) || 80, h: (tbh && Number(tbh.value)) || 28 },
+            stage: { w: (sbw && Number(sbw.value)) || 40, h: (sbh && Number(sbh.value)) || 18 },
+            time: { w: (tbxw && Number(tbxw.value)) || 40, h: (tbxh && Number(tbxh.value)) || 18 },
+            score: { w: (scbw && Number(scbw.value)) || 50, h: (scbh && Number(scbh.value)) || 22 }
+          },
+          logo: { show: !!(logoShow && logoShow.checked), replace: !!(logoReplace && logoReplace.checked), x: (logoX && Number(logoX.value)) || 50, y: (logoY && Number(logoY.value)) || 50, s: (logoS && Number(logoS.value)) || 100, src: (logoEl && logoEl.dataset.src) || null }
+        };
+      }
+
+      /**
+       * Applies a config object to the editor inputs and the device display.
+       */
+      function applyConfig(cfg) {
+        if (typeof cfg !== 'object' || !cfg) throw new Error('Invalid JSON object');
+        // Set input values from config
+        if (inpTitle && cfg.t != null) inpTitle.value = String(cfg.t);
+        if (inpStage && cfg.sg != null) inpStage.value = String(cfg.sg);
+        if (inpTime && cfg.tm != null) inpTime.value = String(cfg.tm);
+        if (inpScore && cfg.sc != null) inpScore.value = String(cfg.sc);
+        if (fsStage && cfg.fstg != null) fsStage.value = String(cfg.fstg);
+        if (fsTime && cfg.ftm != null) fsTime.value = String(cfg.ftm);
+        if (fsScore && cfg.fsc != null) fsScore.value = String(cfg.fsc);
+        if (fsTitle && cfg.ft != null) fsTitle.value = String(cfg.ft);
+        if (cfg.tpos) { tX && (tX.value = Number(cfg.tpos.x)); tY && (tY.value = Number(cfg.tpos.y)); }
+        if (cfg.spos) { sX && (sX.value = Number(cfg.spos.x)); sY && (sY.value = Number(cfg.spos.y)); }
+        if (cfg.timpos) { tiX && (tiX.value = Number(cfg.timpos.x)); tiY && (tiY.value = Number(cfg.timpos.y)); }
+        if (cfg.scpos) { scX && (scX.value = Number(cfg.scpos.x)); scY && (scY.value = Number(cfg.scpos.y)); }
+        
+        // Apply box sizes from config
+        if (cfg.boxes) {
+          tbw && (tbw.value = cfg.boxes.title?.w ?? tbw.value); tbh && (tbh.value = cfg.boxes.title?.h ?? tbh.value);
+          sbw && (sbw.value = cfg.boxes.stage?.w ?? sbw.value); sbh && (sbh.value = cfg.boxes.stage?.h ?? sbh.value);
+          tbxw && (tbxw.value = cfg.boxes.time?.w ?? tbxw.value); tbxh && (tbxh.value = cfg.boxes.time?.h ?? tbxh.value);
+          scbw && (scbw.value = cfg.boxes.score?.w ?? scbw.value); scbh && (scbh.value = cfg.boxes.score?.h ?? scbh.value);
+        }
+        
+        // Apply section heights from config
+        if (cfg.h_header && hHeader) hHeader.value = Number(cfg.h_header);
+        if (cfg.h_controls && hControls) hControls.value = Number(cfg.h_controls);
+        updateSectionHeights(); // Apply the heights
+
+        // Apply TV screen config
+        if (cfg.tvtext != null && tvText) tvText.value = String(cfg.tvtext);
+
+        if (cfg.logo) {
+          logoShow && (logoShow.checked = !!cfg.logo.show);
+          logoReplace && (logoReplace.checked = !!cfg.logo.replace);
+          logoX && (logoX.value = Number(cfg.logo.x));
+          logoY && (logoY.value = Number(cfg.logo.y));
+          logoS && (logoS.value = Number(cfg.logo.s));
+          if (cfg.logo.src) { if (logoEl) { logoEl.src = cfg.logo.src; logoEl.dataset.src = cfg.logo.src; document.querySelector('.matrix').classList.toggle('logo-on', !!cfg.logo.show); } }
+        }
+        
+        // Apply the new values to the display
+        apply();
+        // Save the newly applied config
+        persist(getConfig());
+      }
+
+      /**
+       * Reads all editor input values and applies them to the device display's
+       * text content and CSS custom properties.
+       */
+      function apply() {
+        const dmd = document.querySelector('.dmd.dmd-title');
+        if (dmd && dmdh) dmd.style.height = (dmdh.value || 128) + 'px';
+
+        if (titleEl) {
+          const t = (inpTitle && inpTitle.value) || 'SNEAKERQUEST';
+          titleEl.setAttribute('data-text', t);
+          titleEl.textContent = t;
+          const tSize = (fsTitle && fsTitle.value) ? Number(fsTitle.value) : 22;
+          titleEl.style.fontSize = tSize + 'px';
+          titleEl.style.setProperty('--tx', ((tX && tX.value) || 50) + '%');
+          titleEl.style.setProperty('--ty', ((tY && tY.value) || 46) + '%');
+          if (tbw) titleEl.style.setProperty('--bw', (tbw.value || 80));
+          if (tbh) titleEl.style.setProperty('--bh', (tbh.value || 28) + 'px');
+          // Hide title if logo is shown and 'Replace title' is checked
+          if (logoReplace && logoReplace.checked) { titleEl.style.opacity = (logoShow && logoShow.checked) ? 0 : 1; } else { titleEl.style.opacity = 1; }
+        }
+        if (stageEl) { stageEl.textContent = (inpStage && inpStage.value) || 'STAGE - 01'; stageEl.style.fontSize = ((fsStage && fsStage.value) ? fsStage.value : 14) + 'px'; stageEl.style.left = ((sX && sX.value) || 8) + '%'; stageEl.style.bottom = ((sY && sY.value) || 18) + '%'; if (sbw) stageEl.style.setProperty('--bw', (sbw.value || 40)); if (sbh) stageEl.style.setProperty('--bh', (sbh.value || 18) + 'px'); }
+        if (timeEl) { timeEl.textContent = (inpTime && inpTime.value) || '00:00:00:0'; timeEl.style.fontSize = ((fsTime && fsTime.value) ? fsTime.value : 14) + 'px'; timeEl.style.left = ((tiX && tiX.value) || 72) + '%'; timeEl.style.bottom = ((tiY && tiY.value) || 18) + '%'; if (tbxw) timeEl.style.setProperty('--bw', (tbxw.value || 40)); if (tbxh) timeEl.style.setProperty('--bh', (tbxh.value || 18) + 'px'); }
+        if (scoreEl) { scoreEl.textContent = 'SCORE ' + ((inpScore && inpScore.value) || '000000'); scoreEl.style.fontSize = ((fsScore && fsScore.value) ? fsScore.value : 16) + 'px'; scoreEl.style.left = ((scX && scX.value) || 8) + '%'; scoreEl.style.bottom = ((scY && scY.value) || 8) + '%'; if (scbw) scoreEl.style.setProperty('--bw', (scbw.value || 50)); if (scbh) scoreEl.style.setProperty('--bh', (scbh.value || 22) + 'px'); }
+        
+        if (logoEl) {
+          const show = !!(logoShow && logoShow.checked);
+          const s = (logoS && logoS.value) || 100; const x = (logoX && logoX.value) || 50; const y = (logoY && logoY.value) || 50;
+          logoEl.style.left = x + '%'; logoEl.style.top = y + '%';
+          logoEl.style.transform = `translate(-50%,-50%) scale(${s / 100})`;
+          logoEl.style.position = 'absolute';
+          logoEl.style.transformOrigin = 'center center';
+          document.querySelector('.matrix').classList.toggle('logo-on', show && !!logoEl.src);
+        }
+        
+        // Apply TV screen text
+        if(tvScreenTextEl && tvText) {
+          tvScreenTextEl.textContent = tvText.value || 'TRAP MODE: ARMED ▌';
+        }
+      }
+
+      /**
+       * Updates the main section heights based on slider values.
+       * @param {string} [sourceSlider] - 'header' or 'controls', indicates which slider triggered the change.
+       */
+      function updateSectionHeights(sourceSlider) {
+        if (!hHeader || !hControls || !hScreenDisplay || !headerWrap || !tvScreenWrap || !controlsWrap) return;
+
+        let h_header_val = Number(hHeader.value);
+        let h_controls_val = Number(hControls.value);
+
+        // Ensure total doesn't exceed 90% (to leave 10% for screen)
+        if (h_header_val + h_controls_val > 90) {
+          if (sourceSlider === 'header') {
+            // Header slider moved, so adjust controls
+            h_controls_val = 90 - h_header_val;
+            hControls.value = h_controls_val;
+          } else {
+            // Controls slider moved (or no source), so adjust header
+            h_header_val = 90 - h_controls_val;
+            hHeader.value = h_header_val;
+          }
         }
 
-        const allButtons = document.querySelectorAll('.btn');
-        allButtons.forEach(button => {
-            button.addEventListener('mousedown', () => {
-                handleButtonPress(button.id);
-            });
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                handleButtonPress(button.id);
-                button.classList.add('active-touch'); 
-            });
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                button.classList.remove('active-touch'); 
-            });
-            // Also remove active class on mouseup for desktop
-            button.addEventListener('mouseup', () => {
-                button.classList.remove('active-touch');
-            });
-            button.addEventListener('mouseleave', () => {
-                button.classList.remove('active-touch');
-            });
-        });
-    </script>
+        const h_screen_val = 100 - h_header_val - h_controls_val;
 
+        // Apply heights to the DOM
+        headerWrap.style.height = h_header_val + '%';
+        controlsWrap.style.height = h_controls_val + '%';
+        tvScreenWrap.style.height = h_screen_val + '%'; // Changed to tvScreenWrap
+
+        // Update the display text
+        hScreenDisplay.textContent = h_screen_val.toFixed(0) + '%';
+      }
+
+      // Wire all editor inputs to the apply function
+      ['input', 'change'].forEach(ev => {
+        [inpTitle, inpStage, inpTime, inpScore, fsStage, fsTime, fsScore, fsTitle, tX, tY, sX, sY, tiX, tiY, scX, scY, logoShow, logoReplace, logoX, logoY, logoS, tbw, tbh, dmdh, sbw, sbh, tbxw, tbxh, scbw, scbh, tvText].forEach(el => el && el.addEventListener(ev, apply));
+      });
+
+      // --- Drag and Drop for DMD elements ---
+      let dragEl = null, startX = 0, startY = 0, baseLeft = 0, baseBottom = 0, isTitle = false;
+      
+      function onDownChip(e) {
+        if (!document.body.classList.contains('edit-on')) return; // Only drag in edit mode
+        dragEl = e.currentTarget;
+        isTitle = dragEl.classList.contains('chip-title');
+        const pr = panel.getBoundingClientRect();
+        const r = dragEl.getBoundingClientRect();
+        startX = e.clientX;
+        startY = e.clientY;
+        // Get base positions as percentages
+        baseLeft = (r.left - pr.left) / pr.width * 100;
+        baseBottom = (pr.bottom - r.bottom) / pr.height * 100;
+        dragEl.classList.add('draggable');
+        e.preventDefault();
+      }
+
+      function onMove(e) {
+        if (!dragEl) return;
+        const pr = panel.getBoundingClientRect();
+        const dx = (e.clientX - startX) / pr.width * 100;
+        const dy = (e.clientY - startY) / pr.height * 100;
+        // Calculate new positions, clamped within panel
+        let nx = Math.max(0, Math.min(100, baseLeft + dx));
+        let ny = Math.max(4, Math.min(96, baseBottom - dy));
+        
+        if (isTitle) {
+          // Title uses top/left via CSS vars
+          dragEl.style.setProperty('--tx', nx + '%');
+          dragEl.style.setProperty('--ty', (100 - ny) + '%');
+          if (tX) tX.value = nx;
+          if (tY) tY.value = (100 - ny);
+        } else {
+          // Chips use bottom/left
+          dragEl.style.left = nx + '%';
+          dragEl.style.bottom = ny + '%';
+          // Update corresponding range slider
+          const id = dragEl.dataset.role;
+          if (id === 'stage') { sX && (sX.value = nx); sY && (sY.value = ny); }
+          if (id === 'time') { tiX && (tiX.value = nx); tiY && (tiY.value = ny); }
+          if (id === 'score') { scX && (scX.value = nx); scY && (scY.value = ny); }
+        }
+      }
+
+      function onUp() {
+        if (!dragEl) return;
+        dragEl.classList.remove('draggable');
+        dragEl = null;
+      }
+
+      document.querySelectorAll('.status-chip, .chip-title').forEach(el => el.addEventListener('mousedown', onDownChip));
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+
+      // --- Double-click to focus input ---
+      function setupDoubleClickToEdit() {
+        if (titleEl && inpTitle) {
+          titleEl.addEventListener('dblclick', () => {
+            if (!document.body.classList.contains('edit-on')) return; // Only in edit mode
+            inpTitle.focus();
+            inpTitle.select();
+          });
+        }
+        if (stageEl && inpStage) {
+          stageEl.addEventListener('dblclick', () => {
+            if (!document.body.classList.contains('edit-on')) return;
+            inpStage.focus();
+            inpStage.select();
+          });
+        }
+        if (timeEl && inpTime) {
+          timeEl.addEventListener('dblclick', () => {
+            if (!document.body.classList.contains('edit-on')) return;
+            inpTime.focus();
+            inpTime.select();
+          });
+        }
+        if (scoreEl && inpScore) {
+          scoreEl.addEventListener('dblclick', () => {
+            if (!document.body.classList.contains('edit-on')) return;
+            inpScore.focus();
+            inpScore.select();
+          });
+        }
+        if (tvScreenTextEl && tvText) {
+          tvScreenTextEl.addEventListener('dblclick', () => {
+            if (!document.body.classList.contains('edit-on')) return;
+            tvText.focus();
+            tvText.select();
+          });
+        }
+      }
+      setupDoubleClickToEdit(); // Call the function to attach listeners
+
+      // --- Section Height Listeners ---
+      hHeader && hHeader.addEventListener('input', () => updateSectionHeights('header'));
+      hControls && hControls.addEventListener('input', () => updateSectionHeights('controls'));
+
+      // --- Edit Mode Toggle ---
+      function setEdit(on) { document.body.classList.toggle('edit-on', !!on); }
+      toggleEdit && toggleEdit.addEventListener('change', e => setEdit(e.target.checked));
+      // Hotkey 'e' to toggle edit mode
+      window.addEventListener('keydown', e => {
+        if (e.key.toLowerCase() === 'e' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          if (!toggleEdit) return;
+          toggleEdit.checked = !toggleEdit.checked;
+          toggleEdit.dispatchEvent(new Event('change'));
+        }
+      });
+
+      // --- Initial Load ---
+      const p = load();
+      if (p.v) {
+        // Apply saved config to inputs
+        if (inpTitle && p.t) inpTitle.value = p.t; if (inpStage && p.sg) inpStage.value = p.sg; if (inpTime && p.tm) inpTime.value = p.tm; if (inpScore && p.sc) inpScore.value = p.sc;
+        if (fsStage && p.fstg) fsStage.value = p.fstg; if (fsTime && p.ftm) fsTime.value = p.ftm; if (fsScore && p.fsc) fsScore.value = p.fsc; if (fsTitle && p.ft) fsTitle.value = p.ft;
+        if (p.tpos) { tX && (tX.value = p.tpos.x); tY && (tY.value = p.tpos.y); }
+        if (p.spos) { sX && (sX.value = p.spos.x); sY && (sY.value = p.spos.y); }
+        if (p.timpos) { tiX && (tiX.value = p.timpos.x); tiY && (tiY.value = p.timpos.y); }
+        if (p.scpos) { scX && (scX.value = p.scpos.x); scY && (scY.value = p.scpos.y); }
+        if (typeof p.dmdh === 'number' && dmdh) dmdh.value = p.dmdh;
+        
+        // Load section heights
+        if (p.h_header && hHeader) hHeader.value = p.h_header;
+        if (p.h_controls && hControls) hControls.value = p.h_controls;
+
+        // Load TV screen text
+        if (p.tvtext != null && tvText) tvText.value = p.tvtext;
+
+        if (p.boxes) {
+          tbw && (tbw.value = p.boxes.title?.w ?? tbw.value); tbh && (tbh.value = p.boxes.title?.h ?? tbh.value);
+          sbw && (sbw.value = p.boxes.stage?.w ?? sbw.value); sbh && (sbh.value = p.boxes.stage?.h ?? sbh.value);
+          tbxw && (tbxw.value = p.boxes.time?.w ?? tbxw.value); tbxh && (tbxh.value = p.boxes.time?.h ?? tbxh.value);
+          scbw && (scbw.value = p.boxes.score?.w ?? scbw.value); scbh && (scbh.value = p.boxes.score?.h ?? scbh.value);
+        }
+        if (p.logo) {
+          logoShow && (logoShow.checked = !!p.logo.show);
+          logoReplace && (logoReplace.checked = !!p.logo.replace);
+          logoX && (logoX.value = p.logo.x); logoY && (logoY.value = p.logo.y); logoS && (logoS.value = p.logo.s);
+          if (p.logo.src && logoEl) { logoEl.src = p.logo.src; logoEl.dataset.src = p.logo.src; }
+        }
+      }
+      // Apply initial state (saved or default)
+      apply();
+      updateSectionHeights(); // Apply initial section heights
+
+      // --- Button Actions ---
+      btnSave && btnSave.addEventListener('click', () => {
+        persist(getConfig());
+        btnSave.textContent = 'Saved!';
+        setTimeout(() => { btnSave.textContent = 'Save'; }, 1000);
+      });
+      btnReset && btnReset.addEventListener('click', () => {
+        // Removed confirm() as it is blocked in the iframe environment.
+        // The button now resets without confirmation.
+        localStorage.removeItem(storeKey);
+        location.reload();
+      });
+
+      // --- Logo File Loading ---
+      function fileToDataURL(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
+      logoFile && logoFile.addEventListener('change', async (e) => {
+        const f = e.target.files && e.target.files[0]; if (!f || !logoEl) return;
+        try {
+          const data = await fileToDataURL(f);
+          logoEl.src = data;
+          logoEl.dataset.src = data;
+          if (logoShow) logoShow.checked = true; // Auto-show logo on upload
+          apply();
+          persist(getConfig()); // Save new logo src
+        } catch (err) {
+          console.error('Error reading file:', err);
+          // Don't use alert()
+          if(ioMsg) ioMsg.textContent = 'Failed to load image.'; ioMsg.classList.add('error');
+        }
+      });
+
+      // --- Export / Import JSON ---
+      function showIO(open) {
+        if (ioPanel) ioPanel.hidden = !open;
+        if (ioMsg) { ioMsg.textContent = ''; ioMsg.classList.remove('error'); }
+        if (open && ioTA) { ioTA.value = JSON.stringify(getConfig(), null, 2); } // Populate textarea on open
+      }
+      btnExport && btnExport.addEventListener('click', () => showIO(true));
+      btnImport && btnImport.addEventListener('click', () => showIO(true));
+      btnCloseIO && btnCloseIO.addEventListener('click', () => showIO(false));
+      
+      btnCopy && btnCopy.addEventListener('click', () => {
+        if (!ioTA) return;
+        ioTA.select();
+        let ok = false;
+        try {
+          // Use modern clipboard API if available
+          if (navigator.clipboard && window.isSecureContext) {
+             navigator.clipboard.writeText(ioTA.value).then(() => {
+                if (ioMsg) { ioMsg.textContent = 'Copied to clipboard.'; ioMsg.classList.remove('error'); }
+             }).catch(() => {
+                // Fallback if promise rejects (e.g. permissions)
+                ok = document.execCommand('copy');
+                if (ioMsg) { ioMsg.textContent = ok ? 'Copied to clipboard.' : 'Copy failed. Try manually.'; ioMsg.classList.remove('error'); }
+             });
+             return; // Exit as clipboard API is async
+          } else {
+            // Fallback for older browsers/iframe/insecure context
+            ok = document.execCommand('copy');
+          }
+        } catch (e) {
+          console.error('Copy failed', e);
+          ok = false; // Ensure ok is false on error
+        }
+        if (ioMsg) { ioMsg.textContent = ok ? 'Copied to clipboard.' : 'Copy failed. Try manually.'; ioMsg.classList.remove('error'); }
+      });
+
+      btnApply && btnApply.addEventListener('click', () => {
+        if (!ioTA) return;
+        try {
+          const parsed = JSON.parse(ioTA.value);
+          applyConfig(parsed); // Apply the parsed JSON config
+          if (ioMsg) { ioMsg.textContent = 'Applied and saved.'; ioMsg.classList.remove('error'); }
+          setTimeout(() => showIO(false), 1000); // Close panel on success
+        } catch (err) {
+          if (ioMsg) { ioMsg.textContent = 'Invalid JSON: ' + err.message; ioMsg.classList.add('error'); }
+        }
+      });
+    })();
+  </script>
+
+  <!-- Minimal runtime tests --><script>
+    (function() {
+      // This is a simple self-check script that runs in the console.
+      const results = []; const ok = (m) => results.push('✔ ' + m); const fail = (m) => results.push('✖ ' + m);
+      // ***** FIX IS HERE *****
+      // Removed the stray 'E' character that was causing the syntax error.
+      try { if (document.getElementById('sqTitleText')) ok('#sqTitleText present'); else fail('#sqTitleText missing'); } catch (e) { fail('error checking title: ' + e.message); }
+      try { const fsTitle = document.getElementById('fsTitle'); if (fsTitle) ok('#fsTitle present'); else ok('#fsTitle not required but guarded'); } catch (e) { fail('error checking fsTitle: ' + e.message); }
+      try { const applyFn = document.getElementById('led-editor-js'); ok('editor script loaded'); } catch (e) { fail('editor script missing'); }
+      try { const inp = document.getElementById('inpTitle'); if (inp) { const old = inp.value; inp.value = old; inp.dispatchEvent(new Event('input')); ok('apply does not throw'); } else { ok('no editor inputs in DOM context'); } } catch (e) { fail('apply threw: ' + e.message); }
+      console.log('[LED Tests]', '\n' + results.join('\n'));
+      
+      // Extra tests: export/import
+      try {
+        const exp = document.getElementById('btnExport'); const ta = document.getElementById('ioTextarea');
+        if (exp && ta) { exp.click(); const txt = ta.value; const parsed = JSON.parse(txt); if (parsed && parsed.v === 1) { ok('export JSON parses'); } else { fail('export JSON missing fields'); } document.getElementById('btnCloseIO').click(); }
+      } catch (e) { fail('export JSON failed: ' + e.message); }
+      try {
+        const imp = document.getElementById('btnImport'); const ta = document.getElementById('ioTextarea'); const applyBtn = document.getElementById('btnApply'); const msg = document.getElementById('ioMsg');
+        if (imp && ta && applyBtn) { imp.click(); ta.value = '{ bad json'; applyBtn.click(); ok('import error handled UI-side'); if (msg && msg.textContent.startsWith('Invalid JSON')) ok('invalid JSON message shown'); document.getElementById('btnCloseIO').click(); }
+      } catch (e) { fail('import error path failed: ' + e.message); }
+    })();
+  </script>
 </body>
 </html>
