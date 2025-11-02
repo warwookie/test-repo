@@ -1,150 +1,91 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>Controls Merge — Buttons Left, Joypad Right (2:1)</title>
+<title>Controls Merge — Buttons Left, Joypad Right (2:1) + Perf</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Theme tokens */
-    --bg:#070708;
-    --pane:#080203;
-    --red:#ff3a3a;
-    --ring:#1a0000;
-    --shadow:0 20px 50px #000c;
-    --radius:20px;
-    --gap:16px;
+    --bg:#070708; --pane:#080203; --ring:#1a0000; --radius:20px; --gap:16px;
   }
-
-  /* Page */
   html, body { height:100%; margin:0; }
   body { background:var(--bg); color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
 
-  /* Frame keeps a strict 2:1 overall ratio */
-  #frame{ display:grid; place-items:center; height:100vh; padding:0; box-sizing:border-box; }
+  /* Frame: keep total surface exactly 2:1 (works on 9:16 screens) */
+  #frame{ display:grid; place-items:center; height:100vh; }
   #control-ui{
-    /* Strict 2:1 that maximizes on any screen, esp. 9:16 portrait */
     aspect-ratio: 2 / 1;
-    /* Pick the limiting dimension: height = min(50vw, 100vh), width derives from aspect */
-    height: min( calc(100vw / 2), 100vh );
+    height: min(calc(100vw / 2), 100vh);
     width: auto;
-
-    display:grid;
-    grid-template-columns: 1fr 1fr; /* two equal squares */
-    grid-template-rows: 1fr;
-    gap: 0; /* no gap so two 1:1s exactly form a 2:1 */
-    overflow:hidden;
-    background: transparent;
-  }
-  /* keep side-by-side even on mobile; still 2:1 */
-  
-    .col-left, .col-right{
-    position:relative;
-    aspect-ratio: 1 / 1;            /* exact squares */
-    background: var(--pane);
-    /* visual border that doesn't change layout math */
-    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 1px var(--ring), var(--shadow);
-    border-radius: var(--radius);
-    overflow:hidden;
-    touch-action:none;
-  }
-  }
+    display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr;
+    overflow:hidden; gap:0;
   }
 
-  /* Columns */
+  /* Left (buttons) and right (joypad) are perfect squares */
   .col-left, .col-right{
-    position:relative;
-    aspect-ratio: 1 / 1;   /* always perfect squares */
-    background: var(--pane);
-    border: 1px solid var(--ring);
-    border-radius: var(--radius);
-    box-shadow: inset 0 0 0 2px #000, var(--shadow);
-    overflow:hidden;
-    touch-action:none;
+    position:relative; aspect-ratio:1/1; background:var(--pane);
+    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 1px var(--ring), 0 20px 50px #000c;
+    border-radius:var(--radius); overflow:hidden; touch-action:none;
   }
+  .pad{ position:absolute; inset:var(--gap); border-radius: calc(var(--radius) - 8px); overflow:hidden; }
 
-  /* Left column: buttons overlay host */
-  .btn2-overlay{
-    position:absolute; inset:0;
-    display:grid; place-items:center;
-    pointer-events:auto;
-  }
-  /* Canvas scales to area */
-  #btn2_panel{
-    width:100% !important; height:100% !important;
-    image-rendering: pixelated;
-    display:block;
-  }
+  /* Buttons overlay */
+  .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
+  #btn2_panel{ position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
 
-  /* Right column: joystick canvas + status */
+  /* Temp trigger (top-left) */
+  .btn2_temp{ position:absolute; top:8px; left:8px; z-index:20; pointer-events:auto; touch-action:manipulation;
+    background:#101012; color:#eaeaea; border:1px solid #3a3a3a; border-radius:10px; padding:6px 10px; font-size:12px; line-height:1; }
+  .btn2_temp:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+  /* Keyboard proxies */
+  .btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%);
+    width:min(92%, 520px); height:44%; outline:none; border:0; background:transparent; pointer-events:auto; z-index:2; }
+  .btn2_keyproxy:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
+  #btn2_proxy_blast{ top:6%; }
+  #btn2_proxy_bomb{ bottom:6%; }
+
+  /* Joypad */
   #jpad_canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-  #jpad_status{
-    position:absolute; left:12px; bottom:12px;
-    font:12px ui-monospace,Consolas,Menlo,monospace;
-    background:#0008; padding:6px 8px; border-radius:8px;
-  }
+  #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
 
-  /* Keyboard overlay targets for buttons */
-  .btn2_keyproxy{
-    position:absolute; left:50%; transform:translateX(-50%);
-    width:min(92%, 520px);
-    height:44%;
-    outline: none;
-    border:0;
-    background:transparent;
-    pointer-events:auto;
-  }
-  .btn2_keyproxy:focus-visible{ outline: 2px solid #fff; outline-offset: 2px; border-radius: 12px; }
-  #btn2_proxy_blast{ top:6%;  }
-  #btn2_proxy_bomb{  bottom:6%; }
-
-  /* Prevent accidental text selection */
   * { -webkit-user-select:none; user-select:none; }
 </style>
 </head>
 <body>
+<div id="frame">
+  <main id="control-ui" aria-label="Control surface">
+    <!-- Left: Buttons (Bomb/Blast) -->
+    <section id="left-area" class="col-left" aria-label="Buttons area">
+      <div class="pad">
+        <button id="btn2_temp" class="btn2_temp" aria-label="Start transition">▶ transition</button>
+        <div class="btn2-overlay">
+          <button id="btn2_proxy_blast" class="btn2_keyproxy" role="button" aria-label="Blast" aria-pressed="false" tabindex="0"></button>
+          <button id="btn2_proxy_bomb"  class="btn2_keyproxy" role="button" aria-label="Bomb"  aria-pressed="false" tabindex="0"></button>
+          <canvas id="btn2_panel" width="560" height="560"></canvas>
+        </div>
+      </div>
+    </section>
 
-<div id="frame"><main id="control-ui" aria-label="Control surface">
-  <!-- Left: Buttons overlay area -->
-  <section id="left-area" class="col-left" aria-label="Buttons area">
-    <div class="btn2-overlay">
-      <!-- Accessible focus targets mapped into the canvas logic -->
-      <button id="btn2_proxy_blast"
-              class="btn2_keyproxy"
-              role="button"
-              aria-label="Blast"
-              aria-pressed="false"
-              tabindex="0"></button>
-      <button id="btn2_proxy_bomb"
-              class="btn2_keyproxy"
-              role="button"
-              aria-label="Bomb"
-              aria-pressed="false"
-              tabindex="0"></button>
-
-      <!-- The buttons canvas from BUTTONS_CODE -->
-      <canvas id="btn2_panel" width="560" height="560"></canvas>
-    </div>
-  </section>
-
-  <!-- Right: Joypad/joystick -->
-  <section id="right-area" class="col-right" aria-label="Joypad">
-    <canvas id="jpad_canvas"></canvas>
-    <output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output>
-  </section>
-</main></div>
+    <!-- Right: Joystick -->
+    <section id="right-area" class="col-right" aria-label="Joypad">
+      <div class="pad">
+        <canvas id="jpad_canvas"></canvas>
+        <output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output>
+      </div>
+    </section>
+  </main>
+</div>
 
 <script>
-/* Global scroll prevention only when interacting within control areas */
+/* Prevent page scrolling during control interactions */
 document.addEventListener('touchmove', (e)=>{
   if(e.target.closest('#left-area, #right-area')) e.preventDefault();
-}, {passive:false});
+},{passive:false});
 
 /* =========================
    JOYPAD (prefixed jpad_)
-   Adapted to render in its own right column area
 ========================= */
 (() => {
   const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
@@ -152,13 +93,12 @@ document.addEventListener('touchmove', (e)=>{
   const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
   const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
 
-  /* Exported state */
   window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
 
   const cvs=document.getElementById('jpad_canvas'); const ctx=cvs.getContext('2d');
-  const readout=document.getElementById('jpad_status');
-  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0;
-  let layoutReady=false; let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
+  const readout=document.getElementById('jpad_status'); const rightArea=document.getElementById('right-area');
+  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
+  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
 
   function updateLayout(newWidth,newHeight){
     if(newWidth<1||newHeight<1) return;
@@ -171,12 +111,12 @@ document.addEventListener('touchmove', (e)=>{
     if(COLS<1||ROWS<1) return;
     OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
 
-    /* Joystick centered within its own area */
     joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3);
 
     buf=new Float32Array(COLS*ROWS);
     layoutReady=true;
   }
+
   function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
   function joyPointerToNorm(x,y){
     const dx=x-joyCX, dy=y-joyCY;
@@ -186,6 +126,7 @@ document.addEventListener('touchmove', (e)=>{
     rn=Math.pow(rn,RESPONSE);
     return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
   }
+
   cvs.addEventListener('pointerdown', e=>{
     e.preventDefault();
     const {x,y}=getPointerLocation(e);
@@ -240,7 +181,6 @@ document.addEventListener('touchmove', (e)=>{
     for(let j=0;j<ROWS;j++){
       for(let i=0;i<COLS;i++){
         const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
-
         const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
         if(mag>0.01){
           const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
@@ -263,7 +203,6 @@ document.addEventListener('touchmove', (e)=>{
           jb=Math.max(jb, core*1.0+glow*0.9);
           buf[idx]=Math.max(buf[idx], jb);
         }
-
         let b=buf[idx]||0;
         b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2));
         b += (noise2(i,j)-0.5)*0.06;
@@ -282,12 +221,13 @@ document.addEventListener('touchmove', (e)=>{
   function fract(x){ return x - Math.floor(x); }
   function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1<=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2<=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
 
-  /* Resize to right-area */
-  const rightArea=document.getElementById('right-area');
   const ro=new ResizeObserver(entries=>{
     if(entries[0]){
       const {width,height}=entries[0].contentRect;
-      updateLayout(Math.max(1,Math.floor(width)), Math.max(1,Math.floor(height)));
+      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue('--gap'))||16;
+      const w=Math.max(1, Math.floor(width - p*2));
+      const h=Math.max(1, Math.floor(height - p*2));
+      updateLayout(w,h);
     }
   });
   ro.observe(rightArea);
@@ -296,7 +236,7 @@ document.addEventListener('touchmove', (e)=>{
 
 /* =========================
    BUTTONS (prefixed btn2_)
-   Original logic kept. Only DOM ids and one export renamed.
+   Perf: heavy-phase throttle + pre-rasterized BLAST rows
 ========================= */
 (() => {
 (async function(){
@@ -340,7 +280,13 @@ document.addEventListener('touchmove', (e)=>{
   // ====== Background ======
   const bg=document.createElement('canvas'); bg.width=W; bg.height=H; const bgc=bg.getContext('2d');
   function drawIdleGrid(c){ for(let y=0;y<=H;y+=p){ for(let x=0;x<=W;x+=p){ drawIdleDot(c,x,y); } } }
-  function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d'); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
+  function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr);
+    for(const pt of pts) drawBrightDot(c,pt.x,pt.y);
+    const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d');
+    for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
+    c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore();
+    c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore();
+  }
   drawIdleGrid(bgc); drawPerimeter(bgc);
 
   // ====== Layouts ======
@@ -360,8 +306,38 @@ document.addEventListener('touchmove', (e)=>{
   const FONT='Press Start 2P'; await document.fonts.load(`32px '${FONT}'`); await document.fonts.ready;
   function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px>=minPx; px-=8){ if(px+4<=rect.h) return px; } return minPx; }
   function measureTextWidth(text,px){ const off=document.createElement('canvas'); const c=off.getContext('2d'); c.font=`${px}px '${FONT}'`; c.textBaseline='top'; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
-  function rasterTextPoints(rect,text){ const px=pickFontPx(rect), pad=2; const off=document.createElement('canvas'); const o=off.getContext('2d'); o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.imageSmoothingEnabled=false; o.fillStyle='#fff'; const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0); off.width=w+pad*2; off.height=h+pad*2; o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.fillStyle='#fff'; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad); const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2); const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4; function alpha(ix,iy){ if(ix<0||iy<0||ix>=iw||iy>=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; } const pts=[]; for(let gy=dy; gy<dy+ih; gy+=p){ for(let gx=dx; gx<dx+iw; gx+=p){ const ix=gx-dx, iy=gy-dy; let a=0; const offs=[0,p*0.33,p*0.66]; for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } } if(a>thr){ pts.push({x:gx,y:gy}); } } } return pts; }
-  function buildBlastIconDots(faceRect){ const cols=11; const px=pickFontPx(faceRect); const text='BLAST'; const leftW=measureTextWidth(text,px); const pad=2; const iconW=11*p; const gapW=3*p; const totalW=(leftW+pad*2)+gapW+iconW; const xStart=snap(faceRect.x+(faceRect.w-totalW)/2); const iconRect={x:xStart+(leftW+pad*2)+gapW, y: faceRect.y + Math.round((faceRect.h-11*p)/2), w:11*p, h:11*p}; const list=[]; const cx=snap(iconRect.x+Math.floor(cols/2)*p); const cy=snap(iconRect.y+Math.floor(11/2)*p); const P=(ix,iy)=>list.push({x:cx+ix*p,y:cy+iy*p}); P(0,0); const ringR=[2,3]; for(const rr of ringR){ for(let a=0;a<8;a++){ const dx=Math.round(Math.cos(a*Math.PI/4)*rr); const dy=Math.round(Math.sin(a*Math.PI/4)*rr); P(dx,dy);} } for(let r=1;r<=5;r++){ P(r,0);P(-r,0);P(0,r);P(0,-r);} for(let r=1;r<=4;r++){ P(r,r);P(-r,-r);P(r,-r);P(-r,r);} return list; }
+  function rasterTextPoints(rect,text){
+    const px=pickFontPx(rect), pad=2; const off=document.createElement('canvas'); const o=off.getContext('2d');
+    o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.imageSmoothingEnabled=false; o.fillStyle='#fff';
+    const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0);
+    off.width=w+pad*2; off.height=h+pad*2;
+    o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.fillStyle='#fff'; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
+    const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2);
+    const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
+    function alpha(ix,iy){ if(ix<0||iy<0||ix>=iw||iy>=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
+    const pts=[];
+    for(let gy=dy; gy<dy+ih; gy+=p){
+      for(let gx=dx; gx<dx+iw; gx+=p){
+        const ix=gx-dx, iy=gy-dy; let a=0;
+        const offs=[0,p*0.33,p*0.66];
+        for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } }
+        if(a>thr){ pts.push({x:gx,y:gy}); }
+      }
+    }
+    return pts;
+  }
+  function buildBlastIconDots(faceRect){
+    const cols=11; const px=pickFontPx(faceRect); const text='BLAST';
+    const leftW=measureTextWidth(text,px); const pad=2; const iconW=11*p; const gapW=3*p;
+    const totalW=(leftW+pad*2)+gapW+iconW; const xStart=snap(faceRect.x+(faceRect.w-totalW)/2);
+    const iconRect={x:xStart+(leftW+pad*2)+gapW, y: faceRect.y + Math.round((faceRect.h-11*p)/2), w:11*p, h:11*p};
+    const list=[]; const cx=snap(iconRect.x+Math.floor(cols/2)*p); const cy=snap(iconRect.y+Math.floor(11/2)*p);
+    const P=(ix,iy)=>list.push({x:cx+ix*p,y:cy+iy*p});
+    P(0,0);
+    const ringR=[2,3]; for(const rr of ringR){ for(let a=0;a<8;a++){ const dx=Math.round(Math.cos(a*Math.PI/4)*rr); const dy=Math.round(Math.sin(a*Math.PI/4)*rr); P(dx,dy);} }
+    for(let r=1;r<=5;r++){ P(r,0);P(-r,0);P(0,r);P(0,-r);} for(let r=1;r<=4;r++){ P(r,r);P(-r,-r);P(r,-r);P(-r,r);}
+    return list;
+  }
 
   // Points for labels
   const blastWordDots     = rasterTextPoints(faceBLAST_final,'BLAST');
@@ -369,12 +345,18 @@ document.addEventListener('touchmove', (e)=>{
   const bombWordDotsFinal = rasterTextPoints(faceBOMB_final,'BOMB X');
   const bombWordDotsCenter= rasterTextPoints(faceBOMB_center,'BOMB X');
 
-  function groupRowsTopDown(...lists){ const rows=new Map(); for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } } const ys=[...rows.keys()].sort((a,b)=>a-b); return ys.map(y=>({ y, pts: rows.get(y).sort((a,b)=>a.x-b.x), n: rows.get(y).length })); }
+  // ---- Group rows for top-down build
+  function groupRowsTopDown(...lists){
+    const rows=new Map();
+    for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } }
+    const ys=[...rows.keys()].sort((a,b)=>a-b);
+    return ys.map(y=>({ y, pts: rows.get(y).sort((a,b)=>a.x-b.x), n: rows.get(y).length }));
+  }
   const blastOuterPts = sampleRoundedRectDots(faceBLAST_final.x,faceBLAST_final.y,faceBLAST_final.w,faceBLAST_final.h,faceBLAST_final.r);
   const blastInnerBandPts = (function(){ const rows=3, b_in=2.8*p, mid=(rows-1)/2; const acc=[]; for(let i=0;i<rows;i++){ const o=b_in+(i-mid)*p; const x=faceBLAST_final.x+o, y=faceBLAST_final.y+o, w=faceBLAST_final.w-2*o, h=faceBLAST_final.h-2*o, r=faceBLAST_final.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) acc.push(pt); } return acc; })();
   const blastRows = groupRowsTopDown(blastOuterPts, blastInnerBandPts, blastWordDots, blastIconDots);
 
-  // ====== Precompute BOMB move frames
+  // ====== Precompute BOMB move frames ======
   const stepsTotal = ((faceBOMB_final.y - faceBOMB_center.y) / p) | 0;
   const bombSteps = new Array(Math.max(1, stepsTotal+1));
   for(let s=0; s<bombSteps.length; s++){
@@ -387,8 +369,21 @@ document.addEventListener('touchmove', (e)=>{
     bombSteps[s] = { outerPts, innerPts, textPts, faceRect: face, outerRect: outer };
   }
 
-  // ====== Masks and fields
-  function buildFaceMask(rect){ const pts=[]; const off=document.createElement('canvas'); off.width=W; off.height=H; const oc=off.getContext('2d'); rrPath(oc, rect); const isIn=(x,y)=>oc.isPointInPath(x+0.01,y+0.01); for(let y=rect.y; y<=rect.y+rect.h; y+=p){ for(let x=rect.x; x<=rect.x+rect.w; x+=p){ const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0}); } } const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r); function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy <= (p*1.5)*(p*1.5)) return true; } return false; } for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); } const map=new Map(); for(let k=0;k<pts.length;k++){ map.set(pts[k].i+","+pts[k].j, k); } const neigh = new Array(pts.length); for(let k=0;k<pts.length;k++){ const {i,j}=pts[k]; const ids=[ map.get((i-1)+","+j), map.get((i+1)+","+j), map.get(i+","+(j-1)), map.get(i+","+(j+1)) ]; neigh[k]=ids.map(v=>v===undefined?-1:v); } return {pts, neigh}; }
+  // ====== Masks and fields ======
+  function buildFaceMask(rect){
+    const pts=[]; const off=document.createElement('canvas'); off.width=W; off.height=H; const oc=off.getContext('2d'); rrPath(oc, rect);
+    const isIn=(x,y)=>oc.isPointInPath(x+0.01,y+0.01);
+    for(let y=rect.y; y<=rect.y+rect.h; y+=p){ for(let x=rect.x; x<=rect.x+rect.w; x+=p){
+      const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0});
+    }}
+    const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r);
+    function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy <= (p*1.5)*(p*1.5)) return true; } return false; }
+    for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); }
+    const map=new Map(); for(let k=0;k<pts.length;k++){ map.set(pts[k].i+","+pts[k].j, k); }
+    const neigh = new Array(pts.length);
+    for(let k=0;k<pts.length;k++){ const {i,j}=pts[k]; const ids=[ map.get((i-1)+","+j), map.get((i+1)+","+j), map.get(i+","+(j-1)), map.get(i+","+(j+1)) ]; neigh[k]=ids.map(v=>v===undefined?-1:v); }
+    return {pts, neigh};
+  }
 
   const maskBLAST = buildFaceMask(faceBLAST_final);
   const maskBOMB_bottom  = buildFaceMask(faceBOMB_final);
@@ -403,11 +398,11 @@ document.addEventListener('touchmove', (e)=>{
   const bombDotsB = withPolar(maskBOMB_bottom, cBombB.x, cBombB.y); const neighBombB = maskBOMB_bottom.neigh; const bufBombB = new Float32Array(bombDotsB.length);
   const bombDotsC = withPolar(maskBOMB_center, cBombC.x, cBombC.y); const neighBombC = maskBOMB_center.neigh; const bufBombC = new Float32Array(bombDotsC.length);
 
-  // ====== Quantization & noise
+  // ====== Quantization & noise ======
   const LEVELS=[0.00,0.18,0.36,0.64,1.00]; function qLevel(e){ e=clamp(e,0,1); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d<bd){ bd=d; best=L; } } return best; }
   function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) >>> 0; return ((n % 9973) / 9973); }
 
-  // ====== Tunables
+  // ====== Tunables ======
   let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
   let DECAY_BTN=0.965;
   let V0=880/p; let R0=3; let WIDTH=2.5;
@@ -415,89 +410,220 @@ document.addEventListener('touchmove', (e)=>{
   let TRAIL_OFFSET=3.0, TRAIL_WIDTH=2.0, TRAIL_GAIN=0.55; let INTENSITY=1.0, DIFF_GAIN=0.10;
   const TAU_MAX=1.0; const IMPLODE_SECS=3.0; const IMP_WIDTH=3.0; const IMP_GAIN=0.35; const IMP_TRAIL=0.18;
 
-  // ====== Explosion kernel
+  // ====== Explosion kernel ======
   function R_of_t(t){ return R0 + V0*t*(1 - 0.35*Math.exp(-t*3)); }
-  function updateField(buf, neigh, pts, dt, t, starts){ const n=buf.length; for(let i=0;i<n;i++){ buf[i]*=DECAY_BTN; } for(let i=0;i<n;i++){ let sum=0,cnt=0; const ns=neigh[i]; for(let m=0;m<4;m++){ const j=ns[m]; if(j>=0){ sum+=buf[j]; cnt++; } } if(cnt){ const avg=sum/cnt; buf[i]+=DIFF_GAIN*(avg-buf[i]); } } for(let s=0;s<starts.length;s++){ const t0=starts[s]; const tau=t-t0; if(tau<0||tau>TAU_MAX) continue; const R=R_of_t(tau); const trailR=R-TRAIL_OFFSET; for(let i=0;i<pts.length;i++){ const pt=pts[i]; const d=pt.d, a=pt.a; let ring=Math.max(0,1-Math.abs(d-R)/WIDTH); let trail=Math.max(0,1-Math.abs(d-trailR)/TRAIL_WIDTH); const twist=1+TURB_AMPL*Math.sin(a*FREQ_A + t*OMEGA_A)+TURB_AMPL2*Math.sin(d*FREQ_D + t*OMEGA_D); const E_add=INTENSITY*(ring*twist + TRAIL_GAIN*trail); if(E_add>0) buf[i]+=E_add; } } }
-  function drawBuffer(c, buf, pts){ for(let i=0;i<pts.length;i++){ const e=clamp(buf[i],0,1); if(e<=0.01) continue; const q=qLevel(e); drawBrightDot(c, pts[i].x, pts[i].y, q); }
- }
+  function updateField(buf, neigh, pts, dt, t, starts){
+    const n=buf.length;
+    for(let i=0;i<n;i++){ buf[i]*=DECAY_BTN; }
+    for(let i=0;i<n;i++){
+      let sum=0,cnt=0; const ns=neigh[i];
+      for(let m=0;m<4;m++){ const j=ns[m]; if(j>=0){ sum+=buf[j]; cnt++; } }
+      if(cnt){ const avg=sum/cnt; buf[i]+=DIFF_GAIN*(avg-buf[i]); }
+    }
+    for(let s=0;s<starts.length;s++){
+      const t0=starts[s]; const tau=t-t0; if(tau<0||tau>TAU_MAX) continue;
+      const R=R_of_t(tau); const trailR=R-TRAIL_OFFSET;
+      for(let i=0;i<pts.length;i++){
+        const pt=pts[i]; const d=pt.d, a=pt.a;
+        let ring=Math.max(0,1-Math.abs(d-R)/WIDTH);
+        let trail=Math.max(0,1-Math.abs(d-trailR)/TRAIL_WIDTH);
+        const twist=1+TURB_AMPL*Math.sin(a*FREQ_A + t*OMEGA_A)+TURB_AMPL2*Math.sin(d*FREQ_D + t*OMEGA_D);
+        const E_add=INTENSITY*(ring*twist + TRAIL_GAIN*trail);
+        if(E_add>0) buf[i]+=E_add;
+      }
+    }
+  }
+  function drawBuffer(c, buf, pts){
+    for(let i=0;i<pts.length;i++){ const e=clamp(buf[i],0,1); if(e<=0.01) continue; const q=qLevel(e); drawBrightDot(c, pts[i].x, pts[i].y, q); }
+  }
 
-  // ====== Armed highlight
+  // ====== Armed highlight ======
   const blastLabelPts = rasterTextPoints(faceBLAST_final,'BLAST');
   const blastIconPts  = buildBlastIconDots(faceBLAST_final);
   const indexByXY_BLAST=new Map(); for(let k=0;k<blastDots.length;k++){ const pt=blastDots[k]; indexByXY_BLAST.set(pt.x+","+pt.y, k); }
-  const cutFlagsBlast=new Uint8Array(blastDots.length); (function(){ const set=new Set(); for(const pt of blastLabelPts){ set.add(pt.x+","+pt.y); } for(const pt of blastIconPts){ set.add(pt.x+","+pt.y); } for(const key of set){ const idx=indexByXY_BLAST.get(key); if(idx!==undefined) cutFlagsBlast[idx]=1; } })();
-  let armed=false; function drawBlastHighlight(t){ if(!armed) return; for(let k=0;k<blastDots.length;k++){ const pt=blastDots[k]; const isCut=cutFlagsBlast[k]===1; let E_bg=HOT_BASE + HOT_NOISE*hash3(pt.i, pt.j, t*7); if(pt.perim){ E_bg = clamp(E_bg + RIM_INTENSITY, 0, 1); } if(isCut){ ctx.save(); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill(); ctx.restore(); } else { const q=qLevel(E_bg); drawBrightDot(ctx, pt.x, pt.y, q); } } }
+  const cutFlagsBlast=new Uint8Array(blastDots.length); (function(){
+    const set=new Set(); for(const pt of blastLabelPts){ set.add(pt.x+","+pt.y); } for(const pt of blastIconPts){ set.add(pt.x+","+pt.y); }
+    for(const key of set){ const idx=indexByXY_BLAST.get(key); if(idx!==undefined) cutFlagsBlast[idx]=1; }
+  })();
+  let armed=false; function drawBlastHighlight(t){
+    if(!armed) return;
+    for(let k=0;k<blastDots.length;k++){
+      const pt=blastDots[k]; const isCut=cutFlagsBlast[k]===1;
+      let E_bg=HOT_BASE + HOT_NOISE*hash3(pt.i, pt.j, t*7);
+      if(pt.perim){ E_bg = clamp(E_bg + RIM_INTENSITY, 0, 1); }
+      if(isCut){
+        ctx.save(); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill(); ctx.restore();
+      } else {
+        const q=qLevel(E_bg); drawBrightDot(ctx, pt.x, pt.y, q);
+      }
+    }
+  }
 
-  // ====== Implosion
-  function makeImploder(dots, onDone){ const maxR=dots.reduce((m,pt)=>Math.max(m,pt.d),0); return function drawImplode(t, tStart){ const tau=t-tStart; const T=IMPLODE_SECS; const k=clamp(tau/T,0,1); const R=(1-k)*maxR; const w=IMP_WIDTH; for(let i=0;i<dots.length;i++){ const d0=dots[i].d; let shell=Math.max(0, 1-Math.abs(d0-R)/w); let trail=Math.max(0, 1-Math.abs(d0-(R+2))/(w*1.2)); const e=clamp(IMP_GAIN*shell + IMP_TRAIL*trail, 0, 0.6); if(e>0){ const q=qLevel(e); drawBrightDot(ctx, dots[i].x, dots[i].y, q); } } if(tau>=T){ onDone && onDone(t); return true; } return false; } }
+  // ====== Implosion ======
+  function makeImploder(dots, onDone){
+    const maxR=dots.reduce((m,pt)=>Math.max(m,pt.d),0);
+    return function drawImplode(t, tStart){
+      const tau=t-tStart; const T=IMPLODE_SECS; const k=clamp(tau/T,0,1); const R=(1-k)*maxR; const w=IMP_WIDTH;
+      for(let i=0;i<dots.length;i++){
+        const d0=dots[i].d; let shell=Math.max(0, 1-Math.abs(d0-R)/w); let trail=Math.max(0, 1-Math.abs(d0-(R+2))/(w*1.2));
+        const e=clamp(IMP_GAIN*shell + IMP_TRAIL*trail, 0, 0.6);
+        if(e>0){ const q=qLevel(e); drawBrightDot(ctx, dots[i].x, dots[i].y, q); }
+      }
+      if(tau>=T){ onDone && onDone(t); return true; }
+      return false;
+    }
+  }
   const implodeCenter = makeImploder(bombDotsC, (t)=>{ explosionsCenter.push(t); });
   const implodeBottom = makeImploder(bombDotsB, (t)=>{ explosionsBottom.push(t); });
 
-  // ====== Interaction state & transition ======
+  // ====== State ======
   const state={ mode:'single', active:false, t0:0 };
-
-  function startTransition(){
-    if(state.mode==='single' && !state.active){
-      state.active=true;
-      state.t0=nowS();
-    }
-  }
+  function startTransition(){ if(state.mode==='single' && !state.active){ state.active=true; state.t0=nowS(); } }
   window.btn2_startTransition = startTransition;
-
   document.addEventListener('keydown', (e)=>{ if(e.key==='t') startTransition(); });
 
-  // Clicks mapped directly on this canvas
+  // ====== DPR-safe hit-testing ======
+  const pathBLAST = path2DFor(faceBLAST_final);
+  const pathBOMB_final  = path2DFor(faceBOMB_final);
+  const pathBOMB_center = path2DFor(faceBOMB_center);
+
   canvas.addEventListener('click',(e)=>{
-    const r=canvas.getBoundingClientRect(); const x=(e.clientX-r.left), y=(e.clientY-r.top);
-    const px=x, py=y;
+    const r=canvas.getBoundingClientRect(); const px=(e.clientX - r.left) * DPR, py=(e.clientY - r.top) * DPR;
     if(state.mode==='single' && !state.active){
-      if(ctx.isPointInPath(path2DFor(faceBOMB_center), px*DPR, py*DPR)){ imploding.centerStart = nowS(); }
+      if(ctx.isPointInPath(pathBOMB_center, px, py)){ imploding.centerStart = nowS(); }
       return;
     }
     if(state.active) return;
-    if(ctx.isPointInPath(path2DFor(faceBOMB_final),  px*DPR, py*DPR)){ imploding.bottomStart = nowS(); armed = true; }
-    else if(ctx.isPointInPath(path2DFor(faceBLAST_final), px*DPR, py*DPR)){ if(armed){ explosionsBlast.push(nowS()); armed=false; } }
+    if(ctx.isPointInPath(pathBOMB_final,  px, py)){ imploding.bottomStart = nowS(); armed = true; }
+    else if(ctx.isPointInPath(pathBLAST, px, py)){ if(armed){ explosionsBlast.push(nowS()); armed=false; } }
   });
 
-  // Pressed feel
+  const press = { blast:{state:'idle', t:0}, bomb:{state:'idle', t:0} };
   const perimBlast = blastDots.filter(pt=>pt.perim);
   const perimBombB = bombDotsB.filter(pt=>pt.perim);
   const perimBombC = bombDotsC.filter(pt=>pt.perim);
-  const press = { blast:{state:'idle', t:0}, bomb:{state:'idle', t:0} };
-  const PRESS_IN_MS=90,PRESS_OUT_MS=140; function pressK(which,t){ const st=press[which]; if(st.state==='down'){ const u=clamp((t-st.t)/(PRESS_IN_MS/1000),0,1); return easeInCubic(u); } if(st.state==='up'){ const u=clamp((t-st.t)/(PRESS_OUT_MS/1000),0,1); return 1-easeOutCubic(u); } return 0; }
-  function drawPressOverlay(rect, perimPts, k){ if(k<=0) return; ctx.save(); rrPath(ctx, rect); ctx.clip(); ctx.globalAlpha=0.10*k; ctx.fillStyle='#000'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h); ctx.globalAlpha=0.12*k; ctx.fillStyle=col.bright; ctx.fillRect(rect.x+p, rect.y+p, rect.w-2*p, rect.h-2*p); ctx.restore(); const lx=1/Math.SQRT2, ly=1/Math.SQRT2; for(let i=0;i<perimPts.length;i++){ const pt=perimPts[i]; const dx=(pt.x-(rect.x+rect.w/2)); const dy=(pt.y-(rect.y+rect.h/2)); const len=Math.hypot(dx,dy)||1; const ndx=dx/len, ndy=dy/len; const s=ndx*lx + ndy*ly; if(s>0){ drawBrightDot(ctx, pt.x, pt.y, 0.22*k*s); } else { ctx.save(); ctx.globalAlpha=0.15*k*(-s); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill(); ctx.restore(); } } }
-  canvas.addEventListener('pointerdown', (e)=>{ const rect = canvas.getBoundingClientRect(); const x = (e.clientX - rect.left); const y = (e.clientY - rect.top); const t = nowS(); if(state.mode==='single'){ if(ctx.isPointInPath(path2DFor(faceBOMB_center), x*DPR, y*DPR)){ press.bomb.state='down'; press.bomb.t=t; } } else if(!state.active){ if(ctx.isPointInPath(path2DFor(faceBOMB_final), x*DPR, y*DPR)){ press.bomb.state='down'; press.bomb.t=t; } else if(ctx.isPointInPath(path2DFor(faceBLAST_final), x*DPR, y*DPR)){ press.blast.state='down'; press.blast.t=t; } } });
-  canvas.addEventListener('pointerup', (e)=>{ const rect = canvas.getBoundingClientRect(); const x = (e.clientX - rect.left); const y = (e.clientY - rect.top); const t = nowS(); if(state.mode==='single'){ if(ctx.isPointInPath(path2DFor(faceBOMB_center), x*DPR, y*DPR)){ press.bomb.state='up'; press.bomb.t=t; } } else if(!state.active){ if(ctx.isPointInPath(path2DFor(faceBOMB_final), x*DPR, y*DPR)){ press.bomb.state='up'; press.bomb.t=t; } else if(ctx.isPointInPath(path2DFor(faceBLAST_final), x*DPR, y*DPR)){ press.blast.state='up'; press.blast.t=t; } } });
+  const PRESS_IN_MS=90,PRESS_OUT_MS=140;
+  function pressK(which,t){
+    const st=press[which];
+    if(st.state==='down'){ const u=clamp((t-st.t)/(PRESS_IN_MS/1000),0,1); return easeInCubic(u); }
+    if(st.state==='up'){ const u=clamp((t-st.t)/(PRESS_OUT_MS/1000),0,1); return 1-easeOutCubic(u); }
+    return 0;
+  }
+  function drawPressOverlay(rect, perimPts, k){
+    if(k<=0) return;
+    ctx.save(); rrPath(ctx, rect); ctx.clip();
+    ctx.globalAlpha=0.10*k; ctx.fillStyle='#000'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.globalAlpha=0.12*k; ctx.fillStyle=col.bright; ctx.fillRect(rect.x+p, rect.y+p, rect.w-2*p, rect.h-2*p);
+    ctx.restore();
+    const lx=1/Math.SQRT2, ly=1/Math.SQRT2;
+    for(let i=0;i<perimPts.length;i++){
+      const pt=perimPts[i]; const dx=(pt.x-(rect.x+rect.w/2)); const dy=(pt.y-(rect.y+rect.h/2));
+      const len=Math.hypot(dx,dy)||1; const ndx=dx/len, ndy=dy/len; const s=ndx*lx + ndy*ly;
+      if(s>0){ drawBrightDot(ctx, pt.x, pt.y, 0.22*k*s); }
+      else { ctx.save(); ctx.globalAlpha=0.15*k*(-s); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
+    }
+  }
+  canvas.addEventListener('pointerdown', (e)=>{
+    const rect = canvas.getBoundingClientRect(); const px = (e.clientX - rect.left) * DPR; const py = (e.clientY - rect.top) * DPR;
+    const t = nowS();
+    if(state.mode==='single'){ if(ctx.isPointInPath(pathBOMB_center, px, py)){ press.bomb.state='down'; press.bomb.t=t; } }
+    else if(!state.active){
+      if(ctx.isPointInPath(pathBOMB_final, px, py)){ press.bomb.state='down'; press.bomb.t=t; }
+      else if(ctx.isPointInPath(pathBLAST, px, py)){ press.blast.state='down'; press.blast.t=t; }
+    }
+  });
+  canvas.addEventListener('pointerup', (e)=>{
+    const rect = canvas.getBoundingClientRect(); const px = (e.clientX - rect.left) * DPR; const py = (e.clientY - rect.top) * DPR;
+    const t = nowS();
+    if(state.mode==='single'){ if(ctx.isPointInPath(pathBOMB_center, px, py)){ press.bomb.state='up'; press.bomb.t=t; } }
+    else if(!state.active){
+      if(ctx.isPointInPath(pathBOMB_final, px, py)){ press.bomb.state='up'; press.bomb.t=t; }
+      else if(ctx.isPointInPath(pathBLAST, px, py)){ press.blast.state='up'; press.blast.t=t; }
+    }
+  });
 
-  // ====== Transition animation (no overlap) ======
+  // ====== PERF: pre-rasterize BLAST rows ======
+  const blastRowImgs = blastRows.map(row => {
+    const off = document.createElement('canvas'); off.width=W; off.height=H;
+    const octx = off.getContext('2d');
+    for (const pt of row.pts) drawBrightDot(octx, pt.x, pt.y, 0.94);
+    return off;
+  });
+
+  // ====== PERF: heavy-phase throttle ======
+  let heavy=false; // true during transition/implosion/explosion
+  let lastFrame=0; // timestamp for buttons RAF
+  const FPS_HEAVY=30, FPS_LIGHT=60;
+
+  // ====== Transition animation (uses cached rows) ======
   const TRANS_MS = 900; const DOT_ALPHA=0.94;
-  function drawBlastBuildTopDown(u){ const total=blastRows.length; const f=u*total; const rFull=Math.floor(f); const frac=f - rFull; for(let r=0; r<Math.min(rFull,total); r++){ const row=blastRows[r]; for(let i=0;i<row.n;i++){ const pt=row.pts[i]; drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA); } } if(rFull < total){ const row=blastRows[rFull]; const m=Math.floor(row.n * easeInOut(frac)); for(let i=0;i<m;i++){ const pt=row.pts[i]; drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA); } } }
-  function drawBombMoving(u){ const f=u * (bombSteps.length-1); const s=Math.floor(f); const frac=easeInOut(f - s); const base=bombSteps[Math.min(s,bombSteps.length-1)]; const next=bombSteps[Math.min(s+1,bombSteps.length-1)]; const yLerp=Math.round(base.faceRect.y + (next.faceRect.y - base.faceRect.y) * frac); const dy=yLerp - base.faceRect.y; const drawPts=(arr)=>{ for(let i=0;i<arr.length;i++){ const pt=arr[i]; drawBrightDot(ctx, pt.x, pt.y + dy, DOT_ALPHA); } }; drawPts(base.outerPts); drawPts(base.innerPts); drawPts(base.textPts); }
+  function drawBlastBuildTopDown_cached(u){
+    const total=blastRowImgs.length; const f=u*total; const rFull=Math.floor(f); const frac=f - rFull;
+    // draw all full rows
+    for(let r=0; r<Math.min(rFull,total); r++) ctx.drawImage(blastRowImgs[r], 0, 0);
+    // fractional row (approximate easing by drawing part of the row points)
+    if(rFull < total){
+      const row = blastRows[rFull]; const m=Math.floor(row.n * easeInOut(frac));
+      for(let i=0;i<m;i++){ const pt=row.pts[i]; drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA); }
+    }
+  }
+  function drawBombMoving(u){
+    const f=u * (bombSteps.length-1); const s=Math.floor(f); const frac=easeInOut(f - s);
+    const base=bombSteps[Math.min(s,bombSteps.length-1)]; const next=bombSteps[Math.min(s+1,bombSteps.length-1)];
+    const yLerp=snap(base.faceRect.y + (next.faceRect.y - base.faceRect.y) * frac); const dy=yLerp - base.faceRect.y;
+    const drawPts=(arr)=>{ for(let i=0;i<arr.length;i++){ const pt=arr[i]; drawBrightDot(ctx, pt.x, pt.y + dy, DOT_ALPHA); } };
+    drawPts(base.outerPts); drawPts(base.innerPts); drawPts(base.textPts);
+  }
 
   // ====== Timers / queues ======
   let explosionsBlast=[]; let explosionsBottom=[]; let explosionsCenter=[];
   const imploding={ centerStart:0, bottomStart:0 };
 
-  // ====== Main frame ======
-  function frame(ts){ const t=nowS(); ctx.clearRect(0,0,W,H); ctx.drawImage(bg,0,0);
+  // ====== Main frame (throttled when heavy) ======
+  function frame(ts){
+    // React to mode/active changes for proxies
+    if(__prevMode!==state.mode || __prevActive!==state.active){
+      if(state.active){ setProxiesEnabled(false); }
+      else { setProxiesEnabled(true); updateProxyForMode(); }
+      __prevMode=state.mode; __prevActive=state.active;
+    }
+    // Decide phase heaviness
+    heavy = state.active || imploding.centerStart || imploding.bottomStart ||
+            explosionsBlast.length || explosionsBottom.length || explosionsCenter.length;
+
+    const targetDelta = 1000 / (heavy ? FPS_HEAVY : FPS_LIGHT);
+    if (ts - lastFrame < targetDelta){ requestAnimationFrame(frame); return; }
+    lastFrame = ts;
+
+    const t=nowS();
+    ctx.clearRect(0,0,W,H); ctx.drawImage(bg,0,0);
+
     if(state.mode==='single' && !state.active){
-      ctx.drawImage(layerSingle,0,0); for(const pt of bombWordDotsCenter) drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA);
+      ctx.drawImage(layerSingle,0,0);
+      for(const pt of bombWordDotsCenter) drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA);
       drawPressOverlay(faceBOMB_center, perimBombC, pressK('bomb', t));
-      if(imploding.centerStart){ const done = implodeCenter(t, imploding.centerStart); if(done){ imploding.centerStart=0; } }
+      if(imploding.centerStart){
+        const done = implodeCenter(t, imploding.centerStart);
+        if(done){ imploding.centerStart=0; }
+      }
       updateField(bufBombC, neighBombC, bombDotsC, 0, t, explosionsCenter);
       drawBuffer(ctx, bufBombC, bombDotsC);
-    } else if(state.active){
-      const u=Math.max(0,Math.min(1,(nowS() - state.t0) * (1000/TRANS_MS)));
-      drawBlastBuildTopDown(u);
+    }
+    else if(state.active){
+      const u=clamp((nowS() - state.t0) * (1000/TRANS_MS), 0, 1);
+      drawBlastBuildTopDown_cached(u);
       drawBombMoving(u);
       if(u>=1){ state.active=false; state.mode='two'; }
-    } else {
+    }
+    else {
       ctx.drawImage(layerTwo,0,0);
       for(const pt of blastWordDots) drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA);
       for(const pt of blastIconDots) drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA);
       for(const pt of bombWordDotsFinal) drawBrightDot(ctx, pt.x, pt.y, DOT_ALPHA);
+
       drawPressOverlay(faceBOMB_final,  perimBombB,  pressK('bomb',  t));
       drawPressOverlay(faceBLAST_final, perimBlast,  pressK('blast', t));
+
       if(imploding.bottomStart){
         const done = implodeBottom(t, imploding.bottomStart);
         if(done){ imploding.bottomStart=0; }
@@ -505,26 +631,30 @@ document.addEventListener('touchmove', (e)=>{
         updateField(bufBombB,  neighBombB,  bombDotsB,  0, t, explosionsBottom);
         drawBuffer(ctx, bufBombB, bombDotsB);
       }
+
       updateField(bufBlast, neighBlast, blastDots, 0, t, explosionsBlast);
       drawBlastHighlight(t);
       drawBuffer(ctx, bufBlast, blastDots);
     }
+
     requestAnimationFrame(frame);
   }
-
-  const pathBLAST = path2DFor(faceBLAST_final);
-  const pathBOMB_final  = path2DFor(faceBOMB_final);
-  const pathBOMB_center = path2DFor(faceBOMB_center);
   requestAnimationFrame(frame);
 
+  // ====== Self-tests (kept + added) ======
   (function runTests(){
     console.assert(W===560 && H===560, 'canvas 560×560');
     console.assert(blastRows.length>0, 'blast rows prepared');
     console.assert(bombSteps.length>=2, 'bombSteps precomputed');
     console.assert(blastDots.length>0 && bombDotsB.length>0 && bombDotsC.length>0, 'masks built');
+    // Added simple hit-tests
+    const midB = {x: (faceBOMB_final.x+faceBOMB_final.w/2), y:(faceBOMB_final.y+faceBOMB_final.h/2)};
+    console.assert(ctx.isPointInPath(pathBOMB_final, midB.x, midB.y), 'hit-test bomb center');
+    const midT = {x: (faceBLAST_final.x+faceBLAST_final.w/2), y:(faceBLAST_final.y+faceBLAST_final.h/2)};
+    console.assert(ctx.isPointInPath(pathBLAST, midT.x, midT.y)===true, 'hit-test blast center');
   })();
 
-  /* ===== Keyboard proxies -> synthesize clicks on the canvas ===== */
+  // ====== Keyboard proxies map to canvas clicks ======
   function synthClickAt(clientX,clientY){
     const r=canvas.getBoundingClientRect();
     const evt = new MouseEvent('click', {bubbles:true, cancelable:true, clientX: r.left+clientX, clientY: r.top+clientY});
@@ -533,24 +663,59 @@ document.addEventListener('touchmove', (e)=>{
   const kBlast=document.getElementById('btn2_proxy_blast');
   const kBomb =document.getElementById('btn2_proxy_bomb');
 
-  function clickCenterOf(rect){
-    const cx = rect.x + rect.w/2;
-    const cy = rect.y + rect.h/2;
-    synthClickAt(cx, cy);
+  // Proxy layout toggles for single vs two-button modes
+  function updateProxyForMode(){
+    if(state.mode==='single' && !state.active){
+      // Hide blast proxy. Expand bomb proxy to cover nearly full face
+      kBlast.style.display='none';
+      kBomb.style.top='4%';
+      kBomb.style.bottom='auto';
+      kBomb.style.height='92%';
+    } else {
+      // Two-button layout
+      kBlast.style.display='block';
+      kBlast.style.top='6%';
+      kBlast.style.height='44%';
+      kBomb.style.display='block';
+      kBomb.style.bottom='6%';
+      kBomb.style.top='auto';
+      kBomb.style.height='44%';
+    }
   }
+  function setProxiesEnabled(enabled){
+    const v = enabled ? 'auto' : 'none';
+    kBlast.style.pointerEvents=v;
+    kBomb.style.pointerEvents=v;
+  }
+  // Track state changes to update proxies
+  let __prevMode = undefined; let __prevActive = undefined;
+  function clickCenterOf(rect){ const cx = rect.x + rect.w/2; const cy = rect.y + rect.h/2; synthClickAt(cx, cy); }
   kBlast.addEventListener('click', ()=>{ clickCenterOf(faceBLAST_final); kBlast.setAttribute('aria-pressed','true'); setTimeout(()=>kBlast.setAttribute('aria-pressed','false'),150); });
-  kBomb .addEventListener('click', ()=>{ clickCenterOf(faceBOMB_final);  kBomb .setAttribute('aria-pressed','true');  setTimeout(()=>kBomb .setAttribute('aria-pressed','false'),150); });
+  kBomb .addEventListener('click', ()=>{
+    // Target correct face based on mode
+    if(state.mode==='single' && !state.active){ clickCenterOf(faceBOMB_center); }
+    else { clickCenterOf(faceBOMB_final); }
+    kBomb .setAttribute('aria-pressed','true');
+    setTimeout(()=>kBomb .setAttribute('aria-pressed','false'),150);
+  });
+
+  // Initialize proxy layout
+  updateProxyForMode();
 
   function keypressHandler(e, which){
-    if(e.key==='Enter' || e.key===' '){
-      e.preventDefault();
-      if(which==='blast') kBlast.click(); else kBomb.click();
-    }
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); if(which==='blast') kBlast.click(); else kBomb.click(); }
   }
   kBlast.addEventListener('keydown', e=>keypressHandler(e,'blast'));
   kBomb .addEventListener('keydown', e=>keypressHandler(e,'bomb'));
+
+  /* TEMP TRIGGER HOOK */
+  document.getElementById('btn2_temp').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(window.btn2_startTransition) window.btn2_startTransition();
+  });
+
 })();
-})();  /* end btn2 wrapper */
+})();
 </script>
 </body>
 </html>
