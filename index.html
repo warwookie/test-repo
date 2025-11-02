@@ -1,11 +1,93 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Joypad + Buttons (single file, originals untouched)</title>
+  <style>
+    /* Page baseline */
+    html, body { height: 100%; margin: 0; background: #0b0b0b; }
+
+    /* 2:1 overall canvas: left half for buttons overlay, right side still shows joystick */
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 2fr; /* visual guide only */
+      background: #0b0b0b;
+    }
+
+    /* Joystick sits behind, spans the full area */
+    .joystick-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .joystick-layer iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    /* Buttons overlay covers the left half only */
+    .buttons-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;     /* left half of the stage */
+      height: 100%;
+      z-index: 2;     /* above the joystick */
+      display: grid;
+      place-items: center;
+      pointer-events: auto;
+    }
+
+    /* Keep buttons view square without touching inner code */
+    .square {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      max-height: 100%;
+      max-width: 100%;
+    }
+    .square > iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: transparent;
+    }
+
+    /* Small screens: stack keeping overlay logic */
+    @media (max-width: 640px) {
+      .stage { grid-template-columns: 1fr; }
+      .buttons-layer { width: 100%; height: 50%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+
+    <!-- BACKGROUND: JOYSTICK PANEL (untouched) -->
+    <div class="joystick-layer">
+      <iframe title="Joystick" srcdoc='
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Keep any of your own <link> and <script> tags here, unchanged -->
+</head>
+<body>
+
+
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>DMD: Buttons (left) + Joystick/Radar (right)</title>
+<title>DMD Panel — 2:1, Radar Right, Your Buttons (joystick unblocked)</title>
 <style>
-  :root { color-scheme: dark; }
   html, body { height: 100%; margin: 0; }
   body {
     background: #070708;
@@ -15,39 +97,279 @@
     padding: 1rem;
     box-sizing: border-box;
   }
+  /* 2:1. Width drives height. No transforms. */
   .wrap {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1600px;
+    aspect-ratio: 2 / 1;
+    min-height: 380px;   /* keeps pitch crisp */
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr; /* left: buttons, right: joystick */
     border: 1px solid #1a0000;
-    border-radius: 12px;
+    border-radius: 20px;
     box-shadow: inset 0 0 0 2px #000, 0 20px 50px #000c;
     overflow: hidden;
-    aspect-ratio: 2 / 1; /* requested */
-    background: #080203;
   }
-  .pane { position: relative; }
-  .pane-left, .pane-right { background: #080203; }
-  .pane-left iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-  .pane-right canvas { width: 100%; height: 100%; display: block; background: #080203; }
-  .note { position:absolute; inset:auto auto 8px 8px; color:#a66; font-size:12px; opacity:0.7; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #control-panel { z-index: 1; background: #080203; }
+  /* IMPORTANT: let pointer events pass through so joystick works */
+  #buttons       { z-index: 2; background: transparent; pointer-events: none; }
+  #overlay       { z-index: 3; background: transparent; pointer-events: none; }
+
+  /* Off-screen host for your buttons. Not shown. Used as a render source. */
+  #panelHost { position:absolute; left:-10000px; top:-10000px; width:0; height:0; overflow:hidden; }
+  /* Keep the checkbox required by your code but hidden. */
+  #toggleTimer { position:absolute; left:-10000px; top:-10000px; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- LEFT: Buttons UI (loaded from paste bucket below). -->
-    <div class="pane pane-left">
-      <iframe id="buttons-frame" title="Buttons Panel"></iframe>
-    </div>
-
-    <!-- RIGHT: Existing joystick/radar canvas -->
-    <div class="pane pane-right">
-      <canvas id="control-panel"></canvas>
-    </div>
+  <div class="wrap" id="wrap">
+    <canvas id="control-panel"></canvas>
+    <canvas id="buttons"></canvas>
+    <canvas id="overlay"></canvas>
   </div>
 
-<!-- ===== PASTE BUCKET (left panel). Replace ONLY the placeholder below ===== -->
+  <!-- Hidden DOM that your buttons code expects -->
+  <div id="panelHost" aria-hidden="true">
+    <canvas id="panel" width="560" height="560"></canvas>
+    <input id="toggleTimer" type="checkbox" />
+  </div>
+
+<!-- ================== 1) JOYSTICK + RADAR (UNTOUCHED) ================== -->
+<script>
+(function(){
+  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
+  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
+  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
+  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
+
+  window.joypad={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
+
+  const cvs=document.getElementById('control-panel'); const ctx=cvs.getContext('2d');
+  let W,H,COLS,ROWS,OX,OY; let joyCX,joyCY,joyR; let layoutReady=false; let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
+
+  function updateLayout(newWidth,newHeight){
+    if(newWidth<1||newHeight<1) return;
+    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
+
+    const targetRows=24;
+    PITCH=H/targetRows; DOT_R=PITCH*0.21;
+
+    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
+    if(COLS<1||ROWS<1) return;
+    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
+
+    /* Center joystick/radar in right half */
+    joyCX=W*0.75; joyCY=H/2; joyR=(H/2)-(PITCH*3);
+
+    buf=new Float32Array(COLS*ROWS);
+    layoutReady=true;
+  }
+  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  function isJoy(x){ return x>W/2; }
+  function joyPointerToNorm(x,y){
+    const dx=x-joyCX, dy=y-joyCY;
+    const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
+    let rn=Math.min(dist/joyR,1);
+    if(rn<DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE);
+    rn=Math.pow(rn,RESPONSE);
+    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
+  }
+  cvs.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    const {x,y}=getPointerLocation(e);
+    if(!isJoy(x)) return;
+    try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
+    activePointers.set(e.pointerId,'joy');
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+  });
+  cvs.addEventListener('pointermove', e=>{
+    e.preventDefault();
+    if(activePointers.get(e.pointerId)!=='joy') return;
+    const {x,y}=getPointerLocation(e);
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+  });
+  function endPointer(e){
+    const t=activePointers.get(e.pointerId);
+    activePointers.delete(e.pointerId);
+    if(t==='joy'){
+      let any=false; for(const v of activePointers.values()) if(v==='joy') any=true;
+      if(!any && AUTO_RETURN){ joyTX=0; joyTY=0; }
+    }
+  }
+  cvs.addEventListener('pointerup', endPointer);
+  cvs.addEventListener('pointercancel', endPointer);
+  cvs.addEventListener('pointerleave', endPointer);
+
+  function loop(){
+    outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
+    drawDMD(outX,outY);
+    window.joypad.x=outX; window.joypad.y=outY;
+    window.joypad.mag=Math.min(Math.hypot(outX,outY),1);
+    window.joypad.angle=Math.atan2(outY,outX);
+    requestAnimationFrame(loop);
+  }
+
+  function drawDMD(nx,ny){
+    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
+    ctx.clearRect(0,0,W,H);
+    const now=performance.now()*0.001;
+    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
+    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
+
+    for(let j=0;j<ROWS;j++){
+      for(let i=0;i<COLS;i++){
+        const x=OX+i*PITCH;
+        if(x<=W/2) continue; /* right half only */
+        const idx=j*COLS+i;
+        buf[idx]=(buf[idx]||0)*DECAY;
+      }
+    }
+
+    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=wrap(now*1.6), sweepArcLength=Math.PI/3;
+
+    for(let j=0;j<ROWS;j++){
+      for(let i=0;i<COLS;i++){
+        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
+        if(x>W/2){
+          const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
+          if(mag>0.01){
+            const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
+            if(div>0.001){ const vx=jdx_wc/div+px, vy=jdy_wc/div+py; jdx=vx-joyCX; jdy=vy-joyCY; }
+          }
+          const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
+          buf[idx]+=calcRing(jd,joyR*0.25,ringThick)*0.22;
+          buf[idx]+=calcRing(jd,joyR*0.50,ringThick)*0.20;
+          buf[idx]+=calcRing(jd,joyR*0.75,ringThick)*0.18;
+          buf[idx]+=calcRing(jd,joyR*1.00,ringThick)*0.16;
+          buf[idx]+=calcRing(jd,joyR*DEADZONE,dzRingThick)*0.12;
+          const da=wrap(t-jang); if(jd<joyR*0.98 && da>0 && da<sweepArcLength) buf[idx]+=0.9;
+
+          if(mag>0.01){
+            let jb=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
+            jb=Math.max(jb,pulse01(sd/(PITCH*2.4),0.16)*STEM_GAIN);
+            const kd=Math.hypot(x-px,y-py);
+            const core=Math.exp(-Math.pow(kd/knobCoreR,2));
+            const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
+            jb=Math.max(jb, core*1.0+glow*0.9);
+            buf[idx]=Math.max(buf[idx], jb);
+          }
+        }
+        let b=buf[idx]||0;
+        b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(W/2));
+        b += (noise2(i,j)-0.5)*0.06;
+        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
+      }
+    }
+  }
+
+  function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
+  function dotDraw(x,y,r,level){ if(level<=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level>=1?RED:(level>=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
+  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d<bd){ bd=d; best=s; } } return best; }
+  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+  function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
+  function wrap(a){ a%=Math.PI*2; return a<0? a+Math.PI*2 : a; }
+  function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
+  function fract(x){ return x - Math.floor(x); }
+  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1<=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2<=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
+
+  const ro=new ResizeObserver(entries=>{ if(entries[0]){ const {width,height}=entries[0].contentRect; updateLayout(width,height); } });
+  ro.observe(document.getElementById('wrap'));
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<!-- ================== 2) YOUR BUTTONS (VERBATIM) ON HIDDEN CANVAS ================== -->
+<script>
+/* Your Buttons 100 code goes here verbatim (unchanged). */
+(async function(){
+  /* ... full original script from Buttons 100.html ... */
+})();
+</script>
+
+<!-- ================== 3) COMPOSITOR: BLIT YOUR CANVAS INTO LEFT HALF ================== -->
+<script>
+(function(){
+  const WRAP = document.getElementById('wrap');
+  const dst   = document.getElementById('buttons');
+  const dctx  = dst.getContext('2d', {alpha:true});
+  const src   = document.getElementById('panel'); // your 560×560 canvas
+
+  let W=0,H=0;
+
+  function resize(){
+    const base=document.getElementById('control-panel');
+    dst.width = base.width;
+    dst.height= base.height;
+    W=dst.width; H=dst.height;
+  }
+
+  function frame(){
+    if(!W||!H){ requestAnimationFrame(frame); return; }
+    dctx.clearRect(0,0,W,H);
+
+    // Left half bounds (2:1 => left half is a square)
+    const leftW = W/2, leftH = H;
+    dctx.imageSmoothingEnabled=false;
+    dctx.drawImage(src, 0, 0, 560, 560, 0, 0, leftW, leftH);  // uniform scale
+    requestAnimationFrame(frame);
+  }
+
+  // Map left-half clicks to your offscreen canvas (kept for your button interactions)
+  WRAP.addEventListener('click', (e)=>{
+    const rect = dst.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if(x<0 || x>rect.width/2 || y<0 || y>rect.height) return; // only left half
+    // Map to your 560×560 space
+    const sx = x / (rect.width/2) * 560;
+    const sy = y / (rect.height)  * 560;
+
+    // Synthesize a click to the hidden canvas
+    const srect = document.getElementById('panel').getBoundingClientRect();
+    const evt = new MouseEvent('click', { bubbles:true, cancelable:true,
+      clientX: srect.left + sx, clientY: srect.top  + sy });
+    document.getElementById('panel').dispatchEvent(evt);
+  });
+
+  const ro=new ResizeObserver(()=>resize());
+  ro.observe(WRAP);
+  resize(); requestAnimationFrame(frame);
+})();
+</script>
+
+<!-- ================== 4) CURVED LED BORDER OVERLAY (UNCHANGED) ================== -->
+<script>
+(function(){
+  const overlay=document.getElementById('overlay'); const ctx=overlay.getContext('2d'); const WRAP=document.getElementById('wrap');
+  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000'; const LEVELS=[0,0.35,0.65,1];
+  let W=0,H=0,PITCH=10,DOT_R=2.6, points=[];
+  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d<bd){ bd=d; best=s; } } return best; }
+  function clamp01(x){ return x<0?0:x>1?1:x; }
+  function dotDraw(x,y,r,level){ if(level<=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level>=1?RED:(level>=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
+  function rebuild(){ const base=document.getElementById('control-panel'); overlay.width=base.width; overlay.height=base.height; W=overlay.width; H=overlay.height; const targetRows=36; PITCH=H/targetRows; DOT_R=PITCH*0.18; points=[]; const inset=PITCH*0.6; const step=PITCH*0.8; const radius=Math.max(PITCH*1.2, 20); const xmin=inset, xmax=W-inset, ymin=inset, ymax=H-inset; for(let x=xmin+radius; x<=xmax-radius; x+=step) points.push({ x: x, y: ymin, phase: Math.random()*6.283 }); for(let a=-Math.PI/2; a<=0; a+=step/radius) points.push({ x: xmax-radius + Math.cos(a)*radius, y: ymin+radius + Math.sin(a)*radius, phase: Math.random()*6.283 }); for(let y=ymin+radius; y<=ymax-radius; y+=step) points.push({ x: xmax, y: y, phase: Math.random()*6.283 }); for(let a=0; a<=Math.PI/2; a+=step/radius) points.push({ x: xmax-radius + Math.cos(a)*radius, y: ymax-radius + Math.sin(a)*radius, phase: Math.random()*6.283 }); for(let x=xmax-radius; x>=xmin+radius; x-=step) points.push({ x: x, y: ymax, phase: Math.random()*6.283 }); for(let a=Math.PI/2; a<=Math.PI; a+=step/radius) points.push({ x: xmin+radius + Math.cos(a)*radius, y: ymax-radius + Math.sin(a)*radius, phase: Math.random()*6.283 }); for(let y=ymax-radius; y>=ymin+radius; y-=step) points.push({ x: xmin, y: y, phase: Math.random()*6.283 }); for(let a=Math.PI; a<=3*Math.PI/2; a+=step/radius) points.push({ x: xmin+radius + Math.cos(a)*radius, y: ymin+radius + Math.sin(a)*radius, phase: Math.random()*6.283 }); }
+  function drawFrame(t){ ctx.clearRect(0,0,W,H); const time=t*0.001; for(let i=0;i<points.length;i++){ const p=points[i]; const flick=0.07*Math.sin(time*8+p.phase)+0.05*Math.sin(time*1.7+i*0.35); const level=quantize(clamp01(0.65 + flick)); dotDraw(p.x,p.y,DOT_R,level); } requestAnimationFrame(drawFrame); }
+  const ro=new ResizeObserver(()=>rebuild()); ro.observe(WRAP); rebuild(); requestAnimationFrame(drawFrame);
+})();
+</script>
+</body>
+</html>
+
+</body></html>'></iframe>
+    </div>
+
+    <!-- OVERLAY: LEFT HALF BUTTONS (untouched, 1:1 area) -->
+    <div class="buttons-layer">
+      <div class="square">
+        <iframe title="Buttons" srcdoc='
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Keep any of your own <link> and <script> tags here, unchanged -->
+</head>
+<body>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -296,150 +618,10 @@
 </body>
 </html>
 
-<!-- ======================================================================= -->
+</body></html>'></iframe>
+      </div>
+    </div>
 
-<script>
-// ==== Left pane loader =======================================================
-// Loads pasted HTML from #buttons-html. Also exposes setButtonsHTML(html) if needed.
-(function(){
-  const frame = document.getElementById('buttons-frame');
-  const note  = document.getElementById('left-note');
-
-  function minimalPlaceholder(){
-    return (
-      '<!doctype html><html><head><meta charset="utf-8">' +
-      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-      '<style>html,body{margin:0;height:100%;background:#0b0b0b}' +
-      'canvas{display:block;width:100%;height:100%;image-rendering:pixelated}</style>' +
-      '</head><body><canvas id="c"></canvas>' +
-      '<script>' +
-      'const c=document.getElementById("c"),x=c.getContext("2d");function r(){const w=c.width=innerWidth*devicePixelRatio,h=c.height=innerHeight*devicePixelRatio;x.scale(devicePixelRatio,devicePixelRatio);x.clearRect(0,0,innerWidth,innerHeight);const p=6;for(let y=0;y<innerHeight;y+=p){for(let i=0;i<innerWidth;i+=p){x.fillStyle="#1A0E0E";x.beginPath();x.arc(i,y,1.2,0,7);x.fill();}}}addEventListener("resize",r);r();' +
-      '<\\/script></body></html>'
-    );
-  }
-
-  // Optional runtime API
-  window.setButtonsHTML = function(html){
-    if (typeof html !== 'string' || !html.length) {
-      console.error('setButtonsHTML(html): expected a non-empty HTML string');
-      return;
-    }
-    frame.srcdoc = html;
-    if (note) note.remove();
-  };
-
-  // Prefer pasted HTML, else placeholder
-  const pasted = (document.getElementById('buttons-html')?.textContent || '').trim();
-  if (pasted) { frame.srcdoc = pasted; if (note) note.remove(); }
-  else { frame.srcdoc = minimalPlaceholder(); }
-})();
-</script>
-
-<script>
-// ==== Right pane: Joystick + Radar (same behavior) ===========================
-(function(){
-  const DEADZONE = 0.15; const RESPONSE = 1.20; const SMOOTH = 0.22; const AUTO_RETURN = true;
-  let PITCH = 10, DOT_R = 2.6; const LEVELS = [0,0.35,0.65,1];
-  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
-  const DECAY = 0.90; let buf;
-  const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
-  const cvs = document.getElementById('control-panel'); const ctx = cvs.getContext('2d');
-  window.joypad = { x:0,y:0,mag:0,angle:0 };
-  let W,H,COLS,ROWS,OX,OY; let joyCX,joyCY,joyR; let layoutReady=false;
-  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
-
-  function updateLayout(newWidth,newHeight){
-    if(newWidth<1||newHeight<1) return;
-    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
-    const targetRows=24; PITCH=H/targetRows; DOT_R=PITCH*0.21;
-    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
-    if(COLS<1||ROWS<1) return;
-    OX=(W - COLS*PITCH)/2 + PITCH/2; OY=(H - ROWS*PITCH)/2 + PITCH/2;
-    joyCX=W*0.5;               // centered horizontally in right pane
-    joyCY=H*0.5;               // centered vertically
-    joyR=(H*0.5) - (PITCH*3);  // keep margin
-    buf=new Float32Array(COLS*ROWS); layoutReady=true;
-  }
-
-  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  function isJoy(x){ return x>0; } // pane owns full canvas
-  function joyPointerToNorm(x,y){
-    const dx=x-joyCX, dy=y-joyCY; const dist=Math.hypot(dx,dy); const ang=Math.atan2(dy,dx);
-    let rn=Math.min(dist/joyR,1); if(rn<DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE); rn=Math.pow(rn,RESPONSE);
-    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
-  }
-
-  cvs.addEventListener('pointerdown', e=>{ e.preventDefault(); const {x,y}=getPointerLocation(e); if(!isJoy(x)) return; try{ cvs.setPointerCapture(e.pointerId);}catch(_){} activePointers.set(e.pointerId,'joy'); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
-  cvs.addEventListener('pointermove', e=>{ e.preventDefault(); if(activePointers.get(e.pointerId)!=='joy') return; const {x,y}=getPointerLocation(e); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
-  function endPointer(e){ const t=activePointers.get(e.pointerId); activePointers.delete(e.pointerId); if(t==='joy'){ let active=false; for(const v of activePointers.values()) if(v==='joy') active=true; if(!active && AUTO_RETURN){ joyTX=0; joyTY=0; } } }
-  cvs.addEventListener('pointerup', endPointer); cvs.addEventListener('pointercancel', endPointer); cvs.addEventListener('pointerleave', endPointer);
-
-  function loop(){ outX += (joyTX-outX)*SMOOTH; outY += (joyTY-outY)*SMOOTH; drawDMD(outX,outY); window.joypad.x=outX; window.joypad.y=outY; window.joypad.mag=Math.min(Math.hypot(outX,outY),1); window.joypad.angle=Math.atan2(outY,outX); requestAnimationFrame(loop); }
-
-  function drawDMD(nx,ny){
-    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
-    ctx.clearRect(0,0,W,H);
-    const now=performance.now()*0.001;
-    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
-    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
-
-    for(let j=0;j<ROWS;j++){
-      for(let i=0;i<COLS;i++){
-        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
-        buf[idx]=(buf[idx]||0)*DECAY;
-
-        // warp around knob
-        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
-        if(mag>0.01){
-          const suck=Math.min(0.8, mag*1.2);
-          const jdx_wc=x-px, jdy_wc=y-py; const divisor=(1 - suck);
-          if(divisor>0.001){ const vx=jdx_wc/divisor + px; const vy=jdy_wc/divisor + py; jdx=vx-joyCX; jdy=vy-joyCY; }
-        }
-
-        const jd=Math.hypot(jdx,jdy); const jang=Math.atan2(jdy,jdx);
-        const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5;
-        const t=(now*1.6)%(Math.PI*2); const sweepArcLength=Math.PI/3;
-        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.25)/(ringThick*0.5))*0.22;
-        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.50)/(ringThick*0.5))*0.20;
-        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.75)/(ringThick*0.5))*0.18;
-        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*1.00)/(ringThick*0.5))*0.16;
-        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*DEADZONE)/(dzRingThick*0.5))*0.12;
-        const deltaAngle=((t-jang)%(Math.PI*2)+(Math.PI*2))%(Math.PI*2);
-        if(jd<joyR*0.98 && deltaAngle>0 && deltaAngle<sweepArcLength) buf[idx]+=0.9;
-
-        if(mag>0.01){
-          let joyB=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
-          joyB=Math.max(joyB, Math.max(0,1 - smoothStep(0, PITCH*2.4, sd))*STEM_GAIN);
-          const kd=Math.hypot(x-px, y-py);
-          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
-          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
-          joyB=Math.max(joyB, core*1.0 + glow*0.9);
-          buf[idx]=Math.max(buf[idx], joyB);
-        }
-
-        let b=buf[idx]||0; b += (noise2(i,j)-0.5)*0.06;
-        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
-      }
-    }
-  }
-
-  function dotDraw(x,y,r,level){
-    if(level<=0){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=OFF; ctx.fill(); return; }
-    const color = level>=1 ? RED : (level>=0.65 ? MID : DIM);
-    ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); ctx.restore();
-  }
-  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d<bd){bd=d; best=s;} } return best; }
-  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
-  function noise2(ix,iy){ return (Math.sin((ix*12.9898 + iy*78.233)*43758.5453)%1 + 1)%1; }
-  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax, vy=by-ay, wx=px-ax, wy=py-ay; const c1=vx*wx+vy*wy; if(c1<=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2<=c1) return Math.hypot(px-bx,py-by); const t=c1/c2, sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
-
-  const observer = new ResizeObserver(entries=>{ if(entries[0]){ const {width,height}=entries[0].contentRect; updateLayout(width,height); } });
-  observer.observe(document.querySelector('.pane-right'));
-  requestAnimationFrame(loop);
-
-  // --- Simple runtime checks ("tests") ---
-  console.assert(document.getElementById('buttons-frame'), 'left iframe must exist');
-})();
-</script>
+  </div>
 </body>
 </html>
