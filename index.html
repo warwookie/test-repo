@@ -38,8 +38,7 @@
   <div class="wrap">
     <!-- LEFT: Buttons UI loaded as-is via setButtonsHTML(html). No edits. -->
     <div class="pane pane-left">
-      <iframe id="buttons-frame" title="Buttons Panel"></iframe>
-      <div id="left-note" class="note">left: waiting for Buttons HTML…</div>
+      <iframe id="buttons-frame" title="Buttons Panel" src="Buttons 100.html"></iframe>
     </div>
 
     <!-- RIGHT: Existing joystick/radar canvas (unchanged behavior) -->
@@ -82,7 +81,7 @@
   };
 
   // Default placeholder so the page is valid even before user injection.
-  frame.srcdoc = minimalPlaceholder();
+  if (!frame.getAttribute('src')) frame.srcdoc = minimalPlaceholder();
 })();
 </script>
 
