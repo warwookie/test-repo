@@ -2,350 +2,194 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>SNEAKERQUEST — CRT + LED control screen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>DMD: Buttons (left) + Joystick/Radar (right)</title>
 <style>
-:root{--text:#d6c7a4;--led:#ff3a2f;--cabinet-scale:1;--marquee-h:90;--tabs-h:80;--bottom-h:240;--crt-fr:1fr;--crt-ar:1.333;--crt-r:22;--crtwrap-pad:12;--gap:10;--slot-pad:10;--radius:16;--btn-font:18;--led-title:22;--led-small:14;--icon-heart:20;--icon-shoe:20;--icon-power:20;--icon-bag:20;--slot-heart-h:52;--slot-shoes-h:64;--slot-dots-h:52;--slot-bag-h:52;--slot-flames-h:64;--slot-pause-h:52;--h1-a:38%;--h1-b:38%;--h1-c:24%;--h2-a:32%;--h2-b:44%;--h2-c:24%;--t1:33%;--t2:34%;--t3:33%;--bot-a:58%;--bot-b:42%;--mq-title-size:28;--mq-title-track:0.18;--mq-title-x:0px;--mq-title-y:0px;--mq-sub-size:14;--mq-sub-x:0px;--mq-sub-y:0px;--chip-br:10;--chip-pad-x:10;--chip-pad-y:2;--chip-border:2;--chip-bg:transparent;--matrix-gap:10px;--matrix-dead:#140202;--crt-grid-opacity:0.8;--chevron-opacity:1;--tabs-pad-x-left:12px;--tabs-pad-x-right:12px;--hud1-pad-x-left:0px;--hud1-pad-x-right:0px;--hud2-pad-x-left:0px;--hud2-pad-x-right:0px}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden;touch-action:none}
-.cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a}
-.inner{height:100%;border-radius:22px;background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);position:relative;isolation:isolate}
-.marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
-.led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.06),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 3px,rgba(0,0,0,0) 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
-.led .line{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px rgba(255,58,47,.45),0 0 14px rgba(255,58,47,.25);font-weight:800}
-@keyframes ledEffect4Text{0%{opacity:.96;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}50%{opacity:1;text-shadow:0 0 2px var(--led),0 0 9px rgba(255,58,47,.50),0 0 16px rgba(255,58,47,.28)}100%{opacity:.97;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}}
-.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:ledEffect4Text 3.6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:none}}
-.mq-wrap{position:relative;display:grid;justify-items:center;align-content:center;height:100%}
-.mq-title{font-size:calc(var(--mq-title-size)*1px);letter-spacing:calc(var(--mq-title-track)*1em);transform:translate(var(--mq-title-x),var(--mq-title-y));text-align:center;user-select:none}
-.mq-sub{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:calc(var(--mq-sub-size)*1px);letter-spacing:.12em;margin-top:6px;transform:translate(var(--mq-sub-x),var(--mq-sub-y))}
-.mq-sub .chip{white-space:nowrap}
-.mq-sub .chip-box{padding:calc(var(--chip-pad-y)*1px) calc(var(--chip-pad-x)*1px);border:calc(var(--chip-border)*1px) solid var(--led);border-radius:calc(var(--chip-br)*1px);background:var(--chip-bg)}
-.divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
-.crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
-.crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 22%),radial-gradient(120% 90% at 50% 120%,rgba(0,0,0,.6),rgba(0,0,0,0) 40%),linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412,inset 0 0 30px rgba(0,0,0,.6);position:relative;overflow:hidden}
-.grid{position:absolute;inset:0;background:linear-gradient(transparent 31px,rgba(33,68,59,.22) 32px),linear-gradient(90deg,transparent 31px,rgba(33,68,59,.22) 32px);background-size:32px 32px;opacity:var(--crt-grid-opacity);pointer-events:none}
-canvas#game{position:absolute;inset:0;width:100%;height:100%}
-.tabs{border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);gap:calc(var(--gap)*1px);padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);text-align:center;font-weight:800;letter-spacing:.08em}
-.tab{padding:0;border-right:1px solid #4d4032;display:grid;align-items:stretch}.tab:last-child{border-right:none}
-.tab .led{height:100%;border-radius:10px;padding:8px 10px;display:grid;place-items:center}
-.tab .led .line{font-size:clamp(12px,2.2vh,18px);letter-spacing:.14em;color:var(--led);font-weight:800}
-.hud{display:grid;grid-template-columns:var(--h1-a) var(--h1-b) var(--h1-c);gap:calc(var(--gap)*1px);padding:0 var(--hud1-pad-x-right) 0 var(--hud1-pad-x-left)}
-.hud2{display:grid;grid-template-columns:var(--h2-a) var(--h2-b) var(--h2-c);gap:calc(var(--gap)*1px);padding:0 var(--hud2-pad-x-right) 0 var(--hud2-pad-x-left)}
-.slot{background:linear-gradient(#3a3227,#2c251e);border-radius:calc(var(--radius)*1px);padding:calc(var(--slot-pad)*1px);box-shadow:inset 0 0 0 2px #1a1511,0 2px 0 #0b0907;display:flex;align-items:center;gap:10px;justify-content:space-between;overflow:hidden}
-.slot-heart{height:calc(var(--slot-heart-h)*1px)}
-.slot-shoes{height:calc(var(--slot-shoes-h)*1px)}
-.slot-dots{height:calc(var(--slot-dots-h)*1px)}
-.slot-bag{height:calc(var(--slot-bag-h)*1px)}
-.slot-flames{height:calc(var(--slot-flames-h)*1px)}
-.slot-pause{height:calc(var(--slot-pause-h)*1px)}
-.row{display:flex;gap:8px;align-items:center}
-.led-dots{display:grid;grid-auto-flow:column;gap:10px}
-.dot{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 45% 40%,#ff8a80 0 30%,var(--led) 30% 60%,#b81f15 60%);box-shadow:0 0 6px rgba(255,58,47,.45),inset 0 -2px 4px rgba(0,0,0,.5)}
-.icon{display:inline-block;background:#e0cfa6;filter:drop-shadow(0 1px 0 #7b6948);-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center}
-.icon.heart{width:calc(var(--icon-heart)*1px);height:calc(var(--icon-heart)*1px);background:#ff6a5f;mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%23000" d="M8 14s6-3.33 6-8a3 3 0 0 0-6-1 3 3 0 0 0-6 1c0 4.67 6 8 6 8z"/></svg>')}
-.icon.shoe{width:calc(var(--icon-shoe)*1px);height:calc(var(--icon-shoe)*1px);background:#e6e6e6;mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23000" d="M3 15h18v2H3zM5 13h10l-3-3H7l-2 3zM6 9h5l1 1H7z"/></svg>')}
-.icon.flame{width:calc(var(--icon-power)*1px);height:calc(var(--icon-power)*1px);background:#ffb43b;mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%23000" d="M8 1s4 3 4 6a4 4 0 1 1-8 0c0-3 4-6 4-6z"/></svg>')}
-.icon.bag{width:calc(var(--icon-bag)*1px);height:calc(var(--icon-bag)*1px);background:#d2b07b;mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%23000" d="M5 5V4a3 3 0 0 1 6 0v1h3v9H2V5h3zm2 0h2V4a1 1 0 1 0-2 0v1z"/></svg>')}
-.counter{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:linear-gradient(#5b4c38,#3f3427);box-shadow:inset 0 0 0 2px #201a14;color:#000;text-shadow:0 1px 0 #b7a47d;font-weight:900;letter-spacing:.14em;min-width:110px}
-.seven{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:#e8dcc1}
-.bottom{display:grid;grid-template-columns:1fr;align-items:center;height:100%}
-.control-screen{position:relative;height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px rgba(0,0,0,.35),0 3px 0 #0a0807}
-@media (max-width:520px){.control-screen{grid-template-columns:1fr}}
-.matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,var(--matrix-dead) 40%,#090101 42%,transparent 43%) 0 0/var(--matrix-gap) var(--matrix-gap) repeat}
-.controls{display:grid;grid-template-columns:1fr;gap:12px;z-index:2}
-.btn{position:relative;border:none;cursor:pointer;min-height:56px;padding:14px 18px;border-radius:12px;background:#100a0a;color:#ffb9a9;letter-spacing:.18em;font-weight:900;box-shadow:inset 0 0 0 1px #2a1511,0 6px 10px #000;text-shadow:0 0 6px var(--led),0 0 18px rgba(255,58,47,.45)}
-.btn::after{content:"";position:absolute;inset:6px;border-radius:10px;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 30%,#ff8f80 0 18%,transparent 60%);filter:blur(8px);transition:opacity .12s ease}
-.btn.pulse::after{opacity:.85}
-.pad{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;display:grid;place-items:center;padding:10px;background:#0e0909;box-shadow:inset 0 0 0 1px #2a1812,inset 0 8px 18px #000a}
-.ring{position:absolute;inset:40px;border-radius:50%;background:#120606;box-shadow:inset 0 0 0 2px #2a0000,0 0 0 2px #1a0000}
-.bed{position:absolute;inset:58px;border-radius:50%;overflow:hidden;background:#070404;box-shadow:inset 0 0 0 2px #210000}
-.bed::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:.9;mix-blend-mode:screen;background:radial-gradient(circle at center,#1a0000 40%,#0a0000 42%,transparent 43%) 0 0/var(--matrix-gap) var(--matrix-gap) repeat}
-.sweep{--ang:0deg;position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.16;background:conic-gradient(from var(--ang),rgba(255,58,47,.55) 0 6%,#0000 6% 100%);filter:blur(6px)}
-.chev{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:var(--chevron-opacity)}
-.c-up,.c-right,.c-down,.c-left{position:absolute;inset:0;opacity:.25;transition:opacity .06s linear;background:radial-gradient(circle at center,#ff3a2f 34%,#ff7a72 36%,transparent 40%) 0 0/var(--matrix-gap) var(--matrix-gap) repeat;filter:drop-shadow(0 0 6px #ff3a2f) drop-shadow(0 0 14px #ff3a2f)}
-.c-up{clip-path:polygon(50% 8%,84% 44%,66% 44%,66% 78%,34% 78%,34% 44%,16% 44%)}
-.c-right{clip-path:polygon(92% 50%,56% 84%,56% 66%,22% 66%,22% 34%,56% 34%,56% 16%)}
-.c-down{clip-path:polygon(50% 92%,16% 56%,34% 56%,34% 22%,66% 22%,66% 56%,84% 56%)}
-.c-left{clip-path:polygon(8% 50%,44% 16%,44% 34%,78% 34%,78% 66%,44% 66%,44% 84%)}
-.pad[data-hold~="up"] .c-up{opacity:1}
-.pad[data-hold~="right"] .c-right{opacity:1}
-.pad[data-hold~="down"] .c-down{opacity:1}
-.pad[data-hold~="left"] .c-left{opacity:1}
-.drag-plate{position:absolute;inset:58px;border-radius:50%}
-.puck{--x:0px;--y:0px;position:absolute;left:50%;top:50%;width:96px;height:96px;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y)));border-radius:50%;cursor:grab;user-select:none;touch-action:none;z-index:2;background:radial-gradient(circle at center,rgba(255,58,47,.35) 0 24%,transparent 26%),radial-gradient(circle at center,#ff3a2f 32%,#ff7a72 34%,transparent 36%) 0 0/calc(var(--matrix-gap)*.95) calc(var(--matrix-gap)*.95) repeat,#0c0707;box-shadow:inset 0 0 0 1px #3a0000,0 6px 14px #0008;opacity:.92}
-.puck:active{cursor:grabbing}
-.power-on-run{animation:powerOn 1.5s ease-out both}
-@keyframes powerOn{0%{filter:brightness(0) saturate(0);opacity:0}10%{filter:brightness(3) saturate(0);opacity:1}60%{filter:brightness(1.6) saturate(.25)}100%{filter:none;opacity:1}}
-.crt.power-on-run::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.85),rgba(255,255,255,.55) 22%,rgba(255,255,255,0) 72%);opacity:0;animation:powerOnScreen 1.5s ease-out both}
-@keyframes powerOnScreen{0%{opacity:0}8%{opacity:1}70%{opacity:.35}100%{opacity:0}}
-@media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
-@media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
-#tunerFloatBtn{position:fixed;inset:auto 14px 14px auto;z-index:7000;width:48px;height:48px;border-radius:12px;border:none;cursor:pointer;background:#1a1410;color:#e6d7b6;box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;font-size:22px}
-#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80vh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
-#tunerFloat.open{display:flex}
-#tHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #3a2f27}
-#tTitle{font-weight:700;letter-spacing:.08em;font-size:13px}
-#tBtns button{margin-left:8px;border:none;border-radius:8px;padding:6px 10px;background:#332820;color:#e6d7b6;cursor:pointer}
-#tBody{overflow:auto;padding:12px}
-.tg{margin-bottom:14px;border:1px solid #3a2f27;border-radius:10px;padding:10px}
-.tg h4{margin:0 0 8px 0;font-size:12px;letter-spacing:.08em;color:#f0e6cd}
-.tr{display:grid;grid-template-columns:1fr 120px 60px auto;gap:8px;align-items:center;margin:8px 0}
-.tr label{font-size:12px}
-.tr input[type="range"]{width:100%}
-.tv{font:12px/1 monospace;text-align:right;opacity:.8}
-.lock{font-size:12px;opacity:.9}
-#tFoot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px;border-top:1px solid #3a2f27}
-#tFoot button{flex:1;border:none;background:#3a2f27;color:#e6d7b6;border-radius:10px;padding:10px;cursor:pointer; min-width: 80px;} /* Added min-width */
-#tFoot button.primary{background:#523f32}
-#copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px; white-space: nowrap;} /* Added nowrap */
+  :root { color-scheme: dark; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #070708;
+    font: 14px ui-monospace, Consolas, Menlo, monospace;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* left: buttons, right: joystick */
+    border: 1px solid #1a0000;
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 2px #000, 0 20px 50px #000c;
+    overflow: hidden;
+    aspect-ratio: 2 / 1; /* requested */
+    background: #080203;
+  }
+  .pane { position: relative; }
+  .pane-left, .pane-right { background: #080203; }
+  .pane-left iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .pane-right canvas { width: 100%; height: 100%; display: block; background: #080203; }
+  .note { position:absolute; inset:auto auto 8px 8px; color:#a66; font-size:12px; opacity:0.7; }
 </style>
 </head>
 <body>
+  <div class="wrap">
+    <!-- LEFT: Buttons UI loaded as-is via setButtonsHTML(html). No edits. -->
+    <div class="pane pane-left">
+      <iframe id="buttons-frame" title="Buttons Panel"></iframe>
+      <div id="left-note" class="note">left: waiting for Buttons HTML…</div>
+    </div>
 
-<button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
-
-<div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner">
-  <div id="tHead">
-    <div id="tTitle">LAYOUT TUNER</div>
-    <div id="tBtns"><button id="tMin" title="Minimize">–</button><button id="tClose" title="Close">✕</button></div>
-  </div>
-  <div id="tBody">
-    <div class="tg"><h4>Global</h4>
-      <div class="tr"><label>Scale</label><input id="v_scale" type="range" min="0.85" max="1.15" step="0.01"><div class="tv" id="o_scale"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Row Horizontal Padding</h4>
-      <div class="tr"><label>Tabs Pad Left (px)</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_l"></div><div></div></div>
-      <div class="tr"><label>Tabs Pad Right (px)</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_r"></div><div></div></div>
-      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD1 Pad Left (px)</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
-      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Marquee — Title</h4>
-      <div class="tr"><label>Title size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1"><div class="tv" id="o_mqtsize"></div><div></div></div>
-      <div class="tr"><label>Title tracking (em)</label><input id="v_mqttrack" type="range" min="0.00" max="0.40" step="0.01"><div class="tv" id="o_mqttrack"></div><div></div></div>
-      <div class="tr"><label>Title offset X (px)</label><input id="v_mqtx" type="range" min="-120" max="120" step="1"><div class="tv" id="o_mqtx"></div><div></div></div>
-      <div class="tr"><label>Title offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1"><div class="tv" id="o_mqty"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Marquee — Subline</h4>
-      <div class="tr"><label>Subline size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1"><div class="tv" id="o_mqssize"></div><div></div></div>
-      <div class="tr"><label>Subline offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1"><div class="tv" id="o_mqsx"></div><div></div></div>
-      <div class="tr"><label>Subline offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1"><div class="tv" id="o_mqsy"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Marquee — Chip Boxes</h4>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1"><div class="tv" id="o_chipbr"></div><div></div></div>
-      <div class="tr"><label>Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1"><div class="tv" id="o_chippadx"></div><div></div></div>
-      <div class="tr"><label>Padding Y (px)</label><input id="v_chippady" type="range" min="1" max="10" step="1"><div class="tv" id="o_chippady"></div><div></div></div>
-      <div class="tr"><label>Border (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1"><div class="tv" id="o_chipborder"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Screen (CRT)</h4>
-      <div class="tr"><label>CRT row height (fr)</label><input id="v_crtfr" type="range" min="0.40" max="2.50" step="0.05"><div class="tv" id="o_crtfr"></div><div></div></div>
-      <div class="tr"><label>Aspect ratio (W/H)</label><input id="v_crtar" type="range" min="0.80" max="2.50" step="0.01"><div class="tv" id="o_crtar"></div><div></div></div>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_crtr" type="range" min="10" max="40" step="1"><div class="tv" id="o_crtr"></div><div></div></div>
-      <div class="tr"><label>Bezel padding (px)</label><input id="v_crtpad" type="range" min="6" max="24" step="1"><div class="tv" id="o_crtpad"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Tabs widths (%)</h4>
-      <div class="tr"><label>LIFE %</label><input id="v_t1" type="range" min="10" max="70" step="1"><div class="tv" id="o_t1"></div><label class="lock"><input type="checkbox" id="c_t1"> Lock</label></div>
-      <div class="tr"><label>SNEAKERS %</label><input id="v_t2" type="range" min="10" max="70" step="1"><div class="tv" id="o_t2"></div><label class="lock"><input type="checkbox" id="c_t2"> Lock</label></div>
-      <div class="tr"><label>POWR-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1"><div class="tv" id="o_t3"></div><label class="lock"><input type="checkbox" id="c_t3"> Lock</label></div>
-    </div>
-    <div class="tg"><h4>HUD Row 1 widths (%)</h4>
-      <div class="tr"><label>Hearts %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><label class="lock"><input type="checkbox" id="c_h1a"> Lock</label></div>
-      <div class="tr"><label>Sneakers %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><label class="lock"><input type="checkbox" id="c_h1b"> Lock</label></div>
-      <div class="tr"><label>Dots %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><label class="lock"><input type="checkbox" id="c_h1c"> Lock</label></div>
-    </div>
-    <div class="tg"><h4>HUD Row 2 widths (%)</h4>
-      <div class="tr"><label>Bag %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><label class="lock"><input type="checkbox" id="c_h2a"> Lock</label></div>
-      <div class="tr"><label>Flames %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><label class="lock"><input type="checkbox" id="c_h2b"> Lock</label></div>
-      <div class="tr"><label>Pause %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><label class="lock"><input type="checkbox" id="c_h2c"> Lock</label></div>
-    </div>
-    <div class="tg"><h4>Heights (px)</h4>
-      <div class="tr"><label>Hearts H</label><input id="v_slotheart" type="range" min="36" max="96" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
-      <div class="tr"><label>Sneakers H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
-      <div class="tr"><label>Dots H</label><input id="v_slotdots" type="range" min="36" max="96" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
-      <div class="tr"><label>Bag H</label><input id="v_slotbag" type="range" min="36" max="96" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
-      <div class="tr"><label>Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
-      <div class="tr"><label>Pause H</label><input id="v_slotpause" type="range" min="36" max="96" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
-      <div class="tr"><label>Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
-    </div>
-    <div class="tg"><h4>Bottom split (%)</h4>
-      <div class="tr"><label>Left col %</label><input id="v_bota" type="range" min="30" max="80" step="1"><div class="tv" id="o_bota"></div><label class="lock"><input type="checkbox" id="c_bota"> Lock</label></div>
-      <div class="tr"><label>D-pad %</label><input id="v_botb" type="range" min="20" max="70" step="1"><div class="tv" id="o_botb"></div><label class="lock"><input type="checkbox" id="c_botb"> Lock</label></div>
+    <!-- RIGHT: Existing joystick/radar canvas (unchanged behavior) -->
+    <div class="pane pane-right">
+      <canvas id="control-panel"></canvas>
     </div>
   </div>
-  <div id="tFoot">
-    <button id="btn_copy">Copy CSS</button>
-    <button id="btn_reset">Reset</button>
-    <button id="btn_export" class="primary">Export Clean HTML</button> <!-- NEW Export Button -->
-    <span id="copyMessage"></span>
-  </div>
-</div>
-
-<div class="cabinet"><div class="inner" id="innerRoot">
-  <div class="marquee">
-    <div class="led">
-      <div class="mq-wrap">
-        <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
-        <div class="line mq-sub">
-          <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-          <span class="chip chip-time  chip-box">00:00:0</span>
-          <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="divider"></div>
-  <div class="crt-wrap">
-    <div class="crt power-on-run" id="crt">
-      <canvas id="game" width="960" height="720"></canvas>
-      <div class="grid"></div>
-    </div>
-  </div>
-  <div class="tabs">
-    <div class="tab"><div class="led"><div class="line">L I F E</div></div></div>
-    <div class="tab"><div class="led"><div class="line">S N E A K E R S</div></div></div>
-    <div class="tab"><div class="led"><div class="line">P O W R - U P S</div></div></div>
-  </div>
-  <div class="hud">
-    <div class="slot slot-heart"><div class="row"><span class="icon heart"></span><span class="icon heart"></span><span class="icon heart"></span></div></div>
-    <div class="slot slot-shoes"><div class="row"><span class="icon shoe"></span><span class="icon shoe"></span><span class="icon shoe"></span><span class="icon shoe"></span></div></div>
-    <div class="slot slot-dots"><div class="led-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-  </div>
-  <div class="hud2">
-    <div class="slot slot-bag"><div class="counter"><span class="icon bag"></span><span class="seven" id="counter">000</span></div></div>
-    <div class="slot slot-flames"><div class="row"><span class="icon flame"></span><span class="icon flame"></span><span class="icon flame"></span><span class="icon flame"></span><span class="icon flame"></span></div></div>
-    <div class="slot slot-pause" style="justify-content:flex-end"><button class="btn" id="btn-pause" type="button">PAUSE</button></div>
-  </div>
-  <div class="bottom">
-    <div class="control-screen" id="controlScreen">
-      <div class="matrix" aria-hidden="true"></div>
-      <div class="controls">
-        <button class="btn" id="btn-trigger" type="button">TRIGGER</button>
-        <button class="btn" id="btn-bomb" type="button">BOMB</button>
-      </div>
-      <div class="pad" id="pad">
-        <div class="ring"></div>
-        <div class="bed">
-          <div class="sweep" id="sweep"></div>
-          <div class="chev">
-            <div class="c-up"></div><div class="c-right"></div><div class="c-down"></div><div class="c-left"></div>
-          </div>
-          <div class="drag-plate" id="drag"></div>
-        </div>
-        <div class="puck" id="puck" aria-label="Joystick handle"></div>
-      </div>
-    </div>
-  </div>
-</div></div>
 
 <script>
-/* Demo canvas */
-(function(){const ctx=document.getElementById('game').getContext('2d');let t=0;(function loop(){ctx.fillStyle="#061c18";ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.fillStyle="#15ff96";ctx.font="24px ui-monospace,Consolas,monospace";ctx.fillText("DEMO FRAME: "+t++,24,36);requestAnimationFrame(loop)})()})();
+// ==== Left pane loader =======================================================
+// Public API: call setButtonsHTML(htmlString) to inject your Buttons 100.html.
+// No string templating tricks. Avoids the previous syntax error from nested
+// template literals.
+(function(){
+  const frame = document.getElementById('buttons-frame');
+  const note  = document.getElementById('left-note');
+
+  function minimalPlaceholder(){
+    // Very small, self-contained placeholder so the left pane renders safely.
+    return (
+      '<!doctype html><html><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<style>html,body{margin:0;height:100%;background:#0b0b0b}' +
+      'canvas{display:block;width:100%;height:100%;image-rendering:pixelated}</style>' +
+      '</head><body><canvas id="c"></canvas>' +
+      '<script>' +
+      'const c=document.getElementById("c"),x=c.getContext("2d");function r(){const w=c.width=innerWidth*devicePixelRatio,h=c.height=innerHeight*devicePixelRatio;x.scale(devicePixelRatio,devicePixelRatio);x.clearRect(0,0,innerWidth,innerHeight);const p=6;for(let y=0;y<innerHeight;y+=p){for(let i=0;i<innerWidth;i+=p){x.fillStyle="#1A0E0E";x.beginPath();x.arc(i,y,1.2,0,7);x.fill();}}}addEventListener("resize",r);r();' +
+      '<\/script></body></html>'
+    );
+  }
+
+  // Install API on window so caller can inject their exact HTML content.
+  window.setButtonsHTML = function(html){
+    if (typeof html !== 'string' || !html.length) {
+      console.error('setButtonsHTML(html): expected a non-empty HTML string');
+      return;
+    }
+    frame.srcdoc = html; // Browser handles the rest.
+    if (note) note.remove();
+  };
+
+  // Default placeholder so the page is valid even before user injection.
+  frame.srcdoc = minimalPlaceholder();
+})();
 </script>
 
 <script>
-/* Joystick + button pulse */
-(function(){const pad=document.getElementById('pad');const drag=document.getElementById('drag');const puck=document.getElementById('puck');const sweep=document.getElementById('sweep');function setHold(nx,ny){const held=[];if(ny<-0.25)held.push('up');if(ny>0.25)held.push('down');if(nx>0.25)held.push('right');if(nx<-0.25)held.push('left');if(held.length)pad.setAttribute('data-hold',held.join(' '));else pad.removeAttribute('data-hold')}
-function updatePointer(clientX,clientY){const r=drag.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;const dx=clientX-cx,dy=clientY-cy;const maxR=r.width/2;const dist=Math.min(Math.hypot(dx,dy),maxR);const nx=dx/maxR,ny=dy/maxR;const ang=Math.atan2(dy,dx);puck.style.setProperty('--x',(Math.cos(ang)*dist).toFixed(1)+'px');puck.style.setProperty('--y',(Math.sin(ang)*dist).toFixed(1)+'px');sweep.style.setProperty('--ang',(ang+Math.PI/2)+'rad');setHold(nx,ny)}
-let dragging=false;function startDrag(target,e){e.preventDefault();dragging=true;target.setPointerCapture(e.pointerId);updatePointer(e.clientX,e.clientY)}
-function moveDrag(e){if(!dragging)return;updatePointer(e.clientX,e.clientY)}
-function endDrag(){dragging=false;puck.style.setProperty('--x','0px');puck.style.setProperty('--y','0px');pad.removeAttribute('data-hold')}
-drag.addEventListener('pointerdown',e=>startDrag(drag,e));drag.addEventListener('pointermove',moveDrag);drag.addEventListener('pointerup',endDrag);drag.addEventListener('pointercancel',endDrag);puck.addEventListener('pointerdown',e=>startDrag(puck,e));puck.addEventListener('pointermove',moveDrag);puck.addEventListener('pointerup',endDrag);puck.addEventListener('pointercancel',endDrag);const pulse=el=>{el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse')};document.getElementById('btn-trigger').addEventListener('click',e=>pulse(e.currentTarget));document.getElementById('btn-bomb').addEventListener('click',e=>pulse(e.currentTarget))})();
-</script>
+// ==== Right pane: Joystick + Radar (same behavior) ===========================
+(function(){
+  const DEADZONE = 0.15; const RESPONSE = 1.20; const SMOOTH = 0.22; const AUTO_RETURN = true;
+  let PITCH = 10, DOT_R = 2.6; const LEVELS = [0,0.35,0.65,1];
+  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
+  const DECAY = 0.90; let buf;
+  const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
+  const cvs = document.getElementById('control-panel'); const ctx = cvs.getContext('2d');
+  window.joypad = { x:0,y:0,mag:0,angle:0 };
+  let W,H,COLS,ROWS,OX,OY; let joyCX,joyCY,joyR; let layoutReady=false;
+  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
 
-<script>
-/* Floating Layout Tuner: writes CSS vars, persists to localStorage */
-(function(){const root=document.documentElement;const storageKey='sneakerquest-layout-tuner-v1';const qs=id=>document.getElementById(id);
-const state={'--cabinet-scale':'1','--mq-title-size':'28','--mq-title-track':'0.18','--mq-title-x':'0px','--mq-title-y':'0px','--mq-sub-size':'14','--mq-sub-x':'0px','--mq-sub-y':'0px','--chip-br':'10','--chip-pad-x':'10','--chip-pad-y':'2','--chip-border':'2','--crt-fr':'1','--crt-ar':'1.333','--crt-r':'22','--crtwrap-pad':'12','--t1':'33%','--t2':'34%','--t3':'33%','--h1-a':'38%','--h1-b':'38%','--h1-c':'24%','--h2-a':'32%','--h2-b':'44%','--h2-c':'24%','--slot-heart-h':'52','--slot-shoes-h':'64','--slot-dots-h':'52','--slot-bag-h':'52','--slot-flames-h':'64','--slot-pause-h':'52','--slot-pad':'10','--bot-a':'58%','--bot-b':'42%','--tabs-pad-x-left':'12px','--tabs-pad-x-right':'12px','--hud1-pad-x-left':'0px','--hud1-pad-x-right':'0px','--hud2-pad-x-left':'0px','--hud2-pad-x-right':'0px'}; // Ensure pads have 'px' initially if loaded from old state
-function applyVar(k,v){root.style.setProperty(k,v)}
-function applyAll(){Object.entries(state).forEach(([k,v])=>applyVar(k,v))}
-function load(){try{const s=JSON.parse(localStorage.getItem(storageKey)||'{}');Object.assign(state,s)}catch(e){}}
-function save(){localStorage.setItem(storageKey,JSON.stringify(state))}
-function setPctPair(aKey,bKey,fromA){const a=Math.max(0,Math.min(100,parseInt(state[aKey],10)));const b=100-a;state[aKey]=a+'%';state[bKey]=b+'%'}
-function setPctTriple(k1,k2,k3){let a=parseInt(state[k1],10),b=parseInt(state[k2],10);a=Math.max(10,Math.min(80,a));b=Math.max(10,Math.min(80,b));let c=100-a-b;if(c<10){c=10;b=Math.max(10,100-a-c)}state[k1]=a+'%';state[k2]=b+'%';state[k3]=c+'%'}
-function bind(id,key,transform=(x)=>x,outFmt=(x)=>String(x)){const el=qs(id),out=qs('o_'+id.slice(2));if(!el){console.error('Tuner: Missing element '+id);return}
-const set=val=>{const v=transform(val);state[key]=v;applyVar(key,v);if(out)out.textContent=outFmt(val);save()};
-let initialVal=String(state[key]).replace(/px|%|em|fr/,'');if(key.includes('offset')||key.includes('-pad-')){initialVal=parseInt(initialVal,10)}
-el.value=initialVal;if(out)out.textContent=outFmt(initialVal);el.addEventListener('input',e=>set(e.target.value))}
-const btn=qs('tunerFloatBtn'),panel=qs('tunerFloat'),btnMin=qs('tMin'),btnClose=qs('tClose');btn.addEventListener('click',()=>panel.classList.add('open'));btnClose.addEventListener('click',()=>panel.classList.remove('open'));btnMin.addEventListener('click',()=>panel.classList.toggle('open'));
-load();Object.keys(state).forEach(key=>{if(key.includes('-pad-x-')){state[key]=parseInt(state[key],10)+'px'}});applyAll();
-bind('v_scale','--cabinet-scale',v=>String(v),v=>v);
-bind('v_mqtsize','--mq-title-size',v=>String(v),v=>v+'px');bind('v_mqttrack','--mq-title-track',v=>String(v),v=>v+'em');bind('v_mqtx','--mq-title-x',v=>parseInt(v,10)+'px',v=>v+'px');bind('v_mqty','--mq-title-y',v=>parseInt(v,10)+'px',v=>v+'px');
-bind('v_mqssize','--mq-sub-size',v=>String(v),v=>v+'px');bind('v_mqsx','--mq-sub-x',v=>parseInt(v,10)+'px',v=>v+'px');bind('v_mqsy','--mq-sub-y',v=>parseInt(v,10)+'px',v=>v+'px');
-bind('v_chipbr','--chip-br',v=>String(v),v=>v+'px');bind('v_chippadx','--chip-pad-x',v=>String(v),v=>v+'px');bind('v_chippady','--chip-pad-y',v=>String(v),v=>v+'px');bind('v_chipborder','--chip-border',v=>String(v),v=>v+'px');
-bind('v_crtfr','--crt-fr',v=>String(v),v=>v+'fr');bind('v_crtar','--crt-ar',v=>String(Number(v).toFixed(3)),v=>v);bind('v_crtr','--crt-r',v=>String(v),v=>v+'px');bind('v_crtpad','--crtwrap-pad',v=>String(v),v=>v+'px');
-bind('v_slotheart','--slot-heart-h',v=>String(v),v=>v+'px');bind('v_slotshoes','--slot-shoes-h',v=>String(v),v=>v+'px');bind('v_slotdots','--slot-dots-h',v=>String(v),v=>v+'px');
-bind('v_slotbag','--slot-bag-h',v=>String(v),v=>v+'px');bind('v_slotflames','--slot-flames-h',v=>String(v),v=>v+'px');bind('v_slotpause','--slot-pause-h',v=>String(v),v=>v+'px');bind('v_slotpad','--slot-pad',v=>String(v),v=>v+'px');
-const pxFmt=v=>parseInt(v,10)+'px';const pxOut=v=>v+'px';
-bind('v_tabs_pad_l','--tabs-pad-x-left',pxFmt,pxOut);bind('v_tabs_pad_r','--tabs-pad-x-right',pxFmt,pxOut);
-bind('v_hud1_pad_l','--hud1-pad-x-left',pxFmt,pxOut);bind('v_hud1_pad_r','--hud1-pad-x-right',pxFmt,pxOut);
-bind('v_hud2_pad_l','--hud2-pad-x-left',pxFmt,pxOut);bind('v_hud2_pad_r','--hud2-pad-x-right',pxFmt,pxOut);
-const t1=qs('v_t1'),t2=qs('v_t2'),t3=qs('v_t3');function applyTabs(){setPctTriple('--t1','--t2','--t3');applyAll();syncOutTabs();save()}
-function syncOutTabs(){t1.value=parseInt(state['--t1'],10);t2.value=parseInt(state['--t2'],10);t3.value=parseInt(state['--t3'],10);qs('o_t1').textContent=state['--t1'];qs('o_t2').textContent=state['--t2'];qs('o_t3').textContent=state['--t3']}
-[t1,t2,t3].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--t1']=el.value+'%';if(i===1)state['--t2']=el.value+'%';if(i===2)state['--t3']=el.value+'%';applyTabs()})});
-const h1a=qs('v_h1a'),h1b=qs('v_h1b'),h1c=qs('v_h1c');function applyH1(){setPctTriple('--h1-a','--h1-b','--h1-c');applyAll();syncOutH1();save()}
-function syncOutH1(){h1a.value=parseInt(state['--h1-a'],10);h1b.value=parseInt(state['--h1-b'],10);h1c.value=parseInt(state['--h1-c'],10);qs('o_h1a').textContent=state['--h1-a'];qs('o_h1b').textContent=state['--h1-b'];qs('o_h1c').textContent=state['--h1-c']}
-;[h1a,h1b,h1c].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--h1-a']=el.value+'%';if(i===1)state['--h1-b']=el.value+'%';if(i===2)state['--h1-c']=el.value+'%';applyH1()})});
-const h2a=qs('v_h2a'),h2b=qs('v_h2b'),h2c=qs('v_h2c');function applyH2(){setPctTriple('--h2-a','--h2-b','--h2-c');applyAll();syncOutH2();save()}
-function syncOutH2(){h2a.value=parseInt(state['--h2-a'],10);h2b.value=parseInt(state['--h2-b'],10);h2c.value=parseInt(state['--h2-c'],10);qs('o_h2a').textContent=state['--h2-a'];qs('o_h2b').textContent=state['--h2-b'];qs('o_h2c').textContent=state['--h2-c']}
-;[h2a,h2b,h2c].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--h2-a']=el.value+'%';if(i===1)state['--h2-b']=el.value+'%';if(i===2)state['--h2-c']=el.value+'%';applyH2()})});
-const bota=qs('v_bota'),botb=qs('v_botb');function applyBottom(fromA=true){if(fromA){state['--bot-a']=bota.value+'%';setPctPair('--bot-a','--bot-b',true)}else{state['--bot-b']=botb.value+'%';const a=100-parseInt(botb.value,10);state['--bot-a']=a+'%'}
-applyAll();syncOutBottom();save()}
-function syncOutBottom(){bota.value=parseInt(state['--bot-a'],10);botb.value=parseInt(state['--bot-b'],10);qs('o_bota').textContent=state['--bot-a'];qs('o_botb').textContent=state['--bot-b']}
-bota.addEventListener('input',()=>applyBottom(true));botb.addEventListener('input',()=>applyBottom(false));
-syncOutTabs();syncOutH1();syncOutH2();syncOutBottom();
-const copyBtn=qs('btn_copy');const copyMsg=qs('copyMessage');let msgTimeout;
-copyBtn.addEventListener('click',()=>{const lines=Object.entries(state).map(([k,v])=>`  ${k}: ${String(v)};`).join('\n');const css=`:root{\n${lines}\n}`;let success=!1;try{const textArea=document.createElement("textarea");textArea.value=css;textArea.style.position="fixed";textArea.style.left="-9999px";textArea.style.opacity="0";document.body.appendChild(textArea);textArea.focus();textArea.select();success=document.execCommand('copy');document.body.removeChild(textArea)}catch(err){console.error('Copy CSS fallback failed: ',err);success=!1}
-clearTimeout(msgTimeout);copyMsg.textContent=success?'Copied!':'Copy Failed!';copyMsg.style.opacity='1';copyMsg.style.color=success?'#15ff96':'#ff3a2f';msgTimeout=setTimeout(()=>{copyMsg.style.opacity='0'},2E3)});
-qs('btn_reset').addEventListener('click',()=>{localStorage.removeItem(storageKey);
-Object.assign(state,{'--cabinet-scale':'1','--mq-title-size':'28','--mq-title-track':'0.18','--mq-title-x':'0px','--mq-title-y':'0px','--mq-sub-size':'14','--mq-sub-x':'0px','--mq-sub-y':'0px','--chip-br':'10','--chip-pad-x':'10','--chip-pad-y':'2','--chip-border':'2','--crt-fr':'1','--crt-ar':'1.333','--crt-r':'22','--crtwrap-pad':'12','--t1':'33%','--t2':'34%','--t3':'33%','--h1-a':'38%','--h1-b':'38%','--h1-c':'24%','--h2-a':'32%','--h2-b':'44%','--h2-c':'24%','--slot-heart-h':'52','--slot-shoes-h':'64','--slot-dots-h':'52','--slot-bag-h':'52','--slot-flames-h':'64','--slot-pause-h':'52','--slot-pad':'10','--bot-a':'58%','--bot-b':'42%','--tabs-pad-x-left':'12px','--tabs-pad-x-right':'12px','--hud1-pad-x-left':'0px','--hud1-pad-x-right':'0px','--hud2-pad-x-left':'0px','--hud2-pad-x-right':'0px'}); // Make sure pads are strings with px for reset
-location.reload();});
-// --- NEW Export Functionality ---
-qs('btn_export').addEventListener('click', () => {
-    const currentHTML = document.documentElement.outerHTML;
-    // 1. Generate current CSS :root block
-    const currentCSSVars = Object.entries(state).map(([k, v]) => `  ${k}: ${String(v)};`).join('\n');
-    const currentRootStyle = `:root{\n${currentCSSVars}\n}`;
-    // 2. Replace the default :root in the HTML string
-    let cleanHTML = currentHTML.replace(/:root\{[\s\S]*?\}/, currentRootStyle);
-    // 3. Remove Tuner HTML elements using more robust markers/comments
-    cleanHTML = cleanHTML.replace(/<!-- Floating tuner trigger -->[\s\S]*<!-- End Floating tuner panel -->/, '');
-    // 4. Remove Tuner CSS rules (optional, can be kept if small) - targeting specific IDs/classes used ONLY by tuner
-    cleanHTML = cleanHTML.replace(/#tunerFloatBtn \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tunerFloat \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tunerFloat\.open \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tHead \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tTitle \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tBtns button \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tBody \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/\.tg \{[\s\S]*?\}/g, ''); // Remove all .tg rules
-    cleanHTML = cleanHTML.replace(/\.tg h4 \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/\.tr \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/\.tr label \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/\.tr input\[type="range"\] \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/\.tv \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/\.lock \{[\s\S]*?\}/g, '');
-    cleanHTML = cleanHTML.replace(/#tFoot \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#tFoot button \{[\s\S]*?\}/, ''); // Might affect PAUSE btn if not specific enough
-    cleanHTML = cleanHTML.replace(/#tFoot button\.primary \{[\s\S]*?\}/, '');
-    cleanHTML = cleanHTML.replace(/#copyMessage \{[\s\S]*?\}/, '');
-    // 5. Remove Tuner JS block - Adding specific comments to mark it
-    cleanHTML = cleanHTML.replace(/<script>\s*\/\* Floating Layout Tuner.*?<\/script>/s, '');
-    // 6. Create Blob and Download Link
-    const blob = new Blob([cleanHTML], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'sneakerquest_interface.html';
-    document.body.appendChild(a); // Required for Firefox
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href); // Clean up blob URL
-});
+  function updateLayout(newWidth,newHeight){
+    if(newWidth<1||newHeight<1) return;
+    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
+    const targetRows=24; PITCH=H/targetRows; DOT_R=PITCH*0.21;
+    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
+    if(COLS<1||ROWS<1) return;
+    OX=(W - COLS*PITCH)/2 + PITCH/2; OY=(H - ROWS*PITCH)/2 + PITCH/2;
+    joyCX=W*0.75; joyCY=H*0.5; joyR=(H*0.5) - (PITCH*3);
+    buf=new Float32Array(COLS*ROWS); layoutReady=true;
+  }
+
+  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  function isJoy(x){ return x>0; } // pane owns full canvas
+  function joyPointerToNorm(x,y){
+    const dx=x-joyCX, dy=y-joyCY; const dist=Math.hypot(dx,dy); const ang=Math.atan2(dy,dx);
+    let rn=Math.min(dist/joyR,1); if(rn<DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE); rn=Math.pow(rn,RESPONSE);
+    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
+  }
+
+  cvs.addEventListener('pointerdown', e=>{ e.preventDefault(); const {x,y}=getPointerLocation(e); if(!isJoy(x)) return; try{ cvs.setPointerCapture(e.pointerId);}catch(_){} activePointers.set(e.pointerId,'joy'); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
+  cvs.addEventListener('pointermove', e=>{ e.preventDefault(); if(activePointers.get(e.pointerId)!=='joy') return; const {x,y}=getPointerLocation(e); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
+  function endPointer(e){ const t=activePointers.get(e.pointerId); activePointers.delete(e.pointerId); if(t==='joy'){ let active=false; for(const v of activePointers.values()) if(v==='joy') active=true; if(!active && AUTO_RETURN){ joyTX=0; joyTY=0; } } }
+  cvs.addEventListener('pointerup', endPointer); cvs.addEventListener('pointercancel', endPointer); cvs.addEventListener('pointerleave', endPointer);
+
+  function loop(){ outX += (joyTX-outX)*SMOOTH; outY += (joyTY-outY)*SMOOTH; drawDMD(outX,outY); window.joypad.x=outX; window.joypad.y=outY; window.joypad.mag=Math.min(Math.hypot(outX,outY),1); window.joypad.angle=Math.atan2(outY,outX); requestAnimationFrame(loop); }
+
+  function drawDMD(nx,ny){
+    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
+    ctx.clearRect(0,0,W,H);
+    const now=performance.now()*0.001;
+    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
+    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
+
+    for(let j=0;j<ROWS;j++){
+      for(let i=0;i<COLS;i++){
+        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
+        buf[idx]=(buf[idx]||0)*DECAY;
+
+        // warp around knob
+        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
+        if(mag>0.01){
+          const suck=Math.min(0.8, mag*1.2);
+          const jdx_wc=x-px, jdy_wc=y-py; const divisor=(1 - suck);
+          if(divisor>0.001){ const vx=jdx_wc/divisor + px; const vy=jdy_wc/divisor + py; jdx=vx-joyCX; jdy=vy-joyCY; }
+        }
+
+        const jd=Math.hypot(jdx,jdy); const jang=Math.atan2(jdy,jdx);
+        const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5;
+        const t=(now*1.6)%(Math.PI*2); const sweepArcLength=Math.PI/3;
+        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.25)/(ringThick*0.5))*0.22;
+        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.50)/(ringThick*0.5))*0.20;
+        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*0.75)/(ringThick*0.5))*0.18;
+        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*1.00)/(ringThick*0.5))*0.16;
+        buf[idx]+=Math.max(0,1 - Math.abs(jd-joyR*DEADZONE)/(dzRingThick*0.5))*0.12;
+        const deltaAngle=((t-jang)%(Math.PI*2)+(Math.PI*2))%(Math.PI*2);
+        if(jd<joyR*0.98 && deltaAngle>0 && deltaAngle<sweepArcLength) buf[idx]+=0.9;
+
+        if(mag>0.01){
+          let joyB=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
+          joyB=Math.max(joyB, Math.max(0,1 - smoothStep(0, PITCH*2.4, sd))*STEM_GAIN);
+          const kd=Math.hypot(x-px, y-py);
+          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
+          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
+          joyB=Math.max(joyB, core*1.0 + glow*0.9);
+          buf[idx]=Math.max(buf[idx], joyB);
+        }
+
+        let b=buf[idx]||0; b += (noise2(i,j)-0.5)*0.06;
+        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
+      }
+    }
+  }
+
+  function dotDraw(x,y,r,level){
+    if(level<=0){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=OFF; ctx.fill(); return; }
+    const color = level>=1 ? RED : (level>=0.65 ? MID : DIM);
+    ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); ctx.restore();
+  }
+  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d<bd){bd=d; best=s;} } return best; }
+  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+  function noise2(ix,iy){ return (Math.sin((ix*12.9898 + iy*78.233)*43758.5453)%1 + 1)%1; }
+  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax, vy=by-ay, wx=px-ax, wy=py-ay; const c1=vx*wx+vy*wy; if(c1<=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2<=c1) return Math.hypot(px-bx,py-by); const t=c1/c2, sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
+
+  const observer = new ResizeObserver(entries=>{ if(entries[0]){ const {width,height}=entries[0].contentRect; updateLayout(width,height); } });
+  observer.observe(document.querySelector('.pane-right'));
+  requestAnimationFrame(loop);
+
+  // --- Simple runtime checks ("tests") ---
+  console.assert(typeof window.setButtonsHTML === 'function', 'setButtonsHTML API must exist');
+  console.assert(document.getElementById('buttons-frame'), 'left iframe must exist');
 })();
 </script>
 </body>
 </html>
-
