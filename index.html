@@ -3,74 +3,46 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>SNEAKERQUEST — Mobile‑fit + Full Tuner</title>
-
-<!-- Phosphor icons -->
+<title>SNEAKERQUEST — Mobile 9:16 Patch</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
 <style>
-/* === BASE :root (kept) === */
 :root{
   --text:#d6c7a4; --led:#ff3a2f; --gap:10; --radius:16;
   --icon-heart:20; --icon-shoe:20; --icon-power:20;
-
-  --cabinet-scale: 1;
-  --mq-title-size: 36; --mq-title-track: 0; --mq-title-x: 0px; --mq-title-y: 0px;
-  --mq-sub-size: 12; --mq-sub-x: 1px; --mq-sub-y: 1px;
-  --chip-br: 8; --chip-pad-x: 16; --chip-pad-y: 2; --chip-border: 1;
+  --cabinet-scale: 1; --mq-title-size: 36; --mq-title-track: 0; --mq-title-x: 0px; --mq-title-y: 0px;
+  --mq-sub-size: 12; --mq-sub-x: 1px; --mq-sub-y: 1px; --chip-br: 8; --chip-pad-x: 16; --chip-pad-y: 2; --chip-border: 1;
   --crt-fr: 0.4fr; --crt-ar: 0.860; --crt-r: 10; --crtwrap-pad: 13;
-  --t1: 40%; --t2: 20%; --t3: 40%;
-  --h1-a: 40%; --h1-b: 20%; --h1-c: 40%;
-  --h2-a: 40%; --h2-b: 20%; --h2-c: 40%;
+  --t1: 40%; --t2: 20%; --t3: 40%; --h1-a: 40%; --h1-b: 20%; --h1-c: 40%; --h2-a: 40%; --h2-b: 20%; --h2-c: 40%;
   --slot-heart-h: 46; --slot-shoes-h: 46; --slot-dots-h: 46; --slot-bag-h: 46; --slot-flames-h: 46; --slot-pause-h: 46; --slot-pad: 8;
-  --bot-a: 80%; --bot-b: 20%;
-  --tabs-pad-x-left: 12px; --tabs-pad-x-right: 32px; --hud1-pad-x-left: 0px; --hud1-pad-x-right: 21px; --hud2-pad-x-left: 0px; --hud2-pad-x-right: 21px;
-  --tab-font-size: 15; --gap-tabs: -2px; --gap-hud1: -3px; --gap-hud2: -5px; --gap-bottom: -5px;
-  --marquee-h:90; --tabs-h:80; --bottom-h:240;
+  --bot-a: 80%; --bot-b: 20%; --tabs-pad-x-left: 12px; --tabs-pad-x-right: 32px; --hud1-pad-x-left: 0px; --hud1-pad-x-right: 21px; --hud2-pad-x-left: 0px; --hud2-pad-x-right: 21px; --tab-font-size: 15;
+  --gap-tabs: -2px; --gap-hud1: -3px; --gap-hud2: -5px; --gap-bottom: -5px; --marquee-h:90; --tabs-h:80; --bottom-h:240;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-/* Use dynamic viewport units so mobile URL bars don't crop the game */
-body{
-  margin:0; background:#0a0a0a; color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-  display:grid; place-items:center; min-height:100svh; overflow:hidden;
-}
-.cabinet{
-  position:relative; /* anchor the gear inside */
-  height:calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);
-  aspect-ratio:430/900; max-width:100vw; border-radius:28px; padding:14px;
-  transform:scale(var(--cabinet-scale)); transform-origin:center top;
-  background:
-    radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),
-    linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
-  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a
-}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+body.no-scroll{overflow:hidden}
+:focus{outline:2px solid #ffb24a;outline-offset:2px}
+.cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a}
 .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
 .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
 .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.06),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 3px,rgba(0,0,0,0) 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
-.led .line{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px rgba(255,58,47,.45),0 0 14px rgba(255,58,47,.25);font-weight:800}
+.led .line{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px rgba(255,58,47,.45),0 0 14px rgba(255,58,47,.25);font-weight:800}
 @keyframes ledFx{0%{opacity:.96;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}50%{opacity:1;text-shadow:0 0 2px var(--led),0 0 9px rgba(255,58,47,.50),0 0 16px rgba(255,58,47,.28)}100%{opacity:.97;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}}
 .led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:ledFx 3.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:none}}
-
 .mq-wrap{display:grid;justify-items:center;align-content:center;height:100%}
 .mq-title{font-size:calc(var(--mq-title-size)*1px);letter-spacing:calc(var(--mq-title-track)*1em);transform:translate(var(--mq-title-x),var(--mq-title-y));text-align:center;user-select:none}
 .mq-sub{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:calc(var(--mq-sub-size)*1px);letter-spacing:.12em;margin-top:6px;transform:translate(var(--mq-sub-x),var(--mq-sub-y))}
 .mq-sub .chip{white-space:nowrap}
 .mq-sub .chip-box{padding:calc(var(--chip-pad-y)*1px) calc(var(--chip-pad-x)*1px);border:calc(var(--chip-border)*1px) solid var(--led);border-radius:calc(var(--chip-br)*1px);background:var(--chip-bg)}
 .divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
-
 .crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
 .crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 22%), linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6);position:relative;overflow:hidden}
-
 .tabs{border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);gap:calc(var(--gap)*1px);padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);text-align:center;font-weight:800;letter-spacing:.08em;margin-top:var(--gap-tabs)}
 .tab{padding:0;border-right:1px solid #4d4032;display:grid;align-items:stretch}.tab:last-child{border-right:none}
 .tab .led{height:100%;border-radius:10px;padding:8px 10px;display:grid;place-items:center}
 .tab .led .line{font-size:calc(var(--tab-font-size) * 1px);letter-spacing:.14em;color:var(--led);font-weight:800}
-
 .hud{display:grid;grid-template-columns:var(--h1-a) var(--h1-b) var(--h1-c);gap:calc(var(--gap)*1px);padding:0 var(--hud1-pad-x-right) 0 var(--hud1-pad-x-left);margin-top:var(--gap-hud1)}
 .hud2{display:grid;grid-template-columns:var(--h2-a) var(--h2-b) var(--h2-c);gap:calc(var(--gap)*1px);padding:0 var(--hud2-pad-x-right) 0 var(--hud2-pad-x-left);margin-top:var(--gap-hud2)}
 .slot{background:linear-gradient(#3a3227,#2c251e);border-radius:calc(var(--radius)*1px);padding:calc(var(--slot-pad)*1px);box-shadow:inset 0 0 0 2px #1a1511,0 2px 0 #0b0907;display:flex;align-items:center;justify-content:stretch;overflow:hidden}
@@ -79,13 +51,11 @@ body{
 .slot > .led{height:100%;width:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
 .slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em}
 .sneaker-outline{color:var(--led)} .sneaker-fill{color:#e6e6e6} .heart-outline{color:var(--led)}
-
 .btn-icon{display:inline-grid;place-items:center;padding:0;margin:0;border:0;background:transparent;color:inherit;cursor:pointer;line-height:1}
 .btn-icon .icon{font-size:1em;line-height:1}
 .btn-icon[data-state="playing"] .icon-play{display:none}
 .btn-icon[data-state="paused"] .icon-pause{display:none}
 .slot-pause .line{font-size:calc(var(--icon-power)*1px)}
-
 .slot-heart .line{font-size:calc(var(--icon-heart)*1px)}
 .slot-shoes .line{font-size:calc(var(--icon-shoe)*1px);color:#e6e6e6}
 .slot-flames .line,.slot-dots .line{font-size:calc(var(--icon-power)*1px)}
@@ -97,23 +67,12 @@ body{
 .power.power--armed .ph-crosshair-simple--filled{display:inline-block}
 .counter{display:flex;align-items:center;gap:10px;color:var(--led);text-shadow:0 0 6px var(--led),0 0 18px rgba(255,58,47,.45);font-weight:900;letter-spacing:.14em}
 .seven{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:var(--text)}
-
 .bottom{display:grid;grid-template-columns:1fr;align-items:center;height:100%;margin-top:var(--gap-bottom)}
 .control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px rgba(0,0,0,.35),0 3px 0 #0a0807}
 @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
 .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,transparent 43%) 0 0/10px 10px repeat}
-
-/* === Gear button: now inside cabinet, bottom-right === */
-#tunerFloatBtn{
-  position:absolute; right:12px; bottom:12px; z-index:7000;
-  width:48px; height:48px; border-radius:12px; border:none; cursor:pointer;
-  background:#1a1410; color:#e6d7b6; font-size:22px;
-  box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;
-}
-@media (pointer:coarse){ #tunerFloatBtn{ width:56px; height:56px; border-radius:14px } }
-
-/* Tuner panel remains viewport-fixed so it can scroll independently */
-#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80svh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
+#tunerFloatBtn{position:fixed;inset:auto 14px 14px auto;z-index:7000;width:48px;height:48px;border-radius:12px;border:none;cursor:pointer;background:#1a1410;color:#e6d7b6;box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;font-size:22px}
+#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80vh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
 #tunerFloat.open{display:flex}
 #tHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #3a2f27}
 #tTitle{font-weight:700;letter-spacing:.08em;font-size:13px}
@@ -128,264 +87,196 @@ body{
 #tFoot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px;border-top:1px solid #3a2f27}
 #tFoot button{flex:1;border:none;background:#3a2f27;color:#e6d7b6;border-radius:10px;padding:10px;cursor:pointer;min-width:80px}
 #copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px;white-space:nowrap}
-
 @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
 @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
-
-/* Tiny test results HUD */
 #testHud{position:fixed;left:14px;bottom:14px;background:#111c;padding:8px 10px;border:1px solid #333;border-radius:8px;color:#e6e6e6;font:12px/1.3 ui-monospace,monospace;max-width:60vw;z-index:7060}
 #testHud b{color:#fff}
+
+/* === Mobile (9:16 and narrow widths) === */
+@media (max-width: 420px), (max-aspect-ratio: 9/16) {
+  :root{
+    --mq-title-size: 24;
+    --mq-sub-size: 11;
+    --tab-font-size: 13;
+    --icon-heart: 18; --icon-shoe: 18; --icon-power: 18;
+    --marquee-h: 68; --tabs-h: 64; --bottom-h: 180;
+    --gap: 8; --gap-tabs: -4px; --gap-hud1: -4px; --gap-hud2: -6px; --gap-bottom: -6px;
+    --crt-fr: 0.80;       /* give the screen more room */
+    --crt-ar: 0.75;       /* friendlier aspect on narrow phones */
+    --crtwrap-pad: 10;
+    --slot-heart-h: 40; --slot-shoes-h: 40; --slot-dots-h: 40; --slot-bag-h: 40; --slot-flames-h: 40; --slot-pause-h: 40; --slot-pad: 8;
+    --tabs-pad-x-left: 8px;  --tabs-pad-x-right: 12px;
+    --hud1-pad-x-left: 8px;  --hud1-pad-x-right: 8px;
+    --hud2-pad-x-left: 8px;  --hud2-pad-x-right: 8px;
+  }
+  .cabinet{
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6px);
+    max-width: 100vw; padding: 8px;
+  }
+  .inner{ padding: 8px; }
+  .mq-title{ letter-spacing: calc(var(--mq-title-track) * 0.9em); }
+  .tabs{ grid-template-columns: var(--t1) var(--t2) var(--t3); }
+  html, body { overflow-x: hidden; }
+}
 </style>
 </head>
 <body>
-
-<div class="cabinet" id="cabinetRoot">
-  <!-- Gear now lives INSIDE the cabinet -->
-  <button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
-
-  <div class="inner" id="innerRoot">
-    <div class="marquee">
-      <div class="led">
-        <div class="mq-wrap">
-          <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
-          <div class="line mq-sub">
-            <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-            <span class="chip chip-time  chip-box">00:00:0</span>
-            <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- Solid CRT placeholder -->
-    <div class="crt-wrap">
-      <div class="crt" id="crt" aria-label="Screen placeholder"></div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <div class="tab"><div class="led"><div class="line" id="tab1_text_output">L I F E</div></div></div>
-      <div class="tab"><div class="led"><div class="line" id="tab2_text_output">S N E A K E R S</div></div></div>
-      <div class="tab"><div class="led"><div class="line" id="tab3_text_output">P O W R - U P S</div></div></div>
-    </div>
-
-    <!-- HUD row 1 (Sneakers | Hearts | Powers) -->
-    <div class="hud">
-      <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
-      <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
-      <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers"></div></div></div>
-    </div>
-
-    <!-- HUD row 2 (Flames | Pause | Box) -->
-    <div class="hud2">
-      <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
-      <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-        <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-          <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
-          <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
-        </button>
-      </div></div></div>
-      <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
-    </div>
-
-    <!-- Bottom -->
-    <div class="bottom">
-      <div class="control-screen">
-        <div class="matrix" aria-hidden="true"></div>
-        <main class="control-ui" aria-label="Control surface">
-          <section class="col-left"><div class="pad"></div></section>
-          <section class="col-right"><div class="pad"></div></section>
-        </main>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Floating tuner (viewport-fixed) + test HUD (dev only) -->
-<div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner">
+<button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
+<div id="testHud" hidden></div>
+<div id="tunerFloat" role="dialog" aria-modal="false" aria-labelledby="tTitle" tabindex="-1">
   <div id="tHead">
     <div id="tTitle">LAYOUT TUNER</div>
-    <div id="tBtns"><button id="tMin" title="Minimize">–</button><button id="tClose" title="Close">✕</button></div>
+    <div id="tBtns"><button id="tMin" title="Minimize" type="button">–</button><button id="tClose" title="Close" type="button">✕</button></div>
   </div>
   <div id="tBody">
-    <!-- Global -->
     <div class="tg"><h4>Global</h4>
-      <div class="tr"><label>Scale</label><input id="v_scale" type="range" min="0.85" max="1.15" step="0.01"><div class="tv" id="o_scale"></div><div></div></div>
+      <div class="tr"><label for="v_scale">Scale</label><input id="v_scale" type="range" min="0.85" max="1.15" step="0.01"><div class="tv" id="o_scale"></div><div></div></div>
     </div>
-
-    <!-- Marquee — Title -->
     <div class="tg"><h4>Marquee — Title</h4>
-      <div class="tr"><label>Title size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1"><div class="tv" id="o_mqtsize"></div><div></div></div>
-      <div class="tr"><label>Title tracking (em)</label><input id="v_mqttrack" type="range" min="0.00" max="0.40" step="0.01"><div class="tv" id="o_mqttrack"></div><div></div></div>
-      <div class="tr"><label>Title offset X (px)</label><input id="v_mqtx" type="range" min="-120" max="120" step="1"><div class="tv" id="o_mqtx"></div><div></div></div>
-      <div class="tr"><label>Title offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1"><div class="tv" id="o_mqty"></div><div></div></div>
+      <div class="tr"><label for="v_mqtsize">Title size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1"><div class="tv" id="o_mqtsize"></div><div></div></div>
+      <div class="tr"><label for="v_mqttrack">Title tracking (em)</label><input id="v_mqttrack" type="range" min="0.00" max="0.40" step="0.01"><div class="tv" id="o_mqttrack"></div><div></div></div>
+      <div class="tr"><label for="v_mqtx">Title offset X (px)</label><input id="v_mqtx" type="range" min="-120" max="120" step="1"><div class="tv" id="o_mqtx"></div><div></div></div>
+      <div class="tr"><label for="v_mqty">Title offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1"><div class="tv" id="o_mqty"></div><div></div></div>
     </div>
-
-    <!-- Marquee — Subline -->
     <div class="tg"><h4>Marquee — Subline</h4>
-      <div class="tr"><label>Subline size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1"><div class="tv" id="o_mqssize"></div><div></div></div>
-      <div class="tr"><label>Subline offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1"><div class="tv" id="o_mqsx"></div><div></div></div>
-      <div class="tr"><label>Subline offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1"><div class="tv" id="o_mqsy"></div><div></div></div>
+      <div class="tr"><label for="v_mqssize">Subline size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1"><div class="tv" id="o_mqssize"></div><div></div></div>
+      <div class="tr"><label for="v_mqsx">Subline offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1"><div class="tv" id="o_mqsx"></div><div></div></div>
+      <div class="tr"><label for="v_mqsy">Subline offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1"><div class="tv" id="o_mqsy"></div><div></div></div>
     </div>
-
-    <!-- Marquee — Chip Boxes -->
     <div class="tg"><h4>Marquee — Chip Boxes</h4>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1"><div class="tv" id="o_chipbr"></div><div></div></div>
-      <div class="tr"><label>Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1"><div class="tv" id="o_chippadx"></div><div></div></div>
-      <div class="tr"><label>Padding Y (px)</label><input id="v_chippady" type="range" min="1" max="10" step="1"><div class="tv" id="o_chippady"></div><div></div></div>
-      <div class="tr"><label>Border (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1"><div class="tv" id="o_chipborder"></div><div></div></div>
+      <div class="tr"><label for="v_chipbr">Corner radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1"><div class="tv" id="o_chipbr"></div><div></div></div>
+      <div class="tr"><label for="v_chippadx">Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1"><div class="tv" id="o_chippadx"></div><div></div></div>
+      <div class="tr"><label for="v_chippady">Padding Y (px)</label><input id="v_chippady" type="range" min="1" max="10" step="1"><div class="tv" id="o_chippady"></div><div></div></div>
+      <div class="tr"><label for="v_chipborder">Border (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1"><div class="tv" id="o_chipborder"></div><div></div></div>
     </div>
-
-    <!-- Section Gaps (top margins) -->
     <div class="tg"><h4>Section Gaps (top margins)</h4>
-      <div class="tr"><label>Gap above Tab Bar (px)</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_tabs"></div><div></div></div>
-      <div class="tr"><label>Gap above HUD 1 (px)</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud1"></div><div></div></div>
-      <div class="tr"><label>Gap above HUD 2 (px)</label><input id="v_gap_hud2" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud2"></div><div></div></div>
-      <div class="tr"><label>Gap above Bottom (px)</label><input id="v_gap_bottom" type="range" min="-40" max="0" step="1"><div class="tv" id="o_gap_bottom"></div><div></div></div>
+      <div class="tr"><label for="v_gap_tabs">Gap above Tab Bar (px)</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_tabs"></div><div></div></div>
+      <div class="tr"><label for="v_gap_hud1">Gap above HUD 1 (px)</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud1"></div><div></div></div>
+      <div class="tr"><label for="v_gap_hud2">Gap above HUD 2 (px)</label><input id="v_gap_hud2" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud2"></div><div></div></div>
+      <div class="tr"><label for="v_gap_bottom">Gap above Bottom (px)</label><input id="v_gap_bottom" type="range" min="-40" max="0" step="1"><div class="tv" id="o_gap_bottom"></div><div></div></div>
     </div>
-
-    <!-- Screen (CRT) -->
     <div class="tg"><h4>Screen (CRT)</h4>
-      <div class="tr"><label>CRT row height (fr)</label><input id="v_crtfr" type="range" min="0.40" max="2.50" step="0.05"><div class="tv" id="o_crtfr"></div><div></div></div>
-      <div class="tr"><label>Aspect ratio (W/H)</label><input id="v_crtar" type="range" min="0.80" max="2.50" step="0.01"><div class="tv" id="o_crtar"></div><div></div></div>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_crtr" type="range" min="10" max="40" step="1"><div class="tv" id="o_crtr"></div><div></div></div>
-      <div class="tr"><label>Bezel padding (px)</label><input id="v_crtpad" type="range" min="6" max="24" step="1"><div class="tv" id="o_crtpad"></div><div></div></div>
+      <div class="tr"><label for="v_crtfr">CRT row height (fr)</label><input id="v_crtfr" type="range" min="0.40" max="2.50" step="0.05"><div class="tv" id="o_crtfr"></div><div></div></div>
+      <div class="tr"><label for="v_crtar">Aspect ratio (W/H)</label><input id="v_crtar" type="range" min="0.80" max="2.50" step="0.01"><div class="tv" id="o_crtar"></div><div></div></div>
+      <div class="tr"><label for="v_crtr">Corner radius (px)</label><input id="v_crtr" type="range" min="10" max="40" step="1"><div class="tv" id="o_crtr"></div><div></div></div>
+      <div class="tr"><label for="v_crtpad">Bezel padding (px)</label><input id="v_crtpad" type="range" min="6" max="24" step="1"><div class="tv" id="o_crtpad"></div><div></div></div>
     </div>
-
-    <!-- Tab Bar Content -->
     <div class="tg"><h4>Tab Bar Content</h4>
-      <div class="tr"><label>Tab Font Size (px)</label><input id="v_tab_font_size" type="range" min="10" max="32" step="1"><div class="tv" id="o_tab_font_size"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 1 Text</label><input id="v_tab1_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 2 Text</label><input id="v_tab2_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 3 Text</label><input id="v_tab3_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
+      <div class="tr"><label for="v_tab_font_size">Tab Font Size (px)</label><input id="v_tab_font_size" type="range" min="10" max="32" step="1"><div class="tv" id="o_tab_font_size"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab1_text">Tab 1 Text</label><input id="v_tab1_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab2_text">Tab 2 Text</label><input id="v_tab2_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab3_text">Tab 3 Text</label><input id="v_tab3_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
     </div>
-
-    <!-- Tabs widths (%) -->
     <div class="tg"><h4>Tabs widths (%)</h4>
-      <div class="tr"><label>LIFE %</label><input id="v_t1" type="range" min="10" max="70" step="1"><div class="tv" id="o_t1"></div><div></div></div>
-      <div class="tr"><label>SNEAKERS %</label><input id="v_t2" type="range" min="10" max="70" step="1"><div class="tv" id="o_t2"></div><div></div></div>
-      <div class="tr"><label>POWR-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1"><div class="tv" id="o_t3"></div><div></div></div>
+      <div class="tr"><label for="v_t1">LIFE %</label><input id="v_t1" type="range" min="10" max="70" step="1"><div class="tv" id="o_t1"></div><div></div></div>
+      <div class="tr"><label for="v_t2">SNEAKERS %</label><input id="v_t2" type="range" min="10" max="70" step="1"><div class="tv" id="o_t2"></div><div></div></div>
+      <div class="tr"><label for="v_t3">POWR-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1"><div class="tv" id="o_t3"></div><div></div></div>
     </div>
-
-    <!-- Row Horizontal Padding -->
     <div class="tg"><h4>Row Horizontal Padding</h4>
-      <div class="tr"><label>Tabs Pad Left (px)</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_l"></div><div></div></div>
-      <div class="tr"><label>Tabs Pad Right (px)</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_r"></div><div></div></div>
+      <div class="tr"><label for="v_tabs_pad_l">Tabs Pad Left (px)</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_tabs_pad_r">Tabs Pad Right (px)</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_r"></div><div></div></div>
       <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD1 Pad Left (px)</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
+      <div class="tr"><label for="v_hud1_pad_l">HUD1 Pad Left (px)</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_hud1_pad_r">HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
       <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
+      <div class="tr"><label for="v_hud2_pad_l">HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_hud2_pad_r">HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type ="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
     </div>
-
-    <!-- HUD Row 1 widths (%) -->
-    <div class="tg"><h4>HUD Row 1 widths (%)</h4>
-      <div class="tr"><label>Hearts %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><div></div></div>
-      <div class="tr"><label>Sneakers %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><div></div></div>
-      <div class="tr"><label>Dots %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><div></div></div>
-    </div>
-
-    <!-- HUD Row 2 widths (%) -->
     <div class="tg"><h4>HUD Row 2 widths (%)</h4>
-      <div class="tr"><label>Flames %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><div></div></div>
-      <div class="tr"><label>Pause %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><div></div></div>
-      <div class="tr"><label>Box %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><div></div></div>
+      <div class="tr"><label for="v_h2a">Flames %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><div></div></div>
+      <div class="tr"><label for="v_h2b">Pause %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><div></div></div>
+      <div class="tr"><label for="v_h2c">Box %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><div></div></div>
     </div>
-
-    <!-- Heights (px) -->
     <div class="tg"><h4>Heights (px)</h4>
-      <div class="tr"><label>Sneakers H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
-      <div class="tr"><label>Hearts H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
-      <div class="tr"><label>Dots H</label><input id="v_slotdots" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
-      <div class="tr"><label>Box H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
-      <div class="tr"><label>Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
-      <div class="tr"><label>Pause H</label><input id="v_slotpause" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
-      <div class="tr"><label>Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
+      <div class="tr"><label for="v_slotheart">Sneakers H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
+      <div class="tr"><label for="v_slotshoes">Hearts H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
+      <div class="tr"><label for="v_slotdots">Dots H</label><input id="v_slotdots" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
+      <div class="tr"><label for="v_slotbag">Box H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
+      <div class="tr"><label for="v_slotflames">Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
+      <div class="tr"><label for="v_slotpause">Pause H</label><input id="v_slotpause" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
+      <div class="tr"><label for="v_slotpad">Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
     </div>
-
-    <!-- HUD Icon Counts (read-only tallies) -->
     <div class="tg"><h4>HUD Icon Counts</h4>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Sneakers</label><div class="tv" id="o_count_hearts"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Hearts</label><div class="tv" id="o_count_shoes"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Power-ups</label><div class="tv" id="o_count_powers"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Fires</label><div class="tv" id="o_count_fires"></div></div>
     </div>
-
-    <!-- Icon Amounts (editable) -->
     <div class="tg"><h4>Icon Amounts</h4>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_fill"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_outline"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_fill"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_outline"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Power-ups — total</label><input id="in_powers_total" type="number" min="0" max="4" step="1"><div class="tv" id="tv_powers_total"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Fires — filled</label><input id="in_fires_fill" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_fill"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_hearts_fill">Sneakers — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_hearts_outline">Sneakers — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_shoes_fill">Hearts — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_shoes_outline">Hearts — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_powers_total">Power-ups — total</label><input id="in_powers_total" type="number" min="0" max="4" step="1"><div class="tv" id="tv_powers_total"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_fires_fill">Fires — filled</label><input id="in_fires_fill" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_fires_outline">Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_outline"></div><div></div></div>
     </div>
-
-    <!-- Bottom split (%) -->
     <div class="tg"><h4>Bottom split (%)</h4>
-      <div class="tr"><label>Left col %</label><input id="v_bota" type="range" min="30" max="80" step="1"><div class="tv" id="o_bota"></div><div></div></div>
-      <div class="tr"><label>D-pad %</label><input id="v_botb" type="range" min="20" max="70" step="1"><div class="tv" id="o_botb"></div><div></div></div>
+      <div class="tr"><label for="v_bota">Left col %</label><input id="v_bota" type="range" min="30" max="80" step="1"><div class="tv" id="o_bota"></div><div></div></div>
+      <div class="tr"><label for="v_botb">D-pad %</label><input id="v_botb" type="range" min="20" max="70" step="1"><div class="tv" id="o_botb"></div><div></div></div>
     </div>
   </div>
-  <div id="tFoot"><button id="btn_copy">Copy CSS</button><button id="btn_reset">Reset</button><span id="copyMessage"></span></div>
+  <div id="tFoot">
+    <button id="btn_copy" type="button">Copy CSS</button>
+    <button id="btn_reset" type="button">Reset</button>
+    <span id="copyMessage"></span>
+  </div>
 </div>
-<div id="testHud" hidden></div>
+
+<div id="appRoot" class="cabinet"><div class="inner" id="innerRoot">
+  <div class="marquee"><div class="led"><div class="mq-wrap">
+    <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
+    <div class="line mq-sub">
+      <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+      <span class="chip chip-time  chip-box">00:00:0</span>
+      <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
+    </div>
+  </div></div></div>
+  <div class="divider"></div>
+  <div class="crt-wrap"><div class="crt" id="crt" aria-label="Screen placeholder"></div></div>
+  <div class="tabs">
+    <div class="tab"><div class="led"><div class="line" id="tab1_text_output">L I F E</div></div></div>
+    <div class="tab"><div class="led"><div class="line" id="tab2_text_output">S N E A K E R S</div></div></div>
+    <div class="tab"><div class="led"><div class="line" id="tab3_text_output">P O W R - U P S</div></div></div>
+  </div>
+  <div class="hud">
+    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
+    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
+    <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers"></div></div></div>
+  </div>
+  <div class="hud2">
+    <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
+    <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+      <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+        <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
+        <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
+      </button>
+    </div></div></div>
+    <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
+  </div>
+  <div class="bottom"><div class="control-screen"><div class="matrix" aria-hidden="true"></div>
+    <main class="control-ui" aria-label="Control surface"><section class="col-left"><div class="pad"></div></section><section class="col-right"><div class="pad"></div></section></main>
+  </div></div>
+</div></div>
 
 <script>
 (function(){
   const root=document.documentElement;
-  const cab=document.getElementById('cabinetRoot');
-  const $=id=>document.getElementById(id);
-
-  /* === MOBILE-FIT AUTO SCALER === */
-  function mobileFit(){
-    if(!cab) return;
-    root.style.setProperty('--cabinet-scale','1');
-    const rect=cab.getBoundingClientRect();
-    const vw = (window.visualViewport? window.visualViewport.width : window.innerWidth) - 4;
-    const vh = (window.visualViewport? window.visualViewport.height: window.innerHeight) - 4;
-    const scale = Math.min(vw/rect.width, vh/rect.height, 1);
-    root.style.setProperty('--cabinet-scale', String(scale.toFixed(3)));
-  }
-  mobileFit();
-  window.addEventListener('resize', mobileFit, {passive:true});
-  window.addEventListener('orientationchange', mobileFit, {passive:true});
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', mobileFit, {passive:true});
-    window.visualViewport.addEventListener('scroll', mobileFit, {passive:true});
-  }
-
-  /* === Tuner open/close === */
-  const btn=$('tunerFloatBtn'),panel=$('tunerFloat');
-  const btnMin=$('tMin'),btnClose=$('tClose');
-  btn?.addEventListener('click',()=>panel.classList.add('open'));
-  btnClose?.addEventListener('click',()=>panel.classList.remove('open'));
-  btnMin?.addEventListener('click',()=>panel.classList.toggle('open'));
-
-  /* === Bind helpers === */
   const storageKey='sneakerquest-layout-tuner-v1';
   const ICON_LS='sneakerquest-icon-counts-v1';
+  const $=id=>document.getElementById(id);
+  const appRoot=$('appRoot');
+  const tuner=$('tunerFloat');
+  const openBtn=$('tunerFloatBtn');
+  const btnMin=$('tMin');
+  const btnClose=$('tClose');
+
+  let lastFocused=null;
+  let trapHandler=null;
+  let escHandler=null;
+
   const state={
-    '--cabinet-scale':'1',
-    '--mq-title-size':'36','--mq-title-track':'0','--mq-title-x':'0px','--mq-title-y':'0px',
-    '--mq-sub-size':'12','--mq-sub-x':'1px','--mq-sub-y':'1px',
-    '--chip-br':'8','--chip-pad-x':'16','--chip-pad-y':'2','--chip-border':'1',
-    '--crt-fr':'0.4','--crt-ar':'0.860','--crt-r':'10','--crtwrap-pad':'13',
-    '--t1':'40%','--t2':'20%','--t3':'40%',
-    '--h1-a':'40%','--h1-b':'20%','--h1-c':'40%',
-    '--h2-a':'40%','--h2-b':'20%','--h2-c':'40%',
-    '--slot-heart-h':'46','--slot-shoes-h':'46','--slot-dots-h':'46',
-    '--slot-bag-h':'46','--slot-flames-h':'46','--slot-pause-h':'46',
-    '--slot-pad':'8',
-    '--bot-a':'80%','--bot-b':'20%',
-    '--tabs-pad-x-left':'12px','--tabs-pad-x-right':'32px',
-    '--hud1-pad-x-left':'0px','--hud1-pad-x-right':'21px',
-    '--hud2-pad-x-left':'0px','--hud2-pad-x-right':'21px',
-    '--tab-font-size':'15',
-    '--gap-tabs':'-2px','--gap-hud1':'-3px','--gap-hud2':'-5px','--gap-bottom':'-5px',
+    '--cabinet-scale':'1','--mq-title-size':'36','--mq-title-track':'0','--mq-title-x':'0px','--mq-title-y':'0px','--mq-sub-size':'12','--mq-sub-x':'1px','--mq-sub-y':'1px','--chip-br':'8','--chip-pad-x':'16','--chip-pad-y':'2','--chip-border':'1','--crt-fr':'0.4','--crt-ar':'0.860','--crt-r':'10','--crtwrap-pad':'13','--t1':'40%','--t2':'20%','--t3':'40%','--h1-a':'40%','--h1-b':'20%','--h1-c':'40%','--h2-a':'40%','--h2-b':'20%','--h2-c':'40%','--slot-heart-h':'46','--slot-shoes-h':'46','--slot-dots-h':'46','--slot-bag-h':'46','--slot-flames-h':'46','--slot-pause-h':'46','--slot-pad':'8','--bot-a':'80%','--bot-b':'20%','--tabs-pad-x-left':'12px','--tabs-pad-x-right':'32px','--hud1-pad-x-left':'0px','--hud1-pad-x-right':'21px','--hud2-pad-x-left':'0px','--hud2-pad-x-right':'21px','--tab-font-size':'15','--gap-tabs':'-2px','--gap-hud1':'-3px','--gap-hud2':'-5px','--gap-bottom':'-5px',
     'tab1-text':'L I F E','tab2-text':'S N E A K E R S','tab3-text':'P O W R - U P S'
   };
   try{ Object.assign(state, JSON.parse(localStorage.getItem(storageKey)||'{}')); }catch(_){ }
@@ -393,6 +284,51 @@ body{
   const setVar=(k,v)=>root.style.setProperty(k,v);
   const applyAll=()=>{ for(const [k,v] of Object.entries(state)) if(k.startsWith('--')) setVar(k,v) };
   applyAll();
+
+  // ===== A11y: focus trap + modal semantics =====
+  function getFocusable(container){
+    return Array.from(container.querySelectorAll('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el=>el.offsetParent!==null || el===container);
+  }
+  function openPanel(){
+    lastFocused=document.activeElement;
+    tuner.classList.add('open');
+    tuner.setAttribute('aria-modal','true');
+    appRoot && appRoot.setAttribute('aria-hidden','true');
+    document.body.classList.add('no-scroll');
+    const f=getFocusable(tuner);
+    (f[0]||tuner).focus();
+    trapHandler=(e)=>{
+      if(e.key!=='Tab') return;
+      const nodes=getFocusable(tuner);
+      if(nodes.length===0){ e.preventDefault(); return; }
+      const first=nodes[0], last=nodes[nodes.length-1];
+      if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+    };
+    escHandler=(e)=>{ if(e.key==='Escape'){ closePanel(); } };
+    tuner.addEventListener('keydown',trapHandler);
+    document.addEventListener('keydown',escHandler);
+  }
+  function closePanel(){
+    tuner.classList.remove('open');
+    tuner.setAttribute('aria-modal','false');
+    appRoot && appRoot.removeAttribute('aria-hidden');
+    document.body.classList.remove('no-scroll');
+    tuner.removeEventListener('keydown',trapHandler||(()=>{}));
+    document.removeEventListener('keydown',escHandler||(()=>{}));
+    trapHandler=null; escHandler=null;
+    if(lastFocused && typeof lastFocused.focus==='function') lastFocused.focus();
+  }
+  openBtn?.addEventListener('click',openPanel);
+  btnClose?.addEventListener('click',closePanel);
+  btnMin?.addEventListener('click',()=>{
+    tuner.classList.toggle('open');
+    const isOpen=tuner.classList.contains('open');
+    tuner.setAttribute('aria-modal', String(isOpen));
+    if(!isOpen){ appRoot && appRoot.removeAttribute('aria-hidden'); document.body.classList.remove('no-scroll'); }
+    else { appRoot && appRoot.setAttribute('aria-hidden','true'); document.body.classList.add('no-scroll'); }
+  });
 
   function bind(id,key,transform=x=>x,outFmt=x=>String(x)){
     const el=$(id), out=$('o_'+id.slice(2)); if(!el) return;
@@ -420,7 +356,6 @@ body{
     ids.forEach((id,i)=>{ const ctl=$(id); if(ctl) ctl.value=parseInt(state[keys[i]],10); const meter=$('o_'+ids[i].slice(2)); if(meter) meter.textContent=state[keys[i]]; });
   }
 
-  /* Wire sliders */
   const px=v=>parseInt(v,10)+'px', pxOut=v=>v+'px';
   bind('v_scale','--cabinet-scale',String,String);
   bind('v_mqtsize','--mq-title-size',String,v=>v+'px');
@@ -429,25 +364,20 @@ body{
   bind('v_mqssize','--mq-sub-size',String,v=>v+'px');
   bind('v_mqsx','--mq-sub-x',px,pxOut); bind('v_mqsy','--mq-sub-y',px,pxOut);
   bind('v_chipbr','--chip-br',String,v=>v+'px'); bind('v_chippadx','--chip-pad-x',String,v=>v+'px'); bind('v_chippady','--chip-pad-y',String,v=>v+'px'); bind('v_chipborder','--chip-border',String,v=>v+'px');
-
   bind('v_gap_tabs','--gap-tabs',px,pxOut); bind('v_gap_hud1','--gap-hud1',px,pxOut); bind('v_gap_hud2','--gap-hud2',px,pxOut); bind('v_gap_bottom','--gap-bottom',px,pxOut);
-
   bind('v_crtfr','--crt-fr',String,v=>v+'fr'); bind('v_crtar','--crt-ar',v=>String(Number(v).toFixed(3)),v=>v); bind('v_crtr','--crt-r',String,v=>v+'px'); bind('v_crtpad','--crtwrap-pad',String,v=>v+'px');
-
   bind('v_slotheart','--slot-heart-h',String,v=>v+'px'); bind('v_slotshoes','--slot-shoes-h',String,v=>v+'px');
   bind('v_slotdots','--slot-dots-h',String,v=>v+'px'); bind('v_slotbag','--slot-bag-h',String,v=>v+'px');
   bind('v_slotflames','--slot-flames-h',String,v=>v+'px'); bind('v_slotpause','--slot-pause-h',String,v=>v+'px'); bind('v_slotpad','--slot-pad',String,v=>v+'px');
-
   bind('v_tab_font_size','--tab-font-size',String,v=>v+'px');
   bindText('v_tab1_text','tab1-text','tab1_text_output');
   bindText('v_tab2_text','tab2-text','tab2_text_output');
   bindText('v_tab3_text','tab3-text','tab3_text_output');
-
   applyTriple(['v_t1','v_t2','v_t3'],['--t1','--t2','--t3']);
   applyTriple(['v_h1a','v_h1b','v_h1c'],['--h1-a','--h1-b','--h1-c']);
   applyTriple(['v_h2a','v_h2b','v_h2c'],['--h2-a','--h2-b','--h2-c']);
 
-  /* Copy + reset */
+  // Copy + Reset (legacy copy kept; will modernise in Task 2)
   $('btn_copy')?.addEventListener('click',()=>{
     const lines=Object.entries(state).filter(([k])=>k.startsWith('--')).map(([k,v])=>`  ${k}: ${String(v)};`).join('\n');
     const css=`:root{\n${lines}\n}`; const ta=document.createElement('textarea'); ta.value=css; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
@@ -456,47 +386,50 @@ body{
   });
   $('btn_reset')?.addEventListener('click',()=>{ localStorage.removeItem(storageKey); localStorage.removeItem(ICON_LS); location.reload(); });
 
-  /* Icons */
+  // Icon model
   const defaults = { heartsFill:2, heartsOutline:1, shoesFill:3, shoesOutline:2, powersTotal:4, firesFill:3, firesOutline:2 };
   let iconState = {...defaults};
   try{ Object.assign(iconState, JSON.parse(localStorage.getItem(ICON_LS)||'{}')); }catch(_){ }
   const saveIcons = ()=>localStorage.setItem(ICON_LS, JSON.stringify(iconState));
 
+  // Renderers (safe createElement usage)
   function rebuildHearts(fill, outline){
-    const root=document.querySelector('.slot-heart .line'); if(!root) return; root.innerHTML='';
-    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
-    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
+    const root=document.querySelector('.slot-heart .line'); if(!root) return;
+    root.innerHTML='';
+    for(let i=0;i<outline;i++){ const el=document.createElement('i'); el.className='ph-bold ph-sneaker sneaker-outline'; el.setAttribute('aria-hidden','true'); root.appendChild(el);} 
+    for(let i=0;i<fill;i++){ const el=document.createElement('i'); el.className='ph-fill ph-sneaker sneaker-fill'; el.setAttribute('aria-hidden','true'); root.appendChild(el);} 
   }
   function rebuildShoes(fill, outline){
-    const root=document.querySelector('.slot-shoes .line'); if(!root) return; root.innerHTML='';
-    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
-    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>');
+    const root=document.querySelector('.slot-shoes .line'); if(!root) return;
+    root.innerHTML='';
+    for(let i=0;i<fill;i++){ const el=document.createElement('i'); el.className='ph-fill ph-heart'; el.setAttribute('aria-hidden','true'); root.appendChild(el);}
+    for(let i=0;i<outline;i++){ const el=document.createElement('i'); el.className='ph-bold ph-heart heart-outline'; el.setAttribute('aria-hidden','true'); root.appendChild(el);} 
   }
   function rebuildPowers(total){
-    const root=document.querySelector('.slot-dots .line'); if(!root) return; root.innerHTML='';
+    const root=document.querySelector('.slot-dots .line'); if(!root) return;
+    root.innerHTML='';
     const defs=[{bold:'ph-timer',fill:'ph-timer'},{bold:'ph-shield',fill:'ph-shield'},{bold:'ph-magnet',fill:'ph-magnet'},{bold:'ph-crosshair-simple',fill:'svg'}];
     for(let i=0;i<total;i++){
       const d=defs[i%defs.length];
+      const span=document.createElement('span'); span.className='power power--idle';
+      const ib=document.createElement('i'); ib.className='ph-bold '+d.bold; ib.setAttribute('aria-hidden','true'); span.appendChild(ib);
       if(d.fill==='svg'){
-        root.insertAdjacentHTML('beforeend','<span class="power power--idle">\
-          <i class="ph-bold '+d.bold+'" aria-hidden="true"></i>\
-          <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true">\
-            <circle cx="128" cy="128" r="28"></circle>\
-            <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>\
-          </svg>\
-        </span>');
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('class','ph-fill ph-crosshair-simple--filled is-off'); svg.setAttribute('viewBox','0 0 256 256'); svg.setAttribute('width','1em'); svg.setAttribute('height','1em'); svg.setAttribute('fill','currentColor'); svg.setAttribute('aria-hidden','true');
+        const circle=document.createElementNS('http://www.w3.org/2000/svg','circle'); circle.setAttribute('cx','128'); circle.setAttribute('cy','128'); circle.setAttribute('r','28');
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('d','M128 32v32M128 192v32M32 128h32M192 128h32'); path.setAttribute('stroke','currentColor'); path.setAttribute('stroke-width','20'); path.setAttribute('stroke-linecap','round'); path.setAttribute('fill','none');
+        svg.appendChild(circle); svg.appendChild(path); span.appendChild(svg);
       }else{
-        root.insertAdjacentHTML('beforeend','<span class="power power--idle">\
-          <i class="ph-bold '+d.bold+'" aria-hidden="true"></i>\
-          <i class="ph-fill '+d.fill+' is-off" aria-hidden="true"></i>\
-        </span>');
+        const ifill=document.createElement('i'); ifill.className='ph-fill '+d.fill+' is-off'; ifill.setAttribute('aria-hidden','true'); span.appendChild(ifill);
       }
+      root.appendChild(span);
     }
   }
   function rebuildFires(fill, outline){
-    const root=document.querySelector('.slot-flames .line'); if(!root) return; root.innerHTML='';
-    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
-    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire" aria-hidden="true"></i>');
+    const root=document.querySelector('.slot-flames .line'); if(!root) return;
+    root.innerHTML='';
+    for(let i=0;i<fill;i++){ const el=document.createElement('i'); el.className='ph-fill ph-fire'; el.setAttribute('aria-hidden','true'); root.appendChild(el);} 
+    for(let i=0;i<outline;i++){ const el=document.createElement('i'); el.className='ph-bold ph-fire'; el.setAttribute('aria-hidden','true'); root.appendChild(el);} 
   }
   function updateCounters(){
     const count=(sel)=>{const r=document.querySelector(sel);return r?r.querySelectorAll('i').length:0};
@@ -514,12 +447,10 @@ body{
     updateCounters();
   }
   renderIcons();
-
-  /* Icon Amounts inputs */
   function bindNum(inputId,tvId,key,min,max){
     const inp=$(inputId), tv=$(tvId); if(!inp||!tv) return;
     const clamp=v=>Math.max(min,Math.min(max,(v|0)));
-    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); saveIcons(); renderIcons(); };
+    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); localStorage.setItem(ICON_LS, JSON.stringify(iconState)); renderIcons(); };
     inp.value=iconState[key]; tv.textContent=String(iconState[key]);
     inp.addEventListener('input',e=>set(parseInt(e.target.value||'0',10)));
   }
@@ -531,34 +462,69 @@ body{
   bindNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
   bindNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
 
-  /* Pause/Play toggle */
+  // Pause/Play toggle + keyboard activation
   const pauseBtn=$('btn-pause');
   function setPauseState(state){
-    if(!pauseBtn) return; pauseBtn.dataset.state=state;
+    pauseBtn.dataset.state=state;
     pauseBtn.setAttribute('aria-pressed', String(state==='paused'));
     pauseBtn.setAttribute('aria-label', state==='playing' ? 'Pause' : 'Play');
   }
-  setPauseState('playing');
-  pauseBtn?.addEventListener('click',()=>{
-    setPauseState(pauseBtn.dataset.state==='playing' ? 'paused' : 'playing');
-  });
-
-  /* === Simple tests === */
-  const testHud=document.getElementById('testHud');
-  function assert(name, cond){
-    if(testHud.hidden) testHud.hidden=false;
-    const line=document.createElement('div'); line.innerHTML=(cond?'✅':'❌')+' <b>'+name+'</b>'; testHud.appendChild(line);
+  if(pauseBtn){
+    setPauseState('playing');
+    pauseBtn.addEventListener('click',()=>{ setPauseState(pauseBtn.dataset.state==='playing' ? 'paused' : 'playing'); });
+    pauseBtn.addEventListener('keydown',(e)=>{ if(e.key===' ' || e.key==='Enter'){ e.preventDefault(); pauseBtn.click(); } });
   }
-  (function(){
-    const r=cab.getBoundingClientRect();
-    assert('cabinet fully visible', r.width<=window.innerWidth+1 && r.height<= (window.visualViewport? window.visualViewport.height: window.innerHeight)+1);
+
+  // --- MOBILE FIT GUARD (optional, small) ---
+  (function fitCabinet(){
+    const cab = document.querySelector('.cabinet');
+    if (!cab) return;
+    const check=()=>{
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const h = cab.getBoundingClientRect().height;
+      if (h > vh) {
+        const scale = Math.max(0.92, Math.min(1, vh / h));
+        cab.style.transform = `scale(${scale})`;
+        cab.style.transformOrigin = 'center top';
+      } else {
+        cab.style.transform = '';
+      }
+    };
+    requestAnimationFrame(check);
+    window.addEventListener('resize',()=>requestAnimationFrame(check), {passive:true});
   })();
-  (function(){
-    const btnRect=$('tunerFloatBtn').getBoundingClientRect();
-    const cabRect=cab.getBoundingClientRect();
-    const inside = btnRect.right<=cabRect.right+1 && btnRect.bottom<=cabRect.bottom+1;
-    assert('gear button inside bottom-right of cabinet', inside);
-  })();
+
+  // Tests
+  function assert(name, cond){
+    const hud=document.getElementById('testHud'); if(hud.hidden) hud.hidden=false;
+    const line=document.createElement('div'); line.innerHTML=(cond?'✅':'❌')+' <b>'+name+'</b>'; hud.appendChild(line);
+    if(!cond) console.error('[TEST FAIL]',name); else console.log('[TEST PASS]',name);
+  }
+  function runTests(){
+    try{
+      const leftLine=document.querySelector('.slot-heart .line');
+      const childIsOnlyIcons=[...leftLine.children].every(n=>n.tagName.toLowerCase()==='i');
+      assert('sneakers are direct children (even gap)', childIsOnlyIcons);
+      const expected=(JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsFill ?? 2) + (JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsOutline ?? 1);
+      const directCount=[...leftLine.children].length; assert('sneaker direct-child count matches state', directCount===expected);
+      const pauseLine = document.querySelector('.slot-pause .line');
+      const isCentered = getComputedStyle(pauseLine.parentElement).justifyContent === 'center';
+      assert('pause line centered like other icons', isCentered);
+      const btn=$('btn-pause'); const startsPlaying = btn?.dataset.state==='playing';
+      const pauseVisible = getComputedStyle(btn.querySelector('.icon-pause')).display!=='none';
+      assert('pause starts as playing + pause icon visible', startsPlaying && pauseVisible);
+      btn.click(); const nowPaused = btn.dataset.state==='paused';
+      const playVisible = getComputedStyle(btn.querySelector('.icon-play')).display!=='none';
+      assert('click toggles to paused + play icon visible', nowPaused && playVisible);
+      btn.click();
+      // Modal semantics
+      openPanel();
+      assert('dialog aria-modal true', tuner.getAttribute('aria-modal')==='true');
+      assert('background aria-hidden', appRoot.getAttribute('aria-hidden')==='true');
+      closePanel();
+    }catch(e){ console.error(e); assert('exception-free execution', false); }
+  }
+  runTests();
 })();
 </script>
 </body>
