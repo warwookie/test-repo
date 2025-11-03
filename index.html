@@ -1,10 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>SNEAKERQUEST — Lite (Solid CRT + Icon Tuner)</title>
+<title>SNEAKERQUEST — Mobile‑fit + Full Tuner</title>
 
 <!-- Phosphor icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
@@ -12,65 +11,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
-/* === BASE :root (your variables applied) === */
+/* === BASE :root (kept) === */
 :root{
-  --text:#d6c7a4; 
-  --led:#ff3a2f;
-  --gap:10; 
-  --radius:16; 
+  --text:#d6c7a4; --led:#ff3a2f; --gap:10; --radius:16;
   --icon-heart:20; --icon-shoe:20; --icon-power:20;
 
   --cabinet-scale: 1;
-  --mq-title-size: 36;
-  --mq-title-track: 0;
-  --mq-title-x: 0px;
-  --mq-title-y: 0px;
-  --mq-sub-size: 12;
-  --mq-sub-x: 1px;
-  --mq-sub-y: 1px;
-  --chip-br: 8;
-  --chip-pad-x: 16;
-  --chip-pad-y: 2;
-  --chip-border: 1;
-  --crt-fr: 0.4fr; /* keep fr to render on first paint */
-  --crt-ar: 0.860;
-  --crt-r: 10;
-  --crtwrap-pad: 13;
-  --t1: 40%;
-  --t2: 20%;
-  --t3: 40%;
-  --h1-a: 40%;
-  --h1-b: 20%;
-  --h1-c: 40%;
-  --h2-a: 40%;
-  --h2-b: 20%;
-  --h2-c: 40%;
-  --slot-heart-h: 46;
-  --slot-shoes-h: 46;
-  --slot-dots-h: 46;
-  --slot-bag-h: 46;
-  --slot-flames-h: 46;
-  --slot-pause-h: 46;
-  --slot-pad: 8;
-  --bot-a: 80%;
-  --bot-b: 20%;
-  --tabs-pad-x-left: 12px;
-  --tabs-pad-x-right: 32px;
-  --hud1-pad-x-left: 0px;
-  --hud1-pad-x-right: 21px;
-  --hud2-pad-x-left: 0px;
-  --hud2-pad-x-right: 21px;
-  --tab-font-size: 15;
-  --gap-tabs: -2px;
-  --gap-hud1: -3px;
-  --gap-hud2: -5px;
-  --gap-bottom: -5px;
+  --mq-title-size: 36; --mq-title-track: 0; --mq-title-x: 0px; --mq-title-y: 0px;
+  --mq-sub-size: 12; --mq-sub-x: 1px; --mq-sub-y: 1px;
+  --chip-br: 8; --chip-pad-x: 16; --chip-pad-y: 2; --chip-border: 1;
+  --crt-fr: 0.4fr; --crt-ar: 0.860; --crt-r: 10; --crtwrap-pad: 13;
+  --t1: 40%; --t2: 20%; --t3: 40%;
+  --h1-a: 40%; --h1-b: 20%; --h1-c: 40%;
+  --h2-a: 40%; --h2-b: 20%; --h2-c: 40%;
+  --slot-heart-h: 46; --slot-shoes-h: 46; --slot-dots-h: 46; --slot-bag-h: 46; --slot-flames-h: 46; --slot-pause-h: 46; --slot-pad: 8;
+  --bot-a: 80%; --bot-b: 20%;
+  --tabs-pad-x-left: 12px; --tabs-pad-x-right: 32px; --hud1-pad-x-left: 0px; --hud1-pad-x-right: 21px; --hud2-pad-x-left: 0px; --hud2-pad-x-right: 21px;
+  --tab-font-size: 15; --gap-tabs: -2px; --gap-hud1: -3px; --gap-hud2: -5px; --gap-bottom: -5px;
   --marquee-h:90; --tabs-h:80; --bottom-h:240;
 }
-
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
-.cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a}
+*{box-sizing:border-box}
+html,body{height:100%}
+/* Use dynamic viewport units so mobile URL bars don't crop the game */
+body{
+  margin:0; background:#0a0a0a; color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  display:grid; place-items:center; min-height:100svh; overflow:hidden;
+}
+.cabinet{
+  position:relative; /* anchor the gear inside */
+  height:calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);
+  aspect-ratio:430/900; max-width:100vw; border-radius:28px; padding:14px;
+  transform:scale(var(--cabinet-scale)); transform-origin:center top;
+  background:
+    radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),
+    linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
+  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a
+}
 .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
 .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
 .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.06),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 3px,rgba(0,0,0,0) 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -100,20 +77,13 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
 .slot-heart{height:calc(var(--slot-heart-h)*1px)} .slot-shoes{height:calc(var(--slot-shoes-h)*1px)} .slot-dots{height:calc(var(--slot-dots-h)*1px)}
 .slot-bag{height:calc(var(--slot-bag-h)*1px)} .slot-flames{height:calc(var(--slot-flames-h)*1px)} .slot-pause{height:calc(var(--slot-pause-h)*1px)}
 .slot > .led{height:100%;width:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
-/* Uniform spacing + alignment for icons */
 .slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em}
-/* Make outline sneakers red without grouping (so gap applies to each icon equally) */
-.sneaker-outline{color:var(--led)}
-/* New: filled sneakers should be white; outline hearts should be red */
-.sneaker-fill{color:#e6e6e6}
-.heart-outline{color:var(--led)}
+.sneaker-outline{color:var(--led)} .sneaker-fill{color:#e6e6e6} .heart-outline{color:var(--led)}
 
-/* Pause/Play button — reset to pure icon, inherit LED styling */
 .btn-icon{display:inline-grid;place-items:center;padding:0;margin:0;border:0;background:transparent;color:inherit;cursor:pointer;line-height:1}
 .btn-icon .icon{font-size:1em;line-height:1}
 .btn-icon[data-state="playing"] .icon-play{display:none}
 .btn-icon[data-state="paused"] .icon-pause{display:none}
-/* Make the pause slot icons size match other HUD icons */
 .slot-pause .line{font-size:calc(var(--icon-power)*1px)}
 
 .slot-heart .line{font-size:calc(var(--icon-heart)*1px)}
@@ -133,8 +103,17 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
 @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
 .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,transparent 43%) 0 0/10px 10px repeat}
 
-#tunerFloatBtn{position:fixed;inset:auto 14px 14px auto;z-index:7000;width:48px;height:48px;border-radius:12px;border:none;cursor:pointer;background:#1a1410;color:#e6d7b6;box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;font-size:22px}
-#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80vh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
+/* === Gear button: now inside cabinet, bottom-right === */
+#tunerFloatBtn{
+  position:absolute; right:12px; bottom:12px; z-index:7000;
+  width:48px; height:48px; border-radius:12px; border:none; cursor:pointer;
+  background:#1a1410; color:#e6d7b6; font-size:22px;
+  box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;
+}
+@media (pointer:coarse){ #tunerFloatBtn{ width:56px; height:56px; border-radius:14px } }
+
+/* Tuner panel remains viewport-fixed so it can scroll independently */
+#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80svh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
 #tunerFloat.open{display:flex}
 #tHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #3a2f27}
 #tTitle{font-weight:700;letter-spacing:.08em;font-size:13px}
@@ -149,6 +128,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
 #tFoot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px;border-top:1px solid #3a2f27}
 #tFoot button{flex:1;border:none;background:#3a2f27;color:#e6d7b6;border-radius:10px;padding:10px;cursor:pointer;min-width:80px}
 #copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px;white-space:nowrap}
+
 @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
 @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
 
@@ -159,9 +139,70 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
 </head>
 <body>
 
-<button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
-<div id="testHud" hidden></div>
+<div class="cabinet" id="cabinetRoot">
+  <!-- Gear now lives INSIDE the cabinet -->
+  <button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
 
+  <div class="inner" id="innerRoot">
+    <div class="marquee">
+      <div class="led">
+        <div class="mq-wrap">
+          <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
+          <div class="line mq-sub">
+            <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+            <span class="chip chip-time  chip-box">00:00:0</span>
+            <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Solid CRT placeholder -->
+    <div class="crt-wrap">
+      <div class="crt" id="crt" aria-label="Screen placeholder"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab"><div class="led"><div class="line" id="tab1_text_output">L I F E</div></div></div>
+      <div class="tab"><div class="led"><div class="line" id="tab2_text_output">S N E A K E R S</div></div></div>
+      <div class="tab"><div class="led"><div class="line" id="tab3_text_output">P O W R - U P S</div></div></div>
+    </div>
+
+    <!-- HUD row 1 (Sneakers | Hearts | Powers) -->
+    <div class="hud">
+      <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
+      <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
+      <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers"></div></div></div>
+    </div>
+
+    <!-- HUD row 2 (Flames | Pause | Box) -->
+    <div class="hud2">
+      <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
+      <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+        <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+          <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
+          <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
+        </button>
+      </div></div></div>
+      <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="bottom">
+      <div class="control-screen">
+        <div class="matrix" aria-hidden="true"></div>
+        <main class="control-ui" aria-label="Control surface">
+          <section class="col-left"><div class="pad"></div></section>
+          <section class="col-right"><div class="pad"></div></section>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating tuner (viewport-fixed) + test HUD (dev only) -->
 <div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner">
   <div id="tHead">
     <div id="tTitle">LAYOUT TUNER</div>
@@ -173,7 +214,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>Scale</label><input id="v_scale" type="range" min="0.85" max="1.15" step="0.01"><div class="tv" id="o_scale"></div><div></div></div>
     </div>
 
-    <!-- Marquee -->
+    <!-- Marquee — Title -->
     <div class="tg"><h4>Marquee — Title</h4>
       <div class="tr"><label>Title size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1"><div class="tv" id="o_mqtsize"></div><div></div></div>
       <div class="tr"><label>Title tracking (em)</label><input id="v_mqttrack" type="range" min="0.00" max="0.40" step="0.01"><div class="tv" id="o_mqttrack"></div><div></div></div>
@@ -181,13 +222,14 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>Title offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1"><div class="tv" id="o_mqty"></div><div></div></div>
     </div>
 
+    <!-- Marquee — Subline -->
     <div class="tg"><h4>Marquee — Subline</h4>
       <div class="tr"><label>Subline size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1"><div class="tv" id="o_mqssize"></div><div></div></div>
       <div class="tr"><label>Subline offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1"><div class="tv" id="o_mqsx"></div><div></div></div>
       <div class="tr"><label>Subline offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1"><div class="tv" id="o_mqsy"></div><div></div></div>
     </div>
 
-    <!-- Chip boxes -->
+    <!-- Marquee — Chip Boxes -->
     <div class="tg"><h4>Marquee — Chip Boxes</h4>
       <div class="tr"><label>Corner radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1"><div class="tv" id="o_chipbr"></div><div></div></div>
       <div class="tr"><label>Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1"><div class="tv" id="o_chippadx"></div><div></div></div>
@@ -195,7 +237,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>Border (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1"><div class="tv" id="o_chipborder"></div><div></div></div>
     </div>
 
-    <!-- Section Gaps -->
+    <!-- Section Gaps (top margins) -->
     <div class="tg"><h4>Section Gaps (top margins)</h4>
       <div class="tr"><label>Gap above Tab Bar (px)</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_tabs"></div><div></div></div>
       <div class="tr"><label>Gap above HUD 1 (px)</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud1"></div><div></div></div>
@@ -235,7 +277,14 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
       <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
       <div class="tr"><label>HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min ="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
+      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
+    </div>
+
+    <!-- HUD Row 1 widths (%) -->
+    <div class="tg"><h4>HUD Row 1 widths (%)</h4>
+      <div class="tr"><label>Hearts %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><div></div></div>
+      <div class="tr"><label>Sneakers %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><div></div></div>
+      <div class="tr"><label>Dots %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><div></div></div>
     </div>
 
     <!-- HUD Row 2 widths (%) -->
@@ -256,7 +305,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
     </div>
 
-    <!-- Icon counters (read-only tallies) -->
+    <!-- HUD Icon Counts (read-only tallies) -->
     <div class="tg"><h4>HUD Icon Counts</h4>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Sneakers</label><div class="tv" id="o_count_hearts"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Hearts</label><div class="tv" id="o_count_shoes"></div></div>
@@ -275,85 +324,50 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_outline"></div><div></div></div>
     </div>
 
-    <!-- Bottom split -->
+    <!-- Bottom split (%) -->
     <div class="tg"><h4>Bottom split (%)</h4>
       <div class="tr"><label>Left col %</label><input id="v_bota" type="range" min="30" max="80" step="1"><div class="tv" id="o_bota"></div><div></div></div>
       <div class="tr"><label>D-pad %</label><input id="v_botb" type="range" min="20" max="70" step="1"><div class="tv" id="o_botb"></div><div></div></div>
     </div>
   </div>
-  <div id="tFoot">
-    <button id="btn_copy">Copy CSS</button>
-    <button id="btn_reset">Reset</button>
-    <span id="copyMessage"></span>
-  </div>
+  <div id="tFoot"><button id="btn_copy">Copy CSS</button><button id="btn_reset">Reset</button><span id="copyMessage"></span></div>
 </div>
-
-<div class="cabinet"><div class="inner" id="innerRoot">
-  <div class="marquee">
-    <div class="led">
-      <div class="mq-wrap">
-        <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
-        <div class="line mq-sub">
-          <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-          <span class="chip chip-time  chip-box">00:00:0</span>
-          <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="divider"></div>
-
-  <!-- Solid CRT placeholder -->
-  <div class="crt-wrap">
-    <div class="crt" id="crt" aria-label="Screen placeholder"></div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab"><div class="led"><div class="line" id="tab1_text_output">L I F E</div></div></div>
-    <div class="tab"><div class="led"><div class="line" id="tab2_text_output">S N E A K E R S</div></div></div>
-    <div class="tab"><div class="led"><div class="line" id="tab3_text_output">P O W R - U P S</div></div></div>
-  </div>
-
-  <!-- HUD row 1 -->
-  <div class="hud">
-    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
-    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
-    <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers"></div></div></div>
-  </div>
-
-  <!-- HUD row 2 (Flames | Pause | Box) -->
-  <div class="hud2">
-    <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
-    <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-      <!-- Centered pause/play icon button (inherits LED style) -->
-      <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-        <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
-        <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
-      </button>
-    </div></div></div>
-    <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
-  </div>
-
-  <!-- Bottom -->
-  <div class="bottom">
-    <div class="control-screen">
-      <div class="matrix" aria-hidden="true"></div>
-      <main class="control-ui" aria-label="Control surface">
-        <section class="col-left"><div class="pad"></div></section>
-        <section class="col-right"><div class="pad"></div></section>
-      </main>
-    </div>
-  </div>
-</div></div>
+<div id="testHud" hidden></div>
 
 <script>
 (function(){
   const root=document.documentElement;
-  const storageKey='sneakerquest-layout-tuner-v1';
-  const ICON_LS='sneakerquest-icon-counts-v1';
+  const cab=document.getElementById('cabinetRoot');
   const $=id=>document.getElementById(id);
 
+  /* === MOBILE-FIT AUTO SCALER === */
+  function mobileFit(){
+    if(!cab) return;
+    root.style.setProperty('--cabinet-scale','1');
+    const rect=cab.getBoundingClientRect();
+    const vw = (window.visualViewport? window.visualViewport.width : window.innerWidth) - 4;
+    const vh = (window.visualViewport? window.visualViewport.height: window.innerHeight) - 4;
+    const scale = Math.min(vw/rect.width, vh/rect.height, 1);
+    root.style.setProperty('--cabinet-scale', String(scale.toFixed(3)));
+  }
+  mobileFit();
+  window.addEventListener('resize', mobileFit, {passive:true});
+  window.addEventListener('orientationchange', mobileFit, {passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', mobileFit, {passive:true});
+    window.visualViewport.addEventListener('scroll', mobileFit, {passive:true});
+  }
+
+  /* === Tuner open/close === */
+  const btn=$('tunerFloatBtn'),panel=$('tunerFloat');
+  const btnMin=$('tMin'),btnClose=$('tClose');
+  btn?.addEventListener('click',()=>panel.classList.add('open'));
+  btnClose?.addEventListener('click',()=>panel.classList.remove('open'));
+  btnMin?.addEventListener('click',()=>panel.classList.toggle('open'));
+
+  /* === Bind helpers === */
+  const storageKey='sneakerquest-layout-tuner-v1';
+  const ICON_LS='sneakerquest-icon-counts-v1';
   const state={
     '--cabinet-scale':'1',
     '--mq-title-size':'36','--mq-title-track':'0','--mq-title-x':'0px','--mq-title-y':'0px',
@@ -379,11 +393,6 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   const setVar=(k,v)=>root.style.setProperty(k,v);
   const applyAll=()=>{ for(const [k,v] of Object.entries(state)) if(k.startsWith('--')) setVar(k,v) };
   applyAll();
-
-  const btn=$('tunerFloatBtn'),panel=$('tunerFloat'),btnMin=$('tMin'),btnClose=$('tClose');
-  btn?.addEventListener('click',()=>panel.classList.add('open'));
-  btnClose?.addEventListener('click',()=>panel.classList.remove('open'));
-  btnMin?.addEventListener('click',()=>panel.classList.toggle('open'));
 
   function bind(id,key,transform=x=>x,outFmt=x=>String(x)){
     const el=$(id), out=$('o_'+id.slice(2)); if(!el) return;
@@ -411,6 +420,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
     ids.forEach((id,i)=>{ const ctl=$(id); if(ctl) ctl.value=parseInt(state[keys[i]],10); const meter=$('o_'+ids[i].slice(2)); if(meter) meter.textContent=state[keys[i]]; });
   }
 
+  /* Wire sliders */
   const px=v=>parseInt(v,10)+'px', pxOut=v=>v+'px';
   bind('v_scale','--cabinet-scale',String,String);
   bind('v_mqtsize','--mq-title-size',String,v=>v+'px');
@@ -437,6 +447,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   applyTriple(['v_h1a','v_h1b','v_h1c'],['--h1-a','--h1-b','--h1-c']);
   applyTriple(['v_h2a','v_h2b','v_h2c'],['--h2-a','--h2-b','--h2-c']);
 
+  /* Copy + reset */
   $('btn_copy')?.addEventListener('click',()=>{
     const lines=Object.entries(state).filter(([k])=>k.startsWith('--')).map(([k,v])=>`  ${k}: ${String(v)};`).join('\n');
     const css=`:root{\n${lines}\n}`; const ta=document.createElement('textarea'); ta.value=css; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
@@ -445,29 +456,24 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   });
   $('btn_reset')?.addEventListener('click',()=>{ localStorage.removeItem(storageKey); localStorage.removeItem(ICON_LS); location.reload(); });
 
+  /* Icons */
   const defaults = { heartsFill:2, heartsOutline:1, shoesFill:3, shoesOutline:2, powersTotal:4, firesFill:3, firesOutline:2 };
   let iconState = {...defaults};
-  try{ Object.assign(iconState, JSON.parse(localStorage.getItem(ICON_LS)||'{}')); }catch(_){}
+  try{ Object.assign(iconState, JSON.parse(localStorage.getItem(ICON_LS)||'{}')); }catch(_){ }
   const saveIcons = ()=>localStorage.setItem(ICON_LS, JSON.stringify(iconState));
 
-  // === Renderers ===
-  // NOTE: Heart slot shows SNEAKERS (outline = red). We avoid wrappers so flex gap applies evenly.
   function rebuildHearts(fill, outline){
-    const root=document.querySelector('.slot-heart .line'); if(!root) return;
-    root.innerHTML='';
+    const root=document.querySelector('.slot-heart .line'); if(!root) return; root.innerHTML='';
     for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
     for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
   }
-  // Shoe slot shows HEARTS
   function rebuildShoes(fill, outline){
-    const root=document.querySelector('.slot-shoes .line'); if(!root) return;
-    root.innerHTML='';
+    const root=document.querySelector('.slot-shoes .line'); if(!root) return; root.innerHTML='';
     for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
     for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>');
   }
   function rebuildPowers(total){
-    const root=document.querySelector('.slot-dots .line'); if(!root) return;
-    root.innerHTML='';
+    const root=document.querySelector('.slot-dots .line'); if(!root) return; root.innerHTML='';
     const defs=[{bold:'ph-timer',fill:'ph-timer'},{bold:'ph-shield',fill:'ph-shield'},{bold:'ph-magnet',fill:'ph-magnet'},{bold:'ph-crosshair-simple',fill:'svg'}];
     for(let i=0;i<total;i++){
       const d=defs[i%defs.length];
@@ -488,8 +494,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
     }
   }
   function rebuildFires(fill, outline){
-    const root=document.querySelector('.slot-flames .line'); if(!root) return;
-    root.innerHTML='';
+    const root=document.querySelector('.slot-flames .line'); if(!root) return; root.innerHTML='';
     for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
     for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire" aria-hidden="true"></i>');
   }
@@ -510,10 +515,11 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   }
   renderIcons();
 
+  /* Icon Amounts inputs */
   function bindNum(inputId,tvId,key,min,max){
     const inp=$(inputId), tv=$(tvId); if(!inp||!tv) return;
     const clamp=v=>Math.max(min,Math.min(max,(v|0)));
-    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); localStorage.setItem(ICON_LS, JSON.stringify(iconState)); renderIcons(); };
+    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); saveIcons(); renderIcons(); };
     inp.value=iconState[key]; tv.textContent=String(iconState[key]);
     inp.addEventListener('input',e=>set(parseInt(e.target.value||'0',10)));
   }
@@ -525,60 +531,34 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   bindNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
   bindNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
 
-  // ===== Pause/Play toggle =====
+  /* Pause/Play toggle */
   const pauseBtn=$('btn-pause');
-  if(pauseBtn){
-    const setState=(state)=>{
-      pauseBtn.dataset.state=state; // 'playing' | 'paused'
-      pauseBtn.setAttribute('aria-pressed', String(state==='paused'));
-      pauseBtn.setAttribute('aria-label', state==='playing' ? 'Pause' : 'Play');
-    };
-    setState('playing');
-    pauseBtn.addEventListener('click',()=>{
-      const next = pauseBtn.dataset.state==='playing' ? 'paused' : 'playing';
-      setState(next);
-      // Hook: if you later add real game logic, listen to this state change.
-      // Example: document.dispatchEvent(new CustomEvent('sq:pause', {detail:{state:next}}));
-    });
+  function setPauseState(state){
+    if(!pauseBtn) return; pauseBtn.dataset.state=state;
+    pauseBtn.setAttribute('aria-pressed', String(state==='paused'));
+    pauseBtn.setAttribute('aria-label', state==='playing' ? 'Pause' : 'Play');
   }
+  setPauseState('playing');
+  pauseBtn?.addEventListener('click',()=>{
+    setPauseState(pauseBtn.dataset.state==='playing' ? 'paused' : 'playing');
+  });
 
-  // ===== Tests =====
+  /* === Simple tests === */
+  const testHud=document.getElementById('testHud');
   function assert(name, cond){
-    const hud=document.getElementById('testHud'); if(hud.hidden) hud.hidden=false;
-    const line=document.createElement('div'); line.innerHTML=(cond?'✅':'❌')+' <b>'+name+'</b>'; hud.appendChild(line);
-    if(!cond) console.error('[TEST FAIL]',name); else console.log('[TEST PASS]',name);
+    if(testHud.hidden) testHud.hidden=false;
+    const line=document.createElement('div'); line.innerHTML=(cond?'✅':'❌')+' <b>'+name+'</b>'; testHud.appendChild(line);
   }
-  function runTests(){
-    try{
-      // 1) Sneakers: all direct children (even gap)
-      const leftLine=document.querySelector('.slot-heart .line');
-      const childIsOnlyIcons=[...leftLine.children].every(n=>n.tagName.toLowerCase()==='i');
-      assert('sneakers are direct children (even gap)', childIsOnlyIcons);
-
-      // 2) Count matches state
-      const expected= (JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsFill ?? 2) + (JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsOutline ?? 1);
-      const directCount=[...leftLine.children].length;
-      assert('sneaker direct-child count matches state', directCount===expected);
-
-      // 3) Pause icon inherits LED style and is centered
-      const pauseLine = document.querySelector('.slot-pause .line');
-      const isCentered = getComputedStyle(pauseLine.parentElement).justifyContent === 'center';
-      assert('pause line centered like other icons', isCentered);
-
-      // 4) Toggle works and swaps icons
-      const btn=$('btn-pause');
-      const startsPlaying = btn?.dataset.state==='playing';
-      const pauseVisible = getComputedStyle(btn.querySelector('.icon-pause')).display!=='none';
-      assert('pause starts as playing + pause icon visible', startsPlaying && pauseVisible);
-      btn.click();
-      const nowPaused = btn.dataset.state==='paused';
-      const playVisible = getComputedStyle(btn.querySelector('.icon-play')).display!=='none';
-      assert('click toggles to paused + play icon visible', nowPaused && playVisible);
-      // restore
-      btn.click();
-    }catch(e){ console.error(e); assert('exception-free execution', false); }
-  }
-  runTests();
+  (function(){
+    const r=cab.getBoundingClientRect();
+    assert('cabinet fully visible', r.width<=window.innerWidth+1 && r.height<= (window.visualViewport? window.visualViewport.height: window.innerHeight)+1);
+  })();
+  (function(){
+    const btnRect=$('tunerFloatBtn').getBoundingClientRect();
+    const cabRect=cab.getBoundingClientRect();
+    const inside = btnRect.right<=cabRect.right+1 && btnRect.bottom<=cabRect.bottom+1;
+    assert('gear button inside bottom-right of cabinet', inside);
+  })();
 })();
 </script>
 </body>
