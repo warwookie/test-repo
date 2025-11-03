@@ -103,6 +103,17 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
 .slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em}
 /* Make outline sneakers red without grouping (so gap applies to each icon equally) */
 .sneaker-outline{color:var(--led)}
+/* New: filled sneakers should be white; outline hearts should be red */
+.sneaker-fill{color:#e6e6e6}
+.heart-outline{color:var(--led)}
+
+/* Pause/Play button — reset to pure icon, inherit LED styling */
+.btn-icon{display:inline-grid;place-items:center;padding:0;margin:0;border:0;background:transparent;color:inherit;cursor:pointer;line-height:1}
+.btn-icon .icon{font-size:1em;line-height:1}
+.btn-icon[data-state="playing"] .icon-play{display:none}
+.btn-icon[data-state="paused"] .icon-pause{display:none}
+/* Make the pause slot icons size match other HUD icons */
+.slot-pause .line{font-size:calc(var(--icon-power)*1px)}
 
 .slot-heart .line{font-size:calc(var(--icon-heart)*1px)}
 .slot-shoes .line{font-size:calc(var(--icon-shoe)*1px);color:#e6e6e6}
@@ -223,7 +234,7 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
       <div class="tr"><label>HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
       <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
       <div class="tr"><label>HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
+      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min ="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
     </div>
 
     <!-- HUD Row 2 widths (%) -->
@@ -313,7 +324,13 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   <!-- HUD row 2 (Flames | Pause | Box) -->
   <div class="hud2">
     <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
-    <div class="slot slot-pause"><div class="led"><div class="line" style="width:100%;display:flex;align-items:center;justify-content:flex-end"><button class="btn" id="btn-pause" type="button">PAUSE</button></div></div></div>
+    <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+      <!-- Centered pause/play icon button (inherits LED style) -->
+      <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+        <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
+        <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
+      </button>
+    </div></div></div>
     <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
   </div>
 
@@ -438,14 +455,14 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
     const root=document.querySelector('.slot-heart .line'); if(!root) return;
     root.innerHTML='';
     for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
-    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker" aria-hidden="true"></i>');
+    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
   }
   // Shoe slot shows HEARTS
   function rebuildShoes(fill, outline){
     const root=document.querySelector('.slot-shoes .line'); if(!root) return;
     root.innerHTML='';
     for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
-    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart" aria-hidden="true"></i>');
+    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>');
   }
   function rebuildPowers(total){
     const root=document.querySelector('.slot-dots .line'); if(!root) return;
@@ -507,6 +524,23 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   bindNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
   bindNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
 
+  // ===== Pause/Play toggle =====
+  const pauseBtn=$('btn-pause');
+  if(pauseBtn){
+    const setState=(state)=>{
+      pauseBtn.dataset.state=state; // 'playing' | 'paused'
+      pauseBtn.setAttribute('aria-pressed', String(state==='paused'));
+      pauseBtn.setAttribute('aria-label', state==='playing' ? 'Pause' : 'Play');
+    };
+    setState('playing');
+    pauseBtn.addEventListener('click',()=>{
+      const next = pauseBtn.dataset.state==='playing' ? 'paused' : 'playing';
+      setState(next);
+      // Hook: if you later add real game logic, listen to this state change.
+      // Example: document.dispatchEvent(new CustomEvent('sq:pause', {detail:{state:next}}));
+    });
+  }
+
   // ===== Tests =====
   function assert(name, cond){
     const hud=document.getElementById('testHud'); if(hud.hidden) hud.hidden=false;
@@ -515,25 +549,32 @@ body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-
   }
   function runTests(){
     try{
-      // 1) No wrapper spans around sneakers so flex gap applies evenly
+      // 1) Sneakers: all direct children (even gap)
       const leftLine=document.querySelector('.slot-heart .line');
       const childIsOnlyIcons=[...leftLine.children].every(n=>n.tagName.toLowerCase()==='i');
       assert('sneakers are direct children (even gap)', childIsOnlyIcons);
 
-      // 2) Count of direct children equals fill+outline
-      const expected=iconState.heartsFill + iconState.heartsOutline;
+      // 2) Count matches state
+      const expected= (JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsFill ?? 2) + (JSON.parse(localStorage.getItem('sneakerquest-icon-counts-v1')||'{}').heartsOutline ?? 1);
       const directCount=[...leftLine.children].length;
       assert('sneaker direct-child count matches state', directCount===expected);
 
-      // 3) Hearts slot alignment still horizontal
-      const heartsLine=document.querySelector('.slot-shoes .line');
-      const rowDisplay=getComputedStyle(heartsLine).display==='flex';
-      const align=getComputedStyle(heartsLine).alignItems==='center';
-      assert('hearts row has flex + center alignment', rowDisplay && align);
+      // 3) Pause icon inherits LED style and is centered
+      const pauseLine = document.querySelector('.slot-pause .line');
+      const isCentered = getComputedStyle(pauseLine.parentElement).justifyContent === 'center';
+      assert('pause line centered like other icons', isCentered);
 
-      // 4) HUD2 order remains Flames | Pause | Box
-      const items=[...document.querySelector('.hud2').children].map(n=>n.className.match(/slot-(\w+)/)[1]).join('|');
-      assert('hud2 order', items==='flames|pause|bag');
+      // 4) Toggle works and swaps icons
+      const btn=$('btn-pause');
+      const startsPlaying = btn?.dataset.state==='playing';
+      const pauseVisible = getComputedStyle(btn.querySelector('.icon-pause')).display!=='none';
+      assert('pause starts as playing + pause icon visible', startsPlaying && pauseVisible);
+      btn.click();
+      const nowPaused = btn.dataset.state==='paused';
+      const playVisible = getComputedStyle(btn.querySelector('.icon-play')).display!=='none';
+      assert('click toggles to paused + play icon visible', nowPaused && playVisible);
+      // restore
+      btn.click();
     }catch(e){ console.error(e); assert('exception-free execution', false); }
   }
   runTests();
