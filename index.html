@@ -13,21 +13,43 @@
 <style>
 :root{
   --text:#d6c7a4; --led:#ff3a2f; --cabinet-scale:1;
+
+  /* Section heights */
   --marquee-h:90; --tabs-h:80; --bottom-h:240;
-  --crt-fr:1fr; --crt-ar:1.333; --crt-r:22; --crtwrap-pad:12;
-  --gap:10; --slot-pad:10; --radius:16;
+
+  /* Screen + layout */
+  --crt-fr:0.4fr; --crt-ar:0.860; --crt-r:10; --crtwrap-pad:13;
+  --gap:10; --slot-pad:8; --radius:16;
+
+  /* Icon sizes (visual scale) */
   --icon-heart:20; --icon-shoe:20; --icon-power:20;
-  --slot-heart-h:52; --slot-shoes-h:64; --slot-dots-h:52; --slot-bag-h:52; --slot-flames-h:64; --slot-pause-h:52;
-  --h1-a:38%; --h1-b:38%; --h1-c:24%;
-  --h2-a:32%; --h2-b:44%; --h2-c:24%;
-  --t1:33%; --t2:34%; --t3:33%;
-  --bot-a:58%; --bot-b:42%;
-  --mq-title-size:28; --mq-title-track:0.18; --mq-title-x:0px; --mq-title-y:0px;
-  --mq-sub-size:14; --mq-sub-x:0px; --mq-sub-y:0px;
-  --chip-br:10; --chip-pad-x:10; --chip-pad-y:2; --chip-border:2; --chip-bg:transparent;
-  --tabs-pad-x-left:12px; --tabs-pad-x-right:12px;
-  --hud1-pad-x-left:0px; --hud1-pad-x-right:0px; --hud2-pad-x-left:0px; --hud2-pad-x-right:0px;
-  --tab-font-size:18; --gap-tabs:0px; --gap-hud1:0px; --gap-hud2:0px; --gap-bottom:0px
+
+  /* Slot heights */
+  --slot-heart-h:46; --slot-shoes-h:46; --slot-dots-h:46; --slot-bag-h:46; --slot-flames-h:46; --slot-pause-h:46;
+
+  /* Row widths */
+  --h1-a:40%; --h1-b:20%; --h1-c:40%;
+  --h2-a:40%; --h2-b:20%; --h2-c:40%;
+  --t1:40%; --t2:20%; --t3:40%;
+
+  /* Bottom split */
+  --bot-a:80%; --bot-b:20%;
+
+  /* Marquee text + chips */
+  --mq-title-size:36; --mq-title-track:0; --mq-title-x:0px; --mq-title-y:0px;
+  --mq-sub-size:12; --mq-sub-x:1px; --mq-sub-y:1px;
+  --chip-br:8; --chip-pad-x:16; --chip-pad-y:2; --chip-border:1; --chip-bg:transparent;
+
+  /* Row horizontal padding */
+  --tabs-pad-x-left:12px; --tabs-pad-x-right:32px;
+  --hud1-pad-x-left:0px; --hud1-pad-x-right:21px;
+  --hud2-pad-x-left:0px; --hud2-pad-x-right:21px;
+
+  /* Tabs */
+  --tab-font-size:15;
+
+  /* Vertical gaps */
+  --gap-tabs:-2px; --gap-hud1:-3px; --gap-hud2:-5px; --gap-bottom:-5px
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{
@@ -317,18 +339,37 @@ body{
   const ICON_LS='sneakerquest-icon-counts-v1';
   const $=id=>document.getElementById(id);
 
-  // === Base state for CSS variables ===
+  // === Base state for CSS variables (updated defaults) ===
   const state={
-    '--cabinet-scale':'1','--mq-title-size':'28','--mq-title-track':'0.18','--mq-title-x':'0px','--mq-title-y':'0px',
-    '--mq-sub-size':'14','--mq-sub-x':'0px','--mq-sub-y':'0px','--chip-br':'10','--chip-pad-x':'10','--chip-pad-y':'2','--chip-border':'2',
-    '--crt-fr':'1','--crt-ar':'1.333','--crt-r':'22','--crtwrap-pad':'12',
-    '--t1':'33%','--t2':'34%','--t3':'33%','--h1-a':'38%','--h1-b':'38%','--h1-c':'24%','--h2-a':'32%','--h2-b':'44%','--h2-c':'24%',
-    '--slot-heart-h':'52','--slot-shoes-h':'64','--slot-dots-h':'52','--slot-bag-h':'52','--slot-flames-h':'64','--slot-pause-h':'52',
-    '--slot-pad':'10','--bot-a':'58%','--bot-b':'42%','--tabs-pad-x-left':'12px','--tabs-pad-x-right':'12px',
-    '--hud1-pad-x-left':'0px','--hud1-pad-x-right':'0px','--hud2-pad-x-left':'0px','--hud2-pad-x-right':'0px',
-    '--tab-font-size':'18','tab1-text':'L I F E','tab2-text':'S N E A K E R S','tab3-text':'P O W R - U P S',
-    '--gap-tabs':'0px','--gap-hud1':'0px','--gap-hud2':'0px','--gap-bottom':'0px'
+    '--cabinet-scale':'1',
+
+    '--mq-title-size':'36','--mq-title-track':'0','--mq-title-x':'0px','--mq-title-y':'0px',
+    '--mq-sub-size':'12','--mq-sub-x':'1px','--mq-sub-y':'1px',
+    '--chip-br':'8','--chip-pad-x':'16','--chip-pad-y':'2','--chip-border':'1',
+
+    '--crt-fr':'0.4','--crt-ar':'0.860','--crt-r':'10','--crtwrap-pad':'13',
+
+    '--t1':'40%','--t2':'20%','--t3':'40%',
+    '--h1-a':'40%','--h1-b':'20%','--h1-c':'40%',
+    '--h2-a':'40%','--h2-b':'20%','--h2-c':'40%',
+
+    '--slot-heart-h':'46','--slot-shoes-h':'46','--slot-dots-h':'46',
+    '--slot-bag-h':'46','--slot-flames-h':'46','--slot-pause-h':'46',
+    '--slot-pad':'8',
+
+    '--bot-a':'80%','--bot-b':'20%',
+
+    '--tabs-pad-x-left':'12px','--tabs-pad-x-right':'32px',
+    '--hud1-pad-x-left':'0px','--hud1-pad-x-right':'21px',
+    '--hud2-pad-x-left':'0px','--hud2-pad-x-right':'21px',
+
+    '--tab-font-size':'15',
+    '--gap-tabs':'-2px','--gap-hud1':'-3px','--gap-hud2':'-5px','--gap-bottom':'-5px',
+
+    'tab1-text':'L I F E','tab2-text':'S N E A K E R S','tab3-text':'P O W R - U P S'
   };
+
+  // merge any saved overrides
   try{ Object.assign(state, JSON.parse(localStorage.getItem(storageKey)||'{}')); }catch(_){}
   const save=()=>localStorage.setItem(storageKey,JSON.stringify(state));
   const setVar=(k,v)=>root.style.setProperty(k,v);
@@ -377,6 +418,7 @@ body{
   bind('v_mqssize','--mq-sub-size',String,v=>v+'px');
   bind('v_mqsx','--mq-sub-x',px,pxOut); bind('v_mqsy','--mq-sub-y',px,pxOut);
   bind('v_chipbr','--chip-br',String,v=>v+'px'); bind('v_chippadx','--chip-pad-x',String,v=>v+'px'); bind('v_chippady','--chip-pad-y',String,v=>v+'px'); bind('v_chipborder','--chip-border',String,v=>v+'px');
+
   bind('v_gap_tabs','--gap-tabs',px,pxOut); bind('v_gap_hud1','--gap-hud1',px,pxOut); bind('v_gap_hud2','--gap-hud2',px,pxOut); bind('v_gap_bottom','--gap-bottom',px,pxOut);
 
   bind('v_crtfr','--crt-fr',String,v=>v+'fr'); bind('v_crtar','--crt-ar',v=>String(Number(v).toFixed(3)),v=>v); bind('v_crtr','--crt-r',String,v=>v+'px'); bind('v_crtpad','--crtwrap-pad',String,v=>v+'px');
@@ -486,13 +528,6 @@ body{
   bindNum('in_powers_total','tv_powers_total','powersTotal',0,4);
   bindNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
   bindNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
-
-  // Initialize icon inputs after DOM is ready
-  if(document.readyState==='complete'||document.readyState==='interactive'){
-    // nothing extra needed; inputs already in DOM in this build
-  }else{
-    document.addEventListener('DOMContentLoaded',()=>{});
-  }
 })();
 </script>
 </body>
