@@ -1,482 +1,7 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>SNEAKERQUEST — CRT + LED control screen (Merged Joypad)</title>
-
-<!-- Phosphor icons (pinned 2.1.1) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
-<!-- Pixel font for button canvas labels -->
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
-<style>
-:root{--text:#d6c7a4;--led:#ff3a2f;--cabinet-scale:1;--marquee-h:90;--tabs-h:80;--bottom-h:240;--crt-fr:1fr;--crt-ar:1.333;--crt-r:22;--crtwrap-pad:12;--gap:10;--slot-pad:10;--radius:16;--btn-font:18;--led-title:22;--led-small:14;--icon-heart:20;--icon-shoe:20;--icon-power:20;--icon-bag:20;--slot-heart-h:52;--slot-shoes-h:64;--slot-dots-h:52;--slot-bag-h:52;--slot-flames-h:64;--slot-pause-h:52;--h1-a:38%;--h1-b:38%;--h1-c:24%;--h2-a:32%;--h2-b:44%;--h2-c:24%;--t1:33%;--t2:34%;--t3:33%;--bot-a:58%;--bot-b:42%;--mq-title-size:28;--mq-title-track:0.18;--mq-title-x:0px;--mq-title-y:0px;--mq-sub-size:14;--mq-sub-x:0px;--mq-sub-y:0px;--chip-br:10;--chip-pad-x:10;--chip-pad-y:2;--chip-border:2;--chip-bg:transparent;--matrix-gap:10px;--matrix-dead:#140202;--crt-grid-opacity:0.8;--chevron-opacity:1;--tabs-pad-x-left:12px;--tabs-pad-x-right:12px;--hud1-pad-x-left:0px;--hud1-pad-x-right:0px;--hud2-pad-x-left:0px;--hud2-pad-x-right:0px;--tab-font-size:18;--gap-tabs:0px;--gap-hud1:0px;--gap-hud2:0px;--gap-bottom:0px}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
-.cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a}
-.inner{height:100%;border-radius:22px;background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);position:relative;isolation:isolate}
-.marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
-.led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.06),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 3px,rgba(0,0,0,0) 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
-.led .line{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px rgba(255,58,47,.45),0 0 14px rgba(255,58,47,.25);font-weight:800}
-@keyframes ledEffect4Text{0%{opacity:.96;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}50%{opacity:1;text-shadow:0 0 2px var(--led),0 0 9px rgba(255,58,47,.50),0 0 16px rgba(255,58,47,.28)}100%{opacity:.97;text-shadow:0 0 2px var(--led),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.20)}}
-.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:ledEffect4Text 3.6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:none}}
-.mq-wrap{position:relative;display:grid;justify-items:center;align-content:center;height:100%}
-.mq-title{font-size:calc(var(--mq-title-size)*1px);letter-spacing:calc(var(--mq-title-track)*1em);transform:translate(var(--mq-title-x),var(--mq-title-y));text-align:center;user-select:none}
-.mq-sub{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:calc(var(--mq-sub-size)*1px);letter-spacing:.12em;margin-top:6px;transform:translate(var(--mq-sub-x),var(--mq-sub-y))}
-.mq-sub .chip{white-space:nowrap}
-.mq-sub .chip-box{padding:calc(var(--chip-pad-y)*1px) calc(var(--chip-pad-x)*1px);border:calc(var(--chip-border)*1px) solid var(--led);border-radius:calc(var(--chip-br)*1px);background:var(--chip-bg)}
-.divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
-.crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
-.crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 22%),radial-gradient(120% 90% at 50% 120%,rgba(0,0,0,.6),rgba(0,0,0,0) 40%),linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412,inset 0 0 30px rgba(0,0,0,.6);position:relative;overflow:hidden}
-.grid{position:absolute;inset:0;background:linear-gradient(transparent 31px,rgba(33,68,59,.22) 32px),linear-gradient(90deg,transparent 31px,rgba(33,68,59,.22) 32px);background-size:32px 32px;opacity:var(--crt-grid-opacity);pointer-events:none}
-canvas#game{position:absolute;inset:0;width:100%;height:100%}
-.tabs{border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);gap:calc(var(--gap)*1px);padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);text-align:center;font-weight:800;letter-spacing:.08em;margin-top:var(--gap-tabs)}
-.tab{padding:0;border-right:1px solid #4d4032;display:grid;align-items:stretch}.tab:last-child{border-right:none}
-.tab .led{height:100%;border-radius:10px;padding:8px 10px;display:grid;place-items:center}
-.tab .led .line{font-size:calc(var(--tab-font-size) * 1px);letter-spacing:.14em;color:var(--led);font-weight:800}
-
-/* === SLOTS (Under-box + inner LED) === */
-.hud{display:grid;grid-template-columns:var(--h1-a) var(--h1-b) var(--h1-c);gap:calc(var(--gap)*1px);padding:0 var(--hud1-pad-x-right) 0 var(--hud1-pad-x-left);margin-top:var(--gap-hud1)}
-.hud2{display:grid;grid-template-columns:var(--h2-a) var(--h2-b) var(--h2-c);gap:calc(var(--gap)*1px);padding:0 var(--hud2-pad-x-right) 0 var(--hud2-pad-x-left);margin-top:var(--gap-hud2)}
-.slot{background:linear-gradient(#3a3227,#2c251e);border-radius:calc(var(--radius)*1px);padding:calc(var(--slot-pad)*1px);box-shadow:inset 0 0 0 2px #1a1511,0 2px 0 #0b0907;display:flex;align-items:center;justify-content:stretch;overflow:hidden}
-/* per-slot heights wired to tuner vars */
-.slot-heart{height:calc(var(--slot-heart-h)*1px)}
-.slot-shoes{height:calc(var(--slot-shoes-h)*1px)}
-.slot-dots{height:calc(var(--slot-dots-h)*1px)}
-.slot-bag{height:calc(var(--slot-bag-h)*1px)}
-.slot-flames{height:calc(var(--slot-flames-h)*1px)}
-.slot-pause{height:calc(var(--slot-pause-h)*1px)}
-/* inner LED panel */
-.slot > .led{height:100%;width:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
-.slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em}
-/* font sizing for icon rows */
-.slot-heart .line{font-size:calc(var(--icon-heart)*1px)}
-.slot-shoes .line{font-size:calc(var(--icon-shoe)*1px);color:#e6e6e6}
-.slot-flames .line{font-size:calc(var(--icon-power)*1px)}
-.slot-dots .line{font-size:calc(var(--icon-power)*1px)}
-/* Powers dual-variant visibility */
-.power .ph-bold{display:inline-block}
-.power .ph-fill{display:none}
-.power.power--armed .ph-bold{display:none}
-.power.power--armed .ph-fill{display:inline-block}
-.power .is-off{display:none}
-/* match custom filled crosshair */
-.power .ph-crosshair-simple--filled{display:none}
-.power.power--armed .ph-crosshair-simple--filled{display:inline-block}
-/* utility rows */
-.row{display:flex;gap:8px;align-items:center}
-/* keep existing icon CSS (unused) to avoid unrelated changes) */
-.icon{display:inline-block;background:#e0cfa6;filter:drop-shadow(0 1px 0 #7b6948);-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center}
-/* counter inside LED (unchanged) */
-.counter{display:flex;align-items:center;gap:10px;padding:0;border-radius:0;background:transparent;box-shadow:none;color:var(--led);text-shadow:0 0 6px var(--led),0 0 18px rgba(255,58,47,.45);font-weight:900;letter-spacing:.14em;min-width:unset}
-.seven{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:var(--text)}
-
-.bottom{display:grid;grid-template-columns:1fr;align-items:center;height:100%;margin-top:var(--gap-bottom)}
-.control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px rgba(0,0,0,.35),0 3px 0 #0a0807}
-@media (max-width:520px){.control-screen{grid-template-columns:1fr}}
-.matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,var(--matrix-dead) 40%,#090101 42%,transparent 43%) 0 0/var(--matrix-gap) var(--matrix-gap) repeat}
-
-/* --- New right/left control UI inside .control-screen (scoped) --- */
-.control-ui{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:0;aspect-ratio:2/1;height:100%;width:100%}
-.control-ui .col-left,.control-ui .col-right{position:relative;aspect-ratio:1/1;background:#080203;box-shadow:inset 0 0 0 2px #000, inset 0 0 0 1px #1a0000, 0 20px 50px #000c;border-radius:20px;overflow:hidden;touch-action:none}
-.control-ui .pad{position:absolute;inset:16px;border-radius:12px;overflow:hidden}
-.control-ui .btn2-overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:auto;z-index:5}
-.control-ui #btn2_panel{position:absolute;inset:0;width:100%!important;height:100%!important;image-rendering:pixelated;display:block;z-index:1;pointer-events:none}
-.control-ui .btn2_temp{position:absolute;top:8px;left:8px;z-index:20;pointer-events:auto;touch-action:manipulation;background:#101012;color:#eaeaea;border:1px solid #3a3a3a;border-radius:10px;padding:6px 10px;font-size:12px;line-height:1}
-.control-ui .btn2_keyproxy{position:absolute;left:50%;transform:translateX(-50%);width:min(92%,520px);height:44%;outline:none;border:0;background:transparent;pointer-events:auto;z-index:2}
-.control-ui #btn2_proxy_blast{top:6%}
-.control-ui #btn2_proxy_bomb{bottom:6%}
-.control-ui #jpad_canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.control-ui #jpad_status{position:absolute;left:12px;bottom:12px;font:12px ui-monospace,Consolas,Menlo,monospace;background:#0008;padding:6px 8px;border-radius:8px}
-
-/* Tuner button/panel */
-#tunerFloatBtn{position:fixed;inset:auto 14px 14px auto;z-index:7000;width:48px;height:48px;border-radius:12px;border:none;cursor:pointer;background:#1a1410;color:#e6d7b6;box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;font-size:22px}
-#tunerFloat{position:fixed;right:14px;bottom:76px;width:min(420px,92vw);max-height:min(80vh,720px);background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px #000c}
-#tunerFloat.open{display:flex}
-#tHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #3a2f27}
-#tTitle{font-weight:700;letter-spacing:.08em;font-size:13px}
-#tBtns button{margin-left:8px;border:none;border-radius:8px;padding:6px 10px;background:#332820;color:#e6d7b6;cursor:pointer}
-#tBody{overflow:auto;padding:12px}
-.tg{margin-bottom:14px;border:1px solid #3a2f27;border-radius:10px;padding:10px}
-.tg h4{margin:0 0 8px 0;font-size:12px;letter-spacing:.08em;color:#f0e6cd}
-.tr{display:grid;grid-template-columns:1fr 120px 60px auto;gap:8px;align-items:center;margin:8px 0}
-.tr label{font-size:12px}
-.tr input[type="range"]{width:100%}
-.tv{font:12px/1 monospace;text-align:right;opacity:.8}
-.lock{font-size:12px;opacity:.9}
-#tFoot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px;border-top:1px solid #3a2f27}
-#tFoot button{flex:1;border:none;background:#3a2f27;color:#e6d7b6;border-radius:10px;padding:10px;cursor:pointer;min-width:80px}
-#tFoot button.primary{background:#523f32}
-#copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px;white-space:nowrap}
-@media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
-@media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
-</style>
-</head>
-<body>
-
-<button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
-
-<div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner">
-  <div id="tHead">
-    <div id="tTitle">LAYOUT TUNER</div>
-    <div id="tBtns"><button id="tMin" title="Minimize">–</button><button id="tClose" title="Close">✕</button></div>
-  </div>
-  <div id="tBody">
-    <!-- (unchanged tuner UI) -->
-    <div class="tg"><h4>Global</h4>
-      <div class="tr"><label>Scale</label><input id="v_scale" type="range" min="0.85" max="1.15" step="0.01"><div class="tv" id="o_scale"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Marquee — Title</h4>
-      <div class="tr"><label>Title size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1"><div class="tv" id="o_mqtsize"></div><div></div></div>
-      <div class="tr"><label>Title tracking (em)</label><input id="v_mqttrack" type="range" min="0.00" max="0.40" step="0.01"><div class="tv" id="o_mqttrack"></div><div></div></div>
-      <div class="tr"><label>Title offset X (px)</label><input id="v_mqtx" type="range" min="-120" max="120" step="1"><div class="tv" id="o_mqtx"></div><div></div></div>
-      <div class="tr"><label>Title offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1"><div class="tv" id="o_mqty"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Marquee — Subline</h4>
-      <div class="tr"><label>Subline size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1"><div class="tv" id="o_mqssize"></div><div></div></div>
-      <div class="tr"><label>Subline offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1"><div class="tv" id="o_mqsx"></div><div></div></div>
-      <div class="tr"><label>Subline offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1"><div class="tv" id="o_mqsy"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Marquee — Chip Boxes</h4>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1"><div class="tv" id="o_chipbr"></div><div></div></div>
-      <div class="tr"><label>Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1"><div class="tv" id="o_chippadx"></div><div></div></div>
-      <div class="tr"><label>Padding Y (px)</label><input id="v_chippady" type="range" min="1" max="10" step="1"><div class="tv" id="o_chippady"></div><div></div></div>
-      <div class="tr"><label>Border (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1"><div class="tv" id="o_chipborder"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Section Gaps (top margins)</h4>
-      <div class="tr"><label>Gap above Tab Bar (px)</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_tabs"></div><div></div></div>
-      <div class="tr"><label>Gap above HUD 1 (px)</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud1"></div><div></div></div>
-      <div class="tr"><label>Gap above HUD 2 (px)</label><input id="v_gap_hud2" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud2"></div><div></div></div>
-      <div class="tr"><label>Gap above Bottom (px)</label><input id="v_gap_bottom" type="range" min="-40" max="0" step="1"><div class="tv" id="o_gap_bottom"></div><div></div></div>
-      <div class="tr" style="grid-column:1/-1; opacity:.75; font-size:12px;">Note: Bottom gap cannot increase above current layout (cannot push the D‑pad further down).</div>
-    </div>
-
-    <div class="tg"><h4>Screen (CRT)</h4>
-      <div class="tr"><label>CRT row height (fr)</label><input id="v_crtfr" type="range" min="0.40" max="2.50" step="0.05"><div class="tv" id="o_crtfr"></div><div></div></div>
-      <div class="tr"><label>Aspect ratio (W/H)</label><input id="v_crtar" type="range" min="0.80" max="2.50" step="0.01"><div class="tv" id="o_crtar"></div><div></div></div>
-      <div class="tr"><label>Corner radius (px)</label><input id="v_crtr" type="range" min="10" max="40" step="1"><div class="tv" id="o_crtr"></div><div></div></div>
-      <div class="tr"><label>Bezel padding (px)</label><input id="v_crtpad" type="range" min="6" max="24" step="1"><div class="tv" id="o_crtpad"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Tab Bar Content</h4>
-      <div class="tr"><label>Tab Font Size (px)</label><input id="v_tab_font_size" type="range" min="10" max="32" step="1"><div class="tv" id="o_tab_font_size"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 1 Text</label><input id="v_tab1_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 2 Text</label><input id="v_tab2_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
-      <div class="tr" style="grid-template-columns:100px 1fr"><label>Tab 3 Text</label><input id="v_tab3_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:white;padding:4px;border-radius:4px;"></div>
-    </div>
-
-    <div class="tg"><h4>Tabs widths (%)</h4>
-      <div class="tr"><label>LIFE %</label><input id="v_t1" type="range" min="10" max="70" step="1"><div class="tv" id="o_t1"></div><label class="lock"><input type="checkbox" id="c_t1"> Lock</label></div>
-      <div class="tr"><label>SNEAKERS %</label><input id="v_t2" type="range" min="10" max="70" step="1"><div class="tv" id="o_t2"></div><label class="lock"><input type="checkbox" id="c_t2"> Lock</label></div>
-      <div class="tr"><label>POWR-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1"><div class="tv" id="o_t3"></div><label class="lock"><input type="checkbox" id="c_t3"> Lock</label></div>
-    </div>
-
-    <div class="tg"><h4>Row Horizontal Padding</h4>
-      <div class="tr"><label>Tabs Pad Left (px)</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_l"></div><div></div></div>
-      <div class="tr"><label>Tabs Pad Right (px)</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_r"></div><div></div></div>
-      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD1 Pad Left (px)</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD1 Pad Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
-      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
-      <div class="tr"><label>HUD2 Pad Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
-      <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>HUD Row 1 widths (%)</h4>
-      <div class="tr"><label>Hearts %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><label class="lock"><input type="checkbox" id="c_h1a"> Lock</label></div>
-      <div class="tr"><label>Sneakers %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><label class="lock"><input type="checkbox" id="c_h1b"> Lock</label></div>
-      <div class="tr"><label>Dots %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><label class="lock"><input type="checkbox" id="c_h1c"> Lock</label></div>
-    </div>
-
-    <div class="tg"><h4>HUD Row 2 widths (%)</h4>
-      <div class="tr"><label>Bag %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><label class="lock"><input type="checkbox" id="c_h2a"> Lock</label></div>
-      <div class="tr"><label>Flames %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><label class="lock"><input type="checkbox" id="c_h2b"> Lock</label></div>
-      <div class="tr"><label>Pause %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><label class="lock"><input type="checkbox" id="c_h2c"> Lock</label></div>
-    </div>
-
-    <div class="tg"><h4>Heights (px)</h4>
-      <div class="tr"><label>Hearts H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
-      <div class="tr"><label>Sneakers H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
-      <div class="tr"><label>Dots H</label><input id="v_slotdots" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
-      <div class="tr"><label>Bag H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
-      <div class="tr"><label>Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
-      <div class="tr"><label>Pause H</label><input id="v_slotpause" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
-      <div class="tr"><label>Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
-    </div>
-
-    <div class="tg"><h4>Bottom split (%)</h4>
-      <div class="tr"><label>Left col %</label><input id="v_bota" type="range" min="30" max="80" step="1"><div class="tv" id="o_bota"></div><label class="lock"><input type="checkbox" id="c_bota"> Lock</label></div>
-      <div class="tr"><label>D-pad %</label><input id="v_botb" type="range" min="20" max="70" step="1"><div class="tv" id="o_botb"></div><label class="lock"><input type="checkbox" id="c_botb"> Lock</label></div>
-    </div>
-
-    <!-- NEW: Icon Amounts (editable) -->
-    <div class="tg"><h4>Icon Amounts</h4>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
-        <label>Hearts</label>
-        <input id="v_count_hearts" type="number" min="0" max="10" step="1" inputmode="numeric">
-        <div class="tv" id="o_count_hearts_set"></div>
-        <div></div>
-      </div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
-        <lab
-  <div id="tFoot">
-    <button id="btn_copy">Copy CSS</button>
-    <button id="btn_reset">Reset</button>
-    <span id="copyMessage"></span>
-  </div>
-</div>
-
-<div class="cabinet"><div class="inner" id="innerRoot">
-  <div class="marquee">
-    <div class="led">
-      <div class="mq-wrap">
-        <div class="line mq-title" id="titleSQ">S N E A K E R Q U E S T</div>
-        <div class="line mq-sub">
-          <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-          <span class="chip chip-time  chip-box">00:00:0</span>
-          <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="divider"></div>
-  <div class="crt-wrap">
-    <div class="crt power-on-run" id="crt">
-      <canvas id="game" width="960" height="720"></canvas>
-      <div class="grid"></div>
-    </div>
-  </div>
-  <div class="tabs">
-    <div class="tab"><div class="led"><div class="line" id="tab1_text_output">L I F E</div></div></div>
-    <div class="tab"><div class="led"><div class="line" id="tab2_text_output">S N E A K E R S</div></div></div>
-    <div class="tab"><div class="led"><div class="line" id="tab3_text_output">P O W R - U P S</div></div></div>
-  </div>
-
-  <!-- HUD row 1 -->
-  <div class="hud">
-    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Hearts">
-      <i class="ph-fill ph-heart" aria-hidden="true"></i>
-      <i class="ph-bold ph-heart is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-heart" aria-hidden="true"></i>
-      <i class="ph-bold ph-heart is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-heart" aria-hidden="true"></i>
-      <i class="ph-bold ph-heart is-off" aria-hidden="true"></i>
-    </div></div></div>
-
-    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Sneakers">
-      <span style="color:#ff3a2f">
-        <i class="ph-bold ph-sneaker" aria-hidden="true"></i>
-        <i class="ph-bold ph-sneaker" aria-hidden="true"></i>
-      </span>
-      <i class="ph-fill ph-sneaker" aria-hidden="true"></i>
-      <i class="ph-fill ph-sneaker" aria-hidden="true"></i>
-      <i class="ph-fill ph-sneaker" aria-hidden="true"></i>
-    </div></div></div>
-
-    <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers">
-      <span class="power power--idle" data-power="detonator">
-        <i class="ph-bold ph-timer" aria-hidden="true"></i>
-        <i class="ph-fill ph-timer is-off" aria-hidden="true"></i>
-      </span>
-      <span class="power power--idle" data-power="shield">
-        <i class="ph-bold ph-shield" aria-hidden="true"></i>
-        <i class="ph-fill ph-shield is-off" aria-hidden="true"></i>
-      </span>
-      <span class="power power--idle" data-power="magnet">
-        <i class="ph-bold ph-magnet" aria-hidden="true"></i>
-        <i class="ph-fill ph-magnet is-off" aria-hidden="true"></i>
-      </span>
-      <span class="power power--idle" data-power="bomb-extend">
-        <i class="ph-bold ph-crosshair-simple" aria-hidden="true"></i>
-        <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="1em" height="1em" fill="currentColor">
-          <circle cx="128" cy="128" r="28"></circle>
-          <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>
-        </svg>
-      </span>
-    </div></div></div>
-  </div>
-
-  <!-- HUD row 2 -->
-  <div class="hud2">
-    <div class="slot slot-bag"><div class="led"><div class="line counter"><span class="icon bag"></span><span class="seven" id="counter">000</span></div></div></div>
-    <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire">
-      <i class="ph-fill ph-fire" aria-hidden="true"></i>
-      <i class="ph-bold ph-fire is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-fire" aria-hidden="true"></i>
-      <i class="ph-bold ph-fire is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-fire" aria-hidden="true"></i>
-      <i class="ph-bold ph-fire is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-fire" aria-hidden="true"></i>
-      <i class="ph-bold ph-fire is-off" aria-hidden="true"></i>
-      <i class="ph-fill ph-fire" aria-hidden="true"></i>
-      <i class="ph-bold ph-fire is-off" aria-hidden="true"></i>
-    </div></div></div>
-    <div class="slot slot-pause"><div class="led"><div class="line" style="width:100%;display:flex;align-items:center;justify-content:flex-end"><button class="btn" id="btn-pause" type="button">PAUSE</button></div></div></div>
-  </div>
-
-  <div class="bottom">
-    <div class="control-screen" id="controlScreen">
-      <div class="matrix" aria-hidden="true"></div>
-      <!-- Replaced: new two-column controls surface -->
-      <main class="control-ui" id="control-ui" aria-label="Control surface">
-        <!-- Left: Buttons (Bomb/Blast) -->
-        <section id="left-area" class="col-left" aria-label="Buttons area">
-          <div class="pad">
-            <button id="btn2_temp" class="btn2_temp" aria-label="Start transition">▶ transition</button>
-            <div class="btn2-overlay">
-              <button id="btn2_proxy_blast" class="btn2_keyproxy" role="button" aria-label="Blast" aria-pressed="false" tabindex="0"></button>
-              <button id="btn2_proxy_bomb"  class="btn2_keyproxy" role="button" aria-label="Bomb"  aria-pressed="false" tabindex="0"></button>
-              <canvas id="btn2_panel" width="560" height="560"></canvas>
-            </div>
-          </div>
-        </section>
-        <!-- Right: Joystick -->
-        <section id="right-area" class="col-right" aria-label="Joypad">
-          <div class="pad">
-            <canvas id="jpad_canvas"></canvas>
-            <output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
-</div></div>
-
-<script>
-/* Demo canvas */
-(function(){const canvas=document.getElementById('game');if(!canvas)return;const ctx=canvas.getContext('2d');let t=0;(function loop(){if(!ctx)return;ctx.fillStyle="#061c18";ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.fillStyle="#15ff96";ctx.font="24px ui-monospace,Consolas,monospace";ctx.fillText("DEMO FRAME: "+t++,24,36);requestAnimationFrame(loop)})();})();
-</script>
-
-<script>
-/* Floating Layout Tuner: writes CSS vars, persists to localStorage */
-(function(){const root=document.documentElement;const storageKey='sneakerquest-layout-tuner-v1';const qs=id=>document.getElementById(id);
-const state={'--cabinet-scale':'1','--mq-title-size':'28','--mq-title-track':'0.18','--mq-title-x':'0px','--mq-title-y':'0px','--mq-sub-size':'14','--mq-sub-x':'0px','--mq-sub-y':'0px','--chip-br':'10','--chip-pad-x':'10','--chip-pad-y':'2','--chip-border':'2','--crt-fr':'1','--crt-ar':'1.333','--crt-r':'22','--crtwrap-pad':'12','--t1':'33%','--t2':'34%','--t3':'33%','--h1-a':'38%','--h1-b':'38%','--h1-c':'24%','--h2-a':'32%','--h2-b':'44%','--h2-c':'24%','--slot-heart-h':'52','--slot-shoes-h':'64','--slot-dots-h':'52','--slot-bag-h':'52','--slot-flames-h':'64','--slot-pause-h':'52','--slot-pad':'10','--bot-a':'58%','--bot-b':'42%','--tabs-pad-x-left':'12px','--tabs-pad-x-right':'12px','--hud1-pad-x-left':'0px','--hud1-pad-x-right':'0px','--hud2-pad-x-left':'0px','--hud2-pad-x-right':'0px','--tab-font-size':'18','tab1-text':'L I F E','tab2-text':'S N E A K E R S','tab3-text':'P O W R - U P S','--gap-tabs':'0px','--gap-hud1':'0px','--gap-hud2':'0px','--gap-bottom':'0px'};
-function applyVar(k,v){root.style.setProperty(k,v)}
-function applyAll(){Object.entries(state).forEach(([k,v])=>applyVar(k,v))}
-function load(){try{const s=JSON.parse(localStorage.getItem(storageKey)||'{}');Object.assign(state,s)}catch(e){}}
-function save(){localStorage.setItem(storageKey,JSON.stringify(state))}
-function setPctPair(aKey,bKey){const a=Math.max(0,Math.min(100,parseInt(state[aKey],10)));const b=100-a;state[aKey]=a+'%';state[bKey]=b+'%'}
-function setPctTriple(k1,k2,k3){let a=parseInt(state[k1],10),b=parseInt(state[k2],10);a=Math.max(10,Math.min(80,a));b=Math.max(10,Math.min(80,b));let c=100-a-b;if(c<10){c=10;b=Math.max(10,100-a-c)}state[k1]=a+'%';state[k2]=b+'%';state[k3]=c+'%'}
-function bind(id,key,transform=(x)=>x,outFmt=(x)=>String(x)){const el=qs(id),out=qs('o_'+id.slice(2));if(!el){console.error('Tuner: Missing element '+id);return}
-const set=val=>{const v=transform(val);state[key]=v;applyVar(key,v);if(out)out.textContent=outFmt(val);save()};
-let initialVal=String(state[key]).replace(/px|%|em|fr/,'');if(key.includes('offset')||key.includes('-pad-')||key==='--tab-font-size'){initialVal=parseInt(initialVal,10)}
-el.value=initialVal;if(out)out.textContent=outFmt(initialVal);el.addEventListener('input',e=>set(e.target.value))}
-function bindText(inputId,stateKey,outputId){const el=qs(inputId),out=qs(outputId);if(!el||!out){console.error('Tuner: Missing text bind',inputId,outputId);return}
-const set=val=>{state[stateKey]=val;out.textContent=val;save()};
-const initialVal=state[stateKey];el.value=initialVal;out.textContent=initialVal;el.addEventListener('input',e=>set(e.target.value))}
-const btn=qs('tunerFloatBtn'),panel=qs('tunerFloat'),btnMin=qs('tMin'),btnClose=qs('tClose');
-btn.addEventListener('click',()=>panel.classList.add('open'));
-btnClose.addEventListener('click',()=>panel.classList.remove('open'));
-btnMin.addEventListener('click',()=>panel.classList.toggle('open'));
-
-load();
-Object.keys(state).forEach(key=>{if(key.includes('-pad-x-')){state[key]=parseInt(state[key],10)+'px'}else if(key==='--tab-font-size'){state[key]=parseInt(state[key],10)}});
-applyAll();
-
-// Bind controls
-bind('v_scale','--cabinet-scale',v=>String(v),v=>v);
-bind('v_mqtsize','--mq-title-size',v=>String(v),v=>v+'px');
-bind('v_mqttrack','--mq-title-track',v=>String(v),v=>v+'em');
-bind('v_mqtx','--mq-title-x',v=>parseInt(v,10)+'px',v=>v+'px');
-bind('v_mqty','--mq-title-y',v=>parseInt(v,10)+'px',v=>v+'px');
-
-bind('v_mqssize','--mq-sub-size',v=>String(v),v=>v+'px');
-bind('v_mqsx','--mq-sub-x',v=>parseInt(v,10)+'px',v=>v+'px');
-bind('v_mqsy','--mq-sub-y',v=>parseInt(v,10)+'px',v=>v+'px');
-
-bind('v_chipbr','--chip-br',v=>String(v),v=>v+'px');
-bind('v_chippadx','--chip-pad-x',v=>String(v),v=>v+'px');
-bind('v_chippady','--chip-pad-y',v=>String(v),v=>v+'px');
-bind('v_chipborder','--chip-border',v=>String(v),v=>v+'px');
-
-const pxFmt=v=>parseInt(v,10)+'px';const pxOut=v=>v+'px';
-bind('v_gap_tabs','--gap-tabs',pxFmt,pxOut);
-bind('v_gap_hud1','--gap-hud1',pxFmt,pxOut);
-bind('v_gap_hud2','--gap-hud2',pxFmt,pxOut);
-bind('v_gap_bottom','--gap-bottom',pxFmt,pxOut);
-
-bind('v_crtfr','--crt-fr',v=>String(v),v=>v+'fr');
-bind('v_crtar','--crt-ar',v=>String(Number(v).toFixed(3)),v=>v);
-bind('v_crtr','--crt-r',v=>String(v),v=>v+'px');
-bind('v_crtpad','--crtwrap-pad',v=>String(v),v=>v+'px');
-
-bind('v_slotheart','--slot-heart-h',v=>String(v),v=>v+'px');
-bind('v_slotshoes','--slot-shoes-h',v=>String(v),v=>v+'px');
-bind('v_slotdots','--slot-dots-h',v=>String(v),v=>v+'px');
-bind('v_slotbag','--slot-bag-h',v=>String(v),v=>v+'px');
-bind('v_slotflames','--slot-flames-h',v=>String(v),v=>v+'px');
-bind('v_slotpause','--slot-pause-h',v=>String(v),v=>v+'px');
-bind('v_slotpad','--slot-pad',v=>String(v),v=>v+'px');
-
-bind('v_tabs_pad_l','--tabs-pad-x-left',pxFmt,pxOut);
-bind('v_tabs_pad_r','--tabs-pad-x-right',pxFmt,pxOut);
-bind('v_hud1_pad_l','--hud1-pad-x-left',pxFmt,pxOut);
-bind('v_hud1_pad_r','--hud1-pad-x-right',pxFmt,pxOut);
-bind('v_hud2_pad_l','--hud2-pad-x-left',pxFmt,pxOut);
-bind('v_hud2_pad_r','--hud2-pad-x-right',pxFmt,pxOut);
-
-bind('v_tab_font_size','--tab-font-size',v=>String(v),v=>v+'px');
-bindText('v_tab1_text','tab1-text','tab1_text_output');
-bindText('v_tab2_text','tab2-text','tab2_text_output');
-bindText('v_tab3_text','tab3-text','tab3_text_output');
-
-const t1=qs('v_t1'),t2=qs('v_t2'),t3=qs('v_t3');
-function applyTabs(){setPctTriple('--t1','--t2','--t3');applyAll();syncOutTabs();save()}
-function syncOutTabs(){t1.value=parseInt(state['--t1'],10);t2.value=parseInt(state['--t2'],10);t3.value=parseInt(state['--t3'],10);qs('o_t1').textContent=state['--t1'];qs('o_t2').textContent=state['--t2'];qs('o_t3').textContent=state['--t3']}
-[t1,t2,t3].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--t1']=el.value+'%';if(i===1)state['--t2']=el.value+'%';if(i===2)state['--t3']=el.value+'%';applyTabs()})});
-
-const h1a=qs('v_h1a'),h1b=qs('v_h1b'),h1c=qs('v_h1c');
-function applyH1(){setPctTriple('--h1-a','--h1-b','--h1-c');applyAll();syncOutH1();save()}
-function syncOutH1(){h1a.value=parseInt(state['--h1-a'],10);h1b.value=parseInt(state['--h1-b'],10);h1c.value=parseInt(state['--h1-c'],10);qs('o_h1a').textContent=state['--h1-a'];qs('o_h1b').textContent=state['--h1-b'];qs('o_h1c').textContent=state['--h1-c']}
-;[h1a,h1b,h1c].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--h1-a']=el.value+'%';if(i===1)state['--h1-b']=el.value+'%';if(i===2)state['--h1-c']=el.value+'%';applyH1()})});
-
-const h2a=qs('v_h2a'),h2b=qs('v_h2b'),h2c=qs('v_h2c');
-function applyH2(){setPctTriple('--h2-a','--h2-b','--h2-c');applyAll();syncOutH2();save()}
-function syncOutH2(){h2a.value=parseInt(state['--h2-a'],10);h2b.value=parseInt(state['--h2-b'],10);h2c.value=parseInt(state['--h2-c'],10);qs('o_h2a').textContent=state['--h2-a'];qs('o_h2b').textContent=state['--h2-b'];qs('o_h2c').textContent=state['--h2-c']}
-;[h2a,h2b,h2c].forEach((el,i)=>{el.addEventListener('input',()=>{if(i===0)state['--h2-a']=el.value+'%';if(i===1)state['--h2-b']=el.value+'%';if(i===2)state['--h2-c']=el.value+'%';applyH2()})});
-
-const bota=qs('v_bota'),botb=qs('v_botb');
-function applyBottom(fromA=true){if(fromA){state['--bot-a']=bota.value+'%';setPctPair('--bot-a','--bot-b')}else{state['--bot-b']=botb.value+'%';const a=100-parseInt(botb.value,10);state['--bot-a']=a+'%'}applyAll();syncOutBottom();save()}
-function syncOutBottom(){bota.value=parseInt(state['--bot-a'],10);botb.value=parseInt(state['--bot-b'],10);qs('o_bota').textContent=state['--bot-a'];qs('o_botb').textContent=state['--bot-b']}
-
-bota.addEventListener('input',()=>applyBottom(true));
-botb.addEventListener('input',()=>applyBottom(false));
-
-syncOutTabs();syncOutH1();syncOutH2();syncOutBottom();
-
-const copyBtn=qs('btn_copy');const copyMsg=qs('copyMessage');let msgTimeout;
-copyBtn.addEventListener('click',()=>{const lines=Object.entries(state).filter(([k])=>k.startsWith('--')).map(([k,v])=>`  ${k}: ${String(v)};`).join('\n');const css=`:root{\n${lines}\n}`;let success=false;try{const textArea=document.createElement('textarea');textArea.value=css;textArea.style.position='fixed';textArea.style.left='-9999px';textArea.style.opacity='0';document.body.appendChild(textArea);textArea.focus();textArea.select();success=document.execCommand('copy');document.body.removeChild(textArea)}catch(err){console.error('Copy CSS fallback failed: ',err);success=false}
-clearTimeout(msgTimeout);copyMsg.textContent=success?'Copied!':'Copy Failed!';copyMsg.style.opacity='1';copyMsg.style.color=success?'#15ff96':'#ff3a2f';msgTimeout=setTimeout(()=>{copyMsg.style.opacity='0'},2000)});
-
-qs('btn_reset').addEventListener('click',()=>{localStorage.removeItem(storageKey);location.reload()});
-
-// Ensure tuner is visible on first load (you can close it)
-// === Icon counters (live) ===
-function updateIconCounters(){
-  const q=(sel)=>document.querySelectorAll(sel).length;
-  const hearts = q('.slot-heart .ph-heart:not(.is-off)');
-  const shoes  = q('.slot-shoes .ph-sneaker');
-  const pUps   = q('.slot-dots .power');
-  const fires  = q('.slot-flames .ph-fire:not(.is-off)');
-  const set=(id,val)=>{const el=qs(id); if(el) el.textContent=String(val)};
-  set('o_count_hearts',hearts);
-  set('o_count_shoes',shoes);
-  set('o_count_powerups',pUps);
-  set('o_count_fire',fires);
-}
-
-updateIconCounters();
-
-// Observe HUD areas for changes (counts update on DOM/class changes)
-const hudRoot1 = document.querySelector('.hud');
+// Finish the truncated line
 const hudRoot2 = document.querySelector('.hud2');
+
+// Debounced live counter updates when HUD DOM changes
 (function(){
   if(!window.MutationObserver) return;
   const debounced = (()=>{let f=0; return ()=>{ cancelAnimationFrame(f); f=requestAnimationFrame(updateIconCounters); };})();
@@ -485,7 +10,62 @@ const hudRoot2 = document.querySelector('.hud2');
   if(hudRoot2) obs.observe(hudRoot2,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 })();
 
-// === Icon rendering helpers (amount-controlled) ===
+/* ----------------------------
+   Icon Amounts — UI + Logic
+   (Works even if the HTML block
+    was truncated — we inject it)
+-----------------------------*/
+
+// Create the “Icon Amounts” UI if missing
+function ensureIconAmountsUI(){
+  const body = document.getElementById('tBody');
+  if(!body) return;
+  const need =
+    !document.getElementById('v_count_hearts') ||
+    !document.getElementById('v_count_shoes') ||
+    !document.getElementById('v_count_powerups') ||
+    !document.getElementById('v_count_fire');
+
+  if(!need) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'tg';
+  wrap.innerHTML = `
+    <h4>Icon Amounts</h4>
+    <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
+      <label>Hearts</label>
+      <input id="v_count_hearts" type="number" min="0" max="10" step="1" inputmode="numeric">
+      <div class="tv" id="o_count_hearts_set"></div>
+      <div></div>
+    </div>
+    <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
+      <label>Sneakers</label>
+      <input id="v_count_shoes" type="number" min="0" max="10" step="1" inputmode="numeric">
+      <div class="tv" id="o_count_shoes_set"></div>
+      <div></div>
+    </div>
+    <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
+      <label>Power-ups</label>
+      <input id="v_count_powerups" type="number" min="0" max="12" step="1" inputmode="numeric">
+      <div class="tv" id="o_count_powerups_set"></div>
+      <div></div>
+    </div>
+    <div class="tr" style="grid-template-columns:1fr 120px 60px auto">
+      <label>Fire</label>
+      <input id="v_count_fire" type="number" min="0" max="12" step="1" inputmode="numeric">
+      <div class="tv" id="o_count_fire_set"></div>
+      <div></div>
+    </div>
+
+    <div class="tr" style="grid-template-columns:1fr auto"><label>Hearts (live)</label><div class="tv" id="o_count_hearts">0</div></div>
+    <div class="tr" style="grid-template-columns:1fr auto"><label>Sneakers (live)</label><div class="tv" id="o_count_shoes">0</div></div>
+    <div class="tr" style="grid-template-columns:1fr auto"><label>Power-ups (live)</label><div class="tv" id="o_count_powerups">0</div></div>
+    <div class="tr" style="grid-template-columns:1fr auto"><label>Fire (live)</label><div class="tv" id="o_count_fire">0</div></div>
+  `;
+  body.appendChild(wrap);
+}
+
+// Renderers
 function renderHearts(n){
   const c=document.querySelector('.slot-heart .line'); if(!c) return;
   let s=''; for(let i=0;i<n;i++) s+='<i class="ph-fill ph-heart" aria-hidden="true"></i>';
@@ -511,6 +91,7 @@ function renderFire(n){
   let s=''; for(let i=0;i<n;i++) s+='<i class="ph-fill ph-fire" aria-hidden="true"></i>';
   c.innerHTML=s;
 }
+
 function renderAllIconAmounts(){
   const H=parseInt(state['count-hearts']??'3',10);
   const S=parseInt(state['count-shoes']??'5',10);
@@ -520,7 +101,7 @@ function renderAllIconAmounts(){
   updateIconCounters();
 }
 
-// === Bind number inputs (persist in existing `state` + localStorage) ===
+// Bind a number input to state + re-render
 function bindCount(id,key,outId){
   const el=qs(id), out=qs(outId); if(!el) return;
   const set=(v)=>{
@@ -529,7 +110,6 @@ function bindCount(id,key,outId){
     state[key]=String(n); if(out) out.textContent=String(n);
     save(); renderAllIconAmounts();
   };
-  // default from current DOM if unset
   if(state[key]==null){
     if(key==='count-hearts')   state[key]=String(document.querySelectorAll('.slot-heart .ph-heart:not(.is-off)').length||3);
     if(key==='count-shoes')    state[key]=String(document.querySelectorAll('.slot-shoes .ph-sneaker').length||5);
@@ -540,19 +120,20 @@ function bindCount(id,key,outId){
   el.addEventListener('input',e=>set(e.target.value));
 }
 
-// Wire up counts (no-ops if inputs are missing)
+// Ensure UI exists, then wire it
+ensureIconAmountsUI();
 bindCount('v_count_hearts','count-hearts','o_count_hearts_set');
 bindCount('v_count_shoes','count-shoes','o_count_shoes_set');
 bindCount('v_count_powerups','count-powerups','o_count_powerups_set');
 bindCount('v_count_fire','count-fire','o_count_fire_set');
 
-// First render for icon amounts
+// Initial render for icon amounts + live counters
 renderAllIconAmounts();
 
-// Make sure tuner is visible the first time after restore (one-time)
+// Auto-open tuner once after restore
 try{
   if(!localStorage.getItem(storageKey+':tuner_seen')){
-    panel.classList.add('open');
+    document.getElementById('tunerFloat').classList.add('open');
     localStorage.setItem(storageKey+':tuner_seen','1');
   }
 }catch(_){}
@@ -561,9 +142,198 @@ try{
 })();
 </script>
 
-<!-- (Optional) Joystick + Buttons logic scripts live in your other file.
-     If you host them separately, include them here via <script src="..."></script>.
-     The UI will still render without them. -->
+<script>
+/* =========================
+   Controls: JOYPAD + BUTTONS
+   - Lightweight, no bloat
+   - Bomb effects only in 1-button mode
+========================= */
 
+/* Prevent scrolling on touch over controls */
+document.addEventListener('touchmove', (e)=>{
+  if(e.target.closest('#left-area, #right-area')) e.preventDefault();
+},{passive:false});
+
+/* ---------- JOYPAD (right) ---------- */
+(() => {
+  const cvs=document.getElementById('jpad_canvas'); if(!cvs) return;
+  const ctx=cvs.getContext('2d');
+  const out=document.getElementById('jpad_status');
+  const area=document.getElementById('right-area');
+  let W=0,H=0,CX=0,CY=0,R=0, nx=0, ny=0, tx=0, ty=0;
+  const DEAD=0.15, SMOOTH=0.22;
+
+  function layout(w,h){
+    cvs.width=w; cvs.height=h; W=w; H=h; CX=W/2; CY=H/2; R=Math.min(W,H)*0.38;
+  }
+  new ResizeObserver(entries=>{
+    const r=entries[0].contentRect;
+    const pad=16; // matches .control-ui .pad inset
+    layout(Math.max(1,Math.floor(r.width- pad*2)), Math.max(1,Math.floor(r.height- pad*2)));
+  }).observe(area);
+
+  function toNorm(x,y){
+    const dx=x-CX, dy=y-CY; let d=Math.hypot(dx,dy); const a=Math.atan2(dy,dx);
+    let r=Math.min(1,d/R); if(r<DEAD) r=0; else r=(r-DEAD)/(1-DEAD);
+    return {x:Math.cos(a)*r, y:Math.sin(a)*r};
+  }
+  function pos(e){const b=cvs.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top};}
+  const active=new Set();
+  function set(e,val){ try{cvs.setPointerCapture(e.pointerId);}catch(_){} active.add(e.pointerId); const p=pos(e); const v=toNorm(p.x,p.y); tx=v.x; ty=v.y; }
+  function mov(e){ if(!active.has(e.pointerId)) return; const p=pos(e); const v=toNorm(p.x,p.y); tx=v.x; ty=v.y; }
+  function end(e){ active.delete(e.pointerId); if(!active.size){ tx=0; ty=0; } }
+
+  cvs.addEventListener('pointerdown',set);
+  cvs.addEventListener('pointermove',mov);
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>cvs.addEventListener(t,end));
+
+  function draw(){
+    nx += (tx-nx)*SMOOTH; ny += (ty-ny)*SMOOTH;
+    ctx.clearRect(0,0,W,H);
+    // base
+    ctx.fillStyle='#070404'; ctx.fillRect(0,0,W,H);
+    // ring
+    ctx.strokeStyle='#2a0000'; ctx.lineWidth=8; ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.stroke();
+    // knob
+    const kx=CX+nx*R, ky=CY+ny*R;
+    const g=ctx.createRadialGradient(kx,ky,4,kx,ky,28);
+    g.addColorStop(0,'#ff2a2a'); g.addColorStop(1,'#210000');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(kx,ky,22,0,Math.PI*2); ctx.fill();
+    if(out){ const m=Math.min(1,Math.hypot(nx,ny)); const a=Math.atan2(ny,nx); out.value=`x ${nx.toFixed(2)}, y ${ny.toFixed(2)}, |v| ${m.toFixed(2)}, θ ${a.toFixed(2)}`; }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ---------- BUTTONS (left) ---------- */
+(() => {
+  const DPR=Math.max(1, Math.min(2, Math.round(devicePixelRatio||1)));
+  const cvs=document.getElementById('btn2_panel'); if(!cvs) return;
+  const ctx=cvs.getContext('2d');
+  const proxyBlast=document.getElementById('btn2_proxy_blast');
+  const proxyBomb =document.getElementById('btn2_proxy_bomb');
+  const tmpBtn=document.getElementById('btn2_temp');
+
+  // Canvas size is fixed in HTML (560). Respect DPR for crispness.
+  const W=560, H=560; cvs.width=W*DPR; cvs.height=H*DPR; cvs.style.width=W+'px'; cvs.style.height=H+'px'; ctx.scale(DPR,DPR);
+
+  // Simple geometry for two faces
+  const pad=56, gap=42, faceH=Math.round((H - pad*2 - gap)/2);
+  const BLAST={x:pad, y:pad, w:W-pad*2, h:faceH, r:24};
+  const BOMB2={x:pad, y:pad+faceH+gap, w:W-pad*2, h:faceH, r:24};
+  // Single mode face (centered)
+  const BOMB1={x:pad, y:Math.round((H-faceH)/2), w:W-pad*2, h:faceH, r:24};
+
+  // Mode state
+  const state={ mode:'single', transitioning:false }; // 'single' or 'two'
+
+  function rr(p){ const path=new Path2D(); const {x,y,w,h,r}=p;
+    path.moveTo(x+r,y); path.lineTo(x+w-r,y); path.arcTo(x+w,y,x+w,y+r,r);
+    path.lineTo(x+w,y+h-r); path.arcTo(x+w,y+h,x+w-r,y+h,r);
+    path.lineTo(x+r,y+h); path.arcTo(x,y+h,x,y+h-r,r);
+    path.lineTo(x,y+r); path.arcTo(x,y,x+r,y,r); path.closePath(); return path;
+  }
+  const P_BLAST=rr(BLAST), P_BOMB2=rr(BOMB2), P_BOMB1=rr(BOMB1);
+
+  function face(p,label){
+    // bezel
+    ctx.fillStyle='#120e0e'; ctx.strokeStyle='#2a1511'; ctx.lineWidth=2;
+    ctx.fill(rr(p)); ctx.stroke(rr(p));
+    // inner
+    ctx.fillStyle='#1a0e0e'; ctx.fill(rr({x:p.x+8,y:p.y+8,w:p.w-16,h:p.h-16,r:p.r-8}));
+    // label (pixel font)
+    ctx.save(); ctx.fillStyle='#ff3a2a'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font="28px 'Press Start 2P'";
+    ctx.fillText(label, p.x+p.w/2, p.y+p.h/2);
+    ctx.restore();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(state.mode==='single'){
+      face(BOMB1,'BOMB X');
+    }else{
+      face(BLAST,'BLAST');
+      face(BOMB2,'BOMB X');
+    }
+    // soft glow
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.1;
+    ctx.fillStyle='#ff3a2a'; ctx.fill(rr(state.mode==='single'?BOMB1:BOMB2));
+    ctx.restore();
+  }
+
+  // Bomb effects (ONLY in single mode): a quick implosion pulse
+  let implodingStart=0;
+  function startImplode(){ if(state.mode!=='single') return; implodingStart=performance.now(); requestAnimationFrame(implodeFrame); }
+  function implodeFrame(ts){
+    if(!implodingStart) return;
+    const t=(ts-implodingStart)/800; // 0..1
+    draw();
+    const p=BOMB1; // single-face
+    const cx=p.x+p.w/2, cy=p.y+p.h/2, maxR=Math.min(p.w,p.h)*0.45;
+    const r=maxR*(1-t);
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.strokeStyle='rgba(255,42,42,0.9)';
+    ctx.lineWidth=6;
+    ctx.beginPath(); ctx.arc(cx,cy,Math.max(4,r),0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+    if(t<1) requestAnimationFrame(implodeFrame); else implodingStart=0;
+  }
+
+  // Click handling (use DPR-aware hit test)
+  function hitPath(pth, clientX, clientY){
+    const r=cvs.getBoundingClientRect();
+    const x=(clientX-r.left)*DPR, y=(clientY-r.top)*DPR;
+    return ctx.isPointInPath(pth,x,y);
+  }
+  cvs.addEventListener('click',(e)=>{
+    if(state.mode==='single'){
+      if(hitPath(P_BOMB1,e.clientX,e.clientY)){ startImplode(); } // effects allowed
+    }else{
+      // two-button mode: NO bomb effects
+      // we still allow blast visual feedback (no field sim)
+      if(hitPath(P_BLAST,e.clientX,e.clientY)){ /* optional: add tiny flash */ }
+      if(hitPath(P_BOMB2,e.clientX,e.clientY)){ /* intentionally no effect */ }
+    }
+  });
+
+  // Keyboard proxies map to centers
+  function synthClickAtRect(p){
+    const r=cvs.getBoundingClientRect();
+    const cx=r.left + (p.x+p.w/2)/W * r.width;
+    const cy=r.top  + (p.y+p.h/2)/H * r.height;
+    const evt=new MouseEvent('click',{bubbles:true,cancelable:true,clientX:cx,clientY:cy});
+    cvs.dispatchEvent(evt);
+  }
+  if(proxyBlast) proxyBlast.addEventListener('click',()=>{ if(state.mode==='two') synthClickAtRect(BLAST); });
+  if(proxyBomb)  proxyBomb .addEventListener('click',()=>{ synthClickAtRect(state.mode==='single'?BOMB1:BOMB2); });
+
+  // Mode transition (temp button)
+  if(tmpBtn){
+    tmpBtn.addEventListener('click',()=>{
+      if(state.transitioning) return;
+      state.transitioning=true;
+      // quick redraw swap
+      state.mode = (state.mode==='single'?'two':'single');
+      draw();
+      state.transitioning=false;
+      // Update proxy layout sizes to match semantics (simple)
+      if(state.mode==='single'){
+        if(proxyBlast){ proxyBlast.style.display='none'; }
+        if(proxyBomb){ proxyBomb.style.top='4%'; proxyBomb.style.bottom='auto'; proxyBomb.style.height='92%'; }
+      }else{
+        if(proxyBlast){ proxyBlast.style.display='block'; proxyBlast.style.top='6%'; proxyBlast.style.height='44%'; }
+        if(proxyBomb){ proxyBomb.style.display='block'; proxyBomb.style.bottom='6%'; proxyBomb.style.top='auto'; proxyBomb.style.height='44%'; }
+      }
+    });
+  }
+
+  // Initial proxy layout + first paint
+  if(proxyBlast){ proxyBlast.style.display='none'; }
+  if(proxyBomb){  proxyBomb.style.top='4%'; proxyBomb.style.height='92%'; }
+  draw();
+})();
+</script>
 </body>
 </html>
