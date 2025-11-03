@@ -11,67 +11,66 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
+/* === BASE :root (your variables applied) === */
 :root{
-  --text:#d6c7a4; --led:#ff3a2f; --cabinet-scale:1;
-
-  /* Section heights */
-  --marquee-h:90; --tabs-h:80; --bottom-h:240;
-
-  /* Screen + layout */
-  --crt-fr:0.4fr; --crt-ar:0.860; --crt-r:10; --crtwrap-pad:13;
-  --gap:10; --slot-pad:8; --radius:16;
-
-  /* Icon sizes (visual scale) */
+  --text:#d6c7a4; 
+  --led:#ff3a2f;
+  --gap:10; 
+  --radius:16; 
   --icon-heart:20; --icon-shoe:20; --icon-power:20;
 
-  /* Slot heights */
-  --slot-heart-h:46; --slot-shoes-h:46; --slot-dots-h:46; --slot-bag-h:46; --slot-flames-h:46; --slot-pause-h:46;
-
-  /* Row widths */
-  --h1-a:40%; --h1-b:20%; --h1-c:40%;
-  --h2-a:40%; --h2-b:20%; --h2-c:40%;
-  --t1:40%; --t2:20%; --t3:40%;
-
-  /* Bottom split */
-  --bot-a:80%; --bot-b:20%;
-
-  /* Marquee text + chips */
-  --mq-title-size:36; --mq-title-track:0; --mq-title-x:0px; --mq-title-y:0px;
-  --mq-sub-size:12; --mq-sub-x:1px; --mq-sub-y:1px;
-  --chip-br:8; --chip-pad-x:16; --chip-pad-y:2; --chip-border:1; --chip-bg:transparent;
-
-  /* Row horizontal padding */
-  --tabs-pad-x-left:12px; --tabs-pad-x-right:32px;
-  --hud1-pad-x-left:0px; --hud1-pad-x-right:21px;
-  --hud2-pad-x-left:0px; --hud2-pad-x-right:21px;
-
-  /* Tabs */
-  --tab-font-size:15;
-
-  /* Vertical gaps */
-  --gap-tabs:-2px; --gap-hud1:-3px; --gap-hud2:-5px; --gap-bottom:-5px
+  --cabinet-scale: 1;
+  --mq-title-size: 36;
+  --mq-title-track: 0;
+  --mq-title-x: 0px;
+  --mq-title-y: 0px;
+  --mq-sub-size: 12;
+  --mq-sub-x: 1px;
+  --mq-sub-y: 1px;
+  --chip-br: 8;
+  --chip-pad-x: 16;
+  --chip-pad-y: 2;
+  --chip-border: 1;
+  --crt-fr: 0.4fr; /* keep fr to render on first paint */
+  --crt-ar: 0.860;
+  --crt-r: 10;
+  --crtwrap-pad: 13;
+  --t1: 40%;
+  --t2: 20%;
+  --t3: 40%;
+  --h1-a: 40%;
+  --h1-b: 20%;
+  --h1-c: 40%;
+  --h2-a: 40%;
+  --h2-b: 20%;
+  --h2-c: 40%;
+  --slot-heart-h: 46;
+  --slot-shoes-h: 46;
+  --slot-dots-h: 46;
+  --slot-bag-h: 46;
+  --slot-flames-h: 46;
+  --slot-pause-h: 46;
+  --slot-pad: 8;
+  --bot-a: 80%;
+  --bot-b: 20%;
+  --tabs-pad-x-left: 12px;
+  --tabs-pad-x-right: 32px;
+  --hud1-pad-x-left: 0px;
+  --hud1-pad-x-right: 21px;
+  --hud2-pad-x-left: 0px;
+  --hud2-pad-x-right: 21px;
+  --tab-font-size: 15;
+  --gap-tabs: -2px;
+  --gap-hud1: -3px;
+  --gap-hud2: -5px;
+  --gap-bottom: -5px;
+  --marquee-h:90; --tabs-h:80; --bottom-h:240;
 }
+
 *{box-sizing:border-box} html,body{height:100%}
-body{
-  margin:0; background:#0a0a0a; color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-  display:grid; place-items:center; min-height:100dvh; overflow:hidden
-}
-.cabinet{
-  height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);
-  aspect-ratio:430/900; max-width:100vw; border-radius:28px; padding:14px;
-  transform:scale(var(--cabinet-scale)); transform-origin:center top;
-  background:
-    radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),
-    linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
-  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a
-}
-.inner{
-  height:100%; border-radius:22px; padding:12px; display:grid; gap:calc(var(--gap)*1px);
-  grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);
-  background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);
-  box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510; position:relative; isolation:isolate
-}
+body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+.cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0%,#000 0,#000 18%,transparent 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.55),0 6px 0 #0a0a0a}
+.inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d 100%);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
 .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
 .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.06),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 3px,rgba(0,0,0,0) 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
 .led .line{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px rgba(255,58,47,.45),0 0 14px rgba(255,58,47,.25);font-weight:800}
@@ -87,12 +86,7 @@ body{
 .divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
 
 .crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
-.crt{
-  width:100%; aspect-ratio:var(--crt-ar); border-radius:calc(var(--crt-r)*1px);
-  /* SOLID placeholder (inert) */
-  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 22%), linear-gradient(#0b2823,#0a241f);
-  box-shadow:inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); position:relative; overflow:hidden
-}
+.crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 22%), linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6);position:relative;overflow:hidden}
 
 .tabs{border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);gap:calc(var(--gap)*1px);padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);text-align:center;font-weight:800;letter-spacing:.08em;margin-top:var(--gap-tabs)}
 .tab{padding:0;border-right:1px solid #4d4032;display:grid;align-items:stretch}.tab:last-child{border-right:none}
@@ -105,10 +99,15 @@ body{
 .slot-heart{height:calc(var(--slot-heart-h)*1px)} .slot-shoes{height:calc(var(--slot-shoes-h)*1px)} .slot-dots{height:calc(var(--slot-dots-h)*1px)}
 .slot-bag{height:calc(var(--slot-bag-h)*1px)} .slot-flames{height:calc(var(--slot-flames-h)*1px)} .slot-pause{height:calc(var(--slot-pause-h)*1px)}
 .slot > .led{height:100%;width:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
+/* Uniform spacing + alignment for icons */
 .slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em}
+/* Make outline sneakers red without grouping (so gap applies to each icon equally) */
+.sneaker-outline{color:var(--led)}
+
 .slot-heart .line{font-size:calc(var(--icon-heart)*1px)}
 .slot-shoes .line{font-size:calc(var(--icon-shoe)*1px);color:#e6e6e6}
 .slot-flames .line,.slot-dots .line{font-size:calc(var(--icon-power)*1px)}
+.slot-bag .line{font-size:calc(var(--icon-power)*1px)}
 .power .ph-bold{display:inline-block} .power .ph-fill{display:none}
 .power.power--armed .ph-bold{display:none} .power.power--armed .ph-fill{display:inline-block}
 .power .is-off{display:none}
@@ -140,11 +139,16 @@ body{
 #copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px;white-space:nowrap}
 @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
 @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
+
+/* Tiny test results HUD */
+#testHud{position:fixed;left:14px;bottom:14px;background:#111c;padding:8px 10px;border:1px solid #333;border-radius:8px;color:#e6e6e6;font:12px/1.3 ui-monospace,monospace;max-width:60vw;z-index:7060}
+#testHud b{color:#fff}
 </style>
 </head>
 <body>
 
 <button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
+<div id="testHud" hidden></div>
 
 <div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner">
   <div id="tHead">
@@ -222,25 +226,19 @@ body{
       <div class="tr"><label>HUD2 Pad Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
     </div>
 
-    <!-- HUD Row widths -->
-    <div class="tg"><h4>HUD Row 1 widths (%)</h4>
-      <div class="tr"><label>Hearts %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><div></div></div>
-      <div class="tr"><label>Sneakers %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><div></div></div>
-      <div class="tr"><label>Dots %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><div></div></div>
-    </div>
-
+    <!-- HUD Row 2 widths (%) -->
     <div class="tg"><h4>HUD Row 2 widths (%)</h4>
-      <div class="tr"><label>Bag %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><div></div></div>
-      <div class="tr"><label>Flames %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><div></div></div>
-      <div class="tr"><label>Pause %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><div></div></div>
+      <div class="tr"><label>Flames %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><div></div></div>
+      <div class="tr"><label>Pause %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><div></div></div>
+      <div class="tr"><label>Box %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><div></div></div>
     </div>
 
     <!-- Heights (px) -->
     <div class="tg"><h4>Heights (px)</h4>
-      <div class="tr"><label>Hearts H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
-      <div class="tr"><label>Sneakers H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
+      <div class="tr"><label>Sneakers H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
+      <div class="tr"><label>Hearts H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
       <div class="tr"><label>Dots H</label><input id="v_slotdots" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
-      <div class="tr"><label>Bag H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
+      <div class="tr"><label>Box H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
       <div class="tr"><label>Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
       <div class="tr"><label>Pause H</label><input id="v_slotpause" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
       <div class="tr"><label>Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
@@ -248,18 +246,18 @@ body{
 
     <!-- Icon counters (read-only tallies) -->
     <div class="tg"><h4>HUD Icon Counts</h4>
-      <div class="tr" style="grid-template-columns:1fr auto"><label>Hearts</label><div class="tv" id="o_count_hearts"></div></div>
-      <div class="tr" style="grid-template-columns:1fr auto"><label>Sneakers</label><div class="tv" id="o_count_shoes"></div></div>
+      <div class="tr" style="grid-template-columns:1fr auto"><label>Sneakers</label><div class="tv" id="o_count_hearts"></div></div>
+      <div class="tr" style="grid-template-columns:1fr auto"><label>Hearts</label><div class="tv" id="o_count_shoes"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Power-ups</label><div class="tv" id="o_count_powers"></div></div>
       <div class="tr" style="grid-template-columns:1fr auto"><label>Fires</label><div class="tv" id="o_count_fires"></div></div>
     </div>
 
     <!-- Icon Amounts (editable) -->
     <div class="tg"><h4>Icon Amounts</h4>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_fill"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_outline"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_fill"></div><div></div></div>
-      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Sneakers — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Hearts — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_outline"></div><div></div></div>
       <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Power-ups — total</label><input id="in_powers_total" type="number" min="0" max="4" step="1"><div class="tv" id="tv_powers_total"></div><div></div></div>
       <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Fires — filled</label><input id="in_fires_fill" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_fill"></div><div></div></div>
       <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label>Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_outline"></div><div></div></div>
@@ -307,16 +305,16 @@ body{
 
   <!-- HUD row 1 -->
   <div class="hud">
-    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
-    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
+    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers"></div></div></div>
+    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts"></div></div></div>
     <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers"></div></div></div>
   </div>
 
-  <!-- HUD row 2 -->
+  <!-- HUD row 2 (Flames | Pause | Box) -->
   <div class="hud2">
-    <div class="slot slot-bag"><div class="led"><div class="line counter"><span class="seven" id="counter">000</span></div></div></div>
     <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire"></div></div></div>
     <div class="slot slot-pause"><div class="led"><div class="line" style="width:100%;display:flex;align-items:center;justify-content:flex-end"><button class="btn" id="btn-pause" type="button">PAUSE</button></div></div></div>
+    <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count"><i class="ph-fill ph-package" aria-hidden="true"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span class="seven" id="counter">000</span></div></div></div>
   </div>
 
   <!-- Bottom -->
@@ -332,57 +330,43 @@ body{
 </div></div>
 
 <script>
-/* Lite tuner + icon counts (self-contained) */
 (function(){
   const root=document.documentElement;
   const storageKey='sneakerquest-layout-tuner-v1';
   const ICON_LS='sneakerquest-icon-counts-v1';
   const $=id=>document.getElementById(id);
 
-  // === Base state for CSS variables (updated defaults) ===
   const state={
     '--cabinet-scale':'1',
-
     '--mq-title-size':'36','--mq-title-track':'0','--mq-title-x':'0px','--mq-title-y':'0px',
     '--mq-sub-size':'12','--mq-sub-x':'1px','--mq-sub-y':'1px',
     '--chip-br':'8','--chip-pad-x':'16','--chip-pad-y':'2','--chip-border':'1',
-
     '--crt-fr':'0.4','--crt-ar':'0.860','--crt-r':'10','--crtwrap-pad':'13',
-
     '--t1':'40%','--t2':'20%','--t3':'40%',
     '--h1-a':'40%','--h1-b':'20%','--h1-c':'40%',
     '--h2-a':'40%','--h2-b':'20%','--h2-c':'40%',
-
     '--slot-heart-h':'46','--slot-shoes-h':'46','--slot-dots-h':'46',
     '--slot-bag-h':'46','--slot-flames-h':'46','--slot-pause-h':'46',
     '--slot-pad':'8',
-
     '--bot-a':'80%','--bot-b':'20%',
-
     '--tabs-pad-x-left':'12px','--tabs-pad-x-right':'32px',
     '--hud1-pad-x-left':'0px','--hud1-pad-x-right':'21px',
     '--hud2-pad-x-left':'0px','--hud2-pad-x-right':'21px',
-
     '--tab-font-size':'15',
     '--gap-tabs':'-2px','--gap-hud1':'-3px','--gap-hud2':'-5px','--gap-bottom':'-5px',
-
     'tab1-text':'L I F E','tab2-text':'S N E A K E R S','tab3-text':'P O W R - U P S'
   };
-
-  // merge any saved overrides
-  try{ Object.assign(state, JSON.parse(localStorage.getItem(storageKey)||'{}')); }catch(_){}
+  try{ Object.assign(state, JSON.parse(localStorage.getItem(storageKey)||'{}')); }catch(_){ }
   const save=()=>localStorage.setItem(storageKey,JSON.stringify(state));
   const setVar=(k,v)=>root.style.setProperty(k,v);
   const applyAll=()=>{ for(const [k,v] of Object.entries(state)) if(k.startsWith('--')) setVar(k,v) };
   applyAll();
 
-  // === Tuner panel open/close ===
   const btn=$('tunerFloatBtn'),panel=$('tunerFloat'),btnMin=$('tMin'),btnClose=$('tClose');
   btn?.addEventListener('click',()=>panel.classList.add('open'));
   btnClose?.addEventListener('click',()=>panel.classList.remove('open'));
   btnMin?.addEventListener('click',()=>panel.classList.toggle('open'));
 
-  // === Bind helpers ===
   function bind(id,key,transform=x=>x,outFmt=x=>String(x)){
     const el=$(id), out=$('o_'+id.slice(2)); if(!el) return;
     const set=v=>{ const val=transform(v); state[key]=val; if(key.startsWith('--')) setVar(key,val); out&&(out.textContent=outFmt(v)); save(); };
@@ -398,18 +382,17 @@ body{
     let a=parseInt(state[k1],10), b=parseInt(state[k2],10);
     a=Math.max(10,Math.min(80,a)); b=Math.max(10,Math.min(80,b));
     let c=100-a-b; if(c<10){c=10; b=Math.max(10,100-a-c)}
-    state[k1]=a+'%'; state[k2]=b+'%'; state[k3]=c+'%'
+    state[k1]=a+'%'; state[k2]=b+'%'; state[k3]=c+'%';
   }
   function applyTriple(ids,keys){
     ids.forEach((id,i)=>$(id)?.addEventListener('input',e=>{
       state[keys[i]]=e.target.value+'%'; pctTriple(...keys); applyAll(); save();
-      $('o_'+ids[i].slice(2)).textContent=state[keys[i]];
+      const meter=$('o_'+ids[i].slice(2)); if(meter) meter.textContent=state[keys[i]];
     }));
     pctTriple(...keys); applyAll();
-    ids.forEach((id,i)=>{ $(id).value=parseInt(state[keys[i]],10); $('o_'+ids[i].slice(2)).textContent=state[keys[i]]; });
+    ids.forEach((id,i)=>{ const ctl=$(id); if(ctl) ctl.value=parseInt(state[keys[i]],10); const meter=$('o_'+ids[i].slice(2)); if(meter) meter.textContent=state[keys[i]]; });
   }
 
-  // === Wire sliders ===
   const px=v=>parseInt(v,10)+'px', pxOut=v=>v+'px';
   bind('v_scale','--cabinet-scale',String,String);
   bind('v_mqtsize','--mq-title-size',String,v=>v+'px');
@@ -436,7 +419,6 @@ body{
   applyTriple(['v_h1a','v_h1b','v_h1c'],['--h1-a','--h1-b','--h1-c']);
   applyTriple(['v_h2a','v_h2b','v_h2c'],['--h2-a','--h2-b','--h2-c']);
 
-  // === CSS export / reset
   $('btn_copy')?.addEventListener('click',()=>{
     const lines=Object.entries(state).filter(([k])=>k.startsWith('--')).map(([k,v])=>`  ${k}: ${String(v)};`).join('\n');
     const css=`:root{\n${lines}\n}`; const ta=document.createElement('textarea'); ta.value=css; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
@@ -445,25 +427,25 @@ body{
   });
   $('btn_reset')?.addEventListener('click',()=>{ localStorage.removeItem(storageKey); localStorage.removeItem(ICON_LS); location.reload(); });
 
-  // === ICONS — defaults + render ===
   const defaults = { heartsFill:2, heartsOutline:1, shoesFill:3, shoesOutline:2, powersTotal:4, firesFill:3, firesOutline:2 };
   let iconState = {...defaults};
   try{ Object.assign(iconState, JSON.parse(localStorage.getItem(ICON_LS)||'{}')); }catch(_){}
   const saveIcons = ()=>localStorage.setItem(ICON_LS, JSON.stringify(iconState));
 
+  // === Renderers ===
+  // NOTE: Heart slot shows SNEAKERS (outline = red). We avoid wrappers so flex gap applies evenly.
   function rebuildHearts(fill, outline){
     const root=document.querySelector('.slot-heart .line'); if(!root) return;
-    root.innerHTML=''; for(let i=0;i<fill;i++) root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
-    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart" aria-hidden="true"></i>');
+    root.innerHTML='';
+    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
+    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker" aria-hidden="true"></i>');
   }
+  // Shoe slot shows HEARTS
   function rebuildShoes(fill, outline){
     const root=document.querySelector('.slot-shoes .line'); if(!root) return;
     root.innerHTML='';
-    if(outline>0){ const span=document.createElement('span'); span.style.color='#ff3a2f';
-      for(let i=0;i<outline;i++) span.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker" aria-hidden="true"></i>');
-      root.appendChild(span);
-    }
-    for(let i=0;i<fill;i++) root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker" aria-hidden="true"></i>');
+    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
+    for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart" aria-hidden="true"></i>');
   }
   function rebuildPowers(total){
     const root=document.querySelector('.slot-dots .line'); if(!root) return;
@@ -472,35 +454,34 @@ body{
     for(let i=0;i<total;i++){
       const d=defs[i%defs.length];
       if(d.fill==='svg'){
-        root.insertAdjacentHTML('beforeend',`
-          <span class="power power--idle">
-            <i class="ph-bold ${d.bold}" aria-hidden="true"></i>
-            <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true">
-              <circle cx="128" cy="128" r="28"></circle>
-              <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>
-            </svg>
-          </span>`);
+        root.insertAdjacentHTML('beforeend','<span class="power power--idle">\
+          <i class="ph-bold '+d.bold+'" aria-hidden="true"></i>\
+          <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true">\
+            <circle cx="128" cy="128" r="28"></circle>\
+            <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>\
+          </svg>\
+        </span>');
       }else{
-        root.insertAdjacentHTML('beforeend',`
-          <span class="power power--idle">
-            <i class="ph-bold ${d.bold}" aria-hidden="true"></i>
-            <i class="ph-fill ${d.fill} is-off" aria-hidden="true"></i>
-          </span>`);
+        root.insertAdjacentHTML('beforeend','<span class="power power--idle">\
+          <i class="ph-bold '+d.bold+'" aria-hidden="true"></i>\
+          <i class="ph-fill '+d.fill+' is-off" aria-hidden="true"></i>\
+        </span>');
       }
     }
   }
   function rebuildFires(fill, outline){
     const root=document.querySelector('.slot-flames .line'); if(!root) return;
-    root.innerHTML=''; for(let i=0;i<fill;i++) root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
+    root.innerHTML='';
+    for(let i=0;i<fill;i++)    root.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
     for(let i=0;i<outline;i++) root.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire" aria-hidden="true"></i>');
   }
   function updateCounters(){
-    const count=(selRoot,selIcons)=>{const r=document.querySelector(selRoot);return r?r.querySelectorAll(selIcons).length:0};
+    const count=(sel)=>{const r=document.querySelector(sel);return r?r.querySelectorAll('i').length:0};
     const out=(id,val)=>{const n=$(id); if(n) n.textContent=String(val)};
-    out('o_count_hearts', count('.slot-heart .line','.ph-heart'));
-    out('o_count_shoes',  count('.slot-shoes .line','.ph-sneaker'));
+    out('o_count_hearts', count('.slot-heart .line'));
+    out('o_count_shoes',  count('.slot-shoes .line'));
     out('o_count_powers', document.querySelectorAll('.slot-dots .power').length);
-    out('o_count_fires',  count('.slot-flames .line','.ph-fire'));
+    out('o_count_fires',  count('.slot-flames .line'));
   }
   function renderIcons(){
     rebuildHearts(iconState.heartsFill, iconState.heartsOutline);
@@ -509,15 +490,12 @@ body{
     rebuildFires(iconState.firesFill, iconState.firesOutline);
     updateCounters();
   }
-
-  // First paint (icons)
   renderIcons();
 
-  // Bind Icon Amounts inputs
   function bindNum(inputId,tvId,key,min,max){
     const inp=$(inputId), tv=$(tvId); if(!inp||!tv) return;
     const clamp=v=>Math.max(min,Math.min(max,(v|0)));
-    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); saveIcons(); renderIcons(); };
+    const set=v=>{ iconState[key]=clamp(v); tv.textContent=String(iconState[key]); localStorage.setItem(ICON_LS, JSON.stringify(iconState)); renderIcons(); };
     inp.value=iconState[key]; tv.textContent=String(iconState[key]);
     inp.addEventListener('input',e=>set(parseInt(e.target.value||'0',10)));
   }
@@ -528,6 +506,37 @@ body{
   bindNum('in_powers_total','tv_powers_total','powersTotal',0,4);
   bindNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
   bindNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
+
+  // ===== Tests =====
+  function assert(name, cond){
+    const hud=document.getElementById('testHud'); if(hud.hidden) hud.hidden=false;
+    const line=document.createElement('div'); line.innerHTML=(cond?'✅':'❌')+' <b>'+name+'</b>'; hud.appendChild(line);
+    if(!cond) console.error('[TEST FAIL]',name); else console.log('[TEST PASS]',name);
+  }
+  function runTests(){
+    try{
+      // 1) No wrapper spans around sneakers so flex gap applies evenly
+      const leftLine=document.querySelector('.slot-heart .line');
+      const childIsOnlyIcons=[...leftLine.children].every(n=>n.tagName.toLowerCase()==='i');
+      assert('sneakers are direct children (even gap)', childIsOnlyIcons);
+
+      // 2) Count of direct children equals fill+outline
+      const expected=iconState.heartsFill + iconState.heartsOutline;
+      const directCount=[...leftLine.children].length;
+      assert('sneaker direct-child count matches state', directCount===expected);
+
+      // 3) Hearts slot alignment still horizontal
+      const heartsLine=document.querySelector('.slot-shoes .line');
+      const rowDisplay=getComputedStyle(heartsLine).display==='flex';
+      const align=getComputedStyle(heartsLine).alignItems==='center';
+      assert('hearts row has flex + center alignment', rowDisplay && align);
+
+      // 4) HUD2 order remains Flames | Pause | Box
+      const items=[...document.querySelector('.hud2').children].map(n=>n.className.match(/slot-(\w+)/)[1]).join('|');
+      assert('hud2 order', items==='flames|pause|bag');
+    }catch(e){ console.error(e); assert('exception-free execution', false); }
+  }
+  runTests();
 })();
 </script>
 </body>
