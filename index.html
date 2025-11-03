@@ -92,6 +92,15 @@
     .mq-sub{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:calc(var(--mq-sub-size)*1px);letter-spacing:.12em;margin-top:6px;transform:translate(var(--mq-sub-x),var(--mq-sub-y))}
     .mq-sub .chip{white-space:nowrap}
     .mq-sub .chip-box{padding:calc(var(--chip-pad-y)*1px) calc(var(--chip-pad-x)*1px);border:calc(var(--chip-border)*1px) solid var(--led);border-radius:calc(var(--chip-br)*1px)}
+
+    /* Pause/Play as text only (no chip shape) */
+    .chip-btn{background:transparent;border:0;border-radius:0;padding:0;display:grid;place-items:center;position:relative;color:var(--led);font:inherit;letter-spacing:.12em;cursor:pointer;min-height:1em;line-height:1;min-width:6ch}
+    .chip-btn:focus-visible{outline:none;text-shadow:0 0 6px var(--led),0 0 12px #ff3a2f66}
+    .chip-btn .word{grid-area:1/1;display:block;text-align:center;opacity:0;transform:translateY(6%);transition:opacity .24s ease,transform .24s ease}
+    #btn-pause[data-state=playing] .word-pause{opacity:1;transform:none}
+    #btn-pause[data-state=paused] .word-play{opacity:1;transform:none}
+    @media (prefers-reduced-motion:reduce){.chip-btn .word{transition:none}}
+
     .divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
     .crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
     .crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,#fff1,transparent 22%),linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412,inset 0 0 30px #0009;position:relative;overflow:hidden}
@@ -134,6 +143,7 @@
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
     @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+{:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
     @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
   </style>
 </head>
@@ -174,9 +184,9 @@
       <div class="hud2">
         <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
         <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-          <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-            <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
-            <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
+          <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+            <span class="word word-pause" aria-hidden="false">PAUSE</span>
+            <span class="word word-play" aria-hidden="true">PLAY</span>
           </button>
         </div></div></div>
         <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
@@ -266,9 +276,23 @@
       }
       function initPause(){
         const pb = document.getElementById('btn-pause'); if(!pb) return;
-        const set = (st)=>{pb.dataset.state=st;pb.setAttribute('aria-pressed',String(st==='paused'));pb.setAttribute('aria-label',st==='playing'?'Pause':'Play')};
+        const set = (st)=>{
+          pb.dataset.state = st;
+          const paused = st === 'paused';
+          pb.setAttribute('aria-pressed', String(paused));
+          pb.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+          const wPause = pb.querySelector('.word-pause');
+          const wPlay = pb.querySelector('.word-play');
+          if(wPause && wPlay){
+            wPause.setAttribute('aria-hidden', String(paused));
+            wPlay.setAttribute('aria-hidden', String(!paused));
+          }
+        };
         set('playing');
         pb.addEventListener('click',()=> set(pb.dataset.state==='playing'?'paused':'playing'));
+        pb.addEventListener('keydown',(e)=>{
+          if(e.key==='Enter' || e.key===' '){ e.preventDefault(); pb.click(); }
+        });
       }
 
       // Render once using CSS-provided counts
@@ -277,6 +301,34 @@
       renderPowers(counts.powersTotal);
       renderFires(counts.firesFill, counts.firesOutline);
       initPause();
+
+      // --- Minimal test cases for the Pause/Play control ---
+      function runPauseTests(){
+        const pb = document.getElementById('btn-pause');
+        const wPause = pb.querySelector('.word-pause');
+        const wPlay = pb.querySelector('.word-play');
+        const start = pb.dataset.state;
+        try{
+          console.assert(start==='playing', 'Initial state should be "playing"');
+          console.assert(wPause.getAttribute('aria-hidden')==='false', 'PAUSE should be visible initially');
+          console.assert(wPlay.getAttribute('aria-hidden')==='true', 'PLAY should be hidden initially');
+
+          pb.click(); // -> paused
+          console.assert(pb.dataset.state==='paused', 'State should change to "paused" after first click');
+          console.assert(wPause.getAttribute('aria-hidden')==='true', 'PAUSE hidden when paused');
+          console.assert(wPlay.getAttribute('aria-hidden')==='false', 'PLAY visible when paused');
+
+          pb.click(); // -> playing
+          console.assert(pb.dataset.state==='playing', 'State should return to "playing" after second click');
+          console.assert(wPause.getAttribute('aria-hidden')==='false', 'PAUSE visible again');
+          console.assert(wPlay.getAttribute('aria-hidden')==='true', 'PLAY hidden again');
+
+          console.log('%cPause/Play tests passed','color:#0f0');
+        } catch(err){
+          console.error('Pause/Play tests failed', err);
+        }
+      }
+      runPauseTests();
     })();
   </script>
 </body>
