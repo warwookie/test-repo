@@ -10,7 +10,7 @@
   <style>
     /* Base variables (exactly as provided) */
     :root{
-      --cabinet-scale: 1; /* no longer used for sizing, kept for compatibility */
+      --cabinet-scale: 1;
       --mq-title-size: 43;
       --mq-title-track: 0.38;
       --mq-title-x: 0px;
@@ -72,58 +72,14 @@
       --icons-powers-total: 4;
       --icons-fires-fill: 3;
       --icons-fires-outline: 2;
-
-      /* Viewport fit helper for iOS safe areas */
-      --safeH: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
 
     /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-text-size-adjust:100%}
-
-    /*
-      Scale-to-fit using a measured scaler wrapper.
-      - .fit fills the safe viewport and centers content.
-      - --s is the uniform scale from the 430×900 design size.
-      - .stage-scaler reserves the scaled size so nothing clips.
-      - .stage (the cabinet) is absolutely positioned and scaled from top-left.
-    */
-    :root{
-      --baseW: 430;
-      --baseH: 900;
-      --s: min(calc(100vw / var(--baseW)), calc(var(--safeH) / var(--baseH)));
-    }
-    .fit{
-      inline-size: 100vw;
-      block-size: var(--safeH);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-    }
-    .stage-scaler{
-      position: relative;
-      inline-size: calc(var(--baseW) * var(--s) * 1px);
-      block-size: calc(var(--baseH) * var(--s) * 1px);
-    }
-    .stage{
-      position: absolute;
-      inset: 0 auto auto 0;
-      inline-size: calc(var(--baseW) * 1px);
-      block-size: calc(var(--baseH) * 1px);
-      transform: translateZ(0) scale(var(--s));
-      transform-origin: top left;
-    }
-    .cabinet{
-      border-radius:28px;
-      padding:14px;
-      background:
-        radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),
-        linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
-      box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a;
-    }
-
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+    .cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a}
     .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -186,25 +142,12 @@
     .control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px #0006,0 3px 0 #0a0807}
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
-
-    /* Responsive reductions for short viewports */
-    @media (max-height:720px){
-      :root{--marquee-h:70;--tabs-h:70;--bottom-h:210}
-    }
-    @media (max-height:640px){
-      :root{--marquee-h:64;--tabs-h:64;--bottom-h:200}
-    }
-
-    /* Orientation helpers (optional fine-tuning) */
-    @media (orientation: landscape){
-      .cabinet{ inline-size: min(100vw, calc(100dvh * 430 / 900)); }
-    }
+    @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+    @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
   </style>
 </head>
 <body>
-  <div class="fit">
-    <div class="stage-scaler">
-      <div class="cabinet stage">
+  <div class="cabinet">
     <div class="inner">
       <div class="marquee">
         <div class="led">
@@ -387,7 +330,95 @@
       runPauseTests();
     })();
   </script>
-    </div>
-  </div>
+  
+<script>
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+
+  ready(function(){
+    const sel = { device: '.cabinet', bg: '.cabinet', ui: '.inner' };
+    const q = s => document.querySelector(s);
+
+    function rect(n){
+      if(!n) return null;
+      const r = n.getBoundingClientRect();
+      return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+    }
+    function flags(n){
+      if(!n) return null;
+      const cs = getComputedStyle(n);
+      return {
+        transform: cs.transform,
+        transformOrigin: cs.transformOrigin,
+        overflow: cs.overflow,
+        overflowX: cs.overflowX,
+        overflowY: cs.overflowY,
+        backgroundSize: cs.backgroundSize,
+        backgroundPosition: cs.backgroundPosition
+      };
+    }
+
+    const device = q(sel.device);
+    const bg = q(sel.bg);
+    const ui = q(sel.ui);
+
+    const out = {
+      devicePixelRatio: window.devicePixelRatio || 1,
+      viewport: { w: window.innerWidth, h: window.innerHeight },
+      boxes: {
+        device: rect(device),
+        background: rect(bg),
+        ui: rect(ui)
+      },
+      styles: {
+        device: flags(device),
+        background: flags(bg),
+        ui: flags(ui),
+        body: (function(){ const cs = getComputedStyle(document.body); return { overflow: cs.overflow, overflowX: cs.overflowX, overflowY: cs.overflowY }; })()
+      }
+    };
+
+    // Expose and log
+    window.SCALING_MEASUREMENTS = out;
+    try { console.log('SCALING_MEASUREMENTS', out); } catch(e){}
+
+    // Lightweight overlay
+    const box = document.createElement('div');
+    box.id = 'scaling-debug';
+    box.setAttribute('style', [
+      'position:fixed','top:8px','left:8px','z-index:2147483647',
+      'font:12px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+      'color:#e6e6e6','background:rgba(0,0,0,.7)','padding:8px 10px','border-radius:6px',
+      'pointer-events:none','white-space:pre','max-width:46ch'
+    ].join(';'));
+    function fmtBox(name,b){ return b ? `${name}: x=${b.x} y=${b.y} w=${b.w} h=${b.h}` : `${name}: null`; }
+    const lines = [
+      `DPR: ${out.devicePixelRatio}`,
+      `Viewport: ${out.viewport.w}×${out.viewport.h}`,
+      fmtBox('Device', out.boxes.device),
+      fmtBox('Background', out.boxes.background),
+      fmtBox('UI', out.boxes.ui),
+      `Body overflow: ${out.styles.body.overflow}/${out.styles.body.overflowX}/${out.styles.body.overflowY}`,
+      `Device transform: ${out.styles.device && out.styles.device.transform}`,
+      `UI transform: ${out.styles.ui && out.styles.ui.transform}`
+    ];
+    box.textContent = lines.join('\n');
+    document.body.appendChild(box);
+
+    // --- Additional runtime tests (non-destructive) ---
+    (function runOverlayTests(){
+      try {
+        console.assert(!!window.SCALING_MEASUREMENTS, 'SCALING_MEASUREMENTS should exist');
+        const el = document.getElementById('scaling-debug');
+        console.assert(!!el, '#scaling-debug should be present');
+        console.assert(getComputedStyle(el).position === 'fixed', 'Overlay should be fixed');
+        console.log('%cOverlay tests passed','color:#0f0');
+      } catch (e) {
+        console.error('Overlay tests failed', e);
+      }
+    })();
+  });
+})();
+</script>
 </body>
 </html>
