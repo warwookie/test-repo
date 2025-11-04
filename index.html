@@ -144,7 +144,18 @@
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
     @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
     @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
-  </style>
+  
+
+/* ==== DEBUG: disable clipping and transforms ==== */
+html, body { overflow: visible !important; }
+.cabinet { transform: none !important; --cabinet-scale: 1 !important; }
+.crt, .slot, .control-screen { overflow: visible !important; }
+
+/* Visual guides */
+.cabinet { outline: 2px solid rgba(255,0,0,.6) !important; }
+.inner { outline: 2px solid rgba(0,128,255,.6) !important; }
+
+</style>
 </head>
 <body>
   <div class="cabinet">
