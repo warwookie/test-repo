@@ -81,24 +81,28 @@
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-text-size-adjust:100%}
 
     /*
-      Responsive 9:16 fit:
-      - Keep a strict 430:900 aspect ratio
-      - Size by the *smaller* of viewport width or safe viewport height mapped through the ratio
-      - Avoid transform-scaling to keep pixel-snapping crisp
+      Responsive 9:16 fit using a fixed base size + scale factor.
+      - The .fit box sizes to the viewport and centers the UI.
+      - The .cabinet keeps a 430×900 design size and scales uniformly.
     */
+    .fit{
+      inline-size: 100vw;
+      block-size: var(--safeH);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    :root{
+      --ui-scale: min(calc(100vw / 430), calc(var(--safeH) / 900));
+    }
     .cabinet{
-      /* Maintain cabinet aspect */
-      aspect-ratio: 430 / 900;
-
-      /* Choose the limiting axis. Inline-size computes width. Height then follows from aspect-ratio. */
-      inline-size: min(100vw, calc(var(--safeH) * 430 / 900));
-      block-size: auto; /* let height follow the ratio */
-      max-block-size: var(--safeH);
-
-      /* Visuals (unchanged) */
+      inline-size: 430px;
+      block-size: 900px;
+      transform: scale(var(--ui-scale));
+      transform-origin: center center;
       border-radius:28px;
       padding:14px;
       background:
@@ -185,7 +189,8 @@
   </style>
 </head>
 <body>
-  <div class="cabinet">
+  <div class="fit">
+    <div class="cabinet">
     <div class="inner">
       <div class="marquee">
         <div class="led">
@@ -368,5 +373,6 @@
       runPauseTests();
     })();
   </script>
+  </div>
 </body>
 </html>
