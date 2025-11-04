@@ -74,34 +74,12 @@
       --icons-fires-outline: 2;
     }
 
+    /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;min-height:100dvh;overflow:hidden}
-
-    /* Shell fills the screen and centers content. We scale inside this if needed. */
-    .fit-shell{
-      position:fixed; inset:0;
-      display:grid; place-items:center;
-      background:#000; /* letterbox bars */
-      padding:env(safe-area-inset-top) env(safe-area-inset-right)
-              env(safe-area-inset-bottom) env(safe-area-inset-left);
-      overflow:hidden;
-    }
-
-    /* ORIGINAL cabinet sizing retained to preserve your layout math */
-    .cabinet{
-      height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);
-      aspect-ratio:430/900;
-      max-width:100vw;
-      border-radius:28px;
-      padding:14px;
-      transform-origin:center top;
-      background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
-      box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a;
-      position:relative;
-    }
-
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+    .cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a}
     .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -115,6 +93,7 @@
     .mq-sub .chip{white-space:nowrap}
     .mq-sub .chip-box{padding:calc(var(--chip-pad-y)*1px) calc(var(--chip-pad-x)*1px);border:calc(var(--chip-border)*1px) solid var(--led);border-radius:calc(var(--chip-br)*1px)}
 
+    /* Pause/Play as text only (no chip shape) */
     .chip-btn{background:transparent;border:0;border-radius:0;padding:0;display:grid;place-items:center;position:relative;color:var(--led);font:inherit;letter-spacing:.12em;cursor:pointer;min-height:1em;line-height:1;min-width:6ch}
     .chip-btn:focus-visible{outline:none;text-shadow:0 0 6px var(--led),0 0 12px #ff3a2f66}
     .chip-btn .word{grid-area:1/1;display:block;text-align:center;opacity:0;transform:translateY(6%);transition:opacity .24s ease,transform .24s ease}
@@ -149,6 +128,7 @@
     .btn-icon[data-state=paused] .icon-pause{display:none}
     .slot-pause .line,.slot-flames .line,.slot-dots .line,.slot-bag .line{font-size:20px}
     .slot-heart .line,.slot-shoes .line{font-size:20px}
+    /* Hidden alternates for later activation */
     .is-off{display:none}
     .power .ph-bold{display:inline-block}
     .power .ph-fill{display:none}
@@ -163,147 +143,70 @@
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
     @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+{:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
     @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
   </style>
 </head>
 <body>
-  <div class="fit-shell" id="fit">
-    <div class="cabinet" id="cabinet">
-      <div class="inner">
-        <div class="marquee">
-          <div class="led">
-            <div class="mq-wrap">
-              <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
-              <div class="line mq-sub">
-                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-                <span class="chip chip-time chip-box">00:00:0</span>
-                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-              </div>
+  <div class="cabinet">
+    <div class="inner">
+      <div class="marquee">
+        <div class="led">
+          <div class="mq-wrap">
+            <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+            <div class="line mq-sub">
+              <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+              <span class="chip chip-time chip-box">00:00:0</span>
+              <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="divider"></div>
+      <div class="divider"></div>
 
-        <div class="crt-wrap">
-          <div class="crt" aria-label="Screen placeholder"></div>
-        </div>
+      <div class="crt-wrap">
+        <div class="crt" aria-label="Screen placeholder"></div>
+      </div>
 
-        <div class="tabs">
-          <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
-          <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
-          <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
-        </div>
+      <div class="tabs">
+        <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
+        <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
+        <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
+      </div>
 
-        <div class="hud">
-          <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
-          <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
-          <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
-        </div>
+      <div class="hud">
+        <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
+        <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
+        <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
+      </div>
 
-        <div class="hud2">
-          <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
-          <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-            <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-              <span class="word word-pause" aria-hidden="false">PAUSE</span>
-              <span class="word word-play" aria-hidden="true">PLAY</span>
-            </button>
-          </div></div></div>
-          <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
-            <i class="ph-fill ph-package" aria-hidden="true"></i>
-            <span style="opacity:.8;letter-spacing:.12em">x</span>
-            <span class="seven" id="counter">000</span>
-          </div></div></div>
-        </div>
+      <div class="hud2">
+        <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
+        <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+          <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+            <span class="word word-pause" aria-hidden="false">PAUSE</span>
+            <span class="word word-play" aria-hidden="true">PLAY</span>
+          </button>
+        </div></div></div>
+        <div class="slot slot-bag"><div class="led"><div class="line" aria-label="Box count">
+          <i class="ph-fill ph-package" aria-hidden="true"></i>
+          <span style="opacity:.8;letter-spacing:.12em">x</span>
+          <span class="seven" id="counter">000</span>
+        </div></div></div>
+      </div>
 
-        <div class="bottom">
-          <div class="control-screen">
-            <div class="matrix" aria-hidden="true"></div>
-            <main class="control-ui" aria-label="Control surface">
-              <section class="col-left"><div class="pad"></div></section>
-              <section class="col-right"><div class="pad"></div></section>
-            </main>
-          </div>
+      <div class="bottom">
+        <div class="control-screen">
+          <div class="matrix" aria-hidden="true"></div>
+          <main class="control-ui" aria-label="Control surface">
+            <section class="col-left"><div class="pad"></div></section>
+            <section class="col-right"><div class="pad"></div></section>
+          </main>
         </div>
       </div>
     </div>
   </div>
-
-  <script>
-    // Two display modes:
-    //  - mode=fixed   : scale cabinet uniformly to keep a constant 430x900 design box
-    //  - mode=fluid   : keep your original responsive cabinet sizing (default)
-    (function(){
-      const params = new URLSearchParams(location.search);
-      const mode = (params.get('mode')||'fluid').toLowerCase();
-      const fit = document.getElementById('fit');
-      const cab = document.getElementById('cabinet');
-
-      function visualSize(){
-        const vv = window.visualViewport;
-        if (vv) return { w: vv.width, h: vv.height };
-        return { w: window.innerWidth, h: window.innerHeight };
-      }
-
-      function center(scale){
-        // Center the scaled box inside the shell
-        const shell = getComputedStyle(fit);
-        const padX = parseFloat(shell.paddingLeft) + parseFloat(shell.paddingRight);
-        const padY = parseFloat(shell.paddingTop) + parseFloat(shell.paddingBottom);
-        const { w, h } = visualSize();
-        const availW = Math.max(0, w - padX);
-        const availH = Math.max(0, h - padY);
-        const rect = cab.getBoundingClientRect();
-        const cssW = rect.width / (scale||1);
-        const cssH = rect.height / (scale||1);
-        const pxW = cssW * (scale||1);
-        const pxH = cssH * (scale||1);
-        cab.style.position = 'relative';
-        cab.style.left = `${(availW - pxW) / 2 / (scale||1)}px`;
-        cab.style.top  = `${(availH - pxH) / 2 / (scale||1)}px`;
-      }
-
-      function layout(){
-        // Reset any previous transform to measure
-        cab.style.transform = 'none';
-        cab.style.transformOrigin = 'top left';
-
-        if(mode === 'fixed'){
-          // Target a constant design box of 430x900 CSS px before scaling
-          cab.style.width = '430px';
-          cab.style.height = '900px';
-        } else {
-          // Use original responsive rules
-          cab.style.width = '';
-          cab.style.height = '';
-        }
-
-        const rect0 = cab.getBoundingClientRect();
-        const designW = rect0.width;
-        const designH = rect0.height;
-
-        const { w, h } = visualSize();
-        const shell = getComputedStyle(fit);
-        const padX = parseFloat(shell.paddingLeft) + parseFloat(shell.paddingRight);
-        const padY = parseFloat(shell.paddingTop) + parseFloat(shell.paddingBottom);
-        const availW = Math.max(0, w - padX);
-        const availH = Math.max(0, h - padY);
-
-        const scale = Math.min(availW / designW, availH / designH);
-        cab.style.transform = `scale(${scale})`;
-        center(scale);
-      }
-
-      window.addEventListener('resize', layout);
-      window.addEventListener('orientationchange', layout);
-      if (window.visualViewport){
-        visualViewport.addEventListener('resize', layout);
-        visualViewport.addEventListener('scroll', layout);
-      }
-
-      layout();
-    })();
-  </script>
 
   <script>
     // Interface-only render. Hidden alternates present for later use. No persistence.
@@ -313,7 +216,7 @@
       const NUM = (name, d=0) => parseInt(css.getPropertyValue(name).trim()||d,10);
 
       const counts = {
-        sneakersFill: NUM('--icons-hearts-fill', 4),
+        sneakersFill: NUM('--icons-hearts-fill', 4),      // sneakers = heartsFill in original mapping
         sneakersOutline: NUM('--icons-hearts-outline', 1),
         heartsFill: NUM('--icons-shoes-fill', 2),
         heartsOutline: NUM('--icons-shoes-outline', 1),
@@ -324,8 +227,10 @@
 
       function renderSneakers(fill, outline){
         const r = $('ui-sneakers'); if(!r) return; r.innerHTML='';
+        // Visible state
         for(let i=0;i<outline;i++) r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
         for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
+        // Hidden alternates for later toggling
         for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline is-off" aria-hidden="true"></i>');
         for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill is-off" aria-hidden="true"></i>');
       }
@@ -390,12 +295,14 @@
         });
       }
 
+      // Render once using CSS-provided counts
       renderSneakers(counts.sneakersFill, counts.sneakersOutline);
       renderHearts(counts.heartsFill, counts.heartsOutline);
       renderPowers(counts.powersTotal);
       renderFires(counts.firesFill, counts.firesOutline);
       initPause();
 
+      // --- Minimal test cases for the Pause/Play control ---
       function runPauseTests(){
         const pb = document.getElementById('btn-pause');
         const wPause = pb.querySelector('.word-pause');
