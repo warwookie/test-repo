@@ -84,10 +84,17 @@
     body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden;-webkit-text-size-adjust:100%}
 
     /*
-      Responsive 9:16 fit using a fixed base size + scale factor.
-      - The .fit box sizes to the viewport and centers the UI.
-      - The .cabinet keeps a 430×900 design size and scales uniformly.
+      Scale-to-fit using a measured scaler wrapper.
+      - .fit fills the safe viewport and centers content.
+      - --s is the uniform scale from the 430×900 design size.
+      - .stage-scaler reserves the scaled size so nothing clips.
+      - .stage (the cabinet) is absolutely positioned and scaled from top-left.
     */
+    :root{
+      --baseW: 430;
+      --baseH: 900;
+      --s: min(calc(100vw / var(--baseW)), calc(var(--safeH) / var(--baseH)));
+    }
     .fit{
       inline-size: 100vw;
       block-size: var(--safeH);
@@ -95,14 +102,20 @@
       place-items: center;
       overflow: hidden;
     }
-    :root{
-      --ui-scale: min(calc(100vw / 430), calc(var(--safeH) / 900));
+    .stage-scaler{
+      position: relative;
+      inline-size: calc(var(--baseW) * var(--s) * 1px);
+      block-size: calc(var(--baseH) * var(--s) * 1px);
+    }
+    .stage{
+      position: absolute;
+      inset: 0 auto auto 0;
+      inline-size: calc(var(--baseW) * 1px);
+      block-size: calc(var(--baseH) * 1px);
+      transform: translateZ(0) scale(var(--s));
+      transform-origin: top left;
     }
     .cabinet{
-      inline-size: 430px;
-      block-size: 900px;
-      transform: scale(var(--ui-scale));
-      transform-origin: center center;
       border-radius:28px;
       padding:14px;
       background:
@@ -190,7 +203,8 @@
 </head>
 <body>
   <div class="fit">
-    <div class="cabinet">
+    <div class="stage-scaler">
+      <div class="cabinet stage">
     <div class="inner">
       <div class="marquee">
         <div class="led">
@@ -373,6 +387,7 @@
       runPauseTests();
     })();
   </script>
+    </div>
   </div>
 </body>
 </html>
