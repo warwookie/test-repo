@@ -10,6 +10,10 @@
   <style>
     /* Base variables (exactly as provided) */
     :root{
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+
+      --cabinet-scale: 1;
       --mq-title-size: 43;
       --mq-title-track: 0.38;
       --mq-title-x: 0px;
@@ -21,7 +25,7 @@
       --chip-pad-x: 11;
       --chip-pad-y: 1;
       --chip-border: 1;
-      --crt-fr: 0.4fr;
+      --crt-fr: 0.4;
       --crt-ar: 0.970;
       --crt-r: 10;
       --crtwrap-pad: 13;
@@ -76,9 +80,19 @@
     /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
-    .cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a}
+    html,body{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:auto;overscroll-behavior:contain;touch-action:manipulation}
+    .cabinet{
+  aspect-ratio: 430 / 900;
+  /* Height prefers the smaller stable viewport, with fallback to dynamic */
+  height: calc(min(100svh, 100dvh) - var(--safe-top) - var(--safe-bottom) - 12px);
+  max-width: 100vw;
+  border-radius: 28px;
+  padding: 14px;
+  background: radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),
+              linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
+  box-shadow: inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a
+}
     .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -141,36 +155,25 @@
     .control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px #0006,0 3px 0 #0a0807}
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
-    @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+    @media (max-height: 720px){
+  :root{--marquee-h:70;--tabs-h:70;--bottom-h:210}
+  .cabinet{
+    height: calc(100svh - var(--safe-top) - var(--safe-bottom) - 12px);
+    max-height: calc(100svh - var(--safe-top) - var(--safe-bottom) - 12px);
+  }
+}}
     @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
+  
 
+/* ==== DEBUG: disable clipping and transforms ==== */
+.cabinet { transform: none !important; --cabinet-scale: 1 !important; }
 
-/* ==== ROBUSTNESS: prevent intrinsic overflow in grid children ==== */
-.inner, .tabs, .hud, .hud2, .tab, .slot { min-width: 0; }
-.tabs, .hud, .hud2 { overflow: visible; } /* content can breathe within panel borders */
-.tab .label, .tab, .hud .label { white-space: nowrap; } /* LED labels should not wrap */
-
-
-.device-viewport {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: #0a0a0a;
-}
-.cabinet {
-  max-width: 100vw;
-  max-height: 100dvh;
-  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);
-  aspect-ratio: 430 / 900;
-}
+/* Visual guides removed to prevent clipping overrides during mobile testing */
 
 </style>
 </head>
 <body>
-  <div class="device-viewport">
-    <div class="cabinet">
+  <div class="cabinet">
     <div class="inner">
       <div class="marquee">
         <div class="led">
@@ -228,8 +231,7 @@
         </div>
       </div>
     </div>
-      </div>
-    </div>
+  </div>
 
   <script>
     // Interface-only render. Hidden alternates present for later use. No persistence.
