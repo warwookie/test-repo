@@ -10,6 +10,10 @@
   <style>
     /* Base variables (exactly as provided) */
     :root{
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+
+      --cabinet-scale: 1;
       --mq-title-size: 43;
       --mq-title-track: 0.38;
       --mq-title-x: 0px;
@@ -21,7 +25,7 @@
       --chip-pad-x: 11;
       --chip-pad-y: 1;
       --chip-border: 1;
-      --crt-fr: 0.4fr; /* fixed design */
+      --crt-fr: 0.4;
       --crt-ar: 0.970;
       --crt-r: 10;
       --crtwrap-pad: 13;
@@ -54,9 +58,9 @@
       --gap-hud1: -3px;
       --gap-hud2: -5px;
       --gap-bottom: -5px;
-      --marquee-h: 90; /* fixed design */
-      --tabs-h: 80; /* fixed design */
-      --bottom-h: 240; /* fixed design */
+      --marquee-h: 90;
+      --tabs-h: 80;
+      --bottom-h: 240;
 
       /* Tab Bar Content */
       --tab1-text: "SNEAKERS";
@@ -71,14 +75,32 @@
       --icons-powers-total: 4;
       --icons-fires-fill: 3;
       --icons-fires-outline: 2;
-    }
+    }:root{
+  --cabinet-w: 430;
+  --cabinet-h: 900;
+  --cabinet-ratio: calc(var(--cabinet-h) / var(--cabinet-w));  /* 900/430 */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --vh-safe: calc(min(100svh, 100dvh) - var(--safe-top) - var(--safe-bottom) - 12px);
+}
 
     /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;}
-    .cabinet{border-radius:28px;padding:14px;background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a}
+    html,body{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:manipulation}
+    .cabinet{
+  aspect-ratio: 430 / 900;
+  --fit-w-from-h: calc(var(--vh-safe) / var(--cabinet-ratio));
+  inline-size: min(100vi, var(--fit-w-from-h));  /* width */
+  block-size: auto;                               /* height via aspect-ratio */
+  max-block-size: var(--vh-safe);
+  border-radius:28px;
+  padding:14px;
+  background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),
+             linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
+  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a
+}
     .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -141,149 +163,71 @@
     .control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px #0006,0 3px 0 #0a0807}
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
-    
-    
+    @media (max-height: 720px){
+  .cabinet{
+    /* same contain logic already covers this; keep for cascade clarity */
+    max-height: var(--vh-safe);
+  }
+}
+    @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
+  
+
+/* ==== DEBUG: disable clipping and transforms ==== */
+.cabinet { transform: none !important; --cabinet-scale: 1 !important; }
+
+/* Visual guides */
+.cabinet { outline: 2px solid rgba(255,0,0,.6) !important; }
+.inner { outline: 2px solid rgba(0,128,255,.6) !important; }
 
 
-/* ==== ROBUSTNESS: prevent intrinsic overflow in grid children ==== */
-.inner, .tabs, .hud, .hud2, .tab, .slot { min-width: 0; }
-.tabs, .hud, .hud2 { overflow: visible; } /* content can breathe within panel borders */
-.tab .label, .tab, .hud .label { white-space: nowrap; } /* LED labels should not wrap */
+/* === Viewport centering container === */
+.device-viewport{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0a0a0a; /* keep current page bg */
+}
 
-
-
-
-/* === Uniform scale wrapper === */
-.device-scale {
-  /* Base design size (from the original asset) */
-  width: 996px;
-  height: 2048px;
+/* === Fixed design box we will scale === */
+.device-scale{
+  width: 996px;     /* use your design size; change if needed */
+  height: 2048px;   /* use your design size; change if needed */
   position: relative;
   transform-origin: top left;
 }
 
-/* Compute a single scale factor s = min(vw/996, dvh/2048) */
-@supports (height: 100dvh) {
-  .device-scale {
-    --s: min(100vw / 996, 100dvh / 2048);
-    transform: scale(var(--s));
-  }
-}
-@supports not (height: 100dvh) {
-  .device-scale {
-    --s: min(100vw / 996, 100vh / 2048);
-    transform: scale(var(--s));
-  }
-}
-
-/* Make .cabinet fill the fixed design box without its own sizing logic */
-.device-scale > .cabinet {
+/* The existing device root fills the design box exactly */
+.device-scale > .cabinet{
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   max-width: none;
   max-height: none;
-  /* remove aspect/height driven sizing from .cabinet in this context */
   aspect-ratio: auto;
 }
 
-/* The centering container remains the owner of overflow */
-.device-viewport {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: #0a0a0a;
+/* Neutralize .cabinet's viewport-driven sizing so only the wrapper controls size */
+.cabinet{
+  inline-size: auto !important;
+  block-size: auto !important;
+  max-block-size: none !important;
+  aspect-ratio: auto !important;
 }
 
+/* Remove any debug outlines or forced transforms if present */
+.cabinet{ transform: none !important; }
 
-
-/* === FIX: valid scale math for .device-scale === */
-.device-scale { transform-origin: top left; }
-
-/* Primary path */
-@supports (height: 100dvh) {
-  .device-scale {
-    /* Use calc() inside min() so the math parses */
-    --s: min( calc(100vw / 996), calc(100dvh / 2048) );
-    transform: scale(var(--s));
-  }
-}
-
-/* Safari stable viewport fallback (address toolbar resizing) */
-@supports (height: 100svh) {
-  .device-scale {
-    --s: min( calc(100vw / 996), calc(100svh / 2048) );
-    transform: scale(var(--s));
-  }
-}
-
-/* Legacy fallback if dvh/svh are not supported */
-@supports not (height: 100dvh) and not (height: 100svh) {
-  .device-scale {
-    --s: min( calc(100vw / 996), calc(100vh / 2048) );
-    transform: scale(var(--s));
-  }
-}
-
-/* Ensure the fixed design box is present */
-.device-scale { width: 996px; height: 2048px; position: relative; }
-.device-scale > .cabinet { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; aspect-ratio: auto; }
-
-
-
-/* === LOCKED DESIGN VARS (scoped) === */
-.device-scale{
-  --marquee-h: 90;
-  --tabs-h: 80;
-  --bottom-h: 240;
-  --crt-fr: 0.4fr;
-  --crt-ar: 0.970;
-  --crt-r: 10;
-  --gap: 10;
-  --crtwrap-pad: 13;
-}
-
-
-
-/* === Pixel-locked layout inside the scaled box === */
-.device-scale{
-  /* Design metrics in pixels */
-  --design-h: 2048px;
-  --gap: 10px;            /* existing gap reused */
-  --marquee-h: 90px;
-  --sep-h: 12px;          /* thin groove under marquee */
-  --tabs-h: 80px;
-  --hud1-h: 70px;         /* icons row under tabs */
-  --hud2-h: 70px;         /* second icons row (flames/Pause/counter) */
-  --bottom-h: 240px;
-
-  /* Derived: height for the big green CRT area so rows sum to exactly 2048px.
-     There are 6 gaps between the 7 rows. */
-  --gaps-total: calc(var(--gap) * 6);
-  --fixed-sum: calc(var(--marquee-h) + var(--sep-h) + var(--tabs-h) + var(--hud1-h) + var(--hud2-h) + var(--bottom-h) + var(--gaps-total));
-  --crt-h: calc(var(--design-h) - var(--fixed-sum));
-}
-
-/* Apply the row heights using the pixel vars */
-.device-scale .inner{
-  grid-template-rows:
-    var(--marquee-h)
-    var(--sep-h)
-    var(--crt-h)
-    var(--tabs-h)
-    var(--hud1-h)
-    var(--hud2-h)
-    var(--bottom-h);
-}
+/* Ensure the page itself does not clip */
+body{ overflow: visible !important; }
 
 </style>
 </head>
-<body>
-  <div class="device-viewport">
+$1  <div class="device-viewport">
     <div class="device-scale">
+      <!-- existing device root moved here unchanged -->
       <div class="cabinet">
     <div class="inner">
       <div class="marquee">
@@ -341,7 +285,7 @@
           </main>
         </div>
       </div>
-      </div>
+    </div>
     </div>
   </div>
 
@@ -558,32 +502,23 @@
   });
 })();
 </script>
-  
 <script>
 (function(){
-  const DESIGN_W = 996, DESIGN_H = 2048;
+  const DESIGN_W = 996, DESIGN_H = 2048; // change if your design size differs
 
   function size(){
     const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight || 0;
     const s = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+
     const wrap = document.querySelector('.device-scale');
     if(!wrap) return;
-    wrap.style.width = DESIGN_W + 'px';
-    wrap.style.height = DESIGN_H + 'px';
     wrap.style.transformOrigin = 'top left';
     wrap.style.transform = 'scale(' + s + ')';
-    const vp = document.querySelector('.device-viewport');
-    if(vp){
-      vp.style.position = 'fixed';
-      vp.style.inset = '0';
-      vp.style.display = 'grid';
-      vp.style.placeItems = 'center';
-      vp.style.overflow = 'hidden';
-      vp.style.background = '#0a0a0a';
-    }
-    window.__SQ_SCALE__ = { s, vw, vh };
-    try { console.log('__SQ_SCALE__', window.__SQ_SCALE__); } catch(e){}
+
+    // expose for debugging
+    window.__UNISCALE__ = { s, vw, vh, designW: DESIGN_W, designH: DESIGN_H };
+    try { console.log('__UNISCALE__', window.__UNISCALE__); } catch(e){}
   }
 
   window.addEventListener('resize', size);
