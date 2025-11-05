@@ -525,5 +525,39 @@
   });
 })();
 </script>
+  
+<script>
+(function(){
+  const DESIGN_W = 996, DESIGN_H = 2048;
+
+  function size(){
+    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight || 0;
+    const s = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+    const wrap = document.querySelector('.device-scale');
+    if(!wrap) return;
+    wrap.style.width = DESIGN_W + 'px';
+    wrap.style.height = DESIGN_H + 'px';
+    wrap.style.transformOrigin = 'top left';
+    wrap.style.transform = 'scale(' + s + ')';
+    const vp = document.querySelector('.device-viewport');
+    if(vp){
+      vp.style.position = 'fixed';
+      vp.style.inset = '0';
+      vp.style.display = 'grid';
+      vp.style.placeItems = 'center';
+      vp.style.overflow = 'hidden';
+      vp.style.background = '#0a0a0a';
+    }
+    window.__SQ_SCALE__ = { s, vw, vh };
+    try { console.log('__SQ_SCALE__', window.__SQ_SCALE__); } catch(e){}
+  }
+
+  window.addEventListener('resize', size);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', size);
+  document.addEventListener('DOMContentLoaded', size);
+  size();
+})();
+</script>
 </body>
 </html>
