@@ -180,9 +180,13 @@
   
 
 /* ==== DEBUG: disable clipping and transforms ==== */
+html, body { overflow: visible !important; }
 .cabinet { transform: none !important; --cabinet-scale: 1 !important; }
+.crt, .slot, .control-screen { overflow: visible !important; }
 
-/* Visual guides removed to prevent clipping overrides during mobile testing */
+/* Visual guides */
+.cabinet { outline: 2px solid rgba(255,0,0,.6) !important; }
+.inner { outline: 2px solid rgba(0,128,255,.6) !important; }
 
 </style>
 </head>
