@@ -1,37 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>SNEAKERQUEST — Mobile Responsive</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
 /* Base variables */
 :root{
-  --cabinet-scale: 0.91;
-  --mq-title-size: 32;
-  --mq-title-track: 0.22;
-  --mq-title-x: -37px;
-  --mq-title-y: -19px;
-  --mq-sub-size: 13;
-  --mq-sub-x: -53px;
-  --mq-sub-y: 1px;
-  --chip-br: 7;
-  --chip-pad-x: 11;
-  --chip-pad-y: 1;
+  --cabinet-scale: 1;
+  --mq-title-size: 44;
+  --mq-title-track: 0;
+  --mq-title-x: -1px;
+  --mq-title-y: 0px;
+  --mq-sub-size: 10;
+  --mq-sub-x: -1px;
+  --mq-sub-y: -3px;
+  --chip-br: 10;
+  --chip-pad-x: 10;
+  --chip-pad-y: 2;
   --chip-border: 1;
-  --crt-fr: 0.4fr;
-  --crt-ar: 0.970;
-  --crt-r: 10;
-  --crtwrap-pad: 13;
-  --t1: 45%;
-  --t2: 45%;
-  --t3: 10%;
+  --crt-fr: 0.8;            /* unitless on purpose; CSS multiplies by 1fr */
+  --crt-ar: 1.360;
+  --crt-r: 17;
+  --crtwrap-pad: 9;
+  --t1: 40%;
+  --t2: 20%;
+  --t3: 40%;
   --h1-a: 40%;
   --h1-b: 20%;
   --h1-c: 40%;
   --h2-a: 40%;
   --h2-b: 20%;
   --h2-c: 40%;
-  --slot-heart-h: 46;
+  --slot-heart-h: 43;
   --slot-shoes-h: 46;
   --slot-dots-h: 46;
   --slot-bag-h: 46;
   --slot-flames-h: 46;
   --slot-pause-h: 46;
-  --slot-pad: 8;
+  --slot-pad: 7;
   --bot-a: 80%;
   --bot-b: 20%;
   --tabs-pad-x-left: 12px;
@@ -40,11 +50,11 @@
   --hud1-pad-x-right: 21px;
   --hud2-pad-x-left: 0px;
   --hud2-pad-x-right: 21px;
-  --tab-font-size: 10;
-  --gap-tabs: 2px;
-  --gap-hud1: -3px;
+  --tab-font-size: 17;
+  --gap-tabs: 1px;
+  --gap-hud1: -4px;
   --gap-hud2: -5px;
-  --gap-bottom: -5px;
+  --gap-bottom: 0px;
   --marquee-h: 90;
   --tabs-h: 80;
   --bottom-h: 240;
@@ -55,11 +65,968 @@
   --tab3-text: "POWER-UPS";
 
   /* Icon Amounts */
-  --icons-hearts-fill: 0;
-  --icons-hearts-outline: 0;
-  --icons-shoes-fill: 0;
-  --icons-shoes-outline: 0;
-  --icons-powers-total: 0;
-  --icons-fires-fill: 0;
-  --icons-fires-outline: 0;
+  --icons-hearts-fill: 4;
+  --icons-hearts-outline: 1;
+  --icons-shoes-fill: 2;
+  --icons-shoes-outline: 1;
+  --icons-powers-total: 4;
+  --icons-fires-fill: 3;
+  --icons-fires-outline: 2;
 }
+
+/* Basic */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#0a0a0a;
+  color:#d6c7a4;
+  font-family:system-ui,-apple-system,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100dvh;padding:20px;overflow:hidden;
+}
+
+/* MOBILE SCALING CONTAINER */
+.mobile-scaler{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.cabinet-container{
+  width:min(430px,95vw);height:min(900px,95vh);
+  max-width:430px;max-height:900px;display:flex;align-items:center;justify-content:center;
+}
+
+/* CABINET SHELL */
+.cabinet{
+  width:100%;height:100%;border-radius:28px;padding:14px;
+  background:
+    radial-gradient(120% 120% at 50% 0,#000 0%,#000 18%,transparent 18%),
+    linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
+  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px rgba(0,0,0,.5),0 6px 0 #0a0a0a;
+  transform:scale(var(--cabinet-scale));transform-origin:center;
+}
+
+/* MAIN INTERFACE */
+.inner{
+  height:100%;border-radius:22px;padding:12px;display:grid;
+  gap:10px;
+  grid-template-rows:
+    minmax(80px,1fr)
+    12px
+    minmax(120px, calc(var(--crt-fr) * 1fr))
+    minmax(70px,1fr)
+    minmax(50px,1fr)
+    minmax(50px,1fr)
+    minmax(180px,2fr);
+  background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);
+  box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;
+}
+
+/* MARQUEE */
+.marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
+.led{
+  height:100%;border-radius:12px;
+  background:radial-gradient(circle at 8px 10px,rgba(255,255,255,.1),transparent 28%),repeating-linear-gradient(180deg,rgba(0,0,0,.4) 0 3px,transparent 3px 10px),#120e0c;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 10px;
+}
+.led .line{font-family:ui-monospace,Menlo,Consolas,monospace;color:#ff3a2f;text-shadow:0 0 2px #ff3a2f,0 0 8px rgba(255,58,47,.45);font-weight:800}
+@keyframes ledFx{0%{opacity:.96;text-shadow:0 0 2px #ff3a2f,0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2)}50%{opacity:1;text-shadow:0 0 2px #ff3a2f,0 0 9px rgba(255,58,47,.5),0 0 16px rgba(255,58,47,.28)}100%{opacity:.97;text-shadow:0 0 2px #ff3a2f,0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2)}}
+.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:ledFx 3.6s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.led .line,.tab .led .line,.marquee .led .mq-sub .chip{animation:none}}
+
+.mq-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%}
+.mq-title{
+  font-size:clamp(20px,8vw,calc(var(--mq-title-size) * 1px));
+  letter-spacing:calc(var(--mq-title-track) * 1em);
+  transform:translate(var(--mq-title-x),var(--mq-title-y));
+  text-align:center;user-select:none;line-height:1.2;margin-bottom:6px;
+}
+.mq-sub{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+  font-size:clamp(10px,3vw,calc(var(--mq-sub-size) * 1px));
+  letter-spacing:.12em;transform:translate(var(--mq-sub-x),var(--mq-sub-y));
+}
+.mq-sub .chip{white-space:nowrap}
+.mq-sub .chip-box{
+  padding:calc(var(--chip-pad-y) * 1px) calc(var(--chip-pad-x) * 1px);
+  border:calc(var(--chip-border) * 1px) solid #ff3a2f;
+  border-radius:calc(var(--chip-br) * 1px);
+}
+
+/* DIVIDER */
+.divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
+
+/* CRT SCREEN */
+.crt-wrap{
+  border-radius:20px;padding:calc(var(--crtwrap-pad) * 1px);
+  background:linear-gradient(#3c2f26,#241e18);
+  box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;
+  display:flex;align-items:center;justify-content:center;
+}
+.crt{
+  width:100%;height:100%;min-height:140px;border-radius:calc(var(--crt-r) * 1px);
+  background:linear-gradient(180deg,rgba(255,255,255,.1),transparent 22%),linear-gradient(#0b2823,#0a241f);
+  box-shadow:inset 0 0 0 2px #0e1412,inset 0 0 30px rgba(0,0,0,.6);
+  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:var(--crt-ar);
+}
+
+/* TABS */
+.tabs{
+  border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;
+  display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);
+  gap:10px;padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);
+  text-align:center;font-weight:800;letter-spacing:.08em;margin-top:var(--gap-tabs);
+}
+.tab{padding:0;border-right:1px solid #4d4032;display:flex;align-items:stretch}
+.tab:last-child{border-right:none}
+.tab .led{height:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
+.tab .led .line{font-size:calc(var(--tab-font-size) * 1px);letter-spacing:.14em;color:#ff3a2f;font-weight:800}
+
+/* HUD ROWS */
+.hud{display:grid;grid-template-columns:var(--h1-a) var(--h1-b) var(--h1-c);gap:10px;padding:0 var(--hud1-pad-x-right) 0 var(--hud1-pad-x-left);margin-top:var(--gap-hud1)}
+.hud2{display:grid;grid-template-columns:var(--h2-a) var(--h2-b) var(--h2-c);gap:10px;padding:0 var(--hud2-pad-x-right) 0 var(--hud2-pad-x-left);margin-top:var(--gap-hud2)}
+
+/* SLOTS */
+.slot{
+  background:linear-gradient(#3a3227,#2c251e);border-radius:14px;padding:calc(var(--slot-pad) * 1px);
+  box-shadow:inset 0 0 0 2px #1a1511,0 2px 0 #0b0907;display:flex;align-items:center;justify-content:stretch;overflow:hidden;
+}
+.slot-heart{height:calc(var(--slot-heart-h) * 1px)}
+.slot-shoes{height:calc(var(--slot-shoes-h) * 1px)}
+.slot-dots{height:calc(var(--slot-dots-h) * 1px)}
+.slot-bag{height:calc(var(--slot-bag-h) * 1px)}
+.slot-flames{height:calc(var(--slot-flames-h) * 1px)}
+.slot-pause{height:calc(var(--slot-pause-h) * 1px)}
+.slot > .led{height:100%;width:100%;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:center}
+.slot > .led .line{display:flex;align-items:center;gap:10px;letter-spacing:.12em;font-size:clamp(18px,4vw,22px)}
+
+.sneaker-outline,.heart-outline{color:#ff3a2f}
+.sneaker-fill,.slot-shoes .line{color:#e6e6e6}
+
+/* BUTTONS */
+.btn-icon{display:inline-flex;align-items:center;justify-content:center;padding:0;margin:0;border:0;background:transparent;color:inherit;cursor:pointer;line-height:1;width:100%;height:100%}
+.btn-icon .icon{font-size:1em;line-height:1}
+.btn-icon[data-state="playing"] .icon-play{display:none}
+.btn-icon[data-state="paused"] .icon-pause{display:none}
+
+/* COUNTER */
+.counter{display:flex;align-items:center;gap:10px;color:#ff3a2f;text-shadow:0 0 6px #ff3a2f,0 0 18px rgba(255,58,47,.45);font-weight:900;letter-spacing:.14em;font-size:clamp(18px,4vw,20px)}
+.seven{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;color:#d6c7a4}
+
+/* BOTTOM CONTROL PANEL */
+.bottom{display:grid;grid-template-columns:1fr;align-items:center;height:100%;margin-top:var(--gap-bottom)}
+.control-screen{
+  position:relative;min-height:calc(var(--bottom-h) * 1px);height:100%;
+  border-radius:18px;padding:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:linear-gradient(#1a1210,#0c0908);
+  box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px rgba(0,0,0,.4),0 3px 0 #0a0807;
+}
+.matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,transparent 43%) 0 0 / 10px 10px repeat}
+.control-ui{display:flex;align-items:center;justify-content:center;height:100%;width:100%;z-index:2;position:relative;color:rgba(255,255,255,.2);font-size:clamp(16px,3.5vw,18px);letter-spacing:.1em;text-transform:uppercase}
+
+/* POWER STATES */
+.power .ph-bold{display:inline-block}
+.power .ph-fill{display:none}
+.power.power--armed .ph-bold{display:none}
+.power.power--armed .ph-fill{display:inline-block}
+.power .is-off{display:none}
+.power .ph-crosshair-simple--filled{display:none}
+.power.power--armed .ph-crosshair-simple--filled{display:inline-block}
+
+/* LAYOUT TUNER */
+#tunerFloatBtn{
+  position:fixed;inset:auto 14px 14px auto;z-index:7000;width:48px;height:48px;border-radius:12px;border:none;cursor:pointer;background:#1a1410;color:#e6d7b6;
+  box-shadow:inset 0 0 0 2px #2a2119,0 6px 12px #000;font-size:22px;
+}
+#tunerFloat{
+  position:fixed;right:14px;bottom:76px;width:min(480px,94vw);max-height:min(82vh,760px);
+  background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:12px;display:none;flex-direction:column;z-index:7050;box-shadow:0 16px 40px rgba(0,0,0,.75);
+}
+#tunerFloat.open{display:flex}
+#tHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #3a2f27}
+#tTitle{font-weight:700;letter-spacing:.08em;font-size:13px}
+#tBtns button{margin-left:8px;border:none;border-radius:8px;padding:6px 10px;background:#332820;color:#e6d7b6;cursor:pointer}
+#tBody{overflow:auto;padding:12px}
+.tg{margin-bottom:14px;border:1px solid #3a2f27;border-radius:10px;padding:10px}
+.tg h4{margin:0 0 8px 0;font-size:12px;letter-spacing:.08em;color:#f0e6cd}
+.tr{display:grid;grid-template-columns:1fr 120px 60px auto;gap:8px;align-items:center;margin:8px 0}
+.tr label{font-size:12px}
+.tr input[type="range"],.tr input[type="number"]{width:100%}
+.tv{font:12px/1 monospace;text-align:right;opacity:.8}
+#tFoot{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px;border-top:1px solid #3a2f27}
+#tFoot button{flex:1;border:none;background:#3a2f27;color:#e6d7b6;border-radius:10px;padding:10px;cursor:pointer;min-width:80px}
+#copyMessage{font-size:11px;opacity:0;transition:opacity .3s ease;margin-left:10px;white-space:nowrap}
+
+/* Import CSS area */
+#cssImportArea{display:grid;grid-template-rows:auto 1fr auto;gap:8px}
+#cssInput{width:100%;min-height:160px;resize:vertical;background:#111;border:1px solid #444;color:#fff;padding:8px;border-radius:8px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
+
+/* Responsive tweaks */
+@media (max-width:480px){
+  .cabinet-container{width:95vw;height:calc(95vw * 900 / 430)}
+  .cabinet{padding:12px}
+  .inner{padding:10px;gap:8px}
+  .marquee{padding:10px 12px}
+  .mq-sub{gap:6px}
+  .tabs{padding:8px 10px;gap:8px}
+  .hud,.hud2{gap:8px;padding:0 8px}
+  .slot > .led{padding:6px 8px}
+}
+@media (max-width:350px){.mq-sub{flex-direction:column;gap:4px}.tabs{padding:6px 8px}}
+@media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+@media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
+:focus-visible{outline:2px solid #e6d7b6;outline-offset:2px}
+</style>
+</head>
+<body>
+<button id="tunerFloatBtn" aria-label="Open layout tuner">⚙️</button>
+
+<div id="tunerFloat" role="dialog" aria-modal="false" aria-label="Layout Tuner" tabindex="-1">
+  <div id="tHead">
+    <div id="tTitle">LAYOUT TUNER</div>
+    <div id="tBtns">
+      <button id="tMin" title="Minimize" type="button">–</button>
+      <button id="tClose" title="Close" type="button">✕</button>
+    </div>
+  </div>
+
+  <div id="tBody">
+    <!-- Global -->
+    <div class="tg">
+      <h4>Global</h4>
+      <div class="tr">
+        <label for="v_scale">Scale</label>
+        <input id="v_scale" type="range" min="0.85" max="1.15" step="0.01">
+        <div class="tv" id="o_scale"></div>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- Marquee — Title -->
+    <div class="tg">
+      <h4>Marquee — Title</h4>
+      <div class="tr">
+        <label for="v_mqtsize">Title size</label>
+        <input id="v_mqtsize" type="range" min="16" max="64" step="1">
+        <div class="tv" id="o_mqtsize"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_mqttrack">Title tracking</label>
+        <input id="v_mqttrack" type="range" min="0" max="0.4" step="0.01">
+        <div class="tv" id="o_mqttrack"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_mqtx">Title offset X</label>
+        <input id="v_mqtx" type="range" min="-120" max="120" step="1">
+        <div class="tv" id="o_mqtx"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_mqty">Title offset Y</label>
+        <input id="v_mqty" type="range" min="-60" max="60" step="1">
+        <div class="tv" id="o_mqty"></div><div></div>
+      </div>
+    </div>
+
+    <!-- Marquee — Subline -->
+    <div class="tg">
+      <h4>Marquee — Subline</h4>
+      <div class="tr">
+        <label for="v_mqssize">Subline size</label>
+        <input id="v_mqssize" type="range" min="10" max="32" step="1">
+        <div class="tv" id="o_mqssize"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_mqsx">Subline offset X</label>
+        <input id="v_mqsx" type="range" min="-160" max="160" step="1">
+        <div class="tv" id="o_mqsx"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_mqsy">Subline offset Y</label>
+        <input id="v_mqsy" type="range" min="-80" max="80" step="1">
+        <div class="tv" id="o_mqsy"></div><div></div>
+      </div>
+    </div>
+
+    <!-- Chip Boxes -->
+    <div class="tg">
+      <h4>Marquee — Chip Boxes</h4>
+      <div class="tr">
+        <label for="v_chipbr">Corner radius</label>
+        <input id="v_chipbr" type="range" min="4" max="20" step="1">
+        <div class="tv" id="o_chipbr"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_chippadx">Padding X</label>
+        <input id="v_chippadx" type="range" min="6" max="24" step="1">
+        <div class="tv" id="o_chippadx"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_chippady">Padding Y</label>
+        <input id="v_chippady" type="range" min="1" max="10" step="1">
+        <div class="tv" id="o_chippady"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_chipborder">Border</label>
+        <input id="v_chipborder" type="range" min="1" max="4" step="1">
+        <div class="tv" id="o_chipborder"></div><div></div>
+      </div>
+    </div>
+
+    <!-- Section Gaps -->
+    <div class="tg">
+      <h4>Section Gaps</h4>
+      <div class="tr"><label for="v_gap_tabs">Gap above Tabs</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_tabs"></div><div></div></div>
+      <div class="tr"><label for="v_gap_hud1">Gap above HUD 1</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud1"></div><div></div></div>
+      <div class="tr"><label for="v_gap_hud2">Gap above HUD 2</label><input id="v_gap_hud2" type="range" min="-40" max="40" step="1"><div class="tv" id="o_gap_hud2"></div><div></div></div>
+      <div class="tr"><label for="v_gap_bottom">Gap above Bottom</label><input id="v_gap_bottom" type="range" min="-40" max="0" step="1"><div class="tv" id="o_gap_bottom"></div><div></div></div>
+    </div>
+
+    <!-- Screen (CRT) -->
+    <div class="tg">
+      <h4>Screen (CRT)</h4>
+      <div class="tr">
+        <label for="v_crtfr">CRT row height (fr)</label>
+        <input id="v_crtfr" type="range" min="0.4" max="2.5" step="0.05">
+        <div class="tv" id="o_crtfr"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_crtar">Aspect ratio (W/H)</label>
+        <input id="v_crtar" type="range" min="0.8" max="2.5" step="0.01">
+        <div class="tv" id="o_crtar"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_crtr">Corner radius</label>
+        <input id="v_crtr" type="range" min="10" max="40" step="1">
+        <div class="tv" id="o_crtr"></div><div></div>
+      </div>
+      <div class="tr">
+        <label for="v_crtpad">Bezel padding</label>
+        <input id="v_crtpad" type="range" min="6" max="24" step="1">
+        <div class="tv" id="o_crtpad"></div><div></div>
+      </div>
+    </div>
+
+    <!-- Tab Bar Content -->
+    <div class="tg">
+      <h4>Tab Bar Content</h4>
+      <div class="tr"><label for="v_tab_font_size">Tab Font Size</label><input id="v_tab_font_size" type="range" min="10" max="32" step="1"><div class="tv" id="o_tab_font_size"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab1_text">Tab 1 Text</label><input id="v_tab1_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:#fff;padding:4px;border-radius:4px"></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab2_text">Tab 2 Text</label><input id="v_tab2_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:#fff;padding:4px;border-radius:4px"></div>
+      <div class="tr" style="grid-template-columns:100px 1fr"><label for="v_tab3_text">Tab 3 Text</label><input id="v_tab3_text" type="text" style="width:100%;background:#111;border:1px solid #444;color:#fff;padding:4px;border-radius:4px"></div>
+    </div>
+
+    <!-- Tabs widths -->
+    <div class="tg">
+      <h4>Tabs widths (%)</h4>
+      <div class="tr"><label for="v_t1">SNEAKERS %</label><input id="v_t1" type="range" min="10" max="70" step="1"><div class="tv" id="o_t1"></div><div></div></div>
+      <div class="tr"><label for="v_t2">LIFE %</label><input id="v_t2" type="range" min="10" max="70" step="1"><div class="tv" id="o_t2"></div><div></div></div>
+      <div class="tr"><label for="v_t3">POWER-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1"><div class="tv" id="o_t3"></div><div></div></div>
+    </div>
+
+    <!-- HUD Row 1 widths -->
+    <div class="tg">
+      <h4>HUD Row 1 widths (%)</h4>
+      <div class="tr"><label for="v_h1a">Sneakers row %</label><input id="v_h1a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1a"></div><div></div></div>
+      <div class="tr"><label for="v_h1b">Hearts row %</label><input id="v_h1b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1b"></div><div></div></div>
+      <div class="tr"><label for="v_h1c">Powers row %</label><input id="v_h1c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h1c"></div><div></div></div>
+    </div>
+
+    <!-- Row Horizontal Padding -->
+    <div class="tg">
+      <h4>Row Horizontal Padding</h4>
+      <div class="tr"><label for="v_tabs_pad_l">Tabs Pad Left</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_tabs_pad_r">Tabs Pad Right</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_tabs_pad_r"></div><div></div></div>
+      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
+      <div class="tr"><label for="v_hud1_pad_l">HUD1 Pad Left</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_hud1_pad_r">HUD1 Pad Right</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud1_pad_r"></div><div></div></div>
+      <hr style="border:none;border-top:1px solid #3a2f27;margin:10px 0">
+      <div class="tr"><label for="v_hud2_pad_l">HUD2 Pad Left</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_l"></div><div></div></div>
+      <div class="tr"><label for="v_hud2_pad_r">HUD2 Pad Right</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1"><div class="tv" id="o_hud2_pad_r"></div><div></div></div>
+    </div>
+
+    <!-- HUD Row 2 widths -->
+    <div class="tg">
+      <h4>HUD Row 2 widths (%)</h4>
+      <div class="tr"><label for="v_h2a">Flames %</label><input id="v_h2a" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2a"></div><div></div></div>
+      <div class="tr"><label for="v_h2b">Pause %</label><input id="v_h2b" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2b"></div><div></div></div>
+      <div class="tr"><label for="v_h2c">Box %</label><input id="v_h2c" type="range" min="10" max="70" step="1"><div class="tv" id="o_h2c"></div><div></div></div>
+    </div>
+
+    <!-- Heights -->
+    <div class="tg">
+      <h4>Heights (px)</h4>
+      <div class="tr"><label for="v_slotheart">Sneakers H</label><input id="v_slotheart" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotheart"></div><div></div></div>
+      <div class="tr"><label for="v_slotshoes">Hearts H</label><input id="v_slotshoes" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotshoes"></div><div></div></div>
+      <div class="tr"><label for="v_slotdots">Dots H</label><input id="v_slotdots" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotdots"></div><div></div></div>
+      <div class="tr"><label for="v_slotbag">Box H</label><input id="v_slotbag" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotbag"></div><div></div></div>
+      <div class="tr"><label for="v_slotflames">Flames H</label><input id="v_slotflames" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotflames"></div><div></div></div>
+      <div class="tr"><label for="v_slotpause">Pause H</label><input id="v_slotpause" type="range" min="36" max="110" step="1"><div class="tv" id="o_slotpause"></div><div></div></div>
+      <div class="tr"><label for="v_slotpad">Slot padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1"><div class="tv" id="o_slotpad"></div><div></div></div>
+    </div>
+
+    <!-- Icon Amounts -->
+    <div class="tg">
+      <h4>Icon Amounts</h4>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_hearts_fill">Sneakers — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_hearts_outline">Sneakers — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_hearts_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_shoes_fill">Hearts — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_shoes_outline">Hearts — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1"><div class="tv" id="tv_shoes_outline"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_powers_total">Power-ups — total</label><input id="in_powers_total" type="number" min="0" max="4" step="1"><div class="tv" id="tv_powers_total"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_fires_fill">Fires — filled</label><input id="in_fires_fill" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_fill"></div><div></div></div>
+      <div class="tr" style="grid-template-columns:1fr 120px 60px auto"><label for="in_fires_outline">Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1"><div class="tv" id="tv_fires_outline"></div><div></div></div>
+    </div>
+
+    <!-- Paste CSS -->
+    <div class="tg">
+      <h4>Paste CSS</h4>
+      <div id="cssImportArea">
+        <textarea id="cssInput" placeholder="Paste a :root{ ... } block or any CSS containing custom properties."></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="btn_import_css" type="button">Import CSS</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tFoot">
+    <button id="btn_copy" type="button">Copy CSS</button>
+    <button id="btn_export" type="button">Export JSON</button>
+    <button id="btn_reset" type="button">Reset</button>
+    <span id="copyMessage"></span>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="mobile-scaler">
+  <div class="cabinet-container">
+    <div class="cabinet">
+      <div class="inner" id="innerRoot">
+        <div class="marquee">
+          <div class="led">
+            <div class="mq-wrap">
+              <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+              <div class="line mq-sub">
+                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+                <span class="chip chip-time chip-box">00:00:0</span>
+                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="crt-wrap">
+          <div class="crt" id="crt" aria-label="Screen placeholder"></div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab"><div class="led"><div class="line" id="tab1_text_output">SNEAKERS</div></div></div>
+          <div class="tab"><div class="led"><div class="line" id="tab2_text_output">LIFE</div></div></div>
+          <div class="tab"><div class="led"><div class="line" id="tab3_text_output">POWER-UPS</div></div></div>
+        </div>
+
+        <div class="hud">
+          <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
+          <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
+          <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
+        </div>
+
+        <div class="hud2">
+          <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
+          <div class="slot slot-pause">
+            <div class="led">
+              <div class="line" aria-label="Pause / Play">
+                <button class="btn-icon" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+                  <i class="ph-fill ph-pause icon icon-pause" aria-hidden="true"></i>
+                  <i class="ph-fill ph-play icon icon-play" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="slot slot-bag">
+            <div class="led">
+              <div class="line counter" aria-label="Box count">
+                <i class="ph-fill ph-package" aria-hidden="true"></i>
+                <span style="opacity:.8;letter-spacing:.12em">x</span>
+                <span class="seven" id="counter">000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom">
+          <div class="control-screen">
+            <div class="matrix" aria-hidden="true"></div>
+            <main class="control-ui" aria-label="Control surface">CONTROL PANEL</main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const R = document.documentElement;
+  const SK = 'sneakerquest-layout-tuner-v1';
+  const IK = 'sneakerquest-icon-counts-v1';
+  const $ = id => document.getElementById(id);
+
+  // Defaults mirror the :root above and keep unitless values where UI copy uses unitless
+  const S = {
+    '--cabinet-scale':'1',
+    '--mq-title-size':'44',
+    '--mq-title-track':'0',
+    '--mq-title-x':'-1px',
+    '--mq-title-y':'0px',
+    '--mq-sub-size':'10',
+    '--mq-sub-x':'-1px',
+    '--mq-sub-y':'-3px',
+    '--chip-br':'10',
+    '--chip-pad-x':'10',
+    '--chip-pad-y':'2',
+    '--chip-border':'1',
+    '--crt-fr':'0.8',               // unitless
+    '--crt-ar':'1.360',
+    '--crt-r':'17',
+    '--crtwrap-pad':'9',
+    '--t1':'40%',
+    '--t2':'20%',
+    '--t3':'40%',
+    '--h1-a':'40%',
+    '--h1-b':'20%',
+    '--h1-c':'40%',
+    '--h2-a':'40%',
+    '--h2-b':'20%',
+    '--h2-c':'40%',
+    '--slot-heart-h':'43',
+    '--slot-shoes-h':'46',
+    '--slot-dots-h':'46',
+    '--slot-bag-h':'46',
+    '--slot-flames-h':'46',
+    '--slot-pause-h':'46',
+    '--slot-pad':'7',
+    '--bot-a':'80%',
+    '--bot-b':'20%',
+    '--tabs-pad-x-left':'12px',
+    '--tabs-pad-x-right':'32px',
+    '--hud1-pad-x-left':'0px',
+    '--hud1-pad-x-right':'21px',
+    '--hud2-pad-x-left':'0px',
+    '--hud2-pad-x-right':'21px',
+    '--tab-font-size':'17',
+    '--gap-tabs':'1px',
+    '--gap-hud1':'-4px',
+    '--gap-hud2':'-5px',
+    '--gap-bottom':'0px',
+    '--marquee-h':'90',
+    '--tabs-h':'80',
+    '--bottom-h':'240',
+    'tab1-text':'SNEAKERS',
+    'tab2-text':'LIFE',
+    'tab3-text':'POWER-UPS'
+  };
+  const BASELINE = {...S};
+
+  // Load saved settings if any
+  try { Object.assign(S, JSON.parse(localStorage.getItem(SK) || '{}')); } catch {}
+
+  const save = () => localStorage.setItem(SK, JSON.stringify(S));
+  const setV  = (k,v) => R.style.setProperty(k,v);
+  const apply = () => { for (const [k,v] of Object.entries(S)) if (k.startsWith('--')) setV(k,v); };
+  apply();
+
+  // Panel open/close
+  const b = $('tunerFloatBtn'), p = $('tunerFloat');
+  function trapFocus(){
+    const nodes = p.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    if(!nodes.length) return;
+    const first = nodes[0], last = nodes[nodes.length-1];
+    function onKey(e){
+      if(e.key==='Escape'){ p.classList.remove('open'); p.setAttribute('aria-modal','false'); b?.focus(); }
+      if(e.key==='Tab'){
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      }
+    }
+    p.addEventListener('keydown', onKey, { once:true });
+  }
+  $('tClose')?.addEventListener('click', ()=>{ p.classList.remove('open'); p.setAttribute('aria-modal','false'); b?.focus(); });
+  $('tMin')?.addEventListener('click', ()=>{ const open = p.classList.toggle('open'); p.setAttribute('aria-modal', open ? 'true':'false'); if(open) trapFocus(); });
+  b?.addEventListener('click', ()=>{ p.classList.add('open'); p.setAttribute('aria-modal','true'); trapFocus(); const first = p.querySelector('input,button,textarea'); first?.focus(); });
+
+  // Binding helpers
+  function bind(id, key, xf = x => x, fmt = x => String(x)) {
+    const el = $(id), out = $('o_' + id.slice(2));
+    if(!el) return;
+    const set = v => {
+      const val = xf(v);
+      S[key] = val;
+      if(key.startsWith('--')) setV(key,val);
+      if(out) out.textContent = fmt(v);
+      save();
+    };
+    let init = String(S[key] ?? '').replace(/px|%|em|fr/,'');
+    el.value = init;
+    if(out) out.textContent = fmt(init);
+    el.addEventListener('input', e => set(e.target.value));
+  }
+  function bindText(i,k,o){
+    const el = $(i), out = $(o);
+    if(!el || !out) return;
+    el.value = S[k] || '';
+    out.textContent = S[k] || '';
+    el.addEventListener('input', e => { S[k] = e.target.value; out.textContent = e.target.value; save(); });
+  }
+
+  function pct3(a,b,c){
+    let x = parseInt(S[a],10), y = parseInt(S[b],10);
+    x = Math.max(10, Math.min(80,x));
+    y = Math.max(10, Math.min(80,y));
+    let z = 100 - x - y;
+    if(z < 10){ z = 10; y = Math.max(10, 100 - x - z); }
+    S[a] = x+'%'; S[b] = y+'%'; S[c] = z+'%';
+  }
+  function triple(ids, keys){
+    ids.forEach((id,i)=>{
+      $(id)?.addEventListener('input', e=>{
+        S[keys[i]] = e.target.value + '%';
+        pct3(...keys); apply(); save();
+        const m = $('o_' + ids[i].slice(2)); if(m) m.textContent = S[keys[i]];
+      });
+    });
+    pct3(...keys); apply();
+    ids.forEach((id,i)=>{
+      const c = $(id); if(c) c.value = parseInt(S[keys[i]],10);
+      const m = $('o_' + ids[i].slice(2)); if(m) m.textContent = S[keys[i]];
+    });
+  }
+
+  // Unit formatters
+  const asPx = v => parseInt(v,10) + 'px';
+  const outPx = v => v + 'px';
+
+  // Bind sliders — unitless where Copy CSS is unitless
+  bind('v_scale','--cabinet-scale', String, String);
+
+  bind('v_mqtsize','--mq-title-size', String, v=>v);
+  bind('v_mqttrack','--mq-title-track', String, v=>v);
+  bind('v_mqtx','--mq-title-x', asPx, outPx);
+  bind('v_mqty','--mq-title-y', asPx, outPx);
+
+  bind('v_mqssize','--mq-sub-size', String, v=>v);
+  bind('v_mqsx','--mq-sub-x', asPx, outPx);
+  bind('v_mqsy','--mq-sub-y', asPx, outPx);
+
+  bind('v_chipbr','--chip-br', String, v=>v);
+  bind('v_chippadx','--chip-pad-x', String, v=>v);
+  bind('v_chippady','--chip-pad-y', String, v=>v);
+  bind('v_chipborder','--chip-border', String, v=>v);
+
+  bind('v_gap_tabs','--gap-tabs', asPx, outPx);
+  bind('v_gap_hud1','--gap-hud1', asPx, outPx);
+  bind('v_gap_hud2','--gap-hud2', asPx, outPx);
+  bind('v_gap_bottom','--gap-bottom', asPx, outPx);
+
+  bind('v_crtfr','--crt-fr', String, v=>v); // unitless
+  bind('v_crtar','--crt-ar', v => String(Number(v).toFixed(3)), v=>v);
+  bind('v_crtr','--crt-r', String, v=>v);
+  bind('v_crtpad','--crtwrap-pad', String, v=>v);
+
+  bind('v_slotheart','--slot-heart-h', String, v=>v);
+  bind('v_slotshoes','--slot-shoes-h', String, v=>v);
+  bind('v_slotdots','--slot-dots-h', String, v=>v);
+  bind('v_slotbag','--slot-bag-h', String, v=>v);
+  bind('v_slotflames','--slot-flames-h', String, v=>v);
+  bind('v_slotpause','--slot-pause-h', String, v=>v);
+  bind('v_slotpad','--slot-pad', String, v=>v);
+
+  bind('v_tab_font_size','--tab-font-size', String, v=>v);
+
+  bindText('v_tab1_text','tab1-text','tab1_text_output');
+  bindText('v_tab2_text','tab2-text','tab2_text_output');
+  bindText('v_tab3_text','tab3-text','tab3_text_output');
+
+  triple(['v_t1','v_t2','v_t3'], ['--t1','--t2','--t3']);
+  triple(['v_h1a','v_h1b','v_h1c'], ['--h1-a','--h1-b','--h1-c']);
+  triple(['v_h2a','v_h2b','v_h2c'], ['--h2-a','--h2-b','--h2-c']);
+
+  // Copy CSS
+  $('btn_copy')?.addEventListener('click', ()=>{
+    const vars = Object.entries(S)
+      .filter(([k]) => k.startsWith('--'))
+      .map(([k,v]) => `  ${k}: ${String(v)};`);
+
+    const tabs = [
+      `  --tab1-text: "${(S['tab1-text'] || '').replace(/"/g,'\\"')}";`,
+      `  --tab2-text: "${(S['tab2-text'] || '').replace(/"/g,'\\"')}";`,
+      `  --tab3-text: "${(S['tab3-text'] || '').replace(/"/g,'\\"')}";`,
+    ];
+
+    const I = JSON.parse(localStorage.getItem(IK) || '{}');
+    const icons = [
+      `  --icons-hearts-fill: ${Number(I.heartsFill ?? 0)};`,
+      `  --icons-hearts-outline: ${Number(I.heartsOutline ?? 0)};`,
+      `  --icons-shoes-fill: ${Number(I.shoesFill ?? 0)};`,
+      `  --icons-shoes-outline: ${Number(I.shoesOutline ?? 0)};`,
+      `  --icons-powers-total: ${Number(I.powersTotal ?? 0)};`,
+      `  --icons-fires-fill: ${Number(I.firesFill ?? 0)};`,
+      `  --icons-fires-outline: ${Number(I.firesOutline ?? 0)};`,
+    ];
+
+    const css = ['/* Base variables */', ':root{', ...vars, '\n  /* Tab Bar Content */', ...tabs, '\n  /* Icon Amounts */', ...icons, '}'].join('\n');
+
+    const m = $('copyMessage');
+    const show = msg => { if(m){ m.textContent = msg; m.style.opacity = '1'; setTimeout(()=> m.style.opacity='0',1500);} };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(css).then(()=>show('Copied!')).catch(()=>fallbackCopy());
+    } else fallbackCopy();
+
+    function fallbackCopy(){
+      const ta = document.createElement('textarea');
+      ta.value = css; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy'); document.body.removeChild(ta);
+      show(ok ? 'Copied!' : 'Copy failed');
+    }
+  });
+
+  // Export JSON
+  $('btn_export')?.addEventListener('click', ()=>{
+    const payload = { version:1, vars:S, icons: JSON.parse(localStorage.getItem(IK) || '{}') };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sneakerquest-layout.json';
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  });
+
+  // Reset
+  $('btn_reset')?.addEventListener('click', ()=>{
+    try{
+      localStorage.setItem(SK, JSON.stringify(BASELINE));
+      localStorage.removeItem(IK);
+    }catch{}
+    location.reload();
+  });
+
+  // Icon rendering system
+  const DEF = { heartsFill:4, heartsOutline:1, shoesFill:2, shoesOutline:1, powersTotal:4, firesFill:3, firesOutline:2 };
+  let IState = {...DEF};
+  try { Object.assign(IState, JSON.parse(localStorage.getItem(IK) || '{}')); } catch {}
+  const saveI = () => localStorage.setItem(IK, JSON.stringify(IState));
+
+  function renderSneakers(fill, outline){
+    const r = $('ui-sneakers'); if(!r) return; r.innerHTML='';
+    for(let i=0;i<outline;i++) r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
+    for(let i=0;i<fill;i++) r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
+  }
+  function renderHearts(fill, outline){
+    const r = $('ui-hearts'); if(!r) return; r.innerHTML='';
+    for(let i=0;i<fill;i++) r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
+    for(let i=0;i<outline;i++) r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>');
+  }
+  function renderPowers(total){
+    const r = $('ui-powers'); if(!r) return; r.innerHTML='';
+    const defs = [
+      { bold:'ph-timer',  fill:'ph-timer'  },
+      { bold:'ph-shield', fill:'ph-shield' },
+      { bold:'ph-magnet', fill:'ph-magnet' },
+      { bold:'ph-crosshair-simple', fill:'svg' }
+    ];
+    for(let i=0;i<total;i++){
+      const x = defs[i % defs.length];
+      if(x.fill==='svg'){
+        r.insertAdjacentHTML('beforeend',`
+          <span class="power power--idle">
+            <i class="ph-bold ${x.bold}" aria-hidden="true"></i>
+            <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+              <circle cx="128" cy="128" r="28"></circle>
+              <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>
+            </svg>
+          </span>
+        `);
+      } else {
+        r.insertAdjacentHTML('beforeend',`
+          <span class="power power--idle">
+            <i class="ph-bold ${x.bold}" aria-hidden="true"></i>
+            <i class="ph-fill ${x.fill} is-off" aria-hidden="true"></i>
+          </span>
+        `);
+      }
+    }
+  }
+  function renderFires(fill, outline){
+    const r = $('ui-fires'); if(!r) return; r.innerHTML='';
+    for(let i=0;i<fill;i++) r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
+    for(let i=0;i<outline;i++) r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire" aria-hidden="true"></i>');
+  }
+  function renderIcons(){ renderSneakers(IState.heartsFill, IState.heartsOutline); renderHearts(IState.shoesFill, IState.shoesOutline); renderPowers(IState.powersTotal); renderFires(IState.firesFill, IState.firesOutline); }
+  renderIcons();
+
+  function nNum(inputId, tvId, key, min, max){
+    const inp = $(inputId), tv = $(tvId); if(!inp || !tv) return;
+    const clamp = v => Math.max(min, Math.min(max, (v|0)));
+    const set = v => { IState[key] = clamp(v); tv.textContent = String(IState[key]); saveI(); renderIcons(); };
+    inp.value = IState[key]; tv.textContent = String(IState[key]);
+    inp.addEventListener('input', e => set(parseInt(e.target.value || '0', 10)));
+  }
+  nNum('in_hearts_fill','tv_hearts_fill','heartsFill',0,6);
+  nNum('in_hearts_outline','tv_hearts_outline','heartsOutline',0,6);
+  nNum('in_shoes_fill','tv_shoes_fill','shoesFill',0,6);
+  nNum('in_shoes_outline','tv_shoes_outline','shoesOutline',0,6);
+  nNum('in_powers_total','tv_powers_total','powersTotal',0,4);
+  nNum('in_fires_fill','tv_fires_fill','firesFill',0,10);
+  nNum('in_fires_outline','tv_fires_outline','firesOutline',0,10);
+
+  // Pause button
+  const pb = $('btn-pause');
+  if(pb){
+    const set = st => { pb.dataset.state = st; pb.setAttribute('aria-pressed', String(st==='paused')); pb.setAttribute('aria-label', st==='playing' ? 'Pause':'Play'); };
+    set('playing'); pb.addEventListener('click', ()=> set(pb.dataset.state==='playing' ? 'paused' : 'playing'));
+  }
+
+  // Import CSS handler
+  $('btn_import_css')?.addEventListener('click', ()=>{
+    const raw = ($('cssInput')?.value || '');
+    if(!raw.trim()) return;
+
+    // Pull out :root{...} content if present; otherwise scan entire text
+    const m = raw.match(/:root\s*\{([\s\S]*?)\}/);
+    const body = m ? m[1] : raw;
+
+    // Extract --vars: value;
+    const rx = /--([a-zA-Z0-9-_]+)\s*:\s*([^;]+);/g;
+    const found = {};
+    let hit;
+    while((hit = rx.exec(body)) !== null){
+      const name = '--' + hit[1];
+      let val = hit[2].trim();
+      // Strip surrounding quotes for tab labels when writing S['tab*-text']
+      if(name === '--tab1-text' || name === '--tab2-text' || name === '--tab3-text'){
+        // Keep quotes in CSS var. For JS mirror we store without quotes.
+        const plain = val.replace(/^"(.*)"$/,'$1').replace(/^'(.*)'$/,'$1');
+        found[name] = val;                 // CSS value with quotes
+        S[name.replace(/^--/,'')] = plain; // JS mirror key without quotes, e.g., tab1-text
+        continue;
+      }
+      found[name] = val;
+    }
+
+    // Apply CSS vars
+    for(const [k,v] of Object.entries(found)){
+      setV(k, v);
+      S[k] = v; // store same string for consistency
+    }
+
+    // If icon amounts present, mirror to icon state
+    function getIntVar(n, d=0){
+      const v = found[n]; if(v==null) return null;
+      const x = parseInt(String(v).replace(/[^0-9-]/g,''),10);
+      return Number.isFinite(x) ? x : d;
+    }
+    const maybe = {
+      heartsFill:  getIntVar('--icons-hearts-fill'),
+      heartsOutline:getIntVar('--icons-hearts-outline'),
+      shoesFill:   getIntVar('--icons-shoes-fill'),
+      shoesOutline:getIntVar('--icons-shoes-outline'),
+      powersTotal: getIntVar('--icons-powers-total'),
+      firesFill:   getIntVar('--icons-fires-fill'),
+      firesOutline:getIntVar('--icons-fires-outline'),
+    };
+    for(const [k,v] of Object.entries(maybe)){
+      if(v!=null){ IState[k] = v; }
+    }
+    saveI(); renderIcons();
+
+    // Update tab text outputs if provided
+    if('tab1-text' in S) $('tab1_text_output').textContent = S['tab1-text'];
+    if('tab2-text' in S) $('tab2_text_output').textContent = S['tab2-text'];
+    if('tab3-text' in S) $('tab3_text_output').textContent = S['tab3-text'];
+
+    // Persist and refresh sliders’ displays
+    save(); refreshControls();
+  });
+
+  function refreshControls(){
+    const setInput = (id, val, stripRx = /px|%|em|fr/)=>{ const el = $(id), out = $('o_' + id.slice(2)); if(!el) return;
+      const s = String(val ?? '').replace(stripRx,''); el.value = s; if(out) out.textContent = String(val);
+    };
+    setInput('v_scale', S['--cabinet-scale'], /$/);
+
+    setInput('v_mqtsize', S['--mq-title-size'], /$/);
+    setInput('v_mqttrack', S['--mq-title-track'], /$/);
+    setInput('v_mqtx', S['--mq-title-x']);
+    setInput('v_mqty', S['--mq-title-y']);
+
+    setInput('v_mqssize', S['--mq-sub-size'], /$/);
+    setInput('v_mqsx', S['--mq-sub-x']);
+    setInput('v_mqsy', S['--mq-sub-y']);
+
+    setInput('v_chipbr', S['--chip-br'], /$/);
+    setInput('v_chippadx', S['--chip-pad-x'], /$/);
+    setInput('v_chippady', S['--chip-pad-y'], /$/);
+    setInput('v_chipborder', S['--chip-border'], /$/);
+
+    setInput('v_gap_tabs', S['--gap-tabs']);
+    setInput('v_gap_hud1', S['--gap-hud1']);
+    setInput('v_gap_hud2', S['--gap-hud2']);
+    setInput('v_gap_bottom', S['--gap-bottom']);
+
+    setInput('v_crtfr', S['--crt-fr'], /$/);   // unitless
+    setInput('v_crtar', S['--crt-ar'], /$/);
+    setInput('v_crtr', S['--crt-r'], /$/);
+    setInput('v_crtpad', S['--crtwrap-pad'], /$/);
+
+    setInput('v_slotheart', S['--slot-heart-h'], /$/);
+    setInput('v_slotshoes', S['--slot-shoes-h'], /$/);
+    setInput('v_slotdots', S['--slot-dots-h'], /$/);
+    setInput('v_slotbag', S['--slot-bag-h'], /$/);
+    setInput('v_slotflames', S['--slot-flames-h'], /$/);
+    setInput('v_slotpause', S['--slot-pause-h'], /$/);
+    setInput('v_slotpad', S['--slot-pad'], /$/);
+
+    setInput('v_tab_font_size', S['--tab-font-size'], /$/);
+
+    // Text inputs
+    const t1 = $('v_tab1_text'), t2 = $('v_tab2_text'), t3 = $('v_tab3_text');
+    if(t1) t1.value = S['tab1-text'] || t1.value;
+    if(t2) t2.value = S['tab2-text'] || t2.value;
+    if(t3) t3.value = S['tab3-text'] || t3.value;
+
+    // Percent trios: reflect computed vars
+    const setPct = (id, varName)=>{ const el = $(id), out = $('o_' + id.slice(2));
+      if(el) el.value = parseInt(getComputedStyle(R).getPropertyValue(varName) || S[varName] || '0',10);
+      if(out) out.textContent = getComputedStyle(R).getPropertyValue(varName) || S[varName] || '';
+    };
+    setPct('v_t1','--t1'); setPct('v_t2','--t2'); setPct('v_t3','--t3');
+    setPct('v_h1a','--h1-a'); setPct('v_h1b','--h1-b'); setPct('v_h1c','--h1-c');
+    setPct('v_h2a','--h2-a'); setPct('v_h2b','--h2-b'); setPct('v_h2c','--h2-c');
+
+    // Icon editors
+    const I = JSON.parse(localStorage.getItem(IK) || '{}');
+    const setIcon = (id, tv, v)=>{ const inp=$(id), t=$(tv); if(inp) inp.value = v ?? inp.value; if(t) t.textContent = String(v ?? inp.value); };
+    setIcon('in_hearts_fill','tv_hearts_fill', I.heartsFill);
+    setIcon('in_hearts_outline','tv_hearts_outline', I.heartsOutline);
+    setIcon('in_shoes_fill','tv_shoes_fill', I.shoesFill);
+    setIcon('in_shoes_outline','tv_shoes_outline', I.shoesOutline);
+    setIcon('in_powers_total','tv_powers_total', I.powersTotal);
+    setIcon('in_fires_fill','tv_fires_fill', I.firesFill);
+    setIcon('in_fires_outline','tv_fires_outline', I.firesOutline);
+  }
+
+  // Initial reflect
+  refreshControls();
+
+  // Simple runtime asserts (non-fatal)
+  try{
+    const title = document.querySelector('.mq-title');
+    const before = getComputedStyle(title).fontSize;
+    const sld = $('v_mqtsize'); const prev = sld.value; sld.value='60'; sld.dispatchEvent(new Event('input'));
+    const after = getComputedStyle(title).fontSize;
+    console.assert(before !== after, '[TEST] Title size slider updates font size');
+    sld.value = prev; sld.dispatchEvent(new Event('input'));
+  }catch{}
+
+})();
+</script>
+</body>
+</html>
