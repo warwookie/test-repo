@@ -10,6 +10,9 @@
   <style>
     /* Base variables (exactly as provided) */
     :root{
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+
       --cabinet-scale: 1;
       --mq-title-size: 43;
       --mq-title-track: 0.38;
@@ -72,14 +75,32 @@
       --icons-powers-total: 4;
       --icons-fires-fill: 3;
       --icons-fires-outline: 2;
-    }
+    }:root{
+  --cabinet-w: 430;
+  --cabinet-h: 900;
+  --cabinet-ratio: calc(var(--cabinet-h) / var(--cabinet-w));  /* 900/430 */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --vh-safe: calc(min(100svh, 100dvh) - var(--safe-top) - var(--safe-bottom) - 12px);
+}
 
     /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;overflow:hidden}
-    .cabinet{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);aspect-ratio:430/900;max-width:100vw;border-radius:28px;padding:14px;transform:scale(var(--cabinet-scale));transform-origin:center top;background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a}
+    html,body{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:manipulation}
+    .cabinet{
+  aspect-ratio: 430 / 900;
+  --fit-w-from-h: calc(var(--vh-safe) / var(--cabinet-ratio));
+  inline-size: min(100vi, var(--fit-w-from-h));  /* width */
+  block-size: auto;                               /* height via aspect-ratio */
+  max-block-size: var(--vh-safe);
+  border-radius:28px;
+  padding:14px;
+  background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),
+             linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
+  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a
+}
     .inner{height:100%;border-radius:22px;padding:12px;display:grid;gap:calc(var(--gap)*1px);grid-template-rows:calc(var(--marquee-h)*1px) 12px var(--crt-fr) calc(var(--tabs-h)*1px) auto auto calc(var(--bottom-h)*1px);background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
@@ -142,13 +163,69 @@
     .control-screen{position:relative;min-height:calc(var(--bottom-h)*1px);height:100%;border-radius:18px;padding:14px;display:grid;grid-template-columns:var(--bot-a) var(--bot-b);gap:14px;align-items:center;overflow:hidden;background:linear-gradient(#1a1210,#0c0908);box-shadow:inset 0 0 0 2px #1a1510,inset 0 16px 30px #0006,0 3px 0 #0a0807}
     @media (max-width:520px){.control-screen{grid-template-columns:1fr}}
     .matrix{position:absolute;inset:6px;border-radius:14px;opacity:.9;mix-blend-mode:screen;pointer-events:none;background:radial-gradient(circle at center,#140202 40%,#090101 42%,#0000 43%) 0 0/10px 10px repeat}
-    @media (max-height:720px){:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
-{:root{--marquee-h:70;--tabs-h:70;--bottom-h:210}}
+    @media (max-height: 720px){
+  .cabinet{
+    /* same contain logic already covers this; keep for cascade clarity */
+    max-height: var(--vh-safe);
+  }
+}
     @media (max-height:640px){:root{--marquee-h:64;--tabs-h:64;--bottom-h:200}}
-  </style>
+  
+
+/* ==== DEBUG: disable clipping and transforms ==== */
+.cabinet { transform: none !important; --cabinet-scale: 1 !important; }
+
+
+
+/* === Viewport centering container === */
+.device-viewport{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0a0a0a; /* keep current page bg */
+}
+
+/* === Fixed design box we will scale === */
+.device-scale{
+  width: 996px;     /* use your design size; change if needed */
+  height: 2048px;   /* use your design size; change if needed */
+  position: relative;
+  transform-origin: top left;
+}
+
+/* The existing device root fills the design box exactly */
+.device-scale > .cabinet{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+/* Neutralize .cabinet's viewport-driven sizing so only the wrapper controls size */
+.cabinet{
+  inline-size: auto !important;
+  block-size: auto !important;
+  max-block-size: none !important;
+  aspect-ratio: auto !important;
+}
+
+/* Remove any debug outlines or forced transforms if present */
+.cabinet{ transform: none !important; }
+
+/* Ensure the page itself does not clip */
+body{ overflow: visible !important; }
+
+</style>
 </head>
-<body>
-  <div class="cabinet">
+$1  <div class="device-viewport">
+    <div class="device-scale">
+      <!-- existing device root moved here unchanged -->
+      <div class="cabinet">
     <div class="inner">
       <div class="marquee">
         <div class="led">
@@ -205,6 +282,7 @@
           </main>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
@@ -331,5 +409,32 @@
       runPauseTests();
     })();
   </script>
+  
+
+<script>
+(function(){
+  const DESIGN_W = 996, DESIGN_H = 2048; // change if your design size differs
+
+  function size(){
+    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight || 0;
+    const s = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+
+    const wrap = document.querySelector('.device-scale');
+    if(!wrap) return;
+    wrap.style.transformOrigin = 'top left';
+    wrap.style.transform = 'scale(' + s + ')';
+
+    // expose for debugging
+    window.__UNISCALE__ = { s, vw, vh, designW: DESIGN_W, designH: DESIGN_H };
+    try { console.log('__UNISCALE__', window.__UNISCALE__); } catch(e){}
+  }
+
+  window.addEventListener('resize', size);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', size);
+  document.addEventListener('DOMContentLoaded', size);
+  size();
+})();
+</script>
 </body>
 </html>
