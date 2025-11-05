@@ -25,7 +25,7 @@
       --chip-pad-x: 11;
       --chip-pad-y: 1;
       --chip-border: 1;
-      --crt-fr: 0.4;
+      --crt-fr: 1fr;
       --crt-ar: 0.970;
       --crt-r: 10;
       --crtwrap-pad: 13;
@@ -87,42 +87,29 @@
     /* Interface styles (unchanged layout logic) */
     :root{--text:#d6c7a4;--led:#ff3a2f;--gap:10;--radius:16}
     *{box-sizing:border-box}
-    html,body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;overflow:hidden;overscroll-behavior:contain;touch-action:manipulation}
+    html,body{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
     body{margin:0;background:#0a0a0a;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;display:grid;place-items:center;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:manipulation}
     .cabinet{
-  /* Visual props kept */
+  aspect-ratio: 430 / 900;
+  --fit-w-from-h: calc(var(--vh-safe) / var(--cabinet-ratio));
+  inline-size: min(100vi, var(--fit-w-from-h));  /* width */
+  block-size: auto;                               /* height via aspect-ratio */
+  max-block-size: var(--vh-safe);
   border-radius:28px;
   padding:14px;
   background:radial-gradient(120% 120% at 50% 0,#000 0,#000 18%,#0000 18%),
              linear-gradient(#b99b66,#cbb17d 22%,#a98756 22%,#a98756 23%,#876a46 23%,#876a46 24%,#56432e 24%,#56432e 25%,#3d3123 25%,#3d3123 100%);
-  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a;
-
-  /* Container-based scaling (preserved) */
-  container-type: size; /* enables cqw/cqh/cqmin units */
-  --su: calc(100cqw / 430);
-  --su16: calc(16px * var(--su));
-  --marquee-h: calc(70px * var(--su));
-  --tabs-h:    calc(70px * var(--su));
-  --bottom-h:  calc(210px * var(--su));
-
-  /* Padding-aware contain fit */
-  box-sizing: border-box;
-  --pad-i: 28px; /* left+right padding total */
-  --pad-b: 28px; /* top+bottom padding total */
-
-  /* Use 1/ratio for content box: width/height */
-  aspect-ratio: calc(1 / var(--cabinet-ratio));
-
-  /* Candidate width constrained by safe height and inline viewport */
-  --w-from-height: calc((var(--vh-safe) - var(--pad-b)) / var(--cabinet-ratio) + var(--pad-i));
-  inline-size: min(100vi, var(--w-from-height));
-  block-size: auto;               /* height via aspect-ratio */
-  max-block-size: var(--vh-safe); /* never exceed safe height */
-  margin: 0 auto;
+  box-shadow:inset 0 0 0 2px #1b1510,0 24px 40px #0008,0 6px 0 #0a0a0a
 }
-    $1
-    font-size: var(--su16);
-    line-height: 1.1;$2
+    $1grid-template-rows:
+       calc(var(--marquee-h)*1px)
+       12px
+       var(--crt-fr)
+       calc(var(--tabs-h)*1px)
+       auto
+       auto
+       calc(var(--bottom-h)*1px); 
+    min-height: 0; background:linear-gradient(#6c5640,#3c2f23 14%,#2e251d 14%,#2e251d);box-shadow:inset 0 0 0 2px #2a2119,inset 0 0 0 6px #1b1510;position:relative;isolation:isolate}
     .marquee{border-radius:18px;padding:12px 14px;background:linear-gradient(#2a2320,#1d1815);box-shadow:inset 0 0 0 2px #120e0c,inset 0 0 0 6px #2f2722,0 2px 0 #0a0807}
     .led{height:100%;border-radius:12px;background:radial-gradient(circle at 8px 10px,#fff1,transparent 28%),repeating-linear-gradient(180deg,#0006 0 3px,#0000 3px 10px),#120e0c;display:grid;padding:6px 10px;align-content:center}
     .led .line{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--led);text-shadow:0 0 2px var(--led),0 0 8px #ff3a2f73,0 0 14px #ff3a2f40;font-weight:800}
@@ -144,7 +131,7 @@
     @media (prefers-reduced-motion:reduce){.chip-btn .word{transition:none}}
 
     .divider{height:12px;border-radius:10px;background:linear-gradient(#3b3026,#2a231e);box-shadow:inset 0 0 0 2px #1b1510}
-    .crt-wrap{border-radius:20px;padding:calc(var(--crtwrap-pad)*1px);background:linear-gradient(#3c2f26,#241e18);box-shadow:inset 0 0 0 2px #1a140f,inset 0 0 0 8px #2a211a;display:grid;place-items:center}
+    $1 min-height: 0; }
     .crt{width:100%;aspect-ratio:var(--crt-ar);border-radius:calc(var(--crt-r)*1px);background:linear-gradient(180deg,#fff1,transparent 22%),linear-gradient(#0b2823,#0a241f);box-shadow:inset 0 0 0 2px #0e1412,inset 0 0 30px #0009;position:relative;overflow:hidden}
     .tabs{border-radius:14px;background:linear-gradient(#3a2f26,#2b231d);box-shadow:inset 0 0 0 2px #1a1410;display:grid;grid-template-columns:var(--t1) var(--t2) var(--t3);gap:calc(var(--gap)*1px);padding:10px var(--tabs-pad-x-right) 10px var(--tabs-pad-x-left);text-align:center;font-weight:800;letter-spacing:.08em;margin-top:var(--gap-tabs)}
     .tab{padding:0;border-right:1px solid #4d4032;display:grid;align-items:stretch}
