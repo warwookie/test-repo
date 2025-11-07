@@ -26,26 +26,26 @@
       --screen-bg: #0a241f;
       --led-glow: rgba(255, 58, 47, 0.45);
       
-      /* Updated variables based on your JSON layout */
+      /* DEFAULT VALUES FROM YOUR JSON LAYOUT */
       --cabinet-scale: 1;
-      --mq-title-size: 42;
+      --mq-title-size: 43;
       --mq-title-track: 0;
-      --mq-title-x: 0;
+      --mq-title-x: -1;
       --mq-title-y: 0;
       --mq-sub-size: 10;
       --mq-sub-x: -1;
       --mq-sub-y: -5;
       --chip-br: 6;
-      --chip-pad-x: 6;
+      --chip-pad-x: 8;
       --chip-pad-y: 1;
       --chip-border: 1;
       --crt-fr: 0.4;
-      --crt-ar: 0.99;
-      --crt-r: 10;
-      --crtwrap-pad: 11;
-      --t1: 40;
-      --t2: 20;
-      --t3: 40;
+      --crt-ar: 0.94;
+      --crt-r: 11;
+      --crtwrap-pad: 10;
+      --t1: 24;
+      --t2: 42;
+      --t3: 42;
       --h1-a: 40;
       --h1-b: 20;
       --h1-c: 40;
@@ -58,20 +58,20 @@
       --slot-bag-h: 46;
       --slot-flames-h: 46;
       --slot-pause-h: 46;
-      --slot-pad: 8;
+      --slot-pad: 6;
       --bot-a: 80;
       --bot-b: 20;
       --tabs-pad-x-left: 12;
-      --tabs-pad-x-right: 32;
+      --tabs-pad-x-right: 12;
       --hud1-pad-x-left: 0;
-      --hud1-pad-x-right: 21;
+      --hud1-pad-x-right: 0;
       --hud2-pad-x-left: 0;
-      --hud2-pad-x-right: 21;
-      --tab-font-size: 12;
-      --gap-tabs: 2;
-      --gap-hud1: -3;
-      --gap-hud2: -15;
-      --gap-bottom: -5;
+      --hud2-pad-x-right: 0;
+      --tab-font-size: 13;
+      --gap-tabs: -13;
+      --gap-hud1: -16;
+      --gap-hud2: -13;
+      --gap-bottom: -12;
       --marquee-h: 90;
       --tabs-h: 80;
       --bottom-h: 240;
@@ -850,36 +850,96 @@
       for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire is-off" aria-hidden="true"></i>');
     };
 
-    // Initialize all settings with current values
+    // Your preferred layout as default values
+    const defaultSettings = {
+      "v_scale": "1",
+      "v_mqtsize": "43",
+      "v_mqttrack": "0",
+      "v_mqtx": "-1",
+      "v_mqty": "0",
+      "v_mqssize": "10",
+      "v_mqsx": "-1",
+      "v_mqsy": "-5",
+      "v_chipbr": "6",
+      "v_chippadx": "8",
+      "v_chippady": "1",
+      "v_chipborder": "1",
+      "v_crtfr": "0.4",
+      "v_crtar": "0.94",
+      "v_crtr": "11",
+      "v_crtpad": "10",
+      "v_tab_font_size": "13",
+      "v_tab1_text": "SNEAKERS",
+      "v_tab2_text": "LIFE",
+      "v_tab3_text": "POWER-UPS",
+      "v_t1": "24",
+      "v_t2": "42",
+      "v_t3": "42",
+      "v_h1a": "40",
+      "v_h1b": "20",
+      "v_h1c": "40",
+      "v_h2a": "40",
+      "v_h2b": "20",
+      "v_h2c": "40",
+      "v_gap_tabs": "-13",
+      "v_gap_hud1": "-16",
+      "v_gap_hud2": "-13",
+      "v_gap_bottom": "-12",
+      "v_tabs_pad_l": "12",
+      "v_tabs_pad_r": "12",
+      "v_hud1_pad_l": "0",
+      "v_hud1_pad_r": "0",
+      "v_hud2_pad_l": "0",
+      "v_hud2_pad_r": "0",
+      "v_slotheart": "46",
+      "v_slotshoes": "46",
+      "v_slotdots": "46",
+      "v_slotbag": "46",
+      "v_slotflames": "46",
+      "v_slotpause": "46",
+      "v_slotpad": "6",
+      "in_hearts_fill": "4",
+      "in_hearts_outline": "1",
+      "in_shoes_fill": "2",
+      "in_shoes_outline": "1",
+      "in_powers_total": "4",
+      "in_fires_fill": "3",
+      "in_fires_outline": "2"
+    };
+
+    // Initialize all settings with your preferred values
     function initializeAllSettings() {
-      const root = document.documentElement;
       const inputs = document.querySelectorAll('#sBody input');
       
       inputs.forEach(input => {
-        const key = input.dataset.key;
-        if (key) {
-          let currentValue = getComputedStyle(root).getPropertyValue(key).trim();
+        const id = input.id;
+        if (defaultSettings[id] !== undefined) {
+          input.value = defaultSettings[id];
           
-          if (currentValue) {
-            // Remove quotes from text values
-            if (key.includes('-text')) {
-              currentValue = currentValue.replace(/^"|"$/g, '');
-            }
-            // For numeric values, parse the number
-            else {
-              currentValue = parseFloat(currentValue) || currentValue;
-            }
-            
-            input.value = currentValue;
-            
-            // Update the display
-            const id = input.id;
-            const out = document.getElementById(
-              (id.startsWith('v_') ? 'o_' : id.startsWith('in_') ? 'tv_' : 'sv_') + 
-              id.replace(/^v_|^in_/, '')
-            );
-            if (out) out.textContent = currentValue;
-          }
+          // Update the display
+          const out = document.getElementById(
+            (id.startsWith('v_') ? 'o_' : id.startsWith('in_') ? 'tv_' : 'sv_') + 
+            id.replace(/^v_|^in_/, '')
+          );
+          if (out) out.textContent = defaultSettings[id];
+        }
+      });
+      
+      // Apply all default values to CSS
+      applyDefaultSettings();
+    }
+
+    // Apply default settings to CSS variables
+    function applyDefaultSettings() {
+      const root = document.documentElement;
+      
+      // Apply all default values
+      Object.keys(defaultSettings).forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input && input.dataset.key) {
+          const key = input.dataset.key;
+          const value = defaultSettings[inputId];
+          setVar(key, value);
         }
       });
     }
@@ -915,7 +975,7 @@
       const NUM = (name, d=0) => parseInt(css.getPropertyValue(name).trim()||d,10);
 
       const counts = {
-        sneakersFill: NUM('--icons-hearts-fill', 4),      // sneakers = heartsFill in original mapping
+        sneakersFill: NUM('--icons-hearts-fill', 4),
         sneakersOutline: NUM('--icons-hearts-outline', 1),
         heartsFill: NUM('--icons-shoes-fill', 2),
         heartsOutline: NUM('--icons-shoes-outline', 1),
@@ -952,7 +1012,7 @@
       window.renderFires(counts.firesFill, counts.firesOutline);
       initPause();
 
-      // Initialize settings panel with current values
+      // Initialize settings panel with your preferred values
       initializeAllSettings();
     })();
   </script>
@@ -1200,17 +1260,8 @@
         document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
       });
       document.getElementById('sReset').addEventListener('click', ()=>{
-        for(const i of inputs){ 
-          // Only reset unlocked settings
-          const row = i.closest('.sr');
-          const individualLock = row?.querySelector('.lock-btn:not([data-element])');
-          const individuallyLocked = individualLock && individualLock.classList.contains('locked');
-          
-          if (!individuallyLocked && !i.disabled) {
-            i.value=''; 
-          }
-        }
-        for(const o of Array.from(document.querySelectorAll('.sv'))){ o.textContent=''; }
+        // Reset to your preferred layout
+        initializeAllSettings();
         window.dispatchEvent(new CustomEvent('settings:reset'));
       });
 
@@ -1220,7 +1271,7 @@
   </script>
 
   <script>
-    // Link settings to CSS variables and UI - FIXED VERSION
+    // Link settings to CSS variables and UI
     (function(){
       const root = document.documentElement;
       
@@ -1287,7 +1338,7 @@
 
       window.addEventListener('settings:change', (e)=>{
         const d = e.detail || {};
-        console.log('Setting change:', d.key, d.value); // Debug log
+        console.log('Setting change:', d.key, d.value);
         setVar(d.key, d.value);
         
         if(d.key && d.key.startsWith('--icons-')) rerenderIcons();
@@ -1296,18 +1347,16 @@
       });
 
       window.addEventListener('settings:reset', ()=>{
-        root.removeAttribute('style');
+        // Already handled by initializeAllSettings in reset button
         rerenderIcons(); 
         updateTabText(); 
         scaleContainer();
-        // Re-initialize after reset
-        setTimeout(initializeAllSettings, 100);
       });
 
       // Store original setVar function for element locking system
       window.setVar = setVar;
 
-      // Initialize on load
+      // Initialize on load with your preferred layout
       setTimeout(initializeAllSettings, 100);
       rerenderIcons(); 
       updateTabText();
