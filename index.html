@@ -1,1366 +1,1893 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SNEAKERQUEST — Interface</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEAKERQUEST — Interface</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    :root {
-      --primary-color: #ff3a2f;
-      --secondary-color: #d6c7a4;
-      --bg-dark: #0a0a0a;
-      --bg-medium: #1a1510;
-      --bg-light: #2a2119;
-      --wood-light: #b99b66;
-      --wood-medium: #876a46;
-      --wood-dark: #56432e;
-      --screen-bg: #0a241f;
-      --led-glow: rgba(255, 58, 47, 0.45);
-      
-      /* DEFAULT VALUES FROM YOUR JSON LAYOUT */
-      --cabinet-scale: 1;
-      --mq-title-size: 43;
-      --mq-title-track: 0;
-      --mq-title-x: -1;
-      --mq-title-y: 0;
-      --mq-sub-size: 10;
-      --mq-sub-x: -1;
-      --mq-sub-y: -5;
-      --chip-br: 6;
-      --chip-pad-x: 8;
-      --chip-pad-y: 1;
-      --chip-border: 1;
-      --crt-fr: 0.4;
-      --crt-ar: 0.94;
-      --crt-r: 11;
-      --crtwrap-pad: 10;
-      --t1: 24;
-      --t2: 42;
-      --t3: 42;
-      --h1-a: 40;
-      --h1-b: 20;
-      --h1-c: 40;
-      --h2-a: 40;
-      --h2-b: 20;
-      --h2-c: 40;
-      --slot-heart-h: 46;
-      --slot-shoes-h: 46;
-      --slot-dots-h: 46;
-      --slot-bag-h: 46;
-      --slot-flames-h: 46;
-      --slot-pause-h: 46;
-      --slot-pad: 6;
-      --bot-a: 80;
-      --bot-b: 20;
-      --tabs-pad-x-left: 12;
-      --tabs-pad-x-right: 12;
-      --hud1-pad-x-left: 0;
-      --hud1-pad-x-right: 0;
-      --hud2-pad-x-left: 0;
-      --hud2-pad-x-right: 0;
-      --tab-font-size: 13;
-      --gap-tabs: -13;
-      --gap-hud1: -16;
-      --gap-hud2: -13;
-      --gap-bottom: -12;
-      --marquee-h: 90;
-      --tabs-h: 80;
-      --bottom-h: 240;
+        :root {
+            --primary-color: #ff3a2f;
+            --secondary-color: #d6c7a4;
+            --bg-dark: #0a0a0a;
+            --bg-medium: #1a1510;
+            --bg-light: #2a2119;
+            --wood-light: #b99b66;
+            --wood-medium: #876a46;
+            --wood-dark: #56432e;
+            --screen-bg: #0a241f;
+            --led-glow: rgba(255, 58, 47, 0.45);
+            
+            /* UPDATED SETTINGS FROM JSON */
+            --cabinet-scale: 1;
+            --global-pad-left: 0;
+            --global-pad-right: 0;
+            --hud-gap: 3;
+            --icon-gap-sneakers: 3;
+            --icon-gap-powers: 7;
+            --icon-gap-fires: 2;
+            --mq-title-size: 43;
+            --mq-title-track: 0;
+            --mq-title-x: -1;
+            --mq-title-y: -2;
+            --mq-sub-size: 10;
+            --mq-sub-x: -1;
+            --mq-sub-y: -10;
+            --chip-br: 6;
+            --chip-pad-x: 8;
+            --chip-pad-y: 1;
+            --chip-border: 2;
+            --crt-fr: 0.4;
+            --crt-ar: 0.94;
+            --crt-r: 11;
+            --crtwrap-pad: 10;
+            --t1: 10;
+            --t2: 42;
+            --t3: 42;
+            --h1-a: 40;
+            --h1-b: 28;
+            --h1-c: 40;
+            --h2-a: 40;
+            --h2-b: 28;
+            --h2-c: 40;
+            --slot-heart-h: 41;
+            --slot-shoes-h: 40;
+            --slot-dots-h: 40;
+            --slot-bag-h: 40;
+            --slot-flames-h: 40;
+            --slot-pause-h: 40;
+            --slot-pad: 5;
+            --bot-a: 82;
+            --bot-b: 20;
+            --tabs-pad-x-left: 8;
+            --tabs-pad-x-right: 8;
+            --hud1-pad-x-left: 0;
+            --hud1-pad-x-right: 0;
+            --hud2-pad-x-left: 0;
+            --hud2-pad-x-right: 0;
+            --tab-font-size: 14;
+            --gap-tabs: -14;
+            --gap-hud1: -16;
+            --gap-hud2: -15;
+            --gap-bottom: -13;
 
-      /* Tab Bar Content */
-      --tab1-text: "SNEAKERS";
-      --tab2-text: "LIFE";
-      --tab3-text: "POWER-UPS";
+            /* Updated Icon Counts */
+            --icons-hearts-fill: 0;
+            --icons-hearts-outline: 3;
+            --icons-shoes-fill: 0;
+            --icons-shoes-outline: 5;
+            --icons-powers-total: 4;
+            --icons-fires-fill: 0;
+            --icons-fires-outline: 5;
 
-      /* Icon Amounts */
-      --icons-hearts-fill: 4;
-      --icons-hearts-outline: 1;
-      --icons-shoes-fill: 2;
-      --icons-shoes-outline: 1;
-      --icons-powers-total: 4;
-      --icons-fires-fill: 3;
-      --icons-fires-outline: 2;
-    }
+            /* Tab Bar Content */
+            --tab1-text: "SNEAKERS";
+            --tab2-text: "LIFE";
+            --tab3-text: "POWER-UPS";
+        }
 
-    /* Element lock styles */
-    .element-locked {
-      pointer-events: none !important;
-      opacity: 0.7 !important;
-      position: relative;
-    }
-    
-    .element-locked::after {
-      content: "🔒";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 24px;
-      z-index: 1000;
-      background: rgba(0,0,0,0.8);
-      border-radius: 8px;
-      padding: 8px;
-    }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
 
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: var(--bg-dark);
-    }
+        body {
+            margin: 0;
+            background: var(--bg-dark);
+            color: var(--secondary-color);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    body {
-      margin: 0;
-      background: var(--bg-dark);
-      color: var(--secondary-color);
-      font-family: system-ui, -apple-system, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+        /* Fixed container for uniform scaling */
+        .fixed-container {
+            width: 430px;
+            height: 900px;
+            position: relative;
+            transform-origin: center center;
+        }
 
-    /* Fixed container for uniform scaling */
-    .fixed-container {
-      width: 430px;
-      height: 900px;
-      position: relative;
-      transform-origin: center center;
-    }
+        .cabinet {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            padding: 14px;
+            background: 
+                radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
+                linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, 
+                var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, 
+                var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                0 24px 40px rgba(0,0,0,.5),
+                0 6px 0 var(--bg-dark);
+        }
 
-    .cabinet {
-      width: 100%;
-      height: 100%;
-      border-radius: 28px;
-      padding: 14px;
-      background: 
-        radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
-        linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, 
-        var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, 
-        var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
-      box-shadow: 
-        inset 0 0 0 2px var(--bg-light),
-        0 24px 40px rgba(0,0,0,.5),
-        0 6px 0 var(--bg-dark);
-    }
+        .inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                inset 0 0 0 6px var(--bg-medium);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+        }
 
-    .inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 22px;
-      background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
-      box-shadow: 
-        inset 0 0 0 2px var(--bg-light),
-        inset 0 0 0 6px var(--bg-medium);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      gap: 20px;
-    }
+        /* Marquee section */
+        .marquee {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: 90px;
+            border-radius: 18px;
+            padding: 12px 14px;
+            background: linear-gradient(#2a2320, #1d1815);
+            box-shadow: 
+                inset 0 0 0 2px #120e0c,
+                inset 0 0 0 6px #2f2722,
+                0 2px 0 #0a0807;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
 
-    /* Original interface styles with adjustments for scaling */
-    .marquee {
-      width: 100%;
-      height: 90px;
-      border-radius: 18px;
-      padding: 12px 14px;
-      background: linear-gradient(#2a2320, #1d1815);
-      box-shadow: 
-        inset 0 0 0 2px #120e0c,
-        inset 0 0 0 6px #2f2722,
-        0 2px 0 #0a0807;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .led {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: 
+                radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
+                repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
+                #120e0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .led {
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      background: 
-        radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
-        repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
-        #120e0c;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 10px;
-      position: relative;
-      overflow: hidden;
-    }
+        .mq-wrap {
+            display: grid;
+            justify-items: center;
+            align-content: center;
+            height: 100%;
+        }
 
-    .mq-wrap {
-      display: grid;
-      justify-items: center;
-      align-content: center;
-      height: 100%;
-    }
+        .mq-title {
+            font-size: calc(var(--mq-title-size) * 1px);
+            letter-spacing: calc(var(--mq-title-track) * 1em);
+            transform: translate(calc(var(--mq-title-x) * 1px), calc(var(--mq-title-y) * 1px));
+            text-align: center;
+            user-select: none;
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
+            animation: led-flicker 3.6s ease-in-out infinite;
+        }
 
-    .mq-title {
-      font-size: calc(var(--mq-title-size) * 1px);
-      letter-spacing: calc(var(--mq-title-track) * 1em);
-      transform: translate(calc(var(--mq-title-x) * 1px), calc(var(--mq-title-y) * 1px));
-      text-align: center;
-      user-select: none;
-      color: var(--primary-color);
-      text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
-      animation: led-flicker 3.6s ease-in-out infinite;
-    }
+        .mq-sub {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: calc(var(--mq-sub-size) * 1px);
+            letter-spacing: .12em;
+            margin-top: 6px;
+            transform: translate(calc(var(--mq-sub-x) * 1px), calc(var(--mq-sub-y) * 1px));
+        }
 
-    .mq-sub {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      font-size: calc(var(--mq-sub-size) * 1px);
-      letter-spacing: .12em;
-      margin-top: 6px;
-      transform: translate(calc(var(--mq-sub-x) * 1px), calc(var(--mq-sub-y) * 1px));
-    }
+        .mq-sub .chip {
+            white-space: nowrap;
+        }
 
-    .mq-sub .chip {
-      white-space: nowrap;
-    }
+        .mq-sub .chip-box {
+            padding: calc(var(--chip-pad-y) * 1px) calc(var(--chip-pad-x) * 1px);
+            border: calc(var(--chip-border) * 1px) solid var(--primary-color);
+            border-radius: calc(var(--chip-br) * 1px);
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+        }
 
-    .mq-sub .chip-box {
-      padding: calc(var(--chip-pad-y) * 1px) calc(var(--chip-pad-x) * 1px);
-      border: calc(var(--chip-border) * 1px) solid var(--primary-color);
-      border-radius: calc(var(--chip-br) * 1px);
-      color: var(--primary-color);
-      text-shadow: 0 0 2px var(--primary-color);
-      animation: led-flicker 3.6s ease-in-out infinite;
-    }
+        @keyframes led-flicker {
+            0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+            50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); }
+            100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+        }
 
-    @keyframes led-flicker {
-      0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
-      50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); }
-      100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
-    }
+        .divider {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(#3b3026, #2a231e);
+            box-shadow: inset 0 0 0 2px var(--bg-medium);
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
 
-    .divider {
-      width: 100%;
-      height: 12px;
-      border-radius: 10px;
-      background: linear-gradient(#3b3026, #2a231e);
-      box-shadow: inset 0 0 0 2px var(--bg-medium);
-    }
+        .crt-wrap {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: auto;
+            border-radius: 20px;
+            padding: calc(var(--crtwrap-pad) * 1px);
+            background: linear-gradient(#3c2f26, #241e18);
+            box-shadow: 
+                inset 0 0 0 2px #1a140f,
+                inset 0 0 0 8px #2a211a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
 
-    .crt-wrap {
-      width: 100%;
-      height: auto;
-      border-radius: 20px;
-      padding: calc(var(--crtwrap-pad) * 1px);
-      background: linear-gradient(#3c2f26, #241e18);
-      box-shadow: 
-        inset 0 0 0 2px #1a140f,
-        inset 0 0 0 8px #2a211a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .crt {
+            width: 100%;
+            border-radius: calc(var(--crt-r) * 1px);
+            aspect-ratio: var(--crt-ar);
+            background: 
+                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
+                linear-gradient(var(--screen-bg), #0b2823);
+            box-shadow: 
+                inset 0 0 0 2px #0e1412,
+                inset 0 0 30px rgba(0,0,0,.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .crt {
-      width: 100%;
-      border-radius: calc(var(--crt-r) * 1px);
-      aspect-ratio: var(--crt-ar);
-      background: 
-        linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
-        linear-gradient(var(--screen-bg), #0b2823);
-      box-shadow: 
-        inset 0 0 0 2px #0e1412,
-        inset 0 0 30px rgba(0,0,0,.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
+        .tabs {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: 70px;
+            border-radius: 14px;
+            background: linear-gradient(#3a2f26, #2b231d);
+            box-shadow: inset 0 0 0 2px #1a1410;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-top: calc(var(--gap-tabs) * 1px);
+            padding-left: calc(calc(var(--tabs-pad-x-left) + var(--global-pad-left)) * 1px);
+            padding-right: calc(calc(var(--tabs-pad-x-right) + var(--global-pad-right)) * 1px);
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
+        .tabs .tab:nth-child(1){ flex: 0 1 calc(var(--t2) * 1%); }
+        .tabs .tab:nth-child(2){ flex: 0 1 calc(var(--t1) * 1%); }
+        .tabs .tab:nth-child(3){ flex: 0 1 calc(var(--t3) * 1%); }
 
-    .tabs {
-      width: 100%;
-      height: 70px;
-      border-radius: 14px;
-      background: linear-gradient(#3a2f26, #2b231d);
-      box-shadow: inset 0 0 0 2px #1a1410;
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      text-align: center;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      margin-top: calc(var(--gap-tabs) * 1px);
-      padding-left: calc(var(--tabs-pad-x-left) * 1px);
-      padding-right: calc(var(--tabs-pad-x-right) * 1px);
-    }
-    .tabs .tab:nth-child(1){ flex: 0 1 calc(var(--t2) * 1%); }
-    .tabs .tab:nth-child(2){ flex: 0 1 calc(var(--t1) * 1%); }
-    .tabs .tab:nth-child(3){ flex: 0 1 calc(var(--t3) * 1%); }
+        .tab {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+        }
 
-    .tab {
-      display: flex;
-      align-items: stretch;
-      flex: 1;
-    }
+        .tab .led {
+            height: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
 
-    .tab .led {
-      height: 100%;
-      border-radius: 10px;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-    }
+        .tab .led .line {
+            font-size: calc(var(--tab-font-size) * 1px);
+            letter-spacing: .14em;
+            color: var(--primary-color);
+            font-weight: 800;
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+        }
 
-    .tab .led .line {
-      font-size: calc(var(--tab-font-size) * 1px);
-      letter-spacing: .14em;
-      color: var(--primary-color);
-      font-weight: 800;
-      text-shadow: 0 0 2px var(--primary-color);
-      animation: led-flicker 3.6s ease-in-out infinite;
-    }
+        .hud {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: auto;
+            display: flex;
+            gap: calc(var(--hud-gap) * 1px);
+            margin-top: calc(var(--gap-hud1) * 1px);
+            padding-left: calc(calc(var(--hud1-pad-x-left) + var(--global-pad-left)) * 1px);
+            padding-right: calc(calc(var(--hud1-pad-x-right) + var(--global-pad-right)) * 1px);
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
+        .hud .slot-heart{ height: calc(var(--slot-heart-h) * 1px); }
+        .hud .slot-shoes{ height: calc(var(--slot-shoes-h) * 1px); }
+        .hud .slot-dots{ height: calc(var(--slot-dots-h) * 1px); }
+        .hud .slot:nth-child(1){ flex: 0 1 calc(var(--h1-a) * 1%); }
+        .hud .slot:nth-child(2){ flex: 0 1 calc(var(--h1-b) * 1%); }
+        .hud .slot:nth-child(3){ flex: 0 1 calc(var(--h1-c) * 1%); }
 
-    .hud {
-      width: 100%;
-      height: auto;
-      display: flex;
-      gap: 10px;
-      margin-top: calc(var(--gap-hud1) * 1px);
-      padding-left: calc(var(--hud1-pad-x-left) * 1px);
-      padding-right: calc(var(--hud1-pad-x-right) * 1px);
-    }
-    .hud .slot-heart{ height: calc(var(--slot-heart-h) * 1px); }
-    .hud .slot-shoes{ height: calc(var(--slot-shoes-h) * 1px); }
-    .hud .slot-dots{ height: calc(var(--slot-dots-h) * 1px); }
-    .hud .slot:nth-child(1){ flex: 0 1 calc(var(--h1-a) * 1%); }
-    .hud .slot:nth-child(2){ flex: 0 1 calc(var(--h1-b) * 1%); }
-    .hud .slot:nth-child(3){ flex: 0 1 calc(var(--h1-c) * 1%); }
+        .hud2 {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: auto;
+            display: flex;
+            gap: calc(var(--hud-gap) * 1px);
+            margin-top: calc(var(--gap-hud2) * 1px);
+            padding-left: calc(calc(var(--hud2-pad-x-left) + var(--global-pad-left)) * 1px);
+            padding-right: calc(calc(var(--hud2-pad-x-right) + var(--global-pad-right)) * 1px);
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
+        .hud2 .slot-flames{ height: calc(var(--slot-flames-h) * 1px); }
+        .hud2 .slot-pause{ height: calc(var(--slot-pause-h) * 1px); }
+        .hud2 .slot-bag{ height: calc(var(--slot-bag-h) * 1px); }
+        .hud2 .slot:nth-child(1){ flex: 0 1 calc(var(--h2-a) * 1%); }
+        .hud2 .slot:nth-child(2){ flex: 0 1 calc(var(--h2-b) * 1%); }
+        .hud2 .slot:nth-child(3){ flex: 0 1 calc(var(--h2-c) * 1%); }
 
-    .hud2 {
-      width: 100%;
-      height: auto;
-      display: flex;
-      gap: 10px;
-      margin-top: calc(var(--gap-hud2) * 1px);
-      padding-left: calc(var(--hud2-pad-x-left) * 1px);
-      padding-right: calc(var(--hud2-pad-x-right) * 1px);
-    }
-    .hud2 .slot-flames{ height: calc(var(--slot-flames-h) * 1px); }
-    .hud2 .slot-pause{ height: calc(var(--slot-pause-h) * 1px); }
-    .hud2 .slot-bag{ height: calc(var(--slot-bag-h) * 1px); }
-    .hud2 .slot:nth-child(1){ flex: 0 1 calc(var(--h2-a) * 1%); }
-    .hud2 .slot:nth-child(2){ flex: 0 1 calc(var(--h2-b) * 1%); }
-    .hud2 .slot:nth-child(3){ flex: 0 1 calc(var(--h2-c) * 1%); }
+        .slot {
+            background: linear-gradient(#3a3227, #2c251e);
+            border-radius: 14px;
+            padding: calc(var(--slot-pad) * 1px);
+            box-shadow: 
+                inset 0 0 0 2px #1a1511,
+                0 2px 0 #0b0907;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
 
-    .slot {
-      background: linear-gradient(#3a3227, #2c251e);
-      border-radius: 14px;
-      padding: calc(var(--slot-pad) * 1px);
-      box-shadow: 
-        inset 0 0 0 2px #1a1511,
-        0 2px 0 #0b0907;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      height: 100%;
-      width: 100%;
-    }
+        .slot > .led {
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .slot > .led {
-      height: 100%;
-      width: 100%;
-      border-radius: 10px;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .slot > .led .line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: .12em;
+            width: 100%;
+            justify-content: center;
+        }
 
-    .slot > .led .line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: .12em;
-      width: 100%;
-      justify-content: center;
-    }
+        /* Icon Containers */
+        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
 
-    .sneaker-outline, .heart-outline {
-      color: var(--primary-color);
-    }
+        /* Sneaker Icons */
+        #ui-sneakers {
+            gap: calc(var(--icon-gap-sneakers) * 1px);
+        }
 
-    .sneaker-fill {
-      color: #e6e6e6;
-    }
+        .sneaker-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .chip-btn {
-      background: transparent;
-      border: 0;
-      border-radius: 0;
-      padding: 0;
-      display: grid;
-      place-items: center;
-      position: relative;
-      color: var(--primary-color);
-      font: inherit;
-      letter-spacing: .12em;
-      cursor: pointer;
-      min-height: 1em;
-      line-height: 1;
-      min-width: 6ch;
-    }
+        .sneaker-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .chip-btn:focus-visible {
-      outline: none;
-      text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
-    }
+        .sneaker-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #e6e6e6;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .chip-btn .word {
-      grid-area: 1/1;
-      display: block;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(6%);
-      transition: opacity .24s ease, transform .24s ease;
-    }
+        .sneaker-icon.active .sneaker-fill {
+            opacity: 1;
+        }
 
-    #btn-pause[data-state=playing] .word-pause {
-      opacity: 1;
-      transform: none;
-    }
+        /* Heart Icons */
+        #ui-hearts {
+            gap: 4px;
+        }
 
-    #btn-pause[data-state=paused] .word-play {
-      opacity: 1;
-      transform: none;
-    }
+        .heart-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    @media (prefers-reduced-motion: reduce) {
-      .chip-btn .word {
-        transition: none;
-      }
-    }
+        .heart-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .counter {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--primary-color);
-      text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
-      font-weight: 900;
-      letter-spacing: .14em;
-    }
+        .heart-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #e6e6e6;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .seven {
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      font-size: 20px;
-      color: var(--secondary-color);
-    }
+        .heart-icon.active .heart-fill {
+            opacity: 1;
+        }
 
-    .bottom {
-      width: 100%;
-      height: 150px;
-      margin-top: calc(var(--gap-bottom) * 1px);
-    }
+        /* Fire Icons */
+        #ui-fires {
+            gap: calc(var(--icon-gap-fires) * 1px);
+        }
 
-    .control-screen {
-      position: relative;
-      height: 100%;
-      border-radius: 18px;
-      padding: 14px;
-      display: grid;
-      grid-template-columns: calc(var(--bot-a) * 1%) calc(var(--bot-b) * 1%);
-      gap: 14px;
-      align-items: center;
-      overflow: hidden;
-      background: linear-gradient(#1a1210, #0c0908);
-      box-shadow: 
-        inset 0 0 0 2px #1a1510,
-        inset 0 16px 30px rgba(0,0,0,.4),
-        0 3px 0 #0a0807;
-    }
+        .fire-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .matrix {
-      position: absolute;
-      inset: 6px;
-      border-radius: 14px;
-      opacity: .9;
-      mix-blend-mode: screen;
-      pointer-events: none;
-      background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
-    }
+        .fire-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .is-off {
-      display: none;
-    }
+        .fire-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #e6e6e6;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .power .ph-bold {
-      display: inline-block;
-    }
+        .fire-icon.active .fire-fill {
+            opacity: 1;
+        }
 
-    .power .ph-fill {
-      display: none;
-    }
+        /* Power-up Icons */
+        #ui-powers {
+            gap: calc(var(--icon-gap-powers) * 1px);
+        }
 
-    .power.power--armed .ph-bold {
-      display: none;
-    }
+        .power {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .power.power--armed .ph-fill {
-      display: inline-block;
-    }
+        .power .ph-bold {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .power .ph-crosshair-simple--filled {
-      display: none;
-    }
+        .power .ph-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #e6e6e6;
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .power.power--armed .ph-crosshair-simple--filled {
-      display: inline-block;
-    }
+        .power.active .ph-fill {
+            opacity: 1;
+        }
 
-    .slot-pause .line, .slot-flames .line, .slot-dots .line, .slot-bag .line {
-      font-size: 20px;
-    }
+        /* Blast SVG styling */
+        .blast-outline {
+            width: 1em;
+            height: 1em;
+            color: var(--primary-color);
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .slot-heart .line, .slot-shoes .line {
-      font-size: 20px;
-    }
-  </style>
-  <!-- Settings panel styles -->
-  <style>
-    :root { --settings-accent:#e6d7b6; --settings-bg:#211a15; --settings-surface:#332820; --settings-border:#3a2f27; --settings-text:#f0e6cd }
-    #settingsBtn { position:fixed; right:14px; bottom:14px; width:48px; height:48px; border-radius:12px; border:none; cursor:pointer; background:#1a1410; color:var(--settings-accent); box-shadow:inset 0 0 0 2px #2a2119, 0 6px 12px #000; font-size:22px; z-index:7000 }
-    #settingsPanel { position:fixed; right:14px; bottom:76px; width:min(420px,92vw); max-height:min(80vh,720px); background:var(--settings-bg); color:var(--settings-text); border:1px solid var(--settings-border); border-radius:12px; display:none; flex-direction:column; z-index:7050; box-shadow:0 16px 40px #000c }
-    #settingsPanel.open { display:flex }
-    #sHead { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--settings-border) }
-    #sTitle { font-weight:700; letter-spacing:.08em; font-size:13px }
-    #sBtns button { margin-left:8px; border:none; border-radius:8px; padding:6px 10px; background:var(--settings-surface); color:var(--settings-accent); cursor:pointer }
-    #sBody { overflow:auto; padding:12px }
-    .sg { margin-bottom:14px; border:1px solid var(--settings-border); border-radius:10px; padding:10px }
-    .sg h4 { margin:0 0 8px 0; font-size:12px; letter-spacing:.08em; color:var(--settings-text) }
-    .sr { display:grid; grid-template-columns:1fr 140px 70px 24px auto; gap:8px; align-items:center; margin:8px 0 }
-    .sr label { font-size:12px }
-    .sr input[type=range], .sr input[type=number], .sr input[type=text] { width:100% }
-    .sv { font:12px/1 monospace; text-align:right; opacity:.85 }
-    .lock-btn { background:none; border:none; cursor:pointer; color:#888; font-size:14px; padding:2px; border-radius:4px; transition:color 0.2s ease; }
-    .lock-btn:hover { color:var(--settings-accent); }
-    .lock-btn.locked { color:var(--primary-color); }
-    .locked-control { opacity:0.6; pointer-events:none; }
-    .element-lock-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin:6px 0 }
-    .element-lock-label { font-size:12px; }
-    #sFoot { display:flex; gap:10px; justify-content:space-between; align-items:center; padding:10px; border-top:1px solid var(--settings-border) }
-    #sFoot button { flex:1; border:none; background:var(--settings-border); color:var(--settings-accent); border-radius:10px; padding:10px; cursor:pointer; min-width:80px }
-    #copyMsg { font-size:11px; opacity:0; transition:opacity .3s ease; margin-left:10px; white-space:nowrap }
-    @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important } }
-  </style>
+        .blast-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1em;
+            height: 1em;
+            color: #e6e6e6;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .power.active .blast-fill {
+            opacity: 1;
+        }
+
+        .chip-btn {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            position: relative;
+            color: var(--primary-color);
+            font: inherit;
+            letter-spacing: .12em;
+            cursor: pointer;
+            min-height: 1em;
+            line-height: 1;
+            min-width: 6ch;
+        }
+
+        .chip-btn:focus-visible {
+            outline: none;
+            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
+        }
+
+        .chip-btn .word {
+            grid-area: 1/1;
+            display: block;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(6%);
+            transition: opacity .24s ease, transform .24s ease;
+        }
+
+        #btn-pause[data-state=playing] .word-pause {
+            opacity: 1;
+            transform: none;
+        }
+
+        #btn-pause[data-state=paused] .word-play {
+            opacity: 1;
+            transform: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chip-btn .word {
+                transition: none;
+            }
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
+            font-weight: 900;
+            letter-spacing: .14em;
+        }
+
+        .seven {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 20px;
+            color: var(--secondary-color);
+        }
+
+        .bottom {
+            width: calc(100% - calc(var(--global-pad-left) * 1px) - calc(var(--global-pad-right) * 1px));
+            height: 150px;
+            margin-top: calc(var(--gap-bottom) * 1px);
+            margin-left: calc(var(--global-pad-left) * 1px);
+            margin-right: calc(var(--global-pad-right) * 1px);
+        }
+
+        .control-screen {
+            position: relative;
+            height: 100%;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: calc(var(--bot-a) * 1%) calc(var(--bot-b) * 1%);
+            gap: 14px;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(#1a1210, #0c0908);
+            box-shadow: 
+                inset 0 0 0 2px #1a1510,
+                inset 0 16px 30px rgba(0,0,0,.4),
+                0 3px 0 #0a0807;
+        }
+
+        .matrix {
+            position: absolute;
+            inset: 6px;
+            border-radius: 14px;
+            opacity: .9;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
+        }
+
+        /* Element lock styles */
+        .element-locked {
+            pointer-events: none !important;
+            opacity: 0.7 !important;
+            position: relative;
+        }
+        
+        .element-locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        /* Settings panel styles */
+        :root { 
+            --settings-accent:#e6d7b6; 
+            --settings-bg:#211a15; 
+            --settings-surface:#332820; 
+            --settings-border:#3a2f27; 
+            --settings-text:#f0e6cd; 
+        }
+        
+        #settingsBtn { 
+            position: fixed; 
+            right: 20px; 
+            bottom: 20px; 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 12px; 
+            border: none; 
+            cursor: pointer; 
+            background: #1a1410; 
+            color: var(--settings-accent); 
+            box-shadow: inset 0 0 0 2px #2a2119, 0 6px 12px #000; 
+            font-size: 22px; 
+            z-index: 7000; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #settingsPanel { 
+            position: fixed; 
+            right: 20px; 
+            bottom: 80px; 
+            width: min(450px, 90vw); 
+            max-height: min(80vh, 700px); 
+            background: var(--settings-bg); 
+            color: var(--settings-text); 
+            border: 2px solid var(--settings-border); 
+            border-radius: 12px; 
+            display: none; 
+            flex-direction: column; 
+            z-index: 7050; 
+            box-shadow: 0 16px 40px #000c;
+        }
+        
+        #settingsPanel.open { 
+            display: flex !important; 
+        }
+        
+        #sHead { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 12px 16px; 
+            border-bottom: 1px solid var(--settings-border);
+            background: var(--settings-surface);
+        }
+        
+        #sTitle { 
+            font-weight: 700; 
+            letter-spacing: .08em; 
+            font-size: 14px;
+            color: var(--settings-accent);
+        }
+        
+        #sBtns { 
+            display: flex;
+            gap: 8px;
+        }
+        
+        #sBtns button { 
+            border: none; 
+            border-radius: 6px; 
+            padding: 6px 10px; 
+            background: var(--settings-border); 
+            color: var(--settings-accent); 
+            cursor: pointer;
+            font-size: 12px;
+            min-width: 30px;
+        }
+        
+        #sBody { 
+            overflow: auto; 
+            padding: 16px;
+            flex: 1;
+        }
+        
+        .sg { 
+            margin-bottom: 16px; 
+            border: 1px solid var(--settings-border); 
+            border-radius: 8px; 
+            padding: 12px;
+            background: var(--settings-surface);
+        }
+        
+        .sg h4 { 
+            margin: 0 0 12px 0; 
+            font-size: 13px; 
+            letter-spacing: .06em; 
+            color: var(--settings-accent);
+            border-bottom: 1px solid var(--settings-border);
+            padding-bottom: 6px;
+        }
+        
+        .sr { 
+            display: grid; 
+            grid-template-columns: 1fr 100px 50px 30px; 
+            gap: 8px; 
+            align-items: center; 
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        
+        .sr label { 
+            font-size: 11px;
+            color: var(--settings-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .sr input[type=range], .sr input[type=number], .sr input[type=text] { 
+            width: 100%;
+            background: var(--settings-bg);
+            border: 1px solid var(--settings-border);
+            border-radius: 4px;
+            padding: 4px 6px;
+            color: var(--settings-text);
+            font-size: 11px;
+        }
+        
+        .sr input[type=range] {
+            padding: 0;
+        }
+        
+        .sv { 
+            font: 10px/1 monospace; 
+            text-align: center; 
+            color: var(--settings-accent);
+            background: var(--settings-bg);
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid var(--settings-border);
+            min-width: 40px;
+        }
+        
+        .lock-btn { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: #888; 
+            font-size: 12px; 
+            padding: 4px; 
+            border-radius: 4px; 
+            transition: color 0.2s ease; 
+        }
+        
+        .lock-btn:hover { 
+            color: var(--settings-accent); 
+        }
+        
+        .lock-btn.locked { 
+            color: var(--primary-color); 
+        }
+        
+        .locked-control { 
+            opacity: 0.6; 
+            pointer-events: none; 
+        }
+        
+        .element-lock-row { 
+            display: grid; 
+            grid-template-columns: 1fr auto; 
+            gap: 8px; 
+            align-items: center; 
+            margin: 6px 0;
+            font-size: 11px;
+        }
+        
+        .element-lock-label { 
+            font-size: 11px;
+            color: var(--settings-text);
+        }
+        
+        #sFoot { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 16px; 
+            border-top: 1px solid var(--settings-border);
+            background: var(--settings-surface);
+        }
+        
+        #sFoot button { 
+            flex: 1; 
+            border: none; 
+            background: var(--settings-border); 
+            color: var(--settings-accent); 
+            border-radius: 6px; 
+            padding: 8px; 
+            cursor: pointer; 
+            min-width: 70px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        #copyMsg { 
+            font-size: 10px; 
+            opacity: 0; 
+            transition: opacity .3s ease; 
+            margin-left: 10px; 
+            white-space: nowrap;
+            color: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
-  <div class="fixed-container" id="mainContainer">
-    <div class="cabinet">
-      <div class="inner">
-        <div class="marquee" id="element-marquee">
-          <div class="led">
-            <div class="mq-wrap">
-              <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
-              <div class="line mq-sub">
-                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-                <span class="chip chip-time chip-box">00:00:0</span>
-                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-              </div>
+    <div class="fixed-container" id="mainContainer">
+        <div class="cabinet">
+            <div class="inner">
+                <div class="marquee" id="element-marquee">
+                    <div class="led">
+                        <div class="mq-wrap">
+                            <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+                            <div class="line mq-sub">
+                                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+                                <span class="chip chip-time chip-box">00:00:0</span>
+                                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider" id="element-divider"></div>
+
+                <div class="crt-wrap" id="element-crt">
+                    <div class="crt" aria-label="Screen placeholder"></div>
+                </div>
+
+                <div class="tabs" id="element-tabs">
+                    <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
+                    <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
+                    <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
+                </div>
+
+                <div class="hud" id="element-hud1">
+                    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
+                    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
+                    <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
+                </div>
+
+                <div class="hud2" id="element-hud2">
+                    <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
+                    <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+                        <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+                            <span class="word word-pause" aria-hidden="false">PAUSE</span>
+                            <span class="word word-play" aria-hidden="true">PLAY</span>
+                        </button>
+                    </div></div></div>
+                    <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
+                        <i class="ph-fill ph-package" aria-hidden="true"></i>
+                        <span style="opacity:.8;letter-spacing:.12em">x</span>
+                        <span class="seven" id="counter">000</span>
+                    </div></div></div>
+                </div>
+
+                <div class="bottom" id="element-bottom">
+                    <div class="control-screen" id="element-controls">
+                        <div class="matrix" aria-hidden="true"></div>
+                        <main class="control-ui" aria-label="Control surface">
+                            <section class="col-left"><div class="pad"></div></section>
+                            <section class="col-right"><div class="pad"></div></section>
+                        </main>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-
-        <div class="divider" id="element-divider"></div>
-
-        <div class="crt-wrap" id="element-crt">
-          <div class="crt" aria-label="Screen placeholder"></div>
-        </div>
-
-        <div class="tabs" id="element-tabs">
-          <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
-          <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
-          <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
-        </div>
-
-        <div class="hud" id="element-hud1">
-          <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
-          <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
-          <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
-        </div>
-
-        <div class="hud2" id="element-hud2">
-          <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
-          <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-            <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-              <span class="word word-pause" aria-hidden="false">PAUSE</span>
-              <span class="word word-play" aria-hidden="true">PLAY</span>
-            </button>
-          </div></div></div>
-          <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
-            <i class="ph-fill ph-package" aria-hidden="true"></i>
-            <span style="opacity:.8;letter-spacing:.12em">x</span>
-            <span class="seven" id="counter">000</span>
-          </div></div></div>
-        </div>
-
-        <div class="bottom" id="element-bottom">
-          <div class="control-screen" id="element-controls">
-            <div class="matrix" aria-hidden="true"></div>
-            <main class="control-ui" aria-label="Control surface">
-              <section class="col-left"><div class="pad"></div></section>
-              <section class="col-right"><div class="pad"></div></section>
-            </main>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Floating Settings Trigger and full Panel -->
-  <button id="settingsBtn" aria-label="Open settings">⚙️</button>
-  <div id="settingsPanel" role="dialog" aria-modal="false" aria-label="Settings" tabindex="-1">
-    <div id="sHead">
-      <div id="sTitle">SETTINGS</div>
-      <div id="sBtns">
-        <button id="sMin" type="button" title="Minimize">–</button>
-        <button id="sClose" type="button" title="Close">✕</button>
-      </div>
+    <!-- Floating Settings Trigger and full Panel -->
+    <button id="settingsBtn" aria-label="Open settings">⚙️</button>
+    <div id="settingsPanel" role="dialog" aria-modal="false" aria-label="Settings" tabindex="-1">
+        <div id="sHead">
+            <div id="sTitle">LAYOUT TUNER</div>
+            <div id="sBtns">
+                <button id="sMin" type="button" title="Minimize">–</button>
+                <button id="sClose" type="button" title="Close">✕</button>
+            </div>
+        </div>
+        <div id="sBody" aria-live="polite">
+            <!-- ELEMENT LOCKS -->
+            <div class="sg">
+                <h4>Element Locks</h4>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">Marquee</div>
+                    <button class="lock-btn" data-element="marquee" title="Lock Marquee">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">Divider</div>
+                    <button class="lock-btn" data-element="divider" title="Lock Divider">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">Screen (CRT)</div>
+                    <button class="lock-btn" data-element="crt" title="Lock Screen">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">Tab Bar</div>
+                    <button class="lock-btn" data-element="tabs" title="Lock Tab Bar">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">HUD Row 1</div>
+                    <button class="lock-btn" data-element="hud1" title="Lock HUD 1">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">HUD Row 2</div>
+                    <button class="lock-btn" data-element="hud2" title="Lock HUD 2">🔒</button>
+                </div>
+                <div class="element-lock-row">
+                    <div class="element-lock-label">Bottom Controls</div>
+                    <button class="lock-btn" data-element="bottom" title="Lock Bottom Controls">🔒</button>
+                </div>
+            </div>
+
+            <!-- GLOBAL SETTINGS -->
+            <div class="sg">
+                <h4>Global Settings</h4>
+                <div class="sr">
+                    <label for="v_scale">Cabinet Scale</label>
+                    <input id="v_scale" type="range" min="0.5" max="1.5" step="0.01" data-key="--cabinet-scale" value="1">
+                    <div class="sv" id="o_scale">1.00</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- GLOBAL HORIZONTAL PADDING -->
+            <div class="sg">
+                <h4>Global Horizontal Padding</h4>
+                <div class="sr">
+                    <label for="v_global_pad_l">Left Padding (px)</label>
+                    <input id="v_global_pad_l" type="range" min="0" max="40" step="1" data-key="--global-pad-left" value="0">
+                    <div class="sv" id="o_global_pad_l">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_global_pad_r">Right Padding (px)</label>
+                    <input id="v_global_pad_r" type="range" min="0" max="40" step="1" data-key="--global-pad-right" value="0">
+                    <div class="sv" id="o_global_pad_r">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- HUD AND ICON GAPS -->
+            <div class="sg">
+                <h4>HUD & Icon Gaps</h4>
+                <div class="sr">
+                    <label for="v_hud_gap">HUD Slot Gap (px)</label>
+                    <input id="v_hud_gap" type="range" min="0" max="30" step="1" data-key="--hud-gap" value="3">
+                    <div class="sv" id="o_hud_gap">3</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_icon_gap_sneakers">Sneakers Icon Gap (px)</label>
+                    <input id="v_icon_gap_sneakers" type="range" min="0" max="20" step="1" data-key="--icon-gap-sneakers" value="3">
+                    <div class="sv" id="o_icon_gap_sneakers">3</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_icon_gap_powers">Powers Icon Gap (px)</label>
+                    <input id="v_icon_gap_powers" type="range" min="0" max="20" step="1" data-key="--icon-gap-powers" value="7">
+                    <div class="sv" id="o_icon_gap_powers">7</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_icon_gap_fires">Fires Icon Gap (px)</label>
+                    <input id="v_icon_gap_fires" type="range" min="0" max="20" step="1" data-key="--icon-gap-fires" value="2">
+                    <div class="sv" id="o_icon_gap_fires">2</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- MARQUEE — TITLE -->
+            <div class="sg">
+                <h4>Marquee — Title</h4>
+                <div class="sr">
+                    <label for="v_mqtsize">Title Size (px)</label>
+                    <input id="v_mqtsize" type="range" min="16" max="64" step="1" data-key="--mq-title-size" value="43">
+                    <div class="sv" id="o_mqtsize">43</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_mqttrack">Title Tracking (em)</label>
+                    <input id="v_mqttrack" type="range" min="0" max="0.4" step="0.01" data-key="--mq-title-track" value="0">
+                    <div class="sv" id="o_mqttrack">0.00</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_mqtx">Title Offset X (px)</label>
+                    <input id="v_mqtx" type="range" min="-120" max="120" step="1" data-key="--mq-title-x" value="-1">
+                    <div class="sv" id="o_mqtx">-1</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_mqty">Title Offset Y (px)</label>
+                    <input id="v_mqty" type="range" min="-60" max="60" step="1" data-key="--mq-title-y" value="-2">
+                    <div class="sv" id="o_mqty">-2</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- MARQUEE — SUBTITLE -->
+            <div class="sg">
+                <h4>Marquee — Subtitle</h4>
+                <div class="sr">
+                    <label for="v_mqssize">Subtitle Size (px)</label>
+                    <input id="v_mqssize" type="range" min="6" max="16" step="1" data-key="--mq-sub-size" value="10">
+                    <div class="sv" id="o_mqssize">10</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_mqsx">Subtitle Offset X (px)</label>
+                    <input id="v_mqsx" type="range" min="-120" max="120" step="1" data-key="--mq-sub-x" value="-1">
+                    <div class="sv" id="o_mqsx">-1</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_mqsy">Subtitle Offset Y (px)</label>
+                    <input id="v_mqsy" type="range" min="-60" max="60" step="1" data-key="--mq-sub-y" value="-10">
+                    <div class="sv" id="o_mqsy">-10</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- MARQUEE — CHIPS -->
+            <div class="sg">
+                <h4>Marquee — Chips</h4>
+                <div class="sr">
+                    <label for="v_chipbr">Chip Border Radius (px)</label>
+                    <input id="v_chipbr" type="range" min="0" max="20" step="1" data-key="--chip-br" value="6">
+                    <div class="sv" id="o_chipbr">6</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_chippadx">Chip Padding X (px)</label>
+                    <input id="v_chippadx" type="range" min="0" max="20" step="1" data-key="--chip-pad-x" value="8">
+                    <div class="sv" id="o_chippadx">8</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_chippady">Chip Padding Y (px)</label>
+                    <input id="v_chippady" type="range" min="0" max="10" step="1" data-key="--chip-pad-y" value="1">
+                    <div class="sv" id="o_chippady">1</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_chipborder">Chip Border (px)</label>
+                    <input id="v_chipborder" type="range" min="0" max="6" step="1" data-key="--chip-border" value="2">
+                    <div class="sv" id="o_chipborder">2</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- SCREEN (CRT) -->
+            <div class="sg">
+                <h4>Screen (CRT)</h4>
+                <div class="sr">
+                    <label for="v_crtfr">Frame Ratio</label>
+                    <input id="v_crtfr" type="range" min="0.1" max="1" step="0.01" data-key="--crt-fr" value="0.4">
+                    <div class="sv" id="o_crtfr">0.40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_crtar">Aspect Ratio</label>
+                    <input id="v_crtar" type="range" min="0.5" max="1.5" step="0.01" data-key="--crt-ar" value="0.94">
+                    <div class="sv" id="o_crtar">0.94</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_crtr">Screen Radius (px)</label>
+                    <input id="v_crtr" type="range" min="0" max="30" step="1" data-key="--crt-r" value="11">
+                    <div class="sv" id="o_crtr">11</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_crtpad">Wrapper Padding (px)</label>
+                    <input id="v_crtpad" type="range" min="0" max="30" step="1" data-key="--crtwrap-pad" value="10">
+                    <div class="sv" id="o_crtpad">10</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- TAB BAR -->
+            <div class="sg">
+                <h4>Tab Bar</h4>
+                <div class="sr">
+                    <label for="v_tab_font_size">Tab Font Size (px)</label>
+                    <input id="v_tab_font_size" type="range" min="8" max="20" step="1" data-key="--tab-font-size" value="14">
+                    <div class="sv" id="o_tab_font_size">14</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_t1">Tab 1 Width (%)</label>
+                    <input id="v_t1" type="range" min="5" max="50" step="1" data-key="--t1" value="10">
+                    <div class="sv" id="o_t1">10</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_t2">Tab 2 Width (%)</label>
+                    <input id="v_t2" type="range" min="5" max="50" step="1" data-key="--t2" value="42">
+                    <div class="sv" id="o_t2">42</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_t3">Tab 3 Width (%)</label>
+                    <input id="v_t3" type="range" min="5" max="50" step="1" data-key="--t3" value="42">
+                    <div class="sv" id="o_t3">42</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_tabs_pad_l">Left Padding (px)</label>
+                    <input id="v_tabs_pad_l" type="range" min="0" max="30" step="1" data-key="--tabs-pad-x-left" value="8">
+                    <div class="sv" id="o_tabs_pad_l">8</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_tabs_pad_r">Right Padding (px)</label>
+                    <input id="v_tabs_pad_r" type="range" min="0" max="30" step="1" data-key="--tabs-pad-x-right" value="8">
+                    <div class="sv" id="o_tabs_pad_r">8</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- HUD ROW 1 -->
+            <div class="sg">
+                <h4>HUD Row 1</h4>
+                <div class="sr">
+                    <label for="v_h1a">Slot 1 Width (%)</label>
+                    <input id="v_h1a" type="range" min="5" max="50" step="1" data-key="--h1-a" value="40">
+                    <div class="sv" id="o_h1a">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_h1b">Slot 2 Width (%)</label>
+                    <input id="v_h1b" type="range" min="5" max="50" step="1" data-key="--h1-b" value="28">
+                    <div class="sv" id="o_h1b">28</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_h1c">Slot 3 Width (%)</label>
+                    <input id="v_h1c" type="range" min="5" max="50" step="1" data-key="--h1-c" value="40">
+                    <div class="sv" id="o_h1c">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_hud1_pad_l">Left Padding (px)</label>
+                    <input id="v_hud1_pad_l" type="range" min="0" max="30" step="1" data-key="--hud1-pad-x-left" value="0">
+                    <div class="sv" id="o_hud1_pad_l">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_hud1_pad_r">Right Padding (px)</label>
+                    <input id="v_hud1_pad_r" type="range" min="0" max="30" step="1" data-key="--hud1-pad-x-right" value="0">
+                    <div class="sv" id="o_hud1_pad_r">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- HUD ROW 2 -->
+            <div class="sg">
+                <h4>HUD Row 2</h4>
+                <div class="sr">
+                    <label for="v_h2a">Slot 1 Width (%)</label>
+                    <input id="v_h2a" type="range" min="5" max="50" step="1" data-key="--h2-a" value="40">
+                    <div class="sv" id="o_h2a">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_h2b">Slot 2 Width (%)</label>
+                    <input id="v_h2b" type="range" min="5" max="50" step="1" data-key="--h2-b" value="28">
+                    <div class="sv" id="o_h2b">28</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_h2c">Slot 3 Width (%)</label>
+                    <input id="v_h2c" type="range" min="5" max="50" step="1" data-key="--h2-c" value="40">
+                    <div class="sv" id="o_h2c">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_hud2_pad_l">Left Padding (px)</label>
+                    <input id="v_hud2_pad_l" type="range" min="0" max="30" step="1" data-key="--hud2-pad-x-left" value="0">
+                    <div class="sv" id="o_hud2_pad_l">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_hud2_pad_r">Right Padding (px)</label>
+                    <input id="v_hud2_pad_r" type="range" min="0" max="30" step="1" data-key="--hud2-pad-x-right" value="0">
+                    <div class="sv" id="o_hud2_pad_r">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- SLOT HEIGHTS -->
+            <div class="sg">
+                <h4>Slot Heights</h4>
+                <div class="sr">
+                    <label for="v_slotheart">Heart Slot (px)</label>
+                    <input id="v_slotheart" type="range" min="20" max="80" step="1" data-key="--slot-heart-h" value="41">
+                    <div class="sv" id="o_slotheart">41</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotshoes">Shoes Slot (px)</label>
+                    <input id="v_slotshoes" type="range" min="20" max="80" step="1" data-key="--slot-shoes-h" value="40">
+                    <div class="sv" id="o_slotshoes">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotdots">Dots Slot (px)</label>
+                    <input id="v_slotdots" type="range" min="20" max="80" step="1" data-key="--slot-dots-h" value="40">
+                    <div class="sv" id="o_slotdots">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotflames">Flames Slot (px)</label>
+                    <input id="v_slotflames" type="range" min="20" max="80" step="1" data-key="--slot-flames-h" value="40">
+                    <div class="sv" id="o_slotflames">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotpause">Pause Slot (px)</label>
+                    <input id="v_slotpause" type="range" min="20" max="80" step="1" data-key="--slot-pause-h" value="40">
+                    <div class="sv" id="o_slotpause">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotbag">Bag Slot (px)</label>
+                    <input id="v_slotbag" type="range" min="20" max="80" step="1" data-key="--slot-bag-h" value="40">
+                    <div class="sv" id="o_slotbag">40</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_slotpad">Slot Padding (px)</label>
+                    <input id="v_slotpad" type="range" min="0" max="20" step="1" data-key="--slot-pad" value="5">
+                    <div class="sv" id="o_slotpad">5</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- GAPS -->
+            <div class="sg">
+                <h4>Gaps</h4>
+                <div class="sr">
+                    <label for="v_gap_tabs">Tabs Margin Top (px)</label>
+                    <input id="v_gap_tabs" type="range" min="-40" max="40" step="1" data-key="--gap-tabs" value="-14">
+                    <div class="sv" id="o_gap_tabs">-14</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_gap_hud1">HUD1 Margin Top (px)</label>
+                    <input id="v_gap_hud1" type="range" min="-40" max="40" step="1" data-key="--gap-hud1" value="-16">
+                    <div class="sv" id="o_gap_hud1">-16</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_gap_hud2">HUD2 Margin Top (px)</label>
+                    <input id="v_gap_hud2" type="range" min="-40" max="40" step="1" data-key="--gap-hud2" value="-15">
+                    <div class="sv" id="o_gap_hud2">-15</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_gap_bottom">Bottom Margin Top (px)</label>
+                    <input id="v_gap_bottom" type="range" min="-40" max="40" step="1" data-key="--gap-bottom" value="-13">
+                    <div class="sv" id="o_gap_bottom">-13</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- BOTTOM CONTROL PANEL -->
+            <div class="sg">
+                <h4>Bottom Control Panel</h4>
+                <div class="sr">
+                    <label for="v_bot_a">Left Column Width (%)</label>
+                    <input id="v_bot_a" type="range" min="50" max="90" step="1" data-key="--bot-a" value="82">
+                    <div class="sv" id="o_bot_a">82</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_bot_b">Right Column Width (%)</label>
+                    <input id="v_bot_b" type="range" min="10" max="50" step="1" data-key="--bot-b" value="20">
+                    <div class="sv" id="o_bot_b">20</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- ICON COUNTS -->
+            <div class="sg">
+                <h4>Icon Counts</h4>
+                <div class="sr">
+                    <label for="in_hearts_fill">Hearts Fill</label>
+                    <input id="in_hearts_fill" type="range" min="0" max="10" step="1" data-key="--icons-hearts-fill" value="0">
+                    <div class="sv" id="o_hearts_fill">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_hearts_outline">Hearts Outline</label>
+                    <input id="in_hearts_outline" type="range" min="0" max="10" step="1" data-key="--icons-hearts-outline" value="3">
+                    <div class="sv" id="o_hearts_outline">3</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_shoes_fill">Shoes Fill</label>
+                    <input id="in_shoes_fill" type="range" min="0" max="10" step="1" data-key="--icons-shoes-fill" value="0">
+                    <div class="sv" id="o_shoes_fill">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_shoes_outline">Shoes Outline</label>
+                    <input id="in_shoes_outline" type="range" min="0" max="10" step="1" data-key="--icons-shoes-outline" value="5">
+                    <div class="sv" id="o_shoes_outline">5</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_powers_total">Powers Total</label>
+                    <input id="in_powers_total" type="range" min="0" max="10" step="1" data-key="--icons-powers-total" value="4">
+                    <div class="sv" id="o_powers_total">4</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_fires_fill">Fires Fill</label>
+                    <input id="in_fires_fill" type="range" min="0" max="10" step="1" data-key="--icons-fires-fill" value="0">
+                    <div class="sv" id="o_fires_fill">0</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="in_fires_outline">Fires Outline</label>
+                    <input id="in_fires_outline" type="range" min="0" max="10" step="1" data-key="--icons-fires-outline" value="5">
+                    <div class="sv" id="o_fires_outline">5</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+            <!-- TAB TEXT -->
+            <div class="sg">
+                <h4>Tab Text</h4>
+                <div class="sr">
+                    <label for="v_tab1_text">Tab 1 Text</label>
+                    <input id="v_tab1_text" type="text" data-key="--tab1-text" value="SNEAKERS">
+                    <div class="sv">-</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_tab2_text">Tab 2 Text</label>
+                    <input id="v_tab2_text" type="text" data-key="--tab2-text" value="LIFE">
+                    <div class="sv">-</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+                <div class="sr">
+                    <label for="v_tab3_text">Tab 3 Text</label>
+                    <input id="v_tab3_text" type="text" data-key="--tab3-text" value="POWER-UPS">
+                    <div class="sv">-</div>
+                    <button class="lock-btn" title="Lock this setting">🔒</button>
+                </div>
+            </div>
+
+        </div>
+        <div id="sFoot">
+            <button id="sCopy" type="button">Copy JSON</button>
+            <button id="sExport" type="button">Export JSON</button>
+            <button id="sReset" type="button">Reset</button>
+            <span id="copyMsg"></span>
+        </div>
     </div>
-    <div id="sBody" aria-live="polite">
-      <!-- ELEMENT LOCKS -->
-      <div class="sg"><h4>Element Locks</h4>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Marquee</div>
-          <button class="lock-btn" data-element="marquee" title="Lock Marquee">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Divider</div>
-          <button class="lock-btn" data-element="divider" title="Lock Divider">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Screen (CRT)</div>
-          <button class="lock-btn" data-element="crt" title="Lock Screen">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Tab Bar</div>
-          <button class="lock-btn" data-element="tabs" title="Lock Tab Bar">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">HUD Row 1</div>
-          <button class="lock-btn" data-element="hud1" title="Lock HUD 1">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">HUD Row 2</div>
-          <button class="lock-btn" data-element="hud2" title="Lock HUD 2">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Bottom Controls</div>
-          <button class="lock-btn" data-element="bottom" title="Lock Bottom Controls">🔒</button>
-        </div>
-        <div class="element-lock-row">
-          <div class="element-lock-label">Control Panel</div>
-          <button class="lock-btn" data-element="controls" title="Lock Control Panel">🔒</button>
-        </div>
-      </div>
 
-      <!-- GLOBAL SETTINGS -->
-      <div class="sg"><h4>Global Settings</h4>
-        <div class="sr">
-          <label for="v_scale">Cabinet Scale</label>
-          <input id="v_scale" type="range" min="0.85" max="1.15" step="0.01" data-key="--cabinet-scale">
-          <div class="sv" id="o_scale"></div>
-          <button class="lock-btn" title="Lock this setting">🔒</button>
-          <div></div>
-        </div>
-      </div>
-      <!-- MARQUEE — TITLE -->
-      <div class="sg"><h4>Marquee — Title</h4>
-        <div class="sr"><label for="v_mqtsize">Title Size (px)</label><input id="v_mqtsize" type="range" min="16" max="64" step="1" data-key="--mq-title-size"><div class="sv" id="o_mqtsize"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_mqttrack">Title Tracking (em)</label><input id="v_mqttrack" type="range" min="0" max="0.4" step="0.01" data-key="--mq-title-track"><div class="sv" id="o_mqttrack"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_mqtx">Title Offset X (px)</label><input id="v_mqtx" type="range" min="-120" max="120" step="1" data-key="--mq-title-x"><div class="sv" id="o_mqtx"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_mqty">Title Offset Y (px)</label><input id="v_mqty" type="range" min="-60" max="60" step="1" data-key="--mq-title-y"><div class="sv" id="o_mqty"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- MARQUEE — SUBLINE -->
-      <div class="sg"><h4>Marquee — Subline</h4>
-        <div class="sr"><label for="v_mqssize">Subline Size (px)</label><input id="v_mqssize" type="range" min="10" max="32" step="1" data-key="--mq-sub-size"><div class="sv" id="o_mqssize"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_mqsx">Subline Offset X (px)</label><input id="v_mqsx" type="range" min="-160" max="160" step="1" data-key="--mq-sub-x"><div class="sv" id="o_mqsx"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_mqsy">Subline Offset Y (px)</label><input id="v_mqsy" type="range" min="-80" max="80" step="1" data-key="--mq-sub-y"><div class="sv" id="o_mqsy"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- MARQUEE — CHIP BOXES -->
-      <div class="sg"><h4>Marquee — Chip Boxes</h4>
-        <div class="sr"><label for="v_chipbr">Corner Radius (px)</label><input id="v_chipbr" type="range" min="4" max="20" step="1" data-key="--chip-br"><div class="sv" id="o_chipbr"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_chippadx">Padding X (px)</label><input id="v_chippadx" type="range" min="6" max="24" step="1" data-key="--chip-pad-x"><div class="sv" id="o_chippadx"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_chippady">Padding Y (px)</label><input id="v_chippady" type="range" min="1" max="10" step="1" data-key="--chip-pad-y"><div class="sv" id="o_chippady"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_chipborder">Border Width (px)</label><input id="v_chipborder" type="range" min="1" max="4" step="1" data-key="--chip-border"><div class="sv" id="o_chipborder"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- SCREEN (CRT) -->
-      <div class="sg"><h4>Screen (CRT)</h4>
-        <div class="sr"><label for="v_crtfr">Row Height (fr)</label><input id="v_crtfr" type="range" min="0.4" max="2.5" step="0.05" data-key="--crt-fr"><div class="sv" id="o_crtfr"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_crtar">Aspect Ratio (W/H)</label><input id="v_crtar" type="range" min="0.8" max="2.5" step="0.01" data-key="--crt-ar"><div class="sv" id="o_crtar"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_crtr">Corner Radius (px)</label><input id="v_crtr" type="range" min="10" max="40" step="1" data-key="--crt-r"><div class="sv" id="o_crtr"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_crtpad">Bezel Padding (px)</label><input id="v_crtpad" type="range" min="6" max="24" step="1" data-key="--crtwrap-pad"><div class="sv" id="o_crtpad"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- TAB BAR — CONTENT -->
-      <div class="sg"><h4>Tab Bar — Content</h4>
-        <div class="sr"><label for="v_tab_font_size">Tab Font Size (px)</label><input id="v_tab_font_size" type="range" min="10" max="32" step="1" data-key="--tab-font-size"><div class="sv" id="o_tab_font_size"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr" style="grid-template-columns:100px 1fr 70px 24px 0"><label for="v_tab1_text">Tab 1 Text</label><input id="v_tab1_text" type="text" data-key="--tab1-text"><div></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr" style="grid-template-columns:100px 1fr 70px 24px 0"><label for="v_tab2_text">Tab 2 Text</label><input id="v_tab2_text" type="text" data-key="--tab2-text"><div></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr" style="grid-template-columns:100px 1fr 70px 24px 0"><label for="v_tab3_text">Tab 3 Text</label><input id="v_tab3_text" type="text" data-key="--tab3-text"><div></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- TAB BAR — LAYOUT -->
-      <div class="sg"><h4>Tab Bar — Layout</h4>
-        <div class="sr"><label for="v_t1">LIFE %</label><input id="v_t1" type="range" min="10" max="70" step="1" data-key="--t1"><div class="sv" id="o_t1"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_t2">SNEAKERS %</label><input id="v_t2" type="range" min="10" max="70" step="1" data-key="--t2"><div class="sv" id="o_t2"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_t3">POWR-UPS %</label><input id="v_t3" type="range" min="10" max="70" step="1" data-key="--t3"><div class="sv" id="o_t3"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- HUD ROW 1 — LAYOUT -->
-      <div class="sg"><h4>HUD Row 1 — Layout</h4>
-        <div class="sr"><label for="v_h1a">Sneakers %</label><input id="v_h1a" type="range" min="10" max="70" step="1" data-key="--h1-a"><div class="sv" id="o_h1a"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_h1b">Hearts %</label><input id="v_h1b" type="range" min="10" max="70" step="1" data-key="--h1-b"><div class="sv" id="o_h1b"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_h1c">Powers %</label><input id="v_h1c" type="range" min="10" max="70" step="1" data-key="--h1-c"><div class="sv" id="o_h1c"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- HUD ROW 2 — LAYOUT -->
-      <div class="sg"><h4>HUD Row 2 — Layout</h4>
-        <div class="sr"><label for="v_h2a">Flames %</label><input id="v_h2a" type="range" min="10" max="70" step="1" data-key="--h2-a"><div class="sv" id="o_h2a"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_h2b">Pause %</label><input id="v_h2b" type="range" min="10" max="70" step="1" data-key="--h2-b"><div class="sv" id="o_h2b"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_h2c">Box %</label><input id="v_h2c" type="range" min="10" max="70" step="1" data-key="--h2-c"><div class="sv" id="o_h2c"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- SECTION GAPS -->
-      <div class="sg"><h4>Section Gaps</h4>
-        <div class="sr"><label for="v_gap_tabs">Above Tab Bar (px)</label><input id="v_gap_tabs" type="range" min="-40" max="40" step="1" data-key="--gap-tabs"><div class="sv" id="o_gap_tabs"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_gap_hud1">Above HUD 1 (px)</label><input id="v_gap_hud1" type="range" min="-40" max="40" step="1" data-key="--gap-hud1"><div class="sv" id="o_gap_hud1"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_gap_hud2">Above HUD 2 (px)</label><input id="v_gap_hud2" type="range" min="-40" max="40" step="1" data-key="--gap-hud2"><div class="sv" id="o_gap_hud2"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_gap_bottom">Above Bottom (px)</label><input id="v_gap_bottom" type="range" min="-40" max="0" step="1" data-key="--gap-bottom"><div class="sv" id="o_gap_bottom"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- HORIZONTAL PADDING -->
-      <div class="sg"><h4>Horizontal Padding</h4>
-        <div class="sr"><label for="v_tabs_pad_l">Tabs Left (px)</label><input id="v_tabs_pad_l" type="range" min="0" max="40" step="1" data-key="--tabs-pad-x-left"><div class="sv" id="o_tabs_pad_l"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_tabs_pad_r">Tabs Right (px)</label><input id="v_tabs_pad_r" type="range" min="0" max="40" step="1" data-key="--tabs-pad-x-right"><div class="sv" id="o_tabs_pad_r"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_hud1_pad_l">HUD1 Left (px)</label><input id="v_hud1_pad_l" type="range" min="0" max="40" step="1" data-key="--hud1-pad-x-left"><div class="sv" id="o_hud1_pad_l"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_hud1_pad_r">HUD1 Right (px)</label><input id="v_hud1_pad_r" type="range" min="0" max="40" step="1" data-key="--hud1-pad-x-right"><div class="sv" id="o_hud1_pad_r"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_hud2_pad_l">HUD2 Left (px)</label><input id="v_hud2_pad_l" type="range" min="0" max="40" step="1" data-key="--hud2-pad-x-left"><div class="sv" id="o_hud2_pad_l"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_hud2_pad_r">HUD2 Right (px)</label><input id="v_hud2_pad_r" type="range" min="0" max="40" step="1" data-key="--hud2-pad-x-right"><div class="sv" id="o_hud2_pad_r"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- SLOT HEIGHTS (px) -->
-      <div class="sg"><h4>Slot Heights (px)</h4>
-        <div class="sr"><label for="v_slotheart">Sneakers</label><input id="v_slotheart" type="range" min="36" max="110" step="1" data-key="--slot-heart-h"><div class="sv" id="o_slotheart"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotshoes">Hearts</label><input id="v_slotshoes" type="range" min="36" max="110" step="1" data-key="--slot-shoes-h"><div class="sv" id="o_slotshoes"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotdots">Powers</label><input id="v_slotdots" type="range" min="36" max="110" step="1" data-key="--slot-dots-h"><div class="sv" id="o_slotdots"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotbag">Box</label><input id="v_slotbag" type="range" min="36" max="110" step="1" data-key="--slot-bag-h"><div class="sv" id="o_slotbag"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotflames">Flames</label><input id="v_slotflames" type="range" min="36" max="110" step="1" data-key="--slot-flames-h"><div class="sv" id="o_slotflames"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotpause">Pause</label><input id="v_slotpause" type="range" min="36" max="110" step="1" data-key="--slot-pause-h"><div class="sv" id="o_slotpause"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="v_slotpad">Slot Padding</label><input id="v_slotpad" type="range" min="6" max="16" step="1" data-key="--slot-pad"><div class="sv" id="o_slotpad"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-      <!-- HUD ICON COUNTS (readouts only) -->
-      <div class="sg"><h4>HUD Icon Counts</h4>
-        <div class="sr" style="grid-template-columns:1fr auto 24px 0 0"><label>Sneakers</label><div class="sv" id="o_count_hearts"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div><div></div></div>
-        <div class="sr" style="grid-template-columns:1fr auto 24px 0 0"><label>Hearts</label><div class="sv" id="o_count_shoes"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div><div></div></div>
-        <div class="sr" style="grid-template-columns:1fr auto 24px 0 0"><label>Power-ups</label><div class="sv" id="o_count_powers"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div><div></div></div>
-        <div class="sr" style="grid-template-columns:1fr auto 24px 0 0"><label>Fires</label><div class="sv" id="o_count_fires"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div><div></div></div>
-      </div>
-      <!-- ICON AMOUNTS -->
-      <div class="sg"><h4>Icon Amounts</h4>
-        <div class="sr"><label for="in_hearts_fill">Sneakers — filled</label><input id="in_hearts_fill" type="number" min="0" max="6" step="1" data-key="--icons-hearts-fill"><div class="sv" id="tv_hearts_fill"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_hearts_outline">Sneakers — outline</label><input id="in_hearts_outline" type="number" min="0" max="6" step="1" data-key="--icons-hearts-outline"><div class="sv" id="tv_hearts_outline"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_shoes_fill">Hearts — filled</label><input id="in_shoes_fill" type="number" min="0" max="6" step="1" data-key="--icons-shoes-fill"><div class="sv" id="tv_shoes_fill"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_shoes_outline">Hearts — outline</label><input id="in_shoes_outline" type="number" min="0" max="6" step="1" data-key="--icons-shoes-outline"><div class="sv" id="tv_shoes_outline"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_powers_total">Power-ups — total</label><input id="in_powers_total" type="number" min="0" max="4" step="1" data-key="--icons-powers-total"><div class="sv" id="tv_powers_total"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_fires_fill">Fires — filled</label><input id="in_fires_fill" type="number" min="0" max="10" step="1" data-key="--icons-fires-fill"><div class="sv" id="tv_fires_fill"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-        <div class="sr"><label for="in_fires_outline">Fires — outline</label><input id="in_fires_outline" type="number" min="0" max="10" step="1" data-key="--icons-fires-outline"><div class="sv" id="tv_fires_outline"></div><button class="lock-btn" title="Lock this setting">🔒</button><div></div></div>
-      </div>
-    </div>
-    <div id="sFoot">
-      <button id="sCopy" type="button">Copy JSON</button>
-      <button id="sExport" type="button">Export JSON</button>
-      <button id="sReset" type="button">Reset</button>
-      <span id="copyMsg"></span>
-    </div>
-  </div>
+    <!-- ============================================= -->
+    <!-- MODULAR JAVASCRIPT - ORGANIZED INTO SECTIONS -->
+    <!-- ============================================= -->
 
-  <script>
-    // Make icon rendering functions globally available
-    window.renderSneakers = function(fill, outline){
-      const r = document.getElementById('ui-sneakers'); if(!r) return; r.innerHTML='';
-      // Visible state
-      for(let i=0;i<outline;i++) r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>');
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>');
-      // Hidden alternates for later toggling
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-sneaker sneaker-outline is-off" aria-hidden="true"></i>');
-      for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-sneaker sneaker-fill is-off" aria-hidden="true"></i>');
-    };
-
-    window.renderHearts = function(fill, outline){
-      const r = document.getElementById('ui-hearts'); if(!r) return; r.innerHTML='';
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart" aria-hidden="true"></i>');
-      for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>');
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-heart heart-outline is-off" aria-hidden="true"></i>');
-      for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-heart is-off" aria-hidden="true"></i>');
-    };
-
-    window.renderPowers = function(total){
-      const r = document.getElementById('ui-powers'); if(!r) return; r.innerHTML='';
-      const defs = [
-        { bold:'ph-timer', fill:'ph-timer' },
-        { bold:'ph-shield', fill:'ph-shield' },
-        { bold:'ph-magnet', fill:'ph-magnet' },
-        { bold:'ph-crosshair-simple', fill:'svg' }
-      ];
-      for(let i=0;i<total;i++){
-        const x = defs[i % defs.length];
-        if(x.fill==='svg'){
-          r.insertAdjacentHTML('beforeend','<span class="power power--idle">\
-    <i class="ph-bold '+x.bold+'" aria-hidden="true"></i>\
-    <svg class="ph-fill ph-crosshair-simple--filled is-off" viewBox="0 0 256 256" width="1em" height="1em" fill="currentColor" aria-hidden="true">\
-    <circle cx="128" cy="128" r="28"></circle>\
-    <path d="M128 32v32M128 192v32M32 128h32M192 128h32" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>\
-    </svg>\
-    </span>');
-        } else {
-          r.insertAdjacentHTML('beforeend','<span class="power power--idle">\
-    <i class="ph-bold '+x.bold+'" aria-hidden="true"></i>\
-    <i class="ph-fill '+x.fill+' is-off" aria-hidden="true"></i>\
-    </span>');
-        }
-      }
-    };
-
-    window.renderFires = function(fill, outline){
-      const r = document.getElementById('ui-fires'); if(!r) return; r.innerHTML='';
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire" aria-hidden="true"></i>');
-      for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire" aria-hidden="true"></i>');
-      for(let i=0;i<fill;i++)   r.insertAdjacentHTML('beforeend','<i class="ph-bold ph-fire is-off" aria-hidden="true"></i>');
-      for(let i=0;i<outline;i++)r.insertAdjacentHTML('beforeend','<i class="ph-fill ph-fire is-off" aria-hidden="true"></i>');
-    };
-
-    // Your preferred layout as default values
-    const defaultSettings = {
-      "v_scale": "1",
-      "v_mqtsize": "43",
-      "v_mqttrack": "0",
-      "v_mqtx": "-1",
-      "v_mqty": "0",
-      "v_mqssize": "10",
-      "v_mqsx": "-1",
-      "v_mqsy": "-5",
-      "v_chipbr": "6",
-      "v_chippadx": "8",
-      "v_chippady": "1",
-      "v_chipborder": "1",
-      "v_crtfr": "0.4",
-      "v_crtar": "0.94",
-      "v_crtr": "11",
-      "v_crtpad": "10",
-      "v_tab_font_size": "13",
-      "v_tab1_text": "SNEAKERS",
-      "v_tab2_text": "LIFE",
-      "v_tab3_text": "POWER-UPS",
-      "v_t1": "24",
-      "v_t2": "42",
-      "v_t3": "42",
-      "v_h1a": "40",
-      "v_h1b": "20",
-      "v_h1c": "40",
-      "v_h2a": "40",
-      "v_h2b": "20",
-      "v_h2c": "40",
-      "v_gap_tabs": "-13",
-      "v_gap_hud1": "-16",
-      "v_gap_hud2": "-13",
-      "v_gap_bottom": "-12",
-      "v_tabs_pad_l": "12",
-      "v_tabs_pad_r": "12",
-      "v_hud1_pad_l": "0",
-      "v_hud1_pad_r": "0",
-      "v_hud2_pad_l": "0",
-      "v_hud2_pad_r": "0",
-      "v_slotheart": "46",
-      "v_slotshoes": "46",
-      "v_slotdots": "46",
-      "v_slotbag": "46",
-      "v_slotflames": "46",
-      "v_slotpause": "46",
-      "v_slotpad": "6",
-      "in_hearts_fill": "4",
-      "in_hearts_outline": "1",
-      "in_shoes_fill": "2",
-      "in_shoes_outline": "1",
-      "in_powers_total": "4",
-      "in_fires_fill": "3",
-      "in_fires_outline": "2"
-    };
-
-    // Initialize all settings with your preferred values
-    function initializeAllSettings() {
-      const inputs = document.querySelectorAll('#sBody input');
-      
-      inputs.forEach(input => {
-        const id = input.id;
-        if (defaultSettings[id] !== undefined) {
-          input.value = defaultSettings[id];
-          
-          // Update the display
-          const out = document.getElementById(
-            (id.startsWith('v_') ? 'o_' : id.startsWith('in_') ? 'tv_' : 'sv_') + 
-            id.replace(/^v_|^in_/, '')
-          );
-          if (out) out.textContent = defaultSettings[id];
-        }
-      });
-      
-      // Apply all default values to CSS
-      applyDefaultSettings();
-    }
-
-    // Apply default settings to CSS variables
-    function applyDefaultSettings() {
-      const root = document.documentElement;
-      
-      // Apply all default values
-      Object.keys(defaultSettings).forEach(inputId => {
-        const input = document.getElementById(inputId);
-        if (input && input.dataset.key) {
-          const key = input.dataset.key;
-          const value = defaultSettings[inputId];
-          setVar(key, value);
-        }
-      });
-    }
-
-    // Auto-scale the container to fit the viewport
-    function scaleContainer() {
-      const container = document.querySelector('.fixed-container');
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      // Calculate scale to fit both width and height with some padding
-      const scaleX = (viewportWidth - 40) / 430; // 20px padding on each side
-      const scaleY = (viewportHeight - 40) / 900; // 20px padding on each side
-      const base = Math.min(scaleX, scaleY, 1); // Don't scale up beyond 100%
-      
-      const mult = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cabinet-scale')||'1');
-      const finalScale = Math.max(0.5, Math.min(base * (isNaN(mult)?1:mult), 1.25));
-      
-      container.style.transform = `scale(${finalScale})`;
-    }
-
-    // Initial scale
-    scaleContainer();
-    
-    // Rescale on window resize
-    window.addEventListener('resize', scaleContainer);
-    window.addEventListener('orientationchange', scaleContainer);
-
-    // Interface-only render. Hidden alternates present for later use. No persistence.
-    (function(){
-      const $ = (id) => document.getElementById(id);
-      const css = getComputedStyle(document.documentElement);
-      const NUM = (name, d=0) => parseInt(css.getPropertyValue(name).trim()||d,10);
-
-      const counts = {
-        sneakersFill: NUM('--icons-hearts-fill', 4),
-        sneakersOutline: NUM('--icons-hearts-outline', 1),
-        heartsFill: NUM('--icons-shoes-fill', 2),
-        heartsOutline: NUM('--icons-shoes-outline', 1),
-        powersTotal: NUM('--icons-powers-total', 4),
-        firesFill: NUM('--icons-fires-fill', 3),
-        firesOutline: NUM('--icons-fires-outline', 2)
-      };
-
-      function initPause(){
-        const pb = document.getElementById('btn-pause'); if(!pb) return;
-        const set = (st)=>{
-          pb.dataset.state = st;
-          const paused = st === 'paused';
-          pb.setAttribute('aria-pressed', String(paused));
-          pb.setAttribute('aria-label', paused ? 'Play' : 'Pause');
-          const wPause = pb.querySelector('.word-pause');
-          const wPlay = pb.querySelector('.word-play');
-          if(wPause && wPlay){
-            wPause.setAttribute('aria-hidden', String(paused));
-            wPlay.setAttribute('aria-hidden', String(!paused));
-          }
-        };
-        set('playing');
-        pb.addEventListener('click',()=> set(pb.dataset.state==='playing'?'paused':'playing'));
-        pb.addEventListener('keydown',(e)=>{
-          if(e.key==='Enter' || e.key===' '){ e.preventDefault(); pb.click(); }
-        });
-      }
-
-      // Render once using CSS-provided counts
-      window.renderSneakers(counts.sneakersFill, counts.sneakersOutline);
-      window.renderHearts(counts.heartsFill, counts.heartsOutline);
-      window.renderPowers(counts.powersTotal);
-      window.renderFires(counts.firesFill, counts.firesOutline);
-      initPause();
-
-      // Initialize settings panel with your preferred values
-      initializeAllSettings();
-    })();
-  </script>
-
-  <!-- ENHANCED ELEMENT LOCKING SYSTEM - TRUE LAYOUT ISOLATION -->
-  <script>
-    // Enhanced Element Locking System - TRUE LAYOUT ISOLATION
-    (function(){
-      // Track which elements are locked
-      const lockedElements = new Set();
-      
-      // Store original values for locked elements
-      const lockedElementValues = new Map();
-      
-      // Map elements to their related CSS variables
-      const elementVariables = {
-        'marquee': [
-          '--mq-title-size', '--mq-title-track', '--mq-title-x', '--mq-title-y',
-          '--mq-sub-size', '--mq-sub-x', '--mq-sub-y', '--chip-br', '--chip-pad-x', 
-          '--chip-pad-y', '--chip-border', '--marquee-h'
-        ],
-        'divider': [
-          '--gap-tabs'
-        ],
-        'crt': [
-          '--crt-fr', '--crt-ar', '--crt-r', '--crtwrap-pad', '--gap-hud1'
-        ],
-        'tabs': [
-          '--tab-font-size', '--t1', '--t2', '--t3', '--tabs-pad-x-left', 
-          '--tabs-pad-x-right', '--tabs-h', '--gap-hud2'
-        ],
-        'hud1': [
-          '--h1-a', '--h1-b', '--h1-c', '--hud1-pad-x-left', '--hud1-pad-x-right',
-          '--slot-heart-h', '--slot-shoes-h', '--slot-dots-h', '--slot-pad'
-        ],
-        'hud2': [
-          '--h2-a', '--h2-b', '--h2-c', '--hud2-pad-x-left', '--hud2-pad-x-right',
-          '--slot-flames-h', '--slot-pause-h', '--slot-bag-h', '--slot-pad'
-        ],
-        'bottom': [
-          '--bottom-h', '--bot-a', '--bot-b', '--gap-bottom'
-        ],
-        'controls': [
-          '--bot-a', '--bot-b', '--bottom-h'
-        ]
-      };
-
-      // Store original values when locking
-      function storeLockedValues() {
-        const root = document.documentElement;
-        lockedElements.forEach(element => {
-          const vars = elementVariables[element];
-          if (!vars) return;
-          
-          const values = {};
-          vars.forEach(varName => {
-            const computedValue = getComputedStyle(root).getPropertyValue(varName).trim();
-            values[varName] = computedValue;
-          });
-          lockedElementValues.set(element, values);
-        });
-      }
-
-      // Restore locked values when other settings change
-      function restoreLockedValues() {
-        const root = document.documentElement;
-        lockedElements.forEach(element => {
-          const values = lockedElementValues.get(element);
-          if (!values) return;
-          
-          Object.entries(values).forEach(([varName, value]) => {
-            root.style.setProperty(varName, value);
-          });
-        });
-      }
-
-      // Element Lock functionality
-      function setupElementLocks() {
-        const elementLockButtons = document.querySelectorAll('.lock-btn[data-element]');
-        elementLockButtons.forEach(btn => {
-          btn.addEventListener('click', function() {
-            const elementId = this.dataset.element;
-            const isLocked = this.classList.contains('locked');
-            
-            if (isLocked) {
-              // Unlock
-              this.classList.remove('locked');
-              this.innerHTML = '🔒';
-              lockedElements.delete(elementId);
-              lockedElementValues.delete(elementId);
-            } else {
-              // Lock
-              this.classList.add('locked');
-              this.innerHTML = '🔐';
-              lockedElements.add(elementId);
-              storeLockedValues(); // Capture current values
+    <!-- 1. ICON MANAGER - Handles all icon rendering -->
+    <script>
+        class IconManager {
+            static renderSneakers(fill, outline) {
+                const container = document.getElementById('ui-sneakers');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="sneaker-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
             }
             
-            updateLockedControls();
-            updateElementLockVisuals();
-          });
-        });
-      }
-
-      // Update visual lock state on elements
-      function updateElementLockVisuals() {
-        const elements = {
-          'marquee': document.getElementById('element-marquee'),
-          'divider': document.getElementById('element-divider'),
-          'crt': document.getElementById('element-crt'),
-          'tabs': document.getElementById('element-tabs'),
-          'hud1': document.getElementById('element-hud1'),
-          'hud2': document.getElementById('element-hud2'),
-          'bottom': document.getElementById('element-bottom'),
-          'controls': document.getElementById('element-controls')
-        };
-
-        Object.entries(elements).forEach(([elementId, element]) => {
-          if (element) {
-            if (lockedElements.has(elementId)) {
-              element.classList.add('element-locked');
-            } else {
-              element.classList.remove('element-locked');
+            static renderHearts(fill, outline) {
+                const container = document.getElementById('ui-hearts');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="heart-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
             }
-          }
-        });
-      }
-
-      // Disable controls for locked elements
-      function updateLockedControls() {
-        const inputs = document.querySelectorAll('#sBody input');
-        
-        inputs.forEach(input => {
-          const key = input.dataset.key;
-          if (!key) return;
-          
-          // Check if this variable belongs to a locked element
-          let isLocked = false;
-          for (const [element, vars] of Object.entries(elementVariables)) {
-            if (lockedElements.has(element) && vars.includes(key)) {
-              isLocked = true;
-              break;
+            
+            static renderFires(fill, outline) {
+                const container = document.getElementById('ui-fires');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="fire-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
             }
-          }
-          
-          // Also check individual setting locks
-          const row = input.closest('.sr');
-          const individualLock = row?.querySelector('.lock-btn:not([data-element])');
-          const individuallyLocked = individualLock && individualLock.classList.contains('locked');
-          
-          if (isLocked || individuallyLocked) {
-            input.classList.add('locked-control');
-            input.disabled = true;
-          } else {
-            input.classList.remove('locked-control');
-            input.disabled = false;
-          }
+            
+            static renderPowers(total, active) {
+                const container = document.getElementById('ui-powers');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                const powerTypes = [
+                    { bold: 'ph-timer', fill: 'ph-timer' },
+                    { bold: 'ph-shield', fill: 'ph-shield' },
+                    { bold: 'ph-magnet', fill: 'ph-magnet' },
+                    { bold: 'ph-crosshair-simple', fill: 'blast' }
+                ];
+                
+                for (let i = 0; i < total; i++) {
+                    const powerType = powerTypes[i % powerTypes.length];
+                    const isActive = i < active;
+                    
+                    if (powerType.fill === 'blast') {
+                        container.innerHTML += `
+                            <div class="power ${isActive ? 'active' : ''}">
+                                <!-- Properly scaled blast icon -->
+                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML += `
+                            <div class="power ${isActive ? 'active' : ''}">
+                                <i class="ph-bold ${powerType.bold}" aria-hidden="true"></i>
+                                <i class="ph-fill ${powerType.fill}" aria-hidden="true"></i>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            static updateAllIcons() {
+                const heartsFill = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-hearts-fill')) || 0;
+                const heartsOutline = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-hearts-outline')) || 3;
+                const shoesFill = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-shoes-fill')) || 0;
+                const shoesOutline = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-shoes-outline')) || 5;
+                const powersTotal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-powers-total')) || 4;
+                const powersActive = powersTotal; // All powers active for now
+                const firesFill = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-fires-fill')) || 0;
+                const firesOutline = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--icons-fires-outline')) || 5;
+                
+                IconManager.renderSneakers(shoesFill, shoesOutline);
+                IconManager.renderHearts(heartsFill, heartsOutline);
+                IconManager.renderPowers(powersTotal, powersActive);
+                IconManager.renderFires(firesFill, firesOutline);
+            }
+        }
+    </script>
+
+    <!-- 2. HUD MANAGER - Handles HUD rows and layout -->
+    <script>
+        class HUDManager {
+            static initialize() {
+                // Setup HUD event listeners
+                const pauseBtn = document.getElementById('btn-pause');
+                if (pauseBtn) {
+                    pauseBtn.addEventListener('click', function() {
+                        const isPlaying = this.dataset.state === 'playing';
+                        this.dataset.state = isPlaying ? 'paused' : 'playing';
+                    });
+                }
+            }
+            
+            static updateTabText() {
+                const tab1 = getComputedStyle(document.documentElement).getPropertyValue('--tab1-text').replace(/"/g, '') || 'SNEAKERS';
+                const tab2 = getComputedStyle(document.documentElement).getPropertyValue('--tab2-text').replace(/"/g, '') || 'LIFE';
+                const tab3 = getComputedStyle(document.documentElement).getPropertyValue('--tab3-text').replace(/"/g, '') || 'POWER-UPS';
+                
+                const tabs = document.querySelectorAll('.tabs .tab .line');
+                if (tabs[0]) tabs[0].textContent = tab1;
+                if (tabs[1]) tabs[1].textContent = tab2;
+                if (tabs[2]) tabs[2].textContent = tab3;
+            }
+        }
+    </script>
+
+    <!-- 3. SCALING MANAGER - Handles cabinet scaling and responsiveness -->
+    <script>
+        class ScalingManager {
+            static initialize() {
+                ScalingManager.scaleContainer();
+                window.addEventListener('resize', ScalingManager.scaleContainer);
+            }
+            
+            static scaleContainer() {
+                const container = document.querySelector('.fixed-container');
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                const scaleX = (viewportWidth - 40) / 430;
+                const scaleY = (viewportHeight - 40) / 900;
+                const base = Math.min(scaleX, scaleY, 1);
+                
+                const mult = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cabinet-scale') || '1');
+                const finalScale = Math.max(0.5, Math.min(base * mult, 1.25));
+                
+                container.style.transform = `scale(${finalScale})`;
+            }
+            
+            static updateCabinetScale() {
+                ScalingManager.scaleContainer();
+            }
+        }
+    </script>
+
+    <!-- 4. SETTINGS MANAGER - Handles the settings panel and controls -->
+    <script>
+        class SettingsManager {
+            constructor() {
+                this.panel = document.getElementById('settingsPanel');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                this.closeBtn = document.getElementById('sClose');
+                this.minBtn = document.getElementById('sMin');
+                this.copyBtn = document.getElementById('sCopy');
+                this.exportBtn = document.getElementById('sExport');
+                this.resetBtn = document.getElementById('sReset');
+                this.copyMsg = document.getElementById('copyMsg');
+                
+                this.defaultSettings = {
+                    'v_scale': '1',
+                    'v_global_pad_l': '0',
+                    'v_global_pad_r': '0',
+                    'v_hud_gap': '3',
+                    'v_icon_gap_sneakers': '3',
+                    'v_icon_gap_powers': '7',
+                    'v_icon_gap_fires': '2',
+                    'v_mqtsize': '43',
+                    'v_mqttrack': '0',
+                    'v_mqtx': '-1',
+                    'v_mqty': '-2',
+                    'v_mqssize': '10',
+                    'v_mqsx': '-1',
+                    'v_mqsy': '-10',
+                    'v_chipbr': '6',
+                    'v_chippadx': '8',
+                    'v_chippady': '1',
+                    'v_chipborder': '2',
+                    'v_crtfr': '0.4',
+                    'v_crtar': '0.94',
+                    'v_crtr': '11',
+                    'v_crtpad': '10',
+                    'v_tab_font_size': '14',
+                    'v_t1': '10',
+                    'v_t2': '42',
+                    'v_t3': '42',
+                    'v_tabs_pad_l': '8',
+                    'v_tabs_pad_r': '8',
+                    'v_h1a': '40',
+                    'v_h1b': '28',
+                    'v_h1c': '40',
+                    'v_hud1_pad_l': '0',
+                    'v_hud1_pad_r': '0',
+                    'v_h2a': '40',
+                    'v_h2b': '28',
+                    'v_h2c': '40',
+                    'v_hud2_pad_l': '0',
+                    'v_hud2_pad_r': '0',
+                    'v_slotheart': '41',
+                    'v_slotshoes': '40',
+                    'v_slotdots': '40',
+                    'v_slotflames': '40',
+                    'v_slotpause': '40',
+                    'v_slotbag': '40',
+                    'v_slotpad': '5',
+                    'v_gap_tabs': '-14',
+                    'v_gap_hud1': '-16',
+                    'v_gap_hud2': '-15',
+                    'v_gap_bottom': '-13',
+                    'v_bot_a': '82',
+                    'v_bot_b': '20',
+                    'in_hearts_fill': '0',
+                    'in_hearts_outline': '3',
+                    'in_shoes_fill': '0',
+                    'in_shoes_outline': '5',
+                    'in_powers_total': '4',
+                    'in_fires_fill': '0',
+                    'in_fires_outline': '5',
+                    'v_tab1_text': 'SNEAKERS',
+                    'v_tab2_text': 'LIFE',
+                    'v_tab3_text': 'POWER-UPS'
+                };
+            }
+            
+            init() {
+                this.settingsBtn.addEventListener('click', () => this.togglePanel());
+                this.closeBtn.addEventListener('click', () => this.closePanel());
+                this.minBtn.addEventListener('click', () => this.togglePanel());
+                
+                this.initSettingsControls();
+                this.initElementLocks();
+                this.initActionButtons();
+            }
+            
+            togglePanel() {
+                this.panel.classList.toggle('open');
+            }
+            
+            closePanel() {
+                this.panel.classList.remove('open');
+            }
+            
+            initSettingsControls() {
+                const inputs = document.querySelectorAll('#sBody input[data-key]');
+                
+                inputs.forEach(input => {
+                    const output = document.getElementById('o_' + input.id.replace('v_', '').replace('in_', ''));
+                    
+                    if (this.defaultSettings[input.id] !== undefined) {
+                        input.value = this.defaultSettings[input.id];
+                    }
+                    
+                    if (output) {
+                        output.textContent = input.value;
+                    }
+                    
+                    input.addEventListener('input', (e) => {
+                        const value = e.target.value;
+                        const key = e.target.dataset.key;
+                        
+                        if (output) {
+                            output.textContent = value;
+                        }
+                        
+                        this.updateCSSVariable(key, value);
+                        
+                        if (key.startsWith('--icons-')) {
+                            IconManager.updateAllIcons();
+                        }
+                        
+                        if (key.startsWith('--tab') && key.includes('-text')) {
+                            HUDManager.updateTabText();
+                        }
+                        
+                        if (key === '--cabinet-scale') {
+                            ScalingManager.updateCabinetScale();
+                        }
+                    });
+                });
+            }
+            
+            initElementLocks() {
+                const lockButtons = document.querySelectorAll('.lock-btn[data-element]');
+                
+                lockButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const elementId = e.target.dataset.element;
+                        const element = document.getElementById(`element-${elementId}`);
+                        
+                        if (element) {
+                            element.classList.toggle('element-locked');
+                            e.target.classList.toggle('locked');
+                        }
+                    });
+                });
+            }
+            
+            initActionButtons() {
+                this.copyBtn.addEventListener('click', () => {
+                    const settings = this.collectSettings();
+                    const json = JSON.stringify(settings, null, 2);
+                    
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(json).then(() => {
+                            this.showCopyMessage('Copied to clipboard!');
+                        }).catch(() => {
+                            this.fallbackCopyText(json);
+                        });
+                    } else {
+                        this.fallbackCopyText(json);
+                    }
+                });
+                
+                this.exportBtn.addEventListener('click', () => {
+                    const settings = this.collectSettings();
+                    const json = JSON.stringify(settings, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'sneakerquest-layout.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.showCopyMessage('Exported!');
+                });
+                
+                this.resetBtn.addEventListener('click', () => {
+                    this.resetSettings();
+                    this.showCopyMessage('Settings reset!');
+                });
+            }
+            
+            fallbackCopyText(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    this.showCopyMessage('Copied to clipboard!');
+                } catch (err) {
+                    this.showCopyMessage('Copy failed!');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+            
+            updateCSSVariable(key, value) {
+                if (key.includes('-text')) {
+                    document.documentElement.style.setProperty(key, `"${value}"`);
+                } else {
+                    document.documentElement.style.setProperty(key, value);
+                }
+            }
+            
+            collectSettings() {
+                const settings = {};
+                const inputs = document.querySelectorAll('#sBody input[data-key]');
+                
+                inputs.forEach(input => {
+                    settings[input.id] = input.value;
+                });
+                
+                return settings;
+            }
+            
+            resetSettings() {
+                Object.keys(this.defaultSettings).forEach(settingId => {
+                    const input = document.getElementById(settingId);
+                    const output = document.getElementById('o_' + settingId.replace('v_', '').replace('in_', ''));
+                    
+                    if (input) {
+                        input.value = this.defaultSettings[settingId];
+                        this.updateCSSVariable(input.dataset.key, this.defaultSettings[settingId]);
+                    }
+                    
+                    if (output) {
+                        output.textContent = this.defaultSettings[settingId];
+                    }
+                });
+                
+                ScalingManager.updateCabinetScale();
+                IconManager.updateAllIcons();
+                HUDManager.updateTabText();
+            }
+            
+            showCopyMessage(message) {
+                this.copyMsg.textContent = message;
+                this.copyMsg.style.opacity = '1';
+                
+                setTimeout(() => {
+                    this.copyMsg.style.opacity = '0';
+                }, 2000);
+            }
+        }
+    </script>
+
+    <!-- 5. MAIN INITIALIZATION - Starts everything up -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all managers
+            window.settingsManager = new SettingsManager();
+            settingsManager.init();
+            
+            HUDManager.initialize();
+            ScalingManager.initialize();
+            
+            // Render initial icons
+            IconManager.updateAllIcons();
         });
-      }
-
-      // Enhanced settings change handler with locked element protection
-      const originalSetVar = window.setVar;
-      window.setVar = function(name, val) {
-        // First apply the change normally
-        originalSetVar(name, val);
-        
-        // Then restore any locked element values that might have been affected
-        setTimeout(restoreLockedValues, 0);
-      };
-
-      // Initialize element locks
-      setupElementLocks();
-      updateElementLockVisuals();
-    })();
-  </script>
-
-  <script>
-    // Bind settings inputs and emit settings:change events
-    (function(){
-      const BTN = document.getElementById('settingsBtn');
-      const PANEL = document.getElementById('settingsPanel');
-      const MSG = document.getElementById('copyMsg');
-      document.getElementById('sClose').addEventListener('click', ()=> PANEL.classList.remove('open'));
-      document.getElementById('sMin').addEventListener('click', ()=> PANEL.classList.toggle('open'));
-      BTN.addEventListener('click', ()=> PANEL.classList.add('open'));
-      
-      // Individual setting lock functionality
-      function setupLockButtons() {
-        const lockButtons = document.querySelectorAll('.lock-btn:not([data-element])');
-        lockButtons.forEach(btn => {
-          btn.addEventListener('click', function() {
-            this.classList.toggle('locked');
-            updateLockedControls(); // Update all controls when individual lock changes
-          });
-        });
-      }
-
-      const inputs = Array.from(document.querySelectorAll('#sBody input'));
-      for(const inp of inputs){
-        const id = inp.id; const key = inp.dataset.key || id; const out = document.getElementById((id.startsWith('v_')?'o_':id.startsWith('in_')?'tv_':'sv_') + id.replace(/^v_|^in_/,'') );
-        const label = (document.querySelector('label[for="'+id+'"]')||{}).textContent || id;
-        const group = (inp.closest('.sg')?.querySelector('h4')?.textContent) || '';
-        const m = label.match(/\((px|em|fr|W\/H|%)\)/i); const unit = m?m[1]:'';
-        const show = ()=>{ out && (out.textContent = String(inp.value||'')); };
-        show();
-        inp.addEventListener('input', ()=>{
-          // Check if input is locked (by element OR individual lock)
-          const row = inp.closest('.sr');
-          const individualLock = row?.querySelector('.lock-btn:not([data-element])');
-          const individuallyLocked = individualLock && individualLock.classList.contains('locked');
-          
-          if (individuallyLocked || inp.disabled) {
-            return; // Don't update if locked
-          }
-          show();
-          window.dispatchEvent(new CustomEvent('settings:change', { detail:{ id, key, label, group, value: inp.value, unit } }));
-        });
-      }
-      
-      function collect(){ 
-        const data = {}; 
-        for(const i of inputs){ 
-          // Only include unlocked settings
-          const row = i.closest('.sr');
-          const individualLock = row?.querySelector('.lock-btn:not([data-element])');
-          const individuallyLocked = individualLock && individualLock.classList.contains('locked');
-          
-          if (!individuallyLocked && !i.disabled) {
-            data[i.id] = i.value; 
-          }
-        } 
-        return data; 
-      }
-      
-      document.getElementById('sCopy').addEventListener('click', ()=>{
-        const json = JSON.stringify(collect(), null, 2);
-        const ta = document.createElement('textarea'); ta.value = json; ta.style.position='fixed'; ta.style.left='-9999px';
-        document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove();
-        MSG.textContent = ok ? 'Copied' : 'Copy failed'; MSG.style.opacity = '1'; setTimeout(()=>MSG.style.opacity='0', 1500);
-      });
-      document.getElementById('sExport').addEventListener('click', ()=>{
-        const payload = { version:1, vars: collect() };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'settings.json';
-        document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
-      });
-      document.getElementById('sReset').addEventListener('click', ()=>{
-        // Reset to your preferred layout
-        initializeAllSettings();
-        window.dispatchEvent(new CustomEvent('settings:reset'));
-      });
-
-      // Initialize lock buttons
-      setupLockButtons();
-    })();
-  </script>
-
-  <script>
-    // Link settings to CSS variables and UI
-    (function(){
-      const root = document.documentElement;
-      
-      function setVar(name, val){
-        if(!name || !name.startsWith('--')) return;
-        if(val === '' || val == null){ 
-          root.style.removeProperty(name); 
-          return; 
-        }
-        
-        // Handle text values (wrap in quotes)
-        if (name.includes('-text')) {
-          root.style.setProperty(name, '"' + val + '"');
-        }
-        // All other values are raw numbers (CSS uses calc() with them)
-        else {
-          root.style.setProperty(name, val);
-        }
-      }
-
-      function numberFromVar(name, fallback){
-        const v = getComputedStyle(root).getPropertyValue(name).trim();
-        const n = parseFloat(v); 
-        return isNaN(n) ? fallback : n;
-      }
-
-      function rerenderIcons(){
-        const sneakersFill = numberFromVar('--icons-hearts-fill', 4);
-        const sneakersOutline = numberFromVar('--icons-hearts-outline', 1);
-        const heartsFill = numberFromVar('--icons-shoes-fill', 2);
-        const heartsOutline = numberFromVar('--icons-shoes-outline', 1);
-        const firesFill = numberFromVar('--icons-fires-fill', 3);
-        const firesOutline = numberFromVar('--icons-fires-outline', 2);
-        const powersTotal = numberFromVar('--icons-powers-total', 4);
-        
-        if(window.renderSneakers) window.renderSneakers(sneakersFill, sneakersOutline);
-        if(window.renderHearts) window.renderHearts(heartsFill, heartsOutline);
-        if(window.renderFires) window.renderFires(firesFill, firesOutline);
-        if(window.renderPowers) window.renderPowers(powersTotal);
-        
-        const s=(id,val)=>{ 
-          const el=document.getElementById(id); 
-          if(el) el.textContent=String(val); 
-        };
-        s('o_count_hearts', sneakersFill + ' / ' + sneakersOutline);
-        s('o_count_shoes', heartsFill + ' / ' + heartsOutline);
-        s('o_count_powers', powersTotal);
-        s('o_count_fires', firesFill + ' / ' + firesOutline);
-      }
-
-      function updateTabText(){
-        function getVar(name, fallback){ 
-          const v = getComputedStyle(root).getPropertyValue(name).trim();
-          return v ? v.replace(/^"|"$/g,'') : fallback; 
-        }
-        const t1 = getVar('--tab1-text','SNEAKERS');
-        const t2 = getVar('--tab2-text','LIFE');
-        const t3 = getVar('--tab3-text','POWER-UPS');
-        const tabs = document.querySelectorAll('.tabs .tab .line');
-        if(tabs[0]) tabs[0].textContent = t1;
-        if(tabs[1]) tabs[1].textContent = t2;
-        if(tabs[2]) tabs[2].textContent = t3;
-      }
-
-      window.addEventListener('settings:change', (e)=>{
-        const d = e.detail || {};
-        console.log('Setting change:', d.key, d.value);
-        setVar(d.key, d.value);
-        
-        if(d.key && d.key.startsWith('--icons-')) rerenderIcons();
-        if(d.key === '--tab1-text' || d.key === '--tab2-text' || d.key === '--tab3-text') updateTabText();
-        if(d.key === '--cabinet-scale') scaleContainer();
-      });
-
-      window.addEventListener('settings:reset', ()=>{
-        // Already handled by initializeAllSettings in reset button
-        rerenderIcons(); 
-        updateTabText(); 
-        scaleContainer();
-      });
-
-      // Store original setVar function for element locking system
-      window.setVar = setVar;
-
-      // Initialize on load with your preferred layout
-      setTimeout(initializeAllSettings, 100);
-      rerenderIcons(); 
-      updateTabText();
-    })();
-  </script>
+    </script>
 </body>
 </html>
