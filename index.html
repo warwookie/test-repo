@@ -32,7 +32,6 @@
             width: 100%;
             overflow: hidden;
             background: var(--bg-dark);
-            position: fixed; /* Prevent scrolling */
         }
 
         body {
@@ -44,21 +43,18 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 10px;
+            padding: 20px;
             overscroll-behavior: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
             touch-action: manipulation;
-            /* iOS specific */
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .fixed-container {
-            width: min(430px, 95vw);
-            height: min(900px, 95vh);
+            width: 430px;
+            height: 900px;
             position: relative;
             transform-origin: center center;
         }
@@ -91,17 +87,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 15px;
-            gap: 15px;
-            overflow: hidden;
+            padding: 20px;
+            gap: 20px;
         }
 
-        /* Marquee section - Fixed for mobile */
+        /* Marquee section */
         .marquee {
             width: 100%;
-            height: 80px; /* Reduced for mobile */
-            border-radius: 16px;
-            padding: 10px 12px;
+            height: 90px;
+            border-radius: 18px;
+            padding: 12px 14px;
             background: linear-gradient(#2a2320, #1d1815);
             box-shadow: 
                 inset 0 0 0 2px #120e0c,
@@ -115,7 +110,7 @@
         .led {
             width: 100%;
             height: 100%;
-            border-radius: 10px;
+            border-radius: 12px;
             background: 
                 radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
                 repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
@@ -124,7 +119,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 5px 8px;
+            padding: 6px 10px;
             position: relative;
             overflow: hidden;
         }
@@ -134,11 +129,10 @@
             justify-items: center;
             align-content: center;
             height: 100%;
-            width: 100%;
         }
 
         .mq-title {
-            font-size: clamp(18px, 6vw, 24px); /* Responsive font size */
+            font-size: 27px;
             letter-spacing: 0em;
             text-align: center;
             user-select: none;
@@ -146,21 +140,16 @@
             text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
             animation: led-flicker 3.6s ease-in-out infinite;
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
         }
 
         .mq-sub {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
-            font-size: clamp(6px, 2vw, 7px);
-            letter-spacing: .1em;
-            margin-top: 4px;
+            font-size: 7px;
+            letter-spacing: .12em;
+            margin-top: 6px;
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
         }
 
@@ -169,9 +158,9 @@
         }
 
         .mq-sub .chip-box {
-            padding: 3px 2px;
-            border: 1px solid var(--primary-color);
-            border-radius: 3px;
+            padding: 4px 3px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
             color: var(--primary-color);
             text-shadow: 0 0 2px var(--primary-color);
             animation: led-flicker 3.6s ease-in-out infinite;
@@ -185,8 +174,8 @@
 
         .divider {
             width: 100%;
-            height: 10px;
-            border-radius: 8px;
+            height: 12px;
+            border-radius: 10px;
             background: linear-gradient(#3b3026, #2a231e);
             box-shadow: inset 0 0 0 2px var(--bg-medium);
         }
@@ -194,12 +183,12 @@
         .crt-wrap {
             width: 100%;
             height: auto;
-            border-radius: 18px;
-            padding: 8px;
+            border-radius: 20px;
+            padding: 10px;
             background: linear-gradient(#3c2f26, #241e18);
             box-shadow: 
                 inset 0 0 0 2px #1a140f,
-                inset 0 0 0 6px #2a211a;
+                inset 0 0 0 8px #2a211a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -208,7 +197,7 @@
 
         .crt {
             width: 100%;
-            border-radius: 10px;
+            border-radius: 11px;
             aspect-ratio: 0.94;
             background: 
                 linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
@@ -228,19 +217,19 @@
             width: 100%;
             height: 100%;
             display: block;
-            border-radius: 10px;
+            border-radius: 11px;
             image-rendering: pixelated;
         }
 
-        /* Fullscreen Button - Mobile Optimized */
+        /* Fullscreen Button */
         .fullscreen-btn {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 58, 47, 0.9);
-            border: 1px solid var(--secondary-color);
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 58, 47, 0.8);
+            border: 2px solid var(--secondary-color);
             border-radius: 6px;
             color: var(--secondary-color);
             cursor: pointer;
@@ -249,8 +238,7 @@
             justify-content: center;
             z-index: 100;
             transition: all 0.3s ease;
-            font-size: 14px;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 16px;
         }
 
         .fullscreen-btn:hover {
@@ -258,26 +246,21 @@
             color: var(--primary-color);
         }
 
-        .fullscreen-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Tabs - Fixed for mobile */
         .tabs {
             width: 100%;
-            height: 60px; /* Reduced for mobile */
-            border-radius: 12px;
+            height: 70px;
+            border-radius: 14px;
             background: linear-gradient(#3a2f26, #2b231d);
             box-shadow: inset 0 0 0 2px #1a1410;
             display: flex;
-            gap: 8px;
-            padding: 8px;
+            gap: 10px;
+            padding: 10px;
             text-align: center;
             font-weight: 800;
-            letter-spacing: 0.06em;
-            margin-top: -12px;
-            padding-left: 6px;
-            padding-right: 6px;
+            letter-spacing: 0.08em;
+            margin-top: -14px;
+            padding-left: 8px;
+            padding-right: 8px;
         }
         .tabs .tab:nth-child(1){ flex: 0 1 42%; }
         .tabs .tab:nth-child(2){ flex: 0 1 10%; }
@@ -291,8 +274,8 @@
 
         .tab .led {
             height: 100%;
-            border-radius: 8px;
-            padding: 6px 8px;
+            border-radius: 10px;
+            padding: 8px 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -302,8 +285,8 @@
         }
 
         .tab .led .line {
-            font-size: clamp(8px, 2.5vw, 10px);
-            letter-spacing: .1em;
+            font-size: 10px;
+            letter-spacing: .14em;
             color: var(--primary-color);
             font-weight: 800;
             text-shadow: 0 0 2px var(--primary-color);
@@ -311,17 +294,16 @@
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
         }
 
-        /* HUD Sections - Fixed for mobile */
         .hud {
             width: 100%;
             height: auto;
             display: flex;
             gap: 3px;
-            margin-top: -14px;
+            margin-top: -16px;
         }
-        .hud .slot-heart{ height: 36px; }
-        .hud .slot-shoes{ height: 36px; }
-        .hud .slot-dots{ height: 36px; }
+        .hud .slot-heart{ height: 41px; }
+        .hud .slot-shoes{ height: 40px; }
+        .hud .slot-dots{ height: 40px; }
         .hud .slot:nth-child(1){ flex: 0 1 40%; }
         .hud .slot:nth-child(2){ flex: 0 1 28%; }
         .hud .slot:nth-child(3){ flex: 0 1 40%; }
@@ -331,19 +313,19 @@
             height: auto;
             display: flex;
             gap: 3px;
-            margin-top: -12px;
+            margin-top: -15px;
         }
-        .hud2 .slot-flames{ height: 36px; }
-        .hud2 .slot-pause{ height: 36px; }
-        .hud2 .slot-bag{ height: 36px; }
+        .hud2 .slot-flames{ height: 40px; }
+        .hud2 .slot-pause{ height: 40px; }
+        .hud2 .slot-bag{ height: 40px; }
         .hud2 .slot:nth-child(1){ flex: 0 1 40%; }
         .hud2 .slot:nth-child(2){ flex: 0 1 28%; }
         .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
 
         .slot {
             background: linear-gradient(#3a3227, #2c251e);
-            border-radius: 12px;
-            padding: 4px;
+            border-radius: 14px;
+            padding: 5px;
             box-shadow: 
                 inset 0 0 0 2px #1a1511,
                 0 2px 0 #0b0907;
@@ -358,8 +340,8 @@
         .slot > .led {
             height: 100%;
             width: 100%;
-            border-radius: 8px;
-            padding: 6px 8px;
+            border-radius: 10px;
+            padding: 8px 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -368,35 +350,152 @@
         .slot > .led .line {
             display: flex;
             align-items: center;
-            gap: 8px;
-            letter-spacing: .1em;
+            gap: 10px;
+            letter-spacing: .12em;
             width: 100%;
             justify-content: center;
         }
 
-        /* Icon Containers */
+        /* Icon Containers - RESTORED ORIGINAL STYLES */
         #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 0 3px;
+            padding: 0 4px;
             box-sizing: border-box;
         }
 
-        /* Icon sizes adjusted for mobile */
-        .sneaker-icon, .heart-icon, .fire-icon, .power {
-            transform: scale(0.9); /* Slightly smaller for mobile */
+        /* Sneaker Icons - RESTORED LAYERED STYLE */
+        #ui-sneakers {
+            gap: 3px;
         }
 
-        .sneaker-outline, .sneaker-fill,
-        .heart-outline, .heart-fill,
-        .fire-outline, .fire-fill,
-        .power .ph-bold, .power .ph-fill {
-            font-size: 18px !important; /* Smaller icons */
+        .sneaker-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        .sneaker-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .sneaker-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sneaker-icon.active .sneaker-fill {
+            opacity: 1;
+        }
+
+        /* Heart Icons - RESTORED LAYERED STYLE */
+        #ui-hearts {
+            gap: 4px;
+        }
+
+        .heart-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heart-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .heart-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .heart-icon.active .heart-fill {
+            opacity: 1;
+        }
+
+        /* Fire Icons - RESTORED LAYERED STYLE */
+        #ui-fires {
+            gap: 2px;
+        }
+
+        .fire-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fire-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .fire-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fire-icon.active .fire-fill {
+            opacity: 1;
+        }
+
+        /* Power-up Icons - RESTORED LAYERED STYLE */
+        #ui-powers {
+            gap: 7px;
+        }
+
+        .power {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .power .ph-bold {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .power .ph-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .power.active .ph-fill {
+            opacity: 1;
+        }
+
+        /* Pause/Play Button - FIXED */
         .chip-btn {
             background: transparent;
             border: 0;
@@ -407,52 +506,81 @@
             position: relative;
             color: var(--primary-color);
             font: inherit;
-            letter-spacing: .1em;
+            letter-spacing: .12em;
             cursor: pointer;
             min-height: 1em;
             line-height: 1;
-            min-width: 5ch;
-            font-size: clamp(10px, 3vw, 12px);
+            min-width: 6ch;
+            font-size: 12px;
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chip-btn:focus-visible {
+            outline: none;
+            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
+        }
+
+        .chip-btn .word {
+            grid-area: 1/1;
+            display: block;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(6%);
+            transition: opacity .24s ease, transform .24s ease;
+        }
+
+        #btn-pause[data-state=playing] .word-pause {
+            opacity: 1;
+            transform: none;
+        }
+
+        #btn-pause[data-state=paused] .word-play {
+            opacity: 1;
+            transform: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chip-btn .word {
+                transition: none;
+            }
         }
 
         .counter {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             color: var(--primary-color);
             text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
             font-weight: 900;
-            letter-spacing: .12em;
+            letter-spacing: .14em;
         }
 
         .seven {
             font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
-            font-size: clamp(12px, 3.5vw, 14px);
+            font-size: 14px;
             color: var(--secondary-color);
         }
 
         .counter .ph-package {
-            font-size: 18px !important;
+            font-size: 20px !important;
             color: var(--secondary-color) !important;
             filter: none !important;
         }
 
         .bottom {
             width: 100%;
-            height: 130px; /* Reduced for mobile */
-            margin-top: -10px;
+            height: 150px;
+            margin-top: -13px;
         }
 
         .control-screen {
             position: relative;
             height: 100%;
-            border-radius: 16px;
-            padding: 12px;
+            border-radius: 18px;
+            padding: 14px;
             display: grid;
             grid-template-columns: 82% 20%;
-            gap: 12px;
+            gap: 14px;
             align-items: center;
             overflow: hidden;
             background: linear-gradient(#1a1210, #0c0908);
@@ -465,79 +593,20 @@
         .matrix {
             position: absolute;
             inset: 6px;
-            border-radius: 12px;
+            border-radius: 14px;
             opacity: .9;
             mix-blend-mode: screen;
             pointer-events: none;
             background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
         }
 
-        /* iPhone notch support */
-        @supports (padding: max(0px)) {
-            body {
-                padding-left: max(10px, env(safe-area-inset-left));
-                padding-right: max(10px, env(safe-area-inset-right));
-                padding-top: max(10px, env(safe-area-inset-top));
-                padding-bottom: max(10px, env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Very small screens (iPhone 8 is 375px wide) */
+        /* Mobile responsive text */
         @media (max-width: 400px) {
-            .inner {
-                padding: 12px;
-                gap: 12px;
-            }
-            
-            .marquee {
-                height: 70px;
-            }
-            
             .mq-title {
-                font-size: 16px;
+                font-size: 22px;
             }
-            
-            .tabs {
-                height: 55px;
-            }
-            
-            .hud .slot-heart, 
-            .hud .slot-shoes, 
-            .hud .slot-dots,
-            .hud2 .slot-flames,
-            .hud2 .slot-pause,
-            .hud2 .slot-bag {
-                height: 32px;
-            }
-            
-            .bottom {
-                height: 120px;
-            }
-            
-            .sneaker-outline, .sneaker-fill,
-            .heart-outline, .heart-fill,
-            .fire-outline, .fire-fill,
-            .power .ph-bold, .power .ph-fill {
-                font-size: 16px !important;
-            }
-        }
-
-        /* Portrait orientation fixes */
-        @media (orientation: portrait) and (max-height: 700px) {
-            .fixed-container {
-                height: min(900px, 90vh);
-            }
-            
-            .inner {
-                gap: 10px;
-            }
-            
-            .marquee {
-                height: 65px;
-            }
-            
-            .crt-wrap {
-                padding: 6px;
+            .mq-sub {
+                font-size: 6px;
             }
         }
     </style>
@@ -611,111 +680,13 @@
     </div>
 
     <script>
-        // === MOBILE-FIRST FULLSCREEN MANAGER ===
-        class FullscreenManager {
-            static initialize() {
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (fullscreenBtn) {
-                    fullscreenBtn.addEventListener('click', FullscreenManager.toggleFullscreen);
-                    fullscreenBtn.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        FullscreenManager.toggleFullscreen();
-                    });
-                }
-
-                // iOS specific: try to hide address bar
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    window.addEventListener('load', function() {
-                        setTimeout(function() {
-                            window.scrollTo(0, 1);
-                        }, 100);
-                    });
-                }
-            }
-
-            static toggleFullscreen() {
-                // For iOS, we use a different approach since fullscreen API is restricted
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    FullscreenManager.toggleIOSFullscreen();
-                    return;
-                }
-
-                try {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen?.().catch(err => {
-                            console.log('Fullscreen not supported:', err);
-                            FullscreenManager.toggleFallbackFullscreen();
-                        });
-                    } else {
-                        document.exitFullscreen?.();
-                    }
-                } catch (err) {
-                    console.log('Fullscreen error:', err);
-                    FullscreenManager.toggleFallbackFullscreen();
-                }
-            }
-
-            static toggleIOSFullscreen() {
-                // iOS doesn't support true fullscreen, but we can maximize the experience
-                const body = document.body;
-                const isMaximized = body.classList.contains('ios-maximized');
-                
-                if (!isMaximized) {
-                    body.classList.add('ios-maximized');
-                    // Hide URL bar by scrolling
-                    window.scrollTo(0, 1);
-                    // Add iOS fullscreen styles
-                    document.documentElement.style.overflow = 'hidden';
-                    body.style.padding = '0';
-                    body.style.background = '#000';
-                } else {
-                    body.classList.remove('ios-maximized');
-                    document.documentElement.style.overflow = '';
-                    body.style.padding = '';
-                    body.style.background = '';
-                }
-                
-                // Update button text
-                const btn = document.getElementById('fullscreenBtn');
-                if (btn) {
-                    btn.innerHTML = isMaximized ? 
-                        '<i class="ph-fill ph-arrows-out-simple"></i>' : 
-                        '<i class="ph-fill ph-arrows-in-simple"></i>';
-                }
-            }
-
-            static toggleFallbackFullscreen() {
-                // Fallback for when fullscreen API fails
-                const body = document.body;
-                const container = document.getElementById('mainContainer');
-                
-                if (!body.classList.contains('fallback-fullscreen')) {
-                    body.classList.add('fallback-fullscreen');
-                    container.style.transform = 'scale(1)';
-                    document.documentElement.style.overflow = 'hidden';
-                } else {
-                    body.classList.remove('fallback-fullscreen');
-                    document.documentElement.style.overflow = '';
-                    ScalingManager.scaleContainer();
-                }
-            }
-        }
-
-        // === RESPONSIVE SCALING MANAGER ===
+        // === PROPER UNIFORM SCALING ===
         class ScalingManager {
             static initialize() {
                 ScalingManager.scaleContainer();
-                
-                // Use resize observer for better performance
-                const resizeObserver = new ResizeObserver(entries => {
-                    ScalingManager.scaleContainer();
-                });
-                
-                resizeObserver.observe(document.body);
-                
-                // Also listen to orientation changes
+                window.addEventListener('resize', ScalingManager.scaleContainer);
                 window.addEventListener('orientationchange', () => {
-                    setTimeout(ScalingManager.scaleContainer, 300);
+                    setTimeout(ScalingManager.scaleContainer, 100);
                 });
             }
             
@@ -724,30 +695,31 @@
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
                 
-                // Use more conservative scaling for mobile
-                const scaleX = (viewportWidth - 20) / 430;
-                const scaleY = (viewportHeight - 20) / 900;
-                let finalScale = Math.min(scaleX, scaleY, 1);
+                // Calculate scale based on the smallest dimension to maintain aspect ratio
+                const scaleBasedOnWidth = (viewportWidth - 40) / 430;
+                const scaleBasedOnHeight = (viewportHeight - 40) / 900;
                 
-                // On very small screens, don't scale below 0.8
-                finalScale = Math.max(finalScale, 0.8);
+                // Use the smaller scale to ensure everything fits
+                const finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight, 1);
                 
                 container.style.transform = `scale(${finalScale})`;
             }
         }
 
-        // === ICON MANAGER (Same as before) ===
+        // === ICON MANAGER - RESTORED ORIGINAL ===
         class IconManager {
             static updateAllIcons() {
-                IconManager.renderSneakers(0, 4);
-                IconManager.renderHearts(3, 3);
-                IconManager.renderPowers(0, 4);
-                IconManager.renderFires(0, 5);
+                // Default icon counts
+                IconManager.renderSneakers(3, 5);    // 3 filled, 5 total sneakers
+                IconManager.renderHearts(1, 3);      // 1 filled, 3 total hearts  
+                IconManager.renderPowers(4, 4);      // 4 filled, 4 total powers
+                IconManager.renderFires(4, 5);       // 4 filled, 5 total fires
             }
             
             static renderSneakers(fill, outline) {
                 const container = document.getElementById('ui-sneakers');
                 if (!container) return;
+                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -763,6 +735,7 @@
             static renderHearts(fill, outline) {
                 const container = document.getElementById('ui-hearts');
                 if (!container) return;
+                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -778,6 +751,7 @@
             static renderFires(fill, outline) {
                 const container = document.getElementById('ui-fires');
                 if (!container) return;
+                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -793,6 +767,7 @@
             static renderPowers(total, fill) {
                 const container = document.getElementById('ui-powers');
                 if (!container) return;
+                
                 container.innerHTML = '';
                 const powerTypes = [
                     { bold: 'ph-timer', fill: 'ph-timer' },
@@ -808,8 +783,8 @@
                     if (powerType.fill === 'blast') {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
-                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true"></i>
-                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true"></i>
+                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
                             </div>
                         `;
                     } else {
@@ -821,6 +796,42 @@
                         `;
                     }
                 }
+            }
+        }
+
+        // === SIMPLE FULLSCREEN (with iOS fallback) ===
+        class FullscreenManager {
+            static initialize() {
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', FullscreenManager.toggleFullscreen);
+                }
+            }
+
+            static toggleFullscreen() {
+                // iOS doesn't support true fullscreen, so we'll maximize instead
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    FullscreenManager.toggleIOSMaximize();
+                    return;
+                }
+
+                try {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen?.().catch(err => {
+                            console.log('Fullscreen not available');
+                        });
+                    } else {
+                        document.exitFullscreen?.();
+                    }
+                } catch (err) {
+                    console.log('Fullscreen error:', err);
+                }
+            }
+
+            static toggleIOSMaximize() {
+                // For iOS, we just hide the URL bar and make it feel fullscreen
+                window.scrollTo(0, 1);
+                // The scaling manager will handle the rest
             }
         }
 
@@ -842,7 +853,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 ctx.fillStyle = '#d6c7a4';
-                ctx.font = '16px "Press Start 2P"';
+                ctx.font = '20px "Press Start 2P"';
                 ctx.textAlign = 'center';
                 ctx.fillText('SNEAKER BOMBER', canvas.width / 2, canvas.height / 2 - 20);
                 ctx.fillText('SPACE TO START', canvas.width / 2, canvas.height / 2 + 20);
@@ -850,26 +861,16 @@
             
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.code === 'Space') {
-                    ctx.fillStyle = '#ff3a2f';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '14px "Press Start 2P"';
-                    ctx.fillText('GAME STARTED!', canvas.width / 2, canvas.height / 2);
-                }
-            });
         }
 
         // === INITIALIZE EVERYTHING ===
         document.addEventListener('DOMContentLoaded', function() {
-            FullscreenManager.initialize();
             ScalingManager.initialize();
+            FullscreenManager.initialize();
             IconManager.updateAllIcons();
             setupSimpleGame();
             
-            // Setup pause button
+            // Setup pause button properly
             const pauseBtn = document.getElementById('btn-pause');
             if (pauseBtn) {
                 pauseBtn.addEventListener('click', function() {
@@ -877,23 +878,6 @@
                     this.dataset.state = isPlaying ? 'paused' : 'playing';
                 });
             }
-            
-            // Prevent default touch behaviors
-            document.addEventListener('touchstart', function(e) {
-                if (e.touches.length > 1) e.preventDefault();
-            }, { passive: false });
-            
-            document.addEventListener('touchend', function(e) {
-                e.preventDefault();
-            }, { passive: false });
-            
-            // Initial UI update
-            setTimeout(() => {
-                window.SneakerQuestUI?.setSneakers?.(2, 4);
-                window.SneakerQuestUI?.setHearts?.(2, 3);
-                window.SneakerQuestUI?.setCounter?.(125);
-                window.SneakerQuestUI?.setScore?.(2500);
-            }, 500);
         });
 
         // Global UI API
