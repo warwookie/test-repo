@@ -170,9 +170,7 @@
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
         }
 
-        .mq-sub .chip {
-            white-space: nowrap;
-        }
+        .mq-sub .chip { white-space: nowrap; }
 
         .mq-sub .chip-box {
             padding: 4px 3px;
@@ -229,17 +227,13 @@
             overflow: hidden;
         }
 
-        /* Game Canvas - FIXED FOR MOBILE */
+        /* Game Canvas */
         #gameCanvas {
-            width: 100% !important;
-            height: 100% !important;
+            width: 100%;
+            height: 100%;
             display: block;
             border-radius: 11px;
             image-rendering: pixelated;
-            /* Ensure canvas doesn't overflow */
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
         }
 
         /* Fullscreen Button */
@@ -262,10 +256,7 @@
             font-size: 16px;
         }
 
-        .fullscreen-btn:hover {
-            background: var(--secondary-color);
-            color: var(--primary-color);
-        }
+        .fullscreen-btn:hover { background: var(--secondary-color); color: var(--primary-color); }
 
         .tabs {
             width: 100%;
@@ -287,11 +278,7 @@
         .tabs .tab:nth-child(2){ flex: 0 1 10%; }
         .tabs .tab:nth-child(3){ flex: 0 1 42%; }
 
-        .tab {
-            display: flex;
-            align-items: stretch;
-            flex: 1;
-        }
+        .tab { display: flex; align-items: stretch; flex: 1; }
 
         .tab .led {
             height: 100%;
@@ -315,13 +302,7 @@
             font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
         }
 
-        .hud {
-            width: 100%;
-            height: auto;
-            display: flex;
-            gap: 3px;
-            margin-top: -16px;
-        }
+        .hud { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -16px; }
         .hud .slot-heart{ height: 41px; }
         .hud .slot-shoes{ height: 40px; }
         .hud .slot-dots{ height: 40px; }
@@ -329,13 +310,7 @@
         .hud .slot:nth-child(2){ flex: 0 1 28%; }
         .hud .slot:nth-child(3){ flex: 0 1 40%; }
 
-        .hud2 {
-            width: 100%;
-            height: auto;
-            display: flex;
-            gap: 3px;
-            margin-top: -15px;
-        }
+        .hud2 { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -15px; }
         .hud2 .slot-flames{ height: 40px; }
         .hud2 .slot-pause{ height: 40px; }
         .hud2 .slot-bag{ height: 40px; }
@@ -358,278 +333,78 @@
             width: 100%;
         }
 
-        .slot > .led {
-            height: 100%;
-            width: 100%;
-            border-radius: 10px;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
 
-        .slot > .led .line {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: .12em;
-            width: 100%;
-            justify-content: center;
-        }
+        .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
 
         /* Icon Containers */
         #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            padding: 0 4px;
-            box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box;
         }
 
         /* Sneaker Icons */
-        #ui-sneakers {
-            gap: 3px;
-        }
-
-        .sneaker-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sneaker-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .sneaker-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .sneaker-icon.active .sneaker-fill {
-            opacity: 1;
-        }
+        #ui-sneakers { gap: 3px; }
+        .sneaker-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .sneaker-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .sneaker-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .sneaker-icon.active .sneaker-fill { opacity: 1; }
 
         /* Heart Icons */
-        #ui-hearts {
-            gap: 4px;
-        }
-
-        .heart-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .heart-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .heart-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .heart-icon.active .heart-fill {
-            opacity: 1;
-        }
+        #ui-hearts { gap: 4px; }
+        .heart-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .heart-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .heart-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .heart-icon.active .heart-fill { opacity: 1; }
 
         /* Fire Icons */
-        #ui-fires {
-            gap: 2px;
-        }
-
-        .fire-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fire-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .fire-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .fire-icon.active .fire-fill {
-            opacity: 1;
-        }
+        #ui-fires { gap: 2px; }
+        .fire-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .fire-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .fire-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .fire-icon.active .fire-fill { opacity: 1; }
 
         /* Power-up Icons */
-        #ui-powers {
-            gap: 7px;
-        }
-
-        .power {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .power .ph-bold {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .power .ph-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .power.active .ph-fill {
-            opacity: 1;
-        }
+        #ui-powers { gap: 7px; }
+        .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .power.active .ph-fill { opacity: 1; }
 
         /* Pause/Play Button */
         .chip-btn {
-            background: transparent;
-            border: 0;
-            border-radius: 0;
-            padding: 0;
-            display: grid;
-            place-items: center;
-            position: relative;
-            color: var(--primary-color);
-            font: inherit;
-            letter-spacing: .12em;
-            cursor: pointer;
-            min-height: 1em;
-            line-height: 1;
-            min-width: 6ch;
-            font-size: 12px;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+            background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; position: relative; color: var(--primary-color);
+            font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
         }
+        .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
+        .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
+        #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
+        #btn-pause[data-state=paused]  .word-play  { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) { .chip-btn .word { transition: none; } }
 
-        .chip-btn:focus-visible {
-            outline: none;
-            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
-        }
+        .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
+        .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
+        .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
 
-        .chip-btn .word {
-            grid-area: 1/1;
-            display: block;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(6%);
-            transition: opacity .24s ease, transform .24s ease;
-        }
-
-        #btn-pause[data-state=playing] .word-pause {
-            opacity: 1;
-            transform: none;
-        }
-
-        #btn-pause[data-state=paused] .word-play {
-            opacity: 1;
-            transform: none;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .chip-btn .word {
-                transition: none;
-            }
-        }
-
-        .counter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary-color);
-            text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
-            font-weight: 900;
-            letter-spacing: .14em;
-        }
-
-        .seven {
-            font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
-            font-size: 14px;
-            color: var(--secondary-color);
-        }
-
-        .counter .ph-package {
-            font-size: 20px !important;
-            color: var(--secondary-color) !important;
-            filter: none !important;
-        }
-
-        .bottom {
-            width: 100%;
-            height: 150px;
-            margin-top: -13px;
-        }
+        .bottom { width: 100%; height: 150px; margin-top: -13px; }
 
         .control-screen {
-            position: relative;
-            height: 100%;
-            border-radius: 18px;
-            padding: 14px;
-            display: grid;
-            grid-template-columns: 82% 20%;
-            gap: 14px;
-            align-items: center;
-            overflow: hidden;
-            background: linear-gradient(#1a1210, #0c0908);
-            box-shadow: 
-                inset 0 0 0 2px #1a1510,
-                inset 0 16px 30px rgba(0,0,0,.4),
-                0 3px 0 #0a0807;
+            position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden;
+            background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807;
         }
 
-        .matrix {
-            position: absolute;
-            inset: 6px;
-            border-radius: 14px;
-            opacity: .9;
-            mix-blend-mode: screen;
-            pointer-events: none;
-            background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
-        }
+        .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
 
         /* Mobile responsive text */
         @media (max-width: 400px) {
-            .mq-title {
-                font-size: 22px;
-            }
-            .mq-sub {
-                font-size: 6px;
-            }
+            .mq-title { font-size: 22px; }
+            .mq-sub { font-size: 6px; }
         }
+
+        /* Mobile Safari specific fixes */
+        @media screen and (max-width: 768px) { .fixed-container { transform: scale(0.95); } }
+
+        /* iPhone 8 specific optimization */
+        @media screen and (max-width: 375px) and (max-height: 667px) { .fixed-container { transform: scale(0.82); } }
     </style>
 </head>
 <body>
@@ -704,194 +479,82 @@
         // === MOBILE SAFARI LOCK MODE ===
         class MobileSafariLock {
             static initialize() {
-                // Prevent all scrolling and touch behaviors
                 MobileSafariLock.preventAllScrolling();
-                
-                // Initialize proper scaling
-                MobileSafariLock.initializeProperScaling();
-                
-                // Setup fullscreen button
+                MobileSafariLock.initializeAggressiveScaling();
                 MobileSafariLock.initializeFullscreen();
-                
                 console.log('📱 Mobile Safari Lock Mode Activated');
             }
-            
             static preventAllScrolling() {
-                // Comprehensive touch event prevention
-                const preventDefault = (e) => {
-                    e.preventDefault();
-                };
-                
+                const preventDefault = (e) => { e.preventDefault(); };
                 document.addEventListener('touchstart', preventDefault, { passive: false });
                 document.addEventListener('touchmove', preventDefault, { passive: false });
                 document.addEventListener('touchend', preventDefault, { passive: false });
                 document.addEventListener('touchcancel', preventDefault, { passive: false });
-                
-                // Prevent context menu
                 document.addEventListener('contextmenu', (e) => e.preventDefault());
-                
-                // Force overflow hidden
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
             }
-            
-            static initializeProperScaling() {
+            static initializeAggressiveScaling() {
                 const container = document.querySelector('.fixed-container');
-                
                 const calculateOptimalScale = () => {
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
-                    
-                    // Calculate scale based on both dimensions
                     const scaleBasedOnWidth = viewportWidth / 430;
                     const scaleBasedOnHeight = viewportHeight / 900;
-                    
-                    // Use the smaller scale to ensure everything fits
                     let finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight);
-                    
-                    // On mobile, be slightly more aggressive
                     if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                        finalScale = Math.min(finalScale * 1.02, 1);
+                        finalScale = Math.min(finalScale * 1.05, 1);
                     }
-                    
                     return finalScale;
                 };
-                
                 const applyScaling = () => {
                     const scale = calculateOptimalScale();
                     container.style.transform = `scale(${scale})`;
-                    
-                    console.log(`📐 Proper Scaling: ${scale.toFixed(3)} (${window.innerWidth}x${window.innerHeight})`);
+                    console.log(`📐 Aggressive Scaling: ${scale.toFixed(3)} (${window.innerWidth}x${window.innerHeight})`);
                 };
-                
-                // Initial scaling
                 applyScaling();
-                
-                // Handle resize events
                 let resizeTimeout;
                 window.addEventListener('resize', () => {
                     clearTimeout(resizeTimeout);
                     resizeTimeout = setTimeout(applyScaling, 100);
                 });
-                
-                // Handle orientation changes
                 window.addEventListener('orientationchange', () => {
                     setTimeout(() => {
                         applyScaling();
                         window.scrollTo(0, 0);
+                        document.body.style.overflow = 'hidden';
                     }, 350);
                 });
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
+                    }, 100);
+                    document.addEventListener('touchmove', (e) => {
+                        if (e.scale !== 1) { e.preventDefault(); }
+                    }, { passive: false });
+                }
             }
-            
             static initializeFullscreen() {
                 const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (fullscreenBtn) {
-                    fullscreenBtn.addEventListener('click', MobileSafariLock.toggleFullscreen);
-                }
+                if (fullscreenBtn) { fullscreenBtn.addEventListener('click', MobileSafariLock.toggleFullscreen); }
             }
-            
             static toggleFullscreen() {
-                // iOS doesn't support true fullscreen
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    MobileSafariLock.toggleIOSMaximize();
-                    return;
-                }
-                
-                // For other browsers, try true fullscreen
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) { MobileSafariLock.toggleIOSMaximize(); return; }
                 try {
                     if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen?.().catch(() => {
-                            console.log('Fullscreen not available');
-                        });
-                    } else {
-                        document.exitFullscreen?.();
-                    }
-                } catch (err) {
-                    console.log('Fullscreen error:', err);
-                }
+                        document.documentElement.requestFullscreen?.().catch(() => { console.log('Fullscreen not available'); });
+                    } else { document.exitFullscreen?.(); }
+                } catch (err) { console.log('Fullscreen error:', err); }
             }
-            
             static toggleIOSMaximize() {
-                // On iOS, ensure proper positioning
                 window.scrollTo(0, 0);
-                
-                // Show feedback
                 const btn = document.getElementById('fullscreenBtn');
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<i class="ph-fill ph-check"></i>';
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                }, 1000);
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 1000);
             }
-        }
-
-        // === PROPER CANVAS SETUP WITH DEVICE PIXEL RATIO ===
-        function setupProperCanvas() {
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            function resizeCanvas() {
-                const crt = document.querySelector('.crt');
-                const rect = crt.getBoundingClientRect();
-                
-                // Get the display size of the canvas
-                const displayWidth = Math.floor(rect.width);
-                const displayHeight = Math.floor(rect.height);
-                
-                // Check if the canvas is not the same size
-                if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-                    // Set the display size
-                    canvas.style.width = displayWidth + 'px';
-                    canvas.style.height = displayHeight + 'px';
-                    
-                    // Set the actual size in memory (scaled for device pixel ratio)
-                    const scale = window.devicePixelRatio || 1;
-                    canvas.width = Math.floor(displayWidth * scale);
-                    canvas.height = Math.floor(displayHeight * scale);
-                    
-                    // Normalize coordinate system to use CSS pixels
-                    ctx.scale(scale, scale);
-                    
-                    console.log(`🎯 Canvas: ${displayWidth}x${displayHeight} (device ratio: ${scale})`);
-                }
-                
-                draw();
-            }
-            
-            function draw() {
-                // Clear canvas with proper dimensions
-                const rect = canvas.getBoundingClientRect();
-                const displayWidth = Math.floor(rect.width);
-                const displayHeight = Math.floor(rect.height);
-                
-                ctx.fillStyle = '#0a241f';
-                ctx.fillRect(0, 0, displayWidth, displayHeight);
-                
-                // Use responsive font size based on canvas dimensions
-                const baseFontSize = Math.min(displayWidth * 0.05, 20); // 5% of width, max 20px
-                ctx.fillStyle = '#d6c7a4';
-                ctx.font = `${baseFontSize}px "Press Start 2P"`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                ctx.fillText('SNEAKER BOMBER', displayWidth / 2, displayHeight / 2 - baseFontSize);
-                ctx.fillText('SPACE TO START', displayWidth / 2, displayHeight / 2 + baseFontSize);
-            }
-            
-            // Initial setup
-            resizeCanvas();
-            
-            // Handle resize with debouncing
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(resizeCanvas, 100);
-            });
-            
-            // Handle orientation changes
-            window.addEventListener('orientationchange', () => {
-                setTimeout(resizeCanvas, 350);
-            });
         }
 
         // === ICON MANAGER ===
@@ -902,11 +565,9 @@
                 IconManager.renderPowers(4, 4);
                 IconManager.renderFires(4, 5);
             }
-            
             static renderSneakers(fill, outline) {
                 const container = document.getElementById('ui-sneakers');
                 if (!container) return;
-                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -918,11 +579,9 @@
                     `;
                 }
             }
-            
             static renderHearts(fill, outline) {
                 const container = document.getElementById('ui-hearts');
                 if (!container) return;
-                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -934,11 +593,9 @@
                     `;
                 }
             }
-            
             static renderFires(fill, outline) {
                 const container = document.getElementById('ui-fires');
                 if (!container) return;
-                
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -950,11 +607,9 @@
                     `;
                 }
             }
-            
             static renderPowers(total, fill) {
                 const container = document.getElementById('ui-powers');
                 if (!container) return;
-                
                 container.innerHTML = '';
                 const powerTypes = [
                     { bold: 'ph-timer', fill: 'ph-timer' },
@@ -962,11 +617,9 @@
                     { bold: 'ph-magnet', fill: 'ph-magnet' },
                     { bold: 'ph-crosshair-simple', fill: 'blast' }
                 ];
-                
                 for (let i = 0; i < total; i++) {
                     const powerType = powerTypes[i % powerTypes.length];
                     const isActive = i < fill;
-                    
                     if (powerType.fill === 'blast') {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
@@ -986,13 +639,55 @@
             }
         }
 
+        // === GAME SETUP ===
+        function setupSimpleGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                const crt = document.querySelector('.crt');
+
+                // Use untransformed layout size
+                const cssWidth  = crt.clientWidth;
+                const cssHeight = crt.clientHeight;
+
+                // Match canvas CSS size to box
+                canvas.style.width  = cssWidth + 'px';
+                canvas.style.height = cssHeight + 'px';
+
+                // Retina backing store
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width  = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
+
+                // Reset and scale drawing context
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+
+                draw();
+            }
+
+            function draw() {
+                ctx.fillStyle = '#0a241f';
+                ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+                ctx.fillStyle = '#d6c7a4';
+                ctx.font = '20px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('SNEAKER BOMBER', canvas.clientWidth / 2, canvas.clientHeight / 2 - 20);
+                ctx.fillText('SPACE TO START', canvas.clientWidth / 2, canvas.clientHeight / 2 + 20);
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
         // === INITIALIZE MOBILE SAFARI LOCK MODE ===
         document.addEventListener('DOMContentLoaded', function() {
             MobileSafariLock.initialize();
             IconManager.updateAllIcons();
-            setupProperCanvas(); // Use the new proper canvas setup
-            
-            // Setup pause button
+            setupSimpleGame();
             const pauseBtn = document.getElementById('btn-pause');
             if (pauseBtn) {
                 pauseBtn.addEventListener('click', function() {
@@ -1000,10 +695,10 @@
                     this.dataset.state = isPlaying ? 'paused' : 'playing';
                 });
             }
-            
-            // Force initial positioning
             setTimeout(() => {
                 window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
             }, 150);
         });
 
@@ -1011,25 +706,13 @@
         window.SneakerQuestUI = {
             IconManager: IconManager,
             setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
-            setHearts: (filled, total) => IconManager.renderHearts(filled, total),
-            setPowers: (filled, total) => IconManager.renderPowers(total, filled),
-            setFires: (filled, total) => IconManager.renderFires(filled, total),
-            setCounter: (value) => {
-                const counter = document.getElementById('counter');
-                if (counter) counter.textContent = value.toString().padStart(3, '0');
-            },
-            setStage: (stage) => {
-                const stageElement = document.querySelector('.chip-stage');
-                if (stageElement) stageElement.textContent = `STAGE – ${stage.toString().padStart(2, '0')}`;
-            },
-            setScore: (score) => {
-                const scoreElement = document.querySelector('.chip-score');
-                if (scoreElement) scoreElement.textContent = `SCORE ${score.toString().padStart(6, '0')}`;
-            },
-            setTime: (time) => {
-                const timeElement = document.querySelector('.chip-time');
-                if (timeElement) timeElement.textContent = time;
-            }
+            setHearts:   (filled, total) => IconManager.renderHearts(filled, total),
+            setPowers:   (filled, total) => IconManager.renderPowers(total, filled),
+            setFires:    (filled, total) => IconManager.renderFires(filled, total),
+            setCounter: (value) => { const counter = document.getElementById('counter'); if (counter) counter.textContent = value.toString().padStart(3, '0'); },
+            setStage:   (stage) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${stage.toString().padStart(2, '0')}`; },
+            setScore:   (score) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${score.toString().padStart(6, '0')}`; },
+            setTime:    (time)  => { const el = document.querySelector('.chip-time');  if (el) el.textContent = time; }
         };
     </script>
 </body>
