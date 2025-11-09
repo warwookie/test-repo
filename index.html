@@ -1,407 +1,786 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SNEAKERQUEST</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEAKERQUEST</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    :root {
-      --primary-color: #ff3a2f;
-      --secondary-color: #d6c7a4;
-      --bg-dark: #0a0a0a;
-      --bg-medium: #1a1510;
-      --bg-light: #2a2119;
-      --wood-light: #b99b66;
-      --wood-medium: #876a46;
-      --wood-dark: #56432e;
-      --screen-bg: #0a241f;
-      $1
-      --center-cell: 90px; /* shared target width for middle HUD cells (hearts & pause) */
-    }
+        :root {
+            --primary-color: #ff3a2f;
+            --secondary-color: #d6c7a4;
+            --bg-dark: #0a0a0a;
+            --bg-medium: #1a1510;
+            --bg-light: #2a2119;
+            --wood-light: #b99b66;
+            --wood-medium: #876a46;
+            --wood-dark: #56432e;
+            --screen-bg: #0a241f;
+            --led-glow: rgba(255, 58, 47, 0.45);
+        }
 
-    html, body { display: flex; align-items: flex-start; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; min-height: 100dvh; }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
 
-    /* bottom-pinned layout (single body rule above) */
+        body {
+            margin: 0;
+            background: var(--bg-dark);
+            color: var(--secondary-color);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .fixed-container { width: 430px; height: auto; position: relative; transform-origin: top center; aspect-ratio: 430 / 900; max-width: 100vw; margin: 0 auto; }
+        .fixed-container {
+            width: 430px;
+            height: 900px;
+            position: relative;
+            transform-origin: center center;
+        }
 
-    .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
-      radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
-      linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
-      box-shadow: inset 0 0 0 2px var(--bg-light), 0 24px 40px rgba(0,0,0,.5), 0 6px 0 var(--bg-dark);
-    }
+        .cabinet {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            padding: 14px;
+            background: 
+                radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
+                linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, 
+                var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, 
+                var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                0 24px 40px rgba(0,0,0,.5),
+                0 6px 0 var(--bg-dark);
+        }
 
-    .inner { width: 100%; height: 100%; border-radius: 22px; background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d); box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium); position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; overflow: hidden; }
+        .inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                inset 0 0 0 6px var(--bg-medium);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+        }
 
-    /* Marquee section */
-    .marquee { width: 100%; height: 90px; border-radius: 18px; padding: 12px 14px; background: linear-gradient(#2a2320, #1d1815); box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display: flex; align-items: center; justify-content: center; }
+        /* Marquee section */
+        .marquee {
+            width: 100%;
+            height: 90px;
+            border-radius: 18px;
+            padding: 12px 14px;
+            background: linear-gradient(#2a2320, #1d1815);
+            box-shadow: 
+                inset 0 0 0 2px #120e0c,
+                inset 0 0 0 6px #2f2722,
+                0 2px 0 #0a0807;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .led { width: 100%; height: 100%; border-radius: 12px; background: radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%), repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; position: relative; overflow: hidden; }
+        .led {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: 
+                radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
+                repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
+                #120e0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .mq-wrap { display: grid; justify-items: center; align-content: center; height: 100%; }
+        .mq-wrap {
+            display: grid;
+            justify-items: center;
+            align-content: center;
+            height: 100%;
+        }
 
-    .mq-title { font-size: 27px; text-align: center; user-select: none; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+        .mq-title {
+            font-size: 27px;
+            letter-spacing: 0em;
+            text-align: center;
+            user-select: none;
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
+            animation: led-flicker 3.6s ease-in-out infinite;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
 
-    .mq-sub { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 7px; letter-spacing: .12em; margin-top: 6px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-    .mq-sub .chip { white-space: nowrap; }
-    .mq-sub .chip-box { padding: 4px 3px; border: 2px solid var(--primary-color); border-radius: 4px; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; }
+        .mq-sub {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 7px;
+            letter-spacing: .12em;
+            margin-top: 6px;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
 
-    @keyframes led-flicker { 0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } 50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); } 100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } }
+        .mq-sub .chip {
+            white-space: nowrap;
+        }
 
-    .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
+        .mq-sub .chip-box {
+            padding: 4px 3px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+        }
 
-    .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18); box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; position: relative; }
+        @keyframes led-flicker {
+            0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+            50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); }
+            100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+        }
 
-    .crt { width: 100%; border-radius: 11px; aspect-ratio: 0.94; background: linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823); box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .divider {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(#3b3026, #2a231e);
+            box-shadow: inset 0 0 0 2px var(--bg-medium);
+        }
 
-    /* Game Canvas */
-    #gameCanvas { width: 100%; height: 100%; display: block; border-radius: 11px; image-rendering: pixelated; }
+        .crt-wrap {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            padding: 10px;
+            background: linear-gradient(#3c2f26, #241e18);
+            box-shadow: 
+                inset 0 0 0 2px #1a140f,
+                inset 0 0 0 8px #2a211a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    /* Fullscreen Button */
-    .fullscreen-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(255, 58, 47, 0.8); border: 2px solid var(--secondary-color); border-radius: 6px; color: var(--secondary-color); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; transition: all 0.3s ease; font-size: 16px; }
-    .fullscreen-btn:hover { background: var(--secondary-color); color: var(--primary-color); }
+        .crt {
+            width: 100%;
+            border-radius: 11px;
+            aspect-ratio: 0.94;
+            background: 
+                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
+                linear-gradient(var(--screen-bg), #0b2823);
+            box-shadow: 
+                inset 0 0 0 2px #0e1412,
+                inset 0 0 30px rgba(0,0,0,.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .tabs { width: 100%; height: 70px; border-radius: 14px; background: linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; padding: 10px 8px; text-align: center; font-weight: 800; letter-spacing: 0.08em; margin-top: -14px; }
+        .tabs {
+            width: 100%;
+            height: 70px;
+            border-radius: 14px;
+            background: linear-gradient(#3a2f26, #2b231d);
+            box-shadow: inset 0 0 0 2px #1a1410;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-top: -14px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .tabs .tab:nth-child(1){ flex: 0 1 42%; }
+        .tabs .tab:nth-child(2){ flex: 0 1 10%; }
+        .tabs .tab:nth-child(3){ flex: 0 1 42%; }
 
-    .tab { display: flex; align-items: stretch; min-width: 0; }
+        .tab {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+        }
 
-    .tab .led { height: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; }
+        .tab .led {
+            height: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
 
-    .tab .led .line { font-size: 10px; letter-spacing: .14em; color: var(--primary-color); font-weight: 800; text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; white-space: nowrap; min-width: 0; }
+        .tab .led .line {
+            font-size: 10px;
+            letter-spacing: .14em;
+            color: var(--primary-color);
+            font-weight: 800;
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
 
-    .hud { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -16px; }
-    .hud .slot-heart{ height: 41px; }
-    .hud .slot-shoes{ height: 40px; }
-    .hud .slot-dots{ height: 40px; }
+        .hud {
+            width: 100%;
+            height: auto;
+            display: flex;
+            gap: 3px;
+            margin-top: -16px;
+        }
+        .hud .slot-heart{ height: 41px; }
+        .hud .slot-shoes{ height: 40px; }
+        .hud .slot-dots{ height: 40px; }
+        .hud .slot:nth-child(1){ flex: 0 1 40%; }
+        .hud .slot:nth-child(2){ flex: 0 1 28%; }
+        .hud .slot:nth-child(3){ flex: 0 1 40%; }
 
-    .hud2 { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -15px; }
-    .hud2 .slot-flames{ height: 40px; }
-    
-/* keep the center HUD cells from stretching; center them */
-.slot-shoes, .slot-pause { justify-self: center; max-width: var(--center-cell); width: 100%; }
-    .hud2 .slot-bag{ height: 40px; }
+        .hud2 {
+            width: 100%;
+            height: auto;
+            display: flex;
+            gap: 3px;
+            margin-top: -15px;
+        }
+        .hud2 .slot-flames{ height: 40px; }
+        .hud2 .slot-pause{ height: 40px; }
+        .hud2 .slot-bag{ height: 40px; }
+        .hud2 .slot:nth-child(1){ flex: 0 1 40%; }
+        .hud2 .slot:nth-child(2){ flex: 0 1 28%; }
+        .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
 
-    .slot { background: linear-gradient(#3a3227, #2c251e); border-radius: 14px; padding: 5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 100%; width: 100%; }
-    .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
-    .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
+        .slot {
+            background: linear-gradient(#3a3227, #2c251e);
+            border-radius: 14px;
+            padding: 5px;
+            box-shadow: 
+                inset 0 0 0 2px #1a1511,
+                0 2px 0 #0b0907;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
 
-    /* Icon Containers */
-#ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box; }
+        .slot > .led {
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* Tighter middle-slot spacing */
-.slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
-#ui-hearts { gap: 2px; }
-#ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 20px; }
+        .slot > .led .line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: .12em;
+            width: 100%;
+            justify-content: center;
+        }
 
-/* Pause button should not force wide box */
-.slot-pause .chip-btn { min-width: auto; letter-spacing: .10em; font-size: 11px; }
+        /* Icon Containers */
+        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
 
-    /* Icons */
-    #ui-sneakers { gap: 3px; }
-    .sneaker-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-    .sneaker-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-    .sneaker-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
-    .sneaker-icon.active .sneaker-fill { opacity: 1; }
+        /* Sneaker Icons */
+        #ui-sneakers {
+            gap: 3px;
+        }
 
-    #ui-hearts { gap: 4px; }
-    .heart-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-    .heart-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-    .heart-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
-    .heart-icon.active .heart-fill { opacity: 1; }
+        .sneaker-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    #ui-fires { gap: 2px; }
-    .fire-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-    .fire-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-    .fire-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
-    .fire-icon.active .fire-fill { opacity: 1; }
+        .sneaker-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    #ui-powers { gap: 7px; }
-    .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-    .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-    .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
-    .power.active .ph-fill { opacity: 1; }
+        .sneaker-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .chip-btn { background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; color: var(--primary-color); font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-    .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
-    .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
-    #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
-    #btn-pause[data-state=paused] .word-play { opacity: 1; transform: none; }
+        .sneaker-icon.active .sneaker-fill {
+            opacity: 1;
+        }
 
-    .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
-    .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
-    .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
+        /* Heart Icons */
+        #ui-hearts {
+            gap: 4px;
+        }
 
-    .bottom { width: 100%; height: 150px; margin-top: -13px; }
+        .heart-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
+        .heart-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
 
-    .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
+        .heart-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    @media (max-width: 400px) { .mq-title{font-size:22px;} .mq-sub{font-size:6px;} .tab .led .line{font-size:9px; letter-spacing:.10em; white-space:nowrap;} }
-    @media (max-width: 390px){
-  :root{ --center-cell: 86px; }
-  /* tighten labels and center cells */
-  .hud{  grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 2px; }
-  .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 2px; }
-  #ui-sneakers{gap:2px;} #ui-hearts{gap:2px;} #ui-fires{gap:2px;} #ui-powers{gap:5px;}
-  .sneaker-outline, .sneaker-fill,
-  .heart-outline,   .heart-fill,
-  .fire-outline,    .fire-fill,
-  .power .ph-bold,  .power .ph-fill { font-size: 18px; }
-  .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
-  .slot-shoes, .slot-pause { justify-self: center; }
-}
-  .hud2{ grid-template-columns: 1fr fit-content(86px) 1fr; gap: 2px; }
-  #ui-sneakers{gap:2px;} #ui-hearts{gap:2px;} #ui-fires{gap:2px;} #ui-powers{gap:5px;}
-  .sneaker-outline, .sneaker-fill,
-  .heart-outline,   .heart-fill,
-  .fire-outline,    .fire-fill,
-  .power .ph-bold,  .power .ph-fill { font-size: 18px; }
-  .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
-  .slot-shoes, .slot-pause { justify-self: center; }
-}
-@media (max-width: 360px){
-  :root{ --center-cell: 82px; }
-  .tab .led .line{ font-size: 8.5px; letter-spacing: .08em; }
-  .hud{  grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; }
-  .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; }
-  .sneaker-outline, .sneaker-fill,
-  .heart-outline,   .heart-fill,
-  .fire-outline,    .fire-fill,
-  .power .ph-bold,  .power .ph-fill { font-size: 17px; }
-}
-  .hud{  grid-template-columns: 1fr fit-content(88px) 1fr; }
-  .hud2{ grid-template-columns: 1fr fit-content(82px) 1fr; }
-  .sneaker-outline, .sneaker-fill,
-  .heart-outline,   .heart-fill,
-  .fire-outline,    .fire-fill,
-  .power .ph-bold,  .power .ph-fill { font-size: 17px; }
-}
-</style>
+        .heart-icon.active .heart-fill {
+            opacity: 1;
+        }
+
+        /* Fire Icons */
+        #ui-fires {
+            gap: 2px;
+        }
+
+        .fire-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fire-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .fire-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fire-icon.active .fire-fill {
+            opacity: 1;
+        }
+
+        /* Power-up Icons */
+        #ui-powers {
+            gap: 7px;
+        }
+
+        .power {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .power .ph-bold {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .power .ph-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .power.active .ph-fill {
+            opacity: 1;
+        }
+
+        .chip-btn {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            position: relative;
+            color: var(--primary-color);
+            font: inherit;
+            letter-spacing: .12em;
+            cursor: pointer;
+            min-height: 1em;
+            line-height: 1;
+            min-width: 6ch;
+            font-size: 12px;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
+
+        .chip-btn:focus-visible {
+            outline: none;
+            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
+        }
+
+        .chip-btn .word {
+            grid-area: 1/1;
+            display: block;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(6%);
+            transition: opacity .24s ease, transform .24s ease;
+        }
+
+        #btn-pause[data-state=playing] .word-pause {
+            opacity: 1;
+            transform: none;
+        }
+
+        #btn-pause[data-state=paused] .word-play {
+            opacity: 1;
+            transform: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chip-btn .word {
+                transition: none;
+            }
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
+            font-weight: 900;
+            letter-spacing: .14em;
+        }
+
+        .seven {
+            font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .counter .ph-package {
+            font-size: 20px !important;
+            color: var(--secondary-color) !important;
+            filter: none !important;
+        }
+
+        .bottom {
+            width: 100%;
+            height: 150px;
+            margin-top: -13px;
+        }
+
+        .control-screen {
+            position: relative;
+            height: 100%;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 82% 20%;
+            gap: 14px;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(#1a1210, #0c0908);
+            box-shadow: 
+                inset 0 0 0 2px #1a1510,
+                inset 0 16px 30px rgba(0,0,0,.4),
+                0 3px 0 #0a0807;
+        }
+
+        .matrix {
+            position: absolute;
+            inset: 6px;
+            border-radius: 14px;
+            opacity: .9;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
+        }
+    </style>
 </head>
 <body>
-  <div class="fixed-container" id="mainContainer">
-    <div class="cabinet">
-      <div class="inner">
-        <div class="marquee" id="element-marquee">
-          <div class="led">
-            <div class="mq-wrap">
-              <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
-              <div class="line mq-sub">
-                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
-                <span class="chip chip-time chip-box">00:00:0</span>
-                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
-              </div>
+    <div class="fixed-container" id="mainContainer">
+        <div class="cabinet">
+            <div class="inner">
+                <div class="marquee" id="element-marquee">
+                    <div class="led">
+                        <div class="mq-wrap">
+                            <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+                            <div class="line mq-sub">
+                                <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
+                                <span class="chip chip-time chip-box">00:00:0</span>
+                                <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider" id="element-divider"></div>
+
+                <div class="crt-wrap" id="element-crt">
+                    <div class="crt" aria-label="Screen placeholder"></div>
+                </div>
+
+                <div class="tabs" id="element-tabs">
+                    <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
+                    <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
+                    <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
+                </div>
+
+                <div class="hud" id="element-hud1">
+                    <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
+                    <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
+                    <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
+                </div>
+
+                <div class="hud2" id="element-hud2">
+                    <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
+                    <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+                        <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+                            <span class="word word-pause" aria-hidden="false">PAUSE</span>
+                            <span class="word word-play" aria-hidden="true">PLAY</span>
+                        </button>
+                    </div></div></div>
+                    <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
+                        <i class="ph-fill ph-package" aria-hidden="true"></i>
+                        <span style="opacity:.8;letter-spacing:.12em">x</span>
+                        <span class="seven" id="counter">000</span>
+                    </div></div></div>
+                </div>
+
+                <div class="bottom" id="element-bottom">
+                    <div class="control-screen" id="element-controls">
+                        <div class="matrix" aria-hidden="true"></div>
+                        <main class="control-ui" aria-label="Control surface">
+                            <section class="col-left"><div class="pad"></div></section>
+                            <section class="col-right"><div class="pad"></div></section>
+                        </main>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-
-        <div class="divider" id="element-divider"></div>
-
-        <div class="crt-wrap" id="element-crt">
-          <div class="crt">
-            <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">
-              <i class="ph-fill ph-arrows-out-simple"></i>
-            </button>
-            <canvas id="gameCanvas"></canvas>
-          </div>
-        </div>
-
-        <div class="tabs" id="element-tabs">
-          <div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
-          <div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
-          <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
-        </div>
-
-        <div class="hud" id="element-hud1">
-          <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
-          <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
-          <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
-        </div>
-
-        <div class="hud2" id="element-hud2">
-          <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
-          <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
-            <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
-              <span class="word word-pause" aria-hidden="false">PAUSE</span>
-              <span class="word word-play" aria-hidden="true">PLAY</span>
-            </button>
-          </div></div></div>
-          <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
-            <i class="ph-fill ph-package" aria-hidden="true"></i>
-            <span style="opacity:.8;letter-spacing:.12em">x</span>
-            <span class="seven" id="counter">000</span>
-          </div></div></div>
-        </div>
-
-        <div class="bottom" id="element-bottom">
-          <div class="control-screen" id="element-controls">
-            <div class="matrix" aria-hidden="true"></div>
-            <main class="control-ui" aria-label="Control surface">
-              <section class="col-left"><div class="pad"></div></section>
-              <section class="col-right"><div class="pad"></div></section>
-            </main>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    // === MOBILE SAFARI LAYOUT/SCALING ===
-    class MobileSafariLock {
-      static initialize() {
-        MobileSafariLock.initializeAggressiveScaling();
-        MobileSafariLock.initializeFullscreen();
-      }
-
-      static initializeAggressiveScaling() {
-        const container = document.querySelector('.fixed-container');
-        if (!container) return;
-
-        const applyMeasuredFit = () => {
-          const vv = window.visualViewport;
-          const vh = vv ? vv.height : window.innerHeight; // visible height (excludes Safari bars)
-
-          // measure natural height with no transform
-          const prev = container.style.transform;
-          container.style.transform = 'none';
-          const natH = Math.ceil(container.offsetHeight);
-          container.style.transform = prev;
-
-          // Height-first, uniform scale to make top=0 and bottom=address bar
-          const scaleH = vh / Math.max(1, natH);
-          const scale = Math.max(0.01, scaleH * 1.000);
-
-          container.style.transform = `scale(${scale})`;
-        };
-
-        applyMeasuredFit();
-        let t;
-        window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(applyMeasuredFit, 80); });
-        window.addEventListener('orientationchange', () => setTimeout(applyMeasuredFit, 250));
-      }
-
-      static initializeFullscreen() {
-        const btn = document.getElementById('fullscreenBtn');
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) { window.scrollTo(0, 0); return; }
-          if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
-          else document.exitFullscreen?.();
-        });
-      }
-    }
-
-    // === ICON MANAGER ===
-    class IconManager {
-      static updateAllIcons() {
-        IconManager.renderSneakers(3, 5);
-        IconManager.renderHearts(1, 3);
-        IconManager.renderPowers(4, 4);
-        IconManager.renderFires(4, 5);
-      }
-      static renderSneakers(fill, outline) {
-        const c = document.getElementById('ui-sneakers'); if (!c) return; c.innerHTML = '';
-        for (let i = 0; i < outline; i++) c.innerHTML += `
-          <div class="sneaker-icon ${i < fill ? 'active' : ''}">
-            <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
-            <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
-          </div>`;
-      }
-      static renderHearts(fill, outline) {
-        const c = document.getElementById('ui-hearts'); if (!c) return; c.innerHTML = '';
-        for (let i = 0; i < outline; i++) c.innerHTML += `
-          <div class="heart-icon ${i < fill ? 'active' : ''}">
-            <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
-            <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
-          </div>`;
-      }
-      static renderFires(fill, outline) {
-        const c = document.getElementById('ui-fires'); if (!c) return; c.innerHTML = '';
-        for (let i = 0; i < outline; i++) c.innerHTML += `
-          <div class="fire-icon ${i < fill ? 'active' : ''}">
-            <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
-            <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
-          </div>`;
-      }
-      static renderPowers(total, fill) {
-        const c = document.getElementById('ui-powers'); if (!c) return; c.innerHTML = '';
-        const types = [ { b:'ph-timer', f:'ph-timer' }, { b:'ph-shield', f:'ph-shield' }, { b:'ph-magnet', f:'ph-magnet' }, { b:'ph-crosshair-simple', f:'ph-crosshair-simple' } ];
-        for (let i = 0; i < total; i++) {
-          const t = types[i % types.length];
-          c.innerHTML += `
-            <div class="power ${i < fill ? 'active' : ''}">
-              <i class="ph-bold ${t.b}" aria-hidden="true"></i>
-              <i class="ph-fill ${t.f}" aria-hidden="true"></i>
-            </div>`;
+    <script>
+        // Icon Manager - Handles all icon rendering
+        class IconManager {
+            static renderSneakers(fill, outline) {
+                const container = document.getElementById('ui-sneakers');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="sneaker-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
+            }
+            
+            static renderHearts(fill, outline) {
+                const container = document.getElementById('ui-hearts');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="heart-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
+            }
+            
+            static renderFires(fill, outline) {
+                const container = document.getElementById('ui-fires');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < outline; i++) {
+                    const isFilled = i < fill;
+                    container.innerHTML += `
+                        <div class="fire-icon ${isFilled ? 'active' : ''}">
+                            <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
+                            <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
+                        </div>
+                    `;
+                }
+            }
+            
+            static renderPowers(total, fill) {
+                const container = document.getElementById('ui-powers');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                const powerTypes = [
+                    { bold: 'ph-timer', fill: 'ph-timer' },
+                    { bold: 'ph-shield', fill: 'ph-shield' },
+                    { bold: 'ph-magnet', fill: 'ph-magnet' },
+                    { bold: 'ph-crosshair-simple', fill: 'blast' }
+                ];
+                
+                for (let i = 0; i < total; i++) {
+                    const powerType = powerTypes[i % powerTypes.length];
+                    const isActive = i < fill;
+                    
+                    if (powerType.fill === 'blast') {
+                        container.innerHTML += `
+                            <div class="power ${isActive ? 'active' : ''}">
+                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML += `
+                            <div class="power ${isActive ? 'active' : ''}">
+                                <i class="ph-bold ${powerType.bold}" aria-hidden="true"></i>
+                                <i class="ph-fill ${powerType.fill}" aria-hidden="true"></i>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            static updateAllIcons() {
+                // Default icon counts - your game can override these
+                IconManager.renderSneakers(3, 5);    // 3 filled, 5 total sneakers
+                IconManager.renderHearts(1, 3);      // 1 filled, 3 total hearts  
+                IconManager.renderPowers(4, 4);      // 4 filled, 4 total powers
+                IconManager.renderFires(4, 5);       // 4 filled, 5 total fires
+            }
         }
-      }
-    }
 
-    // === GAME SETUP ===
-    function setupSimpleGame() {
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
+        // HUD Manager - Handles HUD interactions
+        class HUDManager {
+            static initialize() {
+                // Setup pause button
+                const pauseBtn = document.getElementById('btn-pause');
+                if (pauseBtn) {
+                    pauseBtn.addEventListener('click', function() {
+                        const isPlaying = this.dataset.state === 'playing';
+                        this.dataset.state = isPlaying ? 'paused' : 'playing';
+                    });
+                }
+            }
+        }
 
-      function resizeCanvas() {
-        const crt = document.querySelector('.crt');
-        const cssW = crt.clientWidth;  const cssH = crt.clientHeight;
+        // Scaling Manager - Handles responsive scaling
+        class ScalingManager {
+            static initialize() {
+                ScalingManager.scaleContainer();
+                window.addEventListener('resize', ScalingManager.scaleContainer);
+            }
+            
+            static scaleContainer() {
+                const container = document.querySelector('.fixed-container');
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                const scaleX = (viewportWidth - 40) / 430;
+                const scaleY = (viewportHeight - 40) / 900;
+                const finalScale = Math.min(scaleX, scaleY, 1);
+                
+                container.style.transform = `scale(${finalScale})`;
+            }
+        }
 
-        canvas.style.width = cssW + 'px';
-        canvas.style.height = cssH + 'px';
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            HUDManager.initialize();
+            ScalingManager.initialize();
+            IconManager.updateAllIcons();
+        });
 
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width  = Math.round(cssW * dpr);
-        canvas.height = Math.round(cssH * dpr);
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(dpr, dpr);
-        draw();
-
-        // Self-tests
-        console.assert(Math.abs(canvas.width  / (window.devicePixelRatio||1) - cssW) < 1, 'Canvas width backing store mismatch');
-        console.assert(Math.abs(canvas.height / (window.devicePixelRatio||1) - cssH) < 1, 'Canvas height backing store mismatch');
-      }
-
-      function draw() {
-        const w = canvas.clientWidth; const h = canvas.clientHeight;
-        ctx.fillStyle = '#0a241f'; ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#d6c7a4'; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('SNEAKER BOMBER', w / 2, h / 2 - 20);
-        ctx.fillText('SPACE TO START', w / 2, h / 2 + 20);
-      }
-
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      MobileSafariLock.initialize();
-      IconManager.updateAllIcons();
-      setupSimpleGame();
-      const pauseBtn = document.getElementById('btn-pause');
-      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
-      setTimeout(() => { window.scrollTo(0, 0); }, 120);
-    });
-
-    // Simple UI API
-    window.SneakerQuestUI = {
-      IconManager,
-      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
-      setHearts:   (f, t) => IconManager.renderHearts(f, t),
-      setPowers:   (f, t) => IconManager.renderPowers(t, f),
-      setFires:    (f, t) => IconManager.renderFires(f, t),
-      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
-      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
-      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
-      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
-    };
-  </script>
+        // Export the IconManager for game control
+        window.SneakerQuestUI = {
+            IconManager: IconManager,
+            setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
+            setHearts: (filled, total) => IconManager.renderHearts(filled, total),
+            setPowers: (filled, total) => IconManager.renderPowers(total, filled),
+            setFires: (filled, total) => IconManager.renderFires(filled, total),
+            setCounter: (value) => {
+                const counter = document.getElementById('counter');
+                if (counter) counter.textContent = value.toString().padStart(3, '0');
+            },
+            setStage: (stage) => {
+                const stageElement = document.querySelector('.chip-stage');
+                if (stageElement) stageElement.textContent = `STAGE – ${stage.toString().padStart(2, '0')}`;
+            },
+            setScore: (score) => {
+                const scoreElement = document.querySelector('.chip-score');
+                if (scoreElement) scoreElement.textContent = `SCORE ${score.toString().padStart(6, '0')}`;
+            },
+            setTime: (time) => {
+                const timeElement = document.querySelector('.chip-time');
+                if (timeElement) timeElement.textContent = time;
+            }
+        };
+    </script>
 </body>
 </html>
