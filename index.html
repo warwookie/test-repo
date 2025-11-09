@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SNEAKERQUEST</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary-color: #ff3a2f;
             --secondary-color: #d6c7a4;
@@ -26,537 +21,88 @@
             --screen-bg: #0a241f;
             --led-glow: rgba(255, 58, 47, 0.45);
         }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: var(--bg-dark);
-        }
-
+        html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg-dark); }
         body {
-            margin: 0;
-            background: var(--bg-dark);
-            color: var(--secondary-color);
+            margin: 0; color: var(--secondary-color);
             font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
         }
+        .fixed-container { width: 430px; height: 900px; position: relative; transform-origin: center center; }
+        .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
+            radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
+            linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
+            box-shadow: inset 0 0 0 2px var(--bg-light), 0 24px 40px rgba(0,0,0,.5), 0 6px 0 var(--bg-dark);
+        }
+        .inner { width: 100%; height: 100%; border-radius: 22px; background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
+            box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium);
+            position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
+        .marquee { width: 100%; height: 90px; border-radius: 18px; padding: 12px 14px; background: linear-gradient(#2a2320, #1d1815);
+            box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display: flex; align-items: center; justify-content: center; }
+        .led { width: 100%; height: 100%; border-radius: 12px; background:
+            radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
+            repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; position: relative; overflow: hidden; }
+        .mq-wrap { display: grid; justify-items: center; align-content: center; height: 100%; }
+        .mq-title { font-size: 27px; text-align: center; user-select: none; color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow); animation: led-flicker 3.6s ease-in-out infinite;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+        .mq-sub { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 7px; letter-spacing: .12em; margin-top: 6px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+        .mq-sub .chip { white-space: nowrap; }
+        .mq-sub .chip-box { padding: 4px 3px; border: 2px solid var(--primary-color); border-radius: 4px; color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; }
+        @keyframes led-flicker { 0%{opacity:.96; text-shadow:0 0 2px var(--primary-color),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2);} 50%{opacity:1; text-shadow:0 0 2px var(--primary-color),0 0 9px rgba(255,58,47,.5),0 0 16px rgba(255,58,47,.28);} 100%{opacity:.97; text-shadow:0 0 2px var(--primary-color),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2);} }
+        .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
+        .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18);
+            box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; }
+        .crt { width: 100%; border-radius: 11px; aspect-ratio: 0.94; background:
+                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823);
+            box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        /* Fullscreen button */
+        .fullscreen-btn { position: absolute; top: 8px; right: 8px; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; border: 2px solid var(--primary-color); background: rgba(0,0,0,.35); color: var(--primary-color); cursor: pointer; box-shadow: 0 0 6px rgba(255,58,47,.25) inset; }
+        .fullscreen-btn i { font-size: 18px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .fullscreen-btn:focus-visible { outline: 2px solid var(--secondary-color); outline-offset: 2px; }
+        .fullscreen-btn .icon { grid-area: 1/1; opacity: 0; transform: scale(.9); transition: opacity .18s ease, transform .18s ease; }
+        #btn-fullscreen[data-state="off"] .enter { opacity: 1; transform: none; }
+        #btn-fullscreen[data-state="on"] .exit { opacity: 1; transform: none; }
+        /* Optional: darken bg in full or immersive */
+        body.is-fullscreen, body.is-immersive { background: #000; }
 
-        .fixed-container {
-            width: 430px;
-            height: 900px;
-            position: relative;
-            transform-origin: center center;
-        }
-
-        .cabinet {
-            width: 100%;
-            height: 100%;
-            border-radius: 28px;
-            padding: 14px;
-            background: 
-                radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
-                linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, 
-                var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, 
-                var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
-            box-shadow: 
-                inset 0 0 0 2px var(--bg-light),
-                0 24px 40px rgba(0,0,0,.5),
-                0 6px 0 var(--bg-dark);
-        }
-
-        .inner {
-            width: 100%;
-            height: 100%;
-            border-radius: 22px;
-            background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
-            box-shadow: 
-                inset 0 0 0 2px var(--bg-light),
-                inset 0 0 0 6px var(--bg-medium);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        /* Marquee section */
-        .marquee {
-            width: 100%;
-            height: 90px;
-            border-radius: 18px;
-            padding: 12px 14px;
-            background: linear-gradient(#2a2320, #1d1815);
-            box-shadow: 
-                inset 0 0 0 2px #120e0c,
-                inset 0 0 0 6px #2f2722,
-                0 2px 0 #0a0807;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .led {
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            background: 
-                radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
-                repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
-                #120e0c;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 10px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mq-wrap {
-            display: grid;
-            justify-items: center;
-            align-content: center;
-            height: 100%;
-        }
-
-        .mq-title {
-            font-size: 27px;
-            letter-spacing: 0em;
-            text-align: center;
-            user-select: none;
-            color: var(--primary-color);
-            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
-            animation: led-flicker 3.6s ease-in-out infinite;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-        }
-
-        .mq-sub {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            font-size: 7px;
-            letter-spacing: .12em;
-            margin-top: 6px;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-        }
-
-        .mq-sub .chip {
-            white-space: nowrap;
-        }
-
-        .mq-sub .chip-box {
-            padding: 4px 3px;
-            border: 2px solid var(--primary-color);
-            border-radius: 4px;
-            color: var(--primary-color);
-            text-shadow: 0 0 2px var(--primary-color);
-            animation: led-flicker 3.6s ease-in-out infinite;
-        }
-
-        @keyframes led-flicker {
-            0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
-            50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); }
-            100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
-        }
-
-        .divider {
-            width: 100%;
-            height: 12px;
-            border-radius: 10px;
-            background: linear-gradient(#3b3026, #2a231e);
-            box-shadow: inset 0 0 0 2px var(--bg-medium);
-        }
-
-        .crt-wrap {
-            width: 100%;
-            height: auto;
-            border-radius: 20px;
-            padding: 10px;
-            background: linear-gradient(#3c2f26, #241e18);
-            box-shadow: 
-                inset 0 0 0 2px #1a140f,
-                inset 0 0 0 8px #2a211a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .crt {
-            width: 100%;
-            border-radius: 11px;
-            aspect-ratio: 0.94;
-            background: 
-                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
-                linear-gradient(var(--screen-bg), #0b2823);
-            box-shadow: 
-                inset 0 0 0 2px #0e1412,
-                inset 0 0 30px rgba(0,0,0,.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tabs {
-            width: 100%;
-            height: 70px;
-            border-radius: 14px;
-            background: linear-gradient(#3a2f26, #2b231d);
-            box-shadow: inset 0 0 0 2px #1a1410;
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            text-align: center;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            margin-top: -14px;
-            padding-left: 8px;
-            padding-right: 8px;
-        }
-        .tabs .tab:nth-child(1){ flex: 0 1 42%; }
-        .tabs .tab:nth-child(2){ flex: 0 1 10%; }
-        .tabs .tab:nth-child(3){ flex: 0 1 42%; }
-
-        .tab {
-            display: flex;
-            align-items: stretch;
-            flex: 1;
-        }
-
-        .tab .led {
-            height: 100%;
-            border-radius: 10px;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .tab .led .line {
-            font-size: 10px;
-            letter-spacing: .14em;
-            color: var(--primary-color);
-            font-weight: 800;
-            text-shadow: 0 0 2px var(--primary-color);
-            animation: led-flicker 3.6s ease-in-out infinite;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-        }
-
-        .hud {
-            width: 100%;
-            height: auto;
-            display: flex;
-            gap: 3px;
-            margin-top: -16px;
-        }
-        .hud .slot-heart{ height: 41px; }
-        .hud .slot-shoes{ height: 40px; }
-        .hud .slot-dots{ height: 40px; }
-        .hud .slot:nth-child(1){ flex: 0 1 40%; }
-        .hud .slot:nth-child(2){ flex: 0 1 28%; }
-        .hud .slot:nth-child(3){ flex: 0 1 40%; }
-
-        .hud2 {
-            width: 100%;
-            height: auto;
-            display: flex;
-            gap: 3px;
-            margin-top: -15px;
-        }
-        .hud2 .slot-flames{ height: 40px; }
-        .hud2 .slot-pause{ height: 40px; }
-        .hud2 .slot-bag{ height: 40px; }
-        .hud2 .slot:nth-child(1){ flex: 0 1 40%; }
-        .hud2 .slot:nth-child(2){ flex: 0 1 28%; }
-        .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
-
-        .slot {
-            background: linear-gradient(#3a3227, #2c251e);
-            border-radius: 14px;
-            padding: 5px;
-            box-shadow: 
-                inset 0 0 0 2px #1a1511,
-                0 2px 0 #0b0907;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
-        }
-
-        .slot > .led {
-            height: 100%;
-            width: 100%;
-            border-radius: 10px;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .slot > .led .line {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: .12em;
-            width: 100%;
-            justify-content: center;
-        }
-
-        /* Icon Containers */
-        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            padding: 0 4px;
-            box-sizing: border-box;
-        }
-
-        /* Sneaker Icons */
-        #ui-sneakers {
-            gap: 3px;
-        }
-
-        .sneaker-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sneaker-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .sneaker-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .sneaker-icon.active .sneaker-fill {
-            opacity: 1;
-        }
-
-        /* Heart Icons */
-        #ui-hearts {
-            gap: 4px;
-        }
-
-        .heart-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .heart-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .heart-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .heart-icon.active .heart-fill {
-            opacity: 1;
-        }
-
-        /* Fire Icons */
-        #ui-fires {
-            gap: 2px;
-        }
-
-        .fire-icon {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fire-outline {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .fire-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .fire-icon.active .fire-fill {
-            opacity: 1;
-        }
-
-        /* Power-up Icons */
-        #ui-powers {
-            gap: 7px;
-        }
-
-        .power {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .power .ph-bold {
-            color: var(--primary-color);
-            font-size: 20px;
-            filter: drop-shadow(0 0 2px var(--primary-color));
-        }
-
-        .power .ph-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: var(--secondary-color);
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .power.active .ph-fill {
-            opacity: 1;
-        }
-
-        .chip-btn {
-            background: transparent;
-            border: 0;
-            border-radius: 0;
-            padding: 0;
-            display: grid;
-            place-items: center;
-            position: relative;
-            color: var(--primary-color);
-            font: inherit;
-            letter-spacing: .12em;
-            cursor: pointer;
-            min-height: 1em;
-            line-height: 1;
-            min-width: 6ch;
-            font-size: 12px;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-        }
-
-        .chip-btn:focus-visible {
-            outline: none;
-            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
-        }
-
-        .chip-btn .word {
-            grid-area: 1/1;
-            display: block;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(6%);
-            transition: opacity .24s ease, transform .24s ease;
-        }
-
-        #btn-pause[data-state=playing] .word-pause {
-            opacity: 1;
-            transform: none;
-        }
-
-        #btn-pause[data-state=paused] .word-play {
-            opacity: 1;
-            transform: none;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .chip-btn .word {
-                transition: none;
-            }
-        }
-
-        .counter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary-color);
-            text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
-            font-weight: 900;
-            letter-spacing: .14em;
-        }
-
-        .seven {
-            font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
-            font-size: 14px;
-            color: var(--secondary-color);
-        }
-
-        .counter .ph-package {
-            font-size: 20px !important;
-            color: var(--secondary-color) !important;
-            filter: none !important;
-        }
-
-        .bottom {
-            width: 100%;
-            height: 150px;
-            margin-top: -13px;
-        }
-
-        .control-screen {
-            position: relative;
-            height: 100%;
-            border-radius: 18px;
-            padding: 14px;
-            display: grid;
-            grid-template-columns: 82% 20%;
-            gap: 14px;
-            align-items: center;
-            overflow: hidden;
-            background: linear-gradient(#1a1210, #0c0908);
-            box-shadow: 
-                inset 0 0 0 2px #1a1510,
-                inset 0 16px 30px rgba(0,0,0,.4),
-                0 3px 0 #0a0807;
-        }
-
-        .matrix {
-            position: absolute;
-            inset: 6px;
-            border-radius: 14px;
-            opacity: .9;
-            mix-blend-mode: screen;
-            pointer-events: none;
-            background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
-        }
+        /* Tabs */
+        .tabs { width: 100%; height: 70px; border-radius: 14px; background: linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display: flex; gap: 10px; padding: 10px; text-align: center; font-weight: 800; letter-spacing: 0.08em; margin-top: -14px; padding-left: 8px; padding-right: 8px; }
+        .tabs .tab:nth-child(1){ flex: 0 1 42%; } .tabs .tab:nth-child(2){ flex: 0 1 10%; } .tabs .tab:nth-child(3){ flex: 0 1 42%; }
+        .tab { display: flex; align-items: stretch; flex: 1; }
+        .tab .led { height: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; }
+        .tab .led .line { font-size: 10px; letter-spacing: .14em; color: var(--primary-color); font-weight: 800; text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+        .hud { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -16px; }
+        .hud .slot-heart{ height: 41px; } .hud .slot-shoes{ height: 40px; } .hud .slot-dots{ height: 40px; }
+        .hud .slot:nth-child(1){ flex: 0 1 40%; } .hud .slot:nth-child(2){ flex: 0 1 28%; } .hud .slot:nth-child(3){ flex: 0 1 40%; }
+        .hud2 { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -15px; }
+        .hud2 .slot-flames{ height: 40px; } .hud2 .slot-pause{ height: 40px; } .hud2 .slot-bag{ height: 40px; }
+        .hud2 .slot:nth-child(1){ flex: 0 1 40%; } .hud2 .slot:nth-child(2){ flex: 0 1 28%; } .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
+        .slot { background: linear-gradient(#3a3227, #2c251e); border-radius: 14px; padding: 5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 100%; width: 100%; }
+        .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
+        .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
+        /* Icon containers */
+        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box; }
+        #ui-sneakers { gap: 3px; } #ui-hearts { gap: 4px; } #ui-fires { gap: 2px; } #ui-powers { gap: 7px; }
+        .sneaker-icon, .heart-icon, .fire-icon, .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .sneaker-outline, .heart-outline, .fire-outline, .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+        .sneaker-fill, .heart-fill, .fire-fill, .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity .3s ease; }
+        .sneaker-icon.active .sneaker-fill, .heart-icon.active .heart-fill, .fire-icon.active .fire-fill, .power.active .ph-fill { opacity: 1; }
+        .chip-btn { background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; position: relative; color: var(--primary-color); font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+        .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
+        .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
+        #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
+        #btn-pause[data-state=paused] .word-play { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) { .chip-btn .word, .mq-title, .mq-sub .chip-box, .tab .led .line { transition: none; animation: none; text-shadow: none; } }
+        .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
+        .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
+        .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
+        .bottom { width: 100%; height: 150px; margin-top: -13px; }
+        .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
+        .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
+        /* Immersive fallback when fullscreen is disallowed */
+        #mainContainer.immersive { width: 100vw; height: 100svh; transform: none !important; }
     </style>
 </head>
 <body>
@@ -579,7 +125,12 @@
                 <div class="divider" id="element-divider"></div>
 
                 <div class="crt-wrap" id="element-crt">
-                    <div class="crt" aria-label="Screen placeholder"></div>
+                    <div class="crt" aria-label="Screen placeholder">
+                        <button id="btn-fullscreen" class="fullscreen-btn" type="button" aria-pressed="false" aria-label="Enter fullscreen" data-state="off">
+                            <i class="ph-bold ph-corners-out icon enter" aria-hidden="true"></i>
+                            <i class="ph-bold ph-corners-in icon exit" aria-hidden="true"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="tabs" id="element-tabs">
@@ -623,12 +174,10 @@
     </div>
 
     <script>
-        // Icon Manager - Handles all icon rendering
+        // Icon Manager
         class IconManager {
             static renderSneakers(fill, outline) {
-                const container = document.getElementById('ui-sneakers');
-                if (!container) return;
-                
+                const container = document.getElementById('ui-sneakers'); if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -636,15 +185,11 @@
                         <div class="sneaker-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
-                        </div>
-                    `;
+                        </div>`;
                 }
             }
-            
             static renderHearts(fill, outline) {
-                const container = document.getElementById('ui-hearts');
-                if (!container) return;
-                
+                const container = document.getElementById('ui-hearts'); if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -652,15 +197,11 @@
                         <div class="heart-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
-                        </div>
-                    `;
+                        </div>`;
                 }
             }
-            
             static renderFires(fill, outline) {
-                const container = document.getElementById('ui-fires');
-                if (!container) return;
-                
+                const container = document.getElementById('ui-fires'); if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -668,118 +209,186 @@
                         <div class="fire-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
-                        </div>
-                    `;
+                        </div>`;
                 }
             }
-            
             static renderPowers(total, fill) {
-                const container = document.getElementById('ui-powers');
-                if (!container) return;
-                
+                const container = document.getElementById('ui-powers'); if (!container) return;
                 container.innerHTML = '';
-                const powerTypes = [
-                    { bold: 'ph-timer', fill: 'ph-timer' },
-                    { bold: 'ph-shield', fill: 'ph-shield' },
-                    { bold: 'ph-magnet', fill: 'ph-magnet' },
-                    { bold: 'ph-crosshair-simple', fill: 'blast' }
-                ];
-                
+                const powerTypes = [ { bold: 'ph-timer', fill: 'ph-timer' }, { bold: 'ph-shield', fill: 'ph-shield' }, { bold: 'ph-magnet', fill: 'ph-magnet' }, { bold: 'ph-crosshair-simple', fill: 'blast' } ];
                 for (let i = 0; i < total; i++) {
-                    const powerType = powerTypes[i % powerTypes.length];
-                    const isActive = i < fill;
-                    
+                    const powerType = powerTypes[i % powerTypes.length]; const isActive = i < fill;
                     if (powerType.fill === 'blast') {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
                                 <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
                                 <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
-                            </div>
-                        `;
+                            </div>`;
                     } else {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
                                 <i class="ph-bold ${powerType.bold}" aria-hidden="true"></i>
                                 <i class="ph-fill ${powerType.fill}" aria-hidden="true"></i>
-                            </div>
-                        `;
+                            </div>`;
                     }
                 }
             }
-            
             static updateAllIcons() {
-                // Default icon counts - your game can override these
-                IconManager.renderSneakers(3, 5);    // 3 filled, 5 total sneakers
-                IconManager.renderHearts(1, 3);      // 1 filled, 3 total hearts  
-                IconManager.renderPowers(4, 4);      // 4 filled, 4 total powers
-                IconManager.renderFires(4, 5);       // 4 filled, 5 total fires
+                IconManager.renderSneakers(3, 5);
+                IconManager.renderHearts(1, 3);
+                IconManager.renderPowers(4, 4);
+                IconManager.renderFires(4, 5);
             }
         }
 
-        // HUD Manager - Handles HUD interactions
+        // HUD Manager
         class HUDManager {
             static initialize() {
-                // Setup pause button
                 const pauseBtn = document.getElementById('btn-pause');
                 if (pauseBtn) {
                     pauseBtn.addEventListener('click', function() {
                         const isPlaying = this.dataset.state === 'playing';
-                        this.dataset.state = isPlaying ? 'paused' : 'playing';
+                        const next = isPlaying ? 'paused' : 'playing';
+                        this.dataset.state = next;
+                        this.setAttribute('aria-pressed', String(next === 'paused'));
+                        this.setAttribute('aria-label', next === 'paused' ? 'Play' : 'Pause');
                     });
                 }
             }
         }
 
-        // Scaling Manager - Handles responsive scaling
+        // Scaling Manager
         class ScalingManager {
             static initialize() {
                 ScalingManager.scaleContainer();
                 window.addEventListener('resize', ScalingManager.scaleContainer);
+                window.addEventListener('orientationchange', ScalingManager.scaleContainer);
+                document.addEventListener('fullscreenchange', ScalingManager.scaleContainer);
+                document.addEventListener('webkitfullscreenchange', ScalingManager.scaleContainer);
             }
-            
             static scaleContainer() {
-                const container = document.querySelector('.fixed-container');
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                
-                const scaleX = (viewportWidth - 40) / 430;
-                const scaleY = (viewportHeight - 40) / 900;
+                const container = document.querySelector('.fixed-container'); if (!container) return;
+                const immersive = container.classList.contains('immersive');
+                if (immersive) { container.style.transform = 'none'; return; }
+                const viewportWidth = window.innerWidth; const viewportHeight = window.innerHeight;
+                const scaleX = (viewportWidth - 40) / 430; const scaleY = (viewportHeight - 40) / 900;
                 const finalScale = Math.min(scaleX, scaleY, 1);
-                
                 container.style.transform = `scale(${finalScale})`;
             }
         }
 
-        // Initialize everything when DOM is loaded
+        // Fullscreen Manager with sandbox-safe fallback
+        class FullscreenManager {
+            static target() { return document.getElementById('mainContainer'); }
+            static nativeSupported() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
+            static isOn() { return document.fullscreenElement || document.webkitFullscreenElement; }
+
+            static async enterNative() {
+                const el = FullscreenManager.target();
+                if (el.requestFullscreen) return el.requestFullscreen();
+                if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+            }
+            static async exitNative() {
+                if (document.exitFullscreen) return document.exitFullscreen();
+                if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+            }
+
+            static enterImmersive() {
+                const el = FullscreenManager.target();
+                el.classList.add('immersive');
+                document.body.classList.add('is-immersive');
+                ScalingManager.scaleContainer();
+            }
+            static exitImmersive() {
+                const el = FullscreenManager.target();
+                el.classList.remove('immersive');
+                document.body.classList.remove('is-immersive');
+                ScalingManager.scaleContainer();
+            }
+
+            static async enter() {
+                // Try native first if the UA advertises support
+                if (FullscreenManager.nativeSupported()) {
+                    try {
+                        await FullscreenManager.enterNative();
+                        document.body.classList.add('is-fullscreen');
+                        return 'native';
+                    } catch (e) {
+                        // Fall through to immersive on policy blocks
+                    }
+                }
+                // Policy blocked or unsupported
+                FullscreenManager.enterImmersive();
+                return 'immersive';
+            }
+
+            static async exit() {
+                if (FullscreenManager.isOn()) {
+                    try { await FullscreenManager.exitNative(); } finally { document.body.classList.remove('is-fullscreen'); }
+                }
+                FullscreenManager.exitImmersive();
+            }
+
+            static async toggle() {
+                const el = FullscreenManager.target();
+                const btn = document.getElementById('btn-fullscreen');
+                const nativeActive = !!FullscreenManager.isOn();
+                const immersiveActive = el.classList.contains('immersive');
+                if (nativeActive || immersiveActive) return FullscreenManager.exit();
+                return FullscreenManager.enter();
+            }
+
+            static wire() {
+                const btn = document.getElementById('btn-fullscreen'); if (!btn) return;
+                const sync = () => {
+                    const nativeActive = !!FullscreenManager.isOn();
+                    const immersiveActive = FullscreenManager.target().classList.contains('immersive');
+                    const on = nativeActive || immersiveActive;
+                    btn.dataset.state = on ? 'on' : 'off';
+                    btn.setAttribute('aria-pressed', String(on));
+                    const supported = FullscreenManager.nativeSupported();
+                    btn.setAttribute('aria-label', on ? (supported ? 'Exit fullscreen' : 'Exit immersive') : (supported ? 'Enter fullscreen' : 'Enter immersive'));
+                };
+                btn.addEventListener('click', () => { FullscreenManager.toggle().finally(sync); });
+                document.addEventListener('fullscreenchange', sync);
+                document.addEventListener('webkitfullscreenchange', sync);
+                document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'f') FullscreenManager.toggle().finally(sync); });
+                sync();
+            }
+
+            // Test helpers
+            static _testImmersiveToggle() {
+                const el = FullscreenManager.target();
+                FullscreenManager.enterImmersive();
+                console.assert(el.classList.contains('immersive'), 'Immersive enter should add class');
+                FullscreenManager.exitImmersive();
+                console.assert(!el.classList.contains('immersive'), 'Immersive exit should remove class');
+            }
+        }
+
+        // Boot
         document.addEventListener('DOMContentLoaded', function() {
             HUDManager.initialize();
             ScalingManager.initialize();
             IconManager.updateAllIcons();
+            FullscreenManager.wire();
+
+            // Lightweight tests (do not change)
+            console.assert(typeof FullscreenManager.nativeSupported() === 'boolean', 'nativeSupported returns boolean');
+            FullscreenManager._testImmersiveToggle();
         });
 
-        // Export the IconManager for game control
+        // Public API
         window.SneakerQuestUI = {
             IconManager: IconManager,
             setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
-            setHearts: (filled, total) => IconManager.renderHearts(filled, total),
-            setPowers: (filled, total) => IconManager.renderPowers(total, filled),
-            setFires: (filled, total) => IconManager.renderFires(filled, total),
-            setCounter: (value) => {
-                const counter = document.getElementById('counter');
-                if (counter) counter.textContent = value.toString().padStart(3, '0');
-            },
-            setStage: (stage) => {
-                const stageElement = document.querySelector('.chip-stage');
-                if (stageElement) stageElement.textContent = `STAGE – ${stage.toString().padStart(2, '0')}`;
-            },
-            setScore: (score) => {
-                const scoreElement = document.querySelector('.chip-score');
-                if (scoreElement) scoreElement.textContent = `SCORE ${score.toString().padStart(6, '0')}`;
-            },
-            setTime: (time) => {
-                const timeElement = document.querySelector('.chip-time');
-                if (timeElement) timeElement.textContent = time;
-            }
+            setHearts:   (filled, total) => IconManager.renderHearts(filled, total),
+            setPowers:   (filled, total) => IconManager.renderPowers(total, filled),
+            setFires:    (filled, total) => IconManager.renderFires(filled, total),
+            setCounter:  (value) => { const c = document.getElementById('counter'); if (c) c.textContent = value.toString().padStart(3,'0'); },
+            setStage:    (stage) => { const e = document.querySelector('.chip-stage'); if (e) e.textContent = `STAGE – ${stage.toString().padStart(2,'0')}`; },
+            setScore:    (score) => { const e = document.querySelector('.chip-score'); if (e) e.textContent = `SCORE ${score.toString().padStart(6,'0')}`; },
+            setTime:     (time) => { const e = document.querySelector('.chip-time'); if (e) e.textContent = time; }
         };
     </script>
 </body>
