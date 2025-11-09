@@ -23,10 +23,9 @@
       --led-glow: rgba(255, 58, 47, 0.45);
     }
 
-    html, body { display: flex; align-items: flex-end; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; }
+    html, body { display: flex; align-items: flex-end; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; min-height: 100dvh; }
 
-    /* Top pinned, no scroll. Cabinet fills visual viewport height. */
-    body { display: flex; align-items: flex-start; justify-content: center; overflow: hidden; padding: 0; -webkit-user-select: none; user-select: none; }
+    /* bottom-pinned layout (single body rule above) */
 
     .fixed-container { width: 430px; height: auto; position: relative; transform-origin: bottom center; max-width: 100vw; margin: 0 auto; }
 
@@ -81,7 +80,7 @@
 
     .hud2 { width: 100%; display: grid; grid-template-columns: 1fr fit-content(90px) 1fr; gap: 3px; margin-top: -15px; }
     .hud2 .slot-flames{ height: 40px; }
-    .hud2 $1
+    
 /* keep the center HUD cells from stretching; center them */
 .slot-shoes, .slot-pause { justify-self: center; }
     .hud2 .slot-bag{ height: 40px; }
@@ -96,7 +95,7 @@
 /* Tighter middle-slot spacing */
 .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
 #ui-hearts { gap: 2px; }
-#ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 16px; }
+#ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 20px; }
 
 /* Pause button should not force wide box */
 .slot-pause .chip-btn { min-width: auto; letter-spacing: .10em; font-size: 11px; }
@@ -142,10 +141,10 @@
 
     .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
 
-    @media (max-width: 400px) { .mq-title { font-size: 22px; } .mq-sub { font-size: 6px; } .tab .led .line { font-size: 9px; letter-spacing: .10em; white-space: nowrap; } } .mq-sub { font-size: 6px; } .tab .led .line { font-size: 9px; letter-spacing: .10em; } }
+    @media (max-width: 400px) { .mq-title{font-size:22px;} .mq-sub{font-size:6px;} .tab .led .line{font-size:9px; letter-spacing:.10em; white-space:nowrap;} }
     @media (max-width: 390px){
   /* tighten labels and center cells */
-  .tab .led .line{ font-size: 9px; letter-spacing: .10em; white-space: nowrap; }
+  
   .hud{ grid-template-columns: 1fr fit-content(92px) 1fr; gap: 2px; }
   .hud2{ grid-template-columns: 1fr fit-content(86px) 1fr; gap: 2px; }
   #ui-sneakers{gap:2px;} #ui-hearts{gap:2px;} #ui-fires{gap:2px;} #ui-powers{gap:5px;}
@@ -166,8 +165,8 @@
   .power .ph-bold,  .power .ph-fill { font-size: 17px; }
 }
 
-      #ui-sneakers{gap:2px;} #ui-hearts{gap:3px;} #ui-fires{gap:2px;} #ui-powers{gap:6px;}
-      .tab .led .line{ font-size: 9px; letter-spacing: .10em; white-space: nowrap; }
+      
+      
     }
   </style>
 </head>
