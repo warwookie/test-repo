@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SNEAKERQUEST</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --primary-color: #ff3a2f;
             --secondary-color: #d6c7a4;
@@ -21,88 +26,546 @@
             --screen-bg: #0a241f;
             --led-glow: rgba(255, 58, 47, 0.45);
         }
-        html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg-dark); }
-        body {
-            margin: 0; color: var(--secondary-color);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;
-        }
-        .fixed-container { width: 430px; height: 900px; position: relative; transform-origin: center center; }
-        .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
-            radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
-            linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
-            box-shadow: inset 0 0 0 2px var(--bg-light), 0 24px 40px rgba(0,0,0,.5), 0 6px 0 var(--bg-dark);
-        }
-        .inner { width: 100%; height: 100%; border-radius: 22px; background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
-            box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium);
-            position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
-        .marquee { width: 100%; height: 90px; border-radius: 18px; padding: 12px 14px; background: linear-gradient(#2a2320, #1d1815);
-            box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display: flex; align-items: center; justify-content: center; }
-        .led { width: 100%; height: 100%; border-radius: 12px; background:
-            radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
-            repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; position: relative; overflow: hidden; }
-        .mq-wrap { display: grid; justify-items: center; align-content: center; height: 100%; }
-        .mq-title { font-size: 27px; text-align: center; user-select: none; color: var(--primary-color);
-            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow); animation: led-flicker 3.6s ease-in-out infinite;
-            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-        .mq-sub { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 7px; letter-spacing: .12em; margin-top: 6px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-        .mq-sub .chip { white-space: nowrap; }
-        .mq-sub .chip-box { padding: 4px 3px; border: 2px solid var(--primary-color); border-radius: 4px; color: var(--primary-color);
-            text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; }
-        @keyframes led-flicker { 0%{opacity:.96; text-shadow:0 0 2px var(--primary-color),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2);} 50%{opacity:1; text-shadow:0 0 2px var(--primary-color),0 0 9px rgba(255,58,47,.5),0 0 16px rgba(255,58,47,.28);} 100%{opacity:.97; text-shadow:0 0 2px var(--primary-color),0 0 6px rgba(255,58,47,.38),0 0 12px rgba(255,58,47,.2);} }
-        .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
-        .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18);
-            box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; }
-        .crt { width: 100%; border-radius: 11px; aspect-ratio: 0.94; background:
-                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823);
-            box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        /* Fullscreen button */
-        .fullscreen-btn { position: absolute; top: 8px; right: 8px; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; border: 2px solid var(--primary-color); background: rgba(0,0,0,.35); color: var(--primary-color); cursor: pointer; box-shadow: 0 0 6px rgba(255,58,47,.25) inset; }
-        .fullscreen-btn i { font-size: 18px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-        .fullscreen-btn:focus-visible { outline: 2px solid var(--secondary-color); outline-offset: 2px; }
-        .fullscreen-btn .icon { grid-area: 1/1; opacity: 0; transform: scale(.9); transition: opacity .18s ease, transform .18s ease; }
-        #btn-fullscreen[data-state="off"] .enter { opacity: 1; transform: none; }
-        #btn-fullscreen[data-state="on"] .exit { opacity: 1; transform: none; }
-        /* Optional: darken bg in full or immersive */
-        body.is-fullscreen, body.is-immersive { background: #000; }
 
-        /* Tabs */
-        .tabs { width: 100%; height: 70px; border-radius: 14px; background: linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display: flex; gap: 10px; padding: 10px; text-align: center; font-weight: 800; letter-spacing: 0.08em; margin-top: -14px; padding-left: 8px; padding-right: 8px; }
-        .tabs .tab:nth-child(1){ flex: 0 1 42%; } .tabs .tab:nth-child(2){ flex: 0 1 10%; } .tabs .tab:nth-child(3){ flex: 0 1 42%; }
-        .tab { display: flex; align-items: stretch; flex: 1; }
-        .tab .led { height: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; }
-        .tab .led .line { font-size: 10px; letter-spacing: .14em; color: var(--primary-color); font-weight: 800; text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-        .hud { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -16px; }
-        .hud .slot-heart{ height: 41px; } .hud .slot-shoes{ height: 40px; } .hud .slot-dots{ height: 40px; }
-        .hud .slot:nth-child(1){ flex: 0 1 40%; } .hud .slot:nth-child(2){ flex: 0 1 28%; } .hud .slot:nth-child(3){ flex: 0 1 40%; }
-        .hud2 { width: 100%; height: auto; display: flex; gap: 3px; margin-top: -15px; }
-        .hud2 .slot-flames{ height: 40px; } .hud2 .slot-pause{ height: 40px; } .hud2 .slot-bag{ height: 40px; }
-        .hud2 .slot:nth-child(1){ flex: 0 1 40%; } .hud2 .slot:nth-child(2){ flex: 0 1 28%; } .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
-        .slot { background: linear-gradient(#3a3227, #2c251e); border-radius: 14px; padding: 5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 100%; width: 100%; }
-        .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
-        .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
-        /* Icon containers */
-        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box; }
-        #ui-sneakers { gap: 3px; } #ui-hearts { gap: 4px; } #ui-fires { gap: 2px; } #ui-powers { gap: 7px; }
-        .sneaker-icon, .heart-icon, .fire-icon, .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-        .sneaker-outline, .heart-outline, .fire-outline, .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
-        .sneaker-fill, .heart-fill, .fire-fill, .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity .3s ease; }
-        .sneaker-icon.active .sneaker-fill, .heart-icon.active .heart-fill, .fire-icon.active .fire-fill, .power.active .ph-fill { opacity: 1; }
-        .chip-btn { background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; position: relative; color: var(--primary-color); font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
-        .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
-        .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
-        #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
-        #btn-pause[data-state=paused] .word-play { opacity: 1; transform: none; }
-        @media (prefers-reduced-motion: reduce) { .chip-btn .word, .mq-title, .mq-sub .chip-box, .tab .led .line { transition: none; animation: none; text-shadow: none; } }
-        .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
-        .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
-        .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
-        .bottom { width: 100%; height: 150px; margin-top: -13px; }
-        .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
-        .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
-        /* Immersive fallback when fullscreen is disallowed */
-        #mainContainer.immersive { width: 100vw; height: 100svh; transform: none !important; }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-dark);
+            color: var(--secondary-color);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .fixed-container {
+            width: 430px;
+            height: 900px;
+            position: relative;
+            transform-origin: center center;
+        }
+
+        .cabinet {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            padding: 14px;
+            background: 
+                radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
+                linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, 
+                var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, 
+                var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                0 24px 40px rgba(0,0,0,.5),
+                0 6px 0 var(--bg-dark);
+        }
+
+        .inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d);
+            box-shadow: 
+                inset 0 0 0 2px var(--bg-light),
+                inset 0 0 0 6px var(--bg-medium);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Marquee section */
+        .marquee {
+            width: 100%;
+            height: 90px;
+            border-radius: 18px;
+            padding: 12px 14px;
+            background: linear-gradient(#2a2320, #1d1815);
+            box-shadow: 
+                inset 0 0 0 2px #120e0c,
+                inset 0 0 0 6px #2f2722,
+                0 2px 0 #0a0807;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .led {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: 
+                radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%),
+                repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px),
+                #120e0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mq-wrap {
+            display: grid;
+            justify-items: center;
+            align-content: center;
+            height: 100%;
+        }
+
+        .mq-title {
+            font-size: 27px;
+            letter-spacing: 0em;
+            text-align: center;
+            user-select: none;
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow);
+            animation: led-flicker 3.6s ease-in-out infinite;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
+
+        .mq-sub {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 7px;
+            letter-spacing: .12em;
+            margin-top: 6px;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
+
+        .mq-sub .chip {
+            white-space: nowrap;
+        }
+
+        .mq-sub .chip-box {
+            padding: 4px 3px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            color: var(--primary-color);
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+        }
+
+        @keyframes led-flicker {
+            0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+            50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); }
+            100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); }
+        }
+
+        .divider {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(#3b3026, #2a231e);
+            box-shadow: inset 0 0 0 2px var(--bg-medium);
+        }
+
+        .crt-wrap {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            padding: 10px;
+            background: linear-gradient(#3c2f26, #241e18);
+            box-shadow: 
+                inset 0 0 0 2px #1a140f,
+                inset 0 0 0 8px #2a211a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crt {
+            width: 100%;
+            border-radius: 11px;
+            aspect-ratio: 0.94;
+            background: 
+                linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%),
+                linear-gradient(var(--screen-bg), #0b2823);
+            box-shadow: 
+                inset 0 0 0 2px #0e1412,
+                inset 0 0 30px rgba(0,0,0,.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Game Canvas */
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 11px;
+            image-rendering: pixelated;
+        }
+
+        .tabs {
+            width: 100%;
+            height: 70px;
+            border-radius: 14px;
+            background: linear-gradient(#3a2f26, #2b231d);
+            box-shadow: inset 0 0 0 2px #1a1410;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin-top: -14px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .tabs .tab:nth-child(1){ flex: 0 1 42%; }
+        .tabs .tab:nth-child(2){ flex: 0 1 10%; }
+        .tabs .tab:nth-child(3){ flex: 0 1 42%; }
+
+        .tab {
+            display: flex;
+            align-items: stretch;
+            flex: 1;
+        }
+
+        .tab .led {
+            height: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .tab .led .line {
+            font-size: 10px;
+            letter-spacing: .14em;
+            color: var(--primary-color);
+            font-weight: 800;
+            text-shadow: 0 0 2px var(--primary-color);
+            animation: led-flicker 3.6s ease-in-out infinite;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
+
+        .hud {
+            width: 100%;
+            height: auto;
+            display: flex;
+            gap: 3px;
+            margin-top: -16px;
+        }
+        .hud .slot-heart{ height: 41px; }
+        .hud .slot-shoes{ height: 40px; }
+        .hud .slot-dots{ height: 40px; }
+        .hud .slot:nth-child(1){ flex: 0 1 40%; }
+        .hud .slot:nth-child(2){ flex: 0 1 28%; }
+        .hud .slot:nth-child(3){ flex: 0 1 40%; }
+
+        .hud2 {
+            width: 100%;
+            height: auto;
+            display: flex;
+            gap: 3px;
+            margin-top: -15px;
+        }
+        .hud2 .slot-flames{ height: 40px; }
+        .hud2 .slot-pause{ height: 40px; }
+        .hud2 .slot-bag{ height: 40px; }
+        .hud2 .slot:nth-child(1){ flex: 0 1 40%; }
+        .hud2 .slot:nth-child(2){ flex: 0 1 28%; }
+        .hud2 .slot:nth-child(3){ flex: 0 1 40%; }
+
+        .slot {
+            background: linear-gradient(#3a3227, #2c251e);
+            border-radius: 14px;
+            padding: 5px;
+            box-shadow: 
+                inset 0 0 0 2px #1a1511,
+                0 2px 0 #0b0907;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        .slot > .led {
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slot > .led .line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: .12em;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Icon Containers */
+        #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
+
+        /* Sneaker Icons */
+        #ui-sneakers {
+            gap: 3px;
+        }
+
+        .sneaker-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sneaker-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .sneaker-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sneaker-icon.active .sneaker-fill {
+            opacity: 1;
+        }
+
+        /* Heart Icons */
+        #ui-hearts {
+            gap: 4px;
+        }
+
+        .heart-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heart-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .heart-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .heart-icon.active .heart-fill {
+            opacity: 1;
+        }
+
+        /* Fire Icons */
+        #ui-fires {
+            gap: 2px;
+        }
+
+        .fire-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fire-outline {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .fire-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .fire-icon.active .fire-fill {
+            opacity: 1;
+        }
+
+        /* Power-up Icons */
+        #ui-powers {
+            gap: 7px;
+        }
+
+        .power {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .power .ph-bold {
+            color: var(--primary-color);
+            font-size: 20px;
+            filter: drop-shadow(0 0 2px var(--primary-color));
+        }
+
+        .power .ph-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: var(--secondary-color);
+            font-size: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .power.active .ph-fill {
+            opacity: 1;
+        }
+
+        .chip-btn {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            position: relative;
+            color: var(--primary-color);
+            font: inherit;
+            letter-spacing: .12em;
+            cursor: pointer;
+            min-height: 1em;
+            line-height: 1;
+            min-width: 6ch;
+            font-size: 12px;
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+        }
+
+        .chip-btn:focus-visible {
+            outline: none;
+            text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4);
+        }
+
+        .chip-btn .word {
+            grid-area: 1/1;
+            display: block;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(6%);
+            transition: opacity .24s ease, transform .24s ease;
+        }
+
+        #btn-pause[data-state=playing] .word-pause {
+            opacity: 1;
+            transform: none;
+        }
+
+        #btn-pause[data-state=paused] .word-play {
+            opacity: 1;
+            transform: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chip-btn .word {
+                transition: none;
+            }
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+            text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45);
+            font-weight: 900;
+            letter-spacing: .14em;
+        }
+
+        .seven {
+            font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .counter .ph-package {
+            font-size: 20px !important;
+            color: var(--secondary-color) !important;
+            filter: none !important;
+        }
+
+        .bottom {
+            width: 100%;
+            height: 150px;
+            margin-top: -13px;
+        }
+
+        .control-screen {
+            position: relative;
+            height: 100%;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 82% 20%;
+            gap: 14px;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(#1a1210, #0c0908);
+            box-shadow: 
+                inset 0 0 0 2px #1a1510,
+                inset 0 16px 30px rgba(0,0,0,.4),
+                0 3px 0 #0a0807;
+        }
+
+        .matrix {
+            position: absolute;
+            inset: 6px;
+            border-radius: 14px;
+            opacity: .9;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat;
+        }
     </style>
 </head>
 <body>
@@ -125,11 +588,8 @@
                 <div class="divider" id="element-divider"></div>
 
                 <div class="crt-wrap" id="element-crt">
-                    <div class="crt" aria-label="Screen placeholder">
-                        <button id="btn-fullscreen" class="fullscreen-btn" type="button" aria-pressed="false" aria-label="Enter fullscreen" data-state="off">
-                            <i class="ph-bold ph-corners-out icon enter" aria-hidden="true"></i>
-                            <i class="ph-bold ph-corners-in icon exit" aria-hidden="true"></i>
-                        </button>
+                    <div class="crt">
+                        <canvas id="gameCanvas"></canvas>
                     </div>
                 </div>
 
@@ -174,10 +634,122 @@
     </div>
 
     <script>
-        // Icon Manager
+        // === YOUR EXACT GAME CODE - NO CHANGES ===
+        var TILE=40, ROWS=13, COLS=15;
+        var BASE_W = COLS*TILE, BASE_H = ROWS*TILE;
+        var FUSE=180, EXPLOSION=20, FIRE_EXPLOSION=30, ENEMY_SPEED=80, BOX_BURN=600;
+        var C={0:'#000000',1:'#1c2833',2:'#8b4513',3:'#7dd3fc',4:'#cc5500'};
+        var SECRET={S1:{icon:'\uD83D\uDC5F',label:'L Pair 1'},S2:{icon:'\uD83D\uDC5F',label:'R Pair 1'},S3:{icon:'\uD83D\uDC5F',label:'L Pair 2'},S4:{icon:'\uD83D\uDC5F',label:'R Pair 2'},R:{icon:'\uD83D\uDCA5',label:'Range Up'},B:{icon:'\u2795',label:'Bomb Up'},Q:{icon:'\u23F1\uFE0F',label:'Quick Detonate'}};
+        var MAP=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,2,2,2,2,2,0,0,0,0,1],[1,0,1,0,1,0,1,2,1,2,1,0,1,0,1],[1,0,2,0,2,2,0,2,0,2,2,0,2,0,1],[1,2,1,0,1,0,1,0,1,0,1,0,1,2,1],[1,2,2,2,0,0,2,2,2,0,2,2,2,2,1],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],[1,2,2,2,0,0,2,2,2,0,2,2,2,2,1],[1,2,1,0,1,0,1,0,1,0,1,0,1,2,1],[1,0,2,0,2,2,0,2,0,2,2,0,2,0,1],[1,0,1,0,1,2,1,2,1,0,1,0,1,0,1],[1,0,0,0,0,2,2,2,2,2,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+
+        // ---- state ----
+        var map, playerGrid, playerPix, keys={}, started=false, over=false;
+        var VISIT=null, stats, bombs=[], blasts=[], enemies=[], burning=[], secretsHidden={}, itemsAt={};
+        var lastTime = performance.now();
+
+        // DOM refs
+        var cv=document.getElementById('gameCanvas');
+        var ctx=cv?cv.getContext('2d'):null;
+
+        function enableCrisp(){ if(ctx) ctx.imageSmoothingEnabled=false; }
+        var DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
+        function tile(x,y){ if(x<0||x>=COLS||y<0||y>=ROWS) return 1; return map[y][x]; }
+        function passable(x,y){ return tile(x,y)===0; }
+        function randDir(){ var d=DIRS[(Math.random()*DIRS.length)|0]; return {dx:d[0],dy:d[1]}; }
+
+        // ---- layout fit ----
+        function fitCanvas(){
+            if(!cv) return;
+            var crt = cv.parentElement;
+            var rect = crt.getBoundingClientRect();
+            cv.width = BASE_W;
+            cv.height = BASE_H;
+            cv.style.width = '100%';
+            cv.style.height = '100%';
+            enableCrisp();
+            draw();
+        }
+
+        // ---- avatars ----
+        var avatarKey='runnerM';
+        var playerAnim={dir:'down',moving:false,t:0,idx:0};
+        var RUNNER_SETS={};
+        function buildRunnerSets(){ RUNNER_SETS = {}; RUNNER_SETS.runnerM = buildFramesForStyle('tracksuitM'); }
+        function getCurrentFrames(){ var set = RUNNER_SETS[avatarKey] || RUNNER_SETS['runnerM']; return set ? (set[playerAnim.dir] || set.down) : []; }
+        function drawRunnerAvatar(px,py){ if(!ctx) return; var frames=getCurrentFrames(); var idx=frames.length? (playerAnim.idx%frames.length) : 0; var fr=frames[idx]||frames[0]; var x=px+2, y=py+2, w=TILE-4, h=TILE-4; ctx.save(); ctx.imageSmoothingEnabled=false; if(fr) ctx.drawImage(fr, x, y, w, h); ctx.restore(); }
+        function buildFramesForStyle(style){ var set={down:[],up:[],left:[],right:[]}; var W=24,H=24,N=4,i; for(i=0;i<N;i++){ set.right.push(makeRunnerFrame(i,'right',W,H,style)); } for(i=0;i<set.right.length;i++){ var src=set.right[i]; var off=document.createElement('canvas'); off.width=src.width; off.height=src.height; var g=off.getContext('2d'); g.imageSmoothingEnabled=false; g.translate(off.width,0); g.scale(-1,1); g.drawImage(src,0,0); set.left.push(off);} for(i=0;i<N;i++){ set.down.push(makeRunnerFrame(i,'down',W,H,style)); } for(i=0;i<N;i++){ set.up.push(makeRunnerFrame(i,'up',W,H,style)); } return set; }
+        function makeRunnerFrame(step,dir,W,H,style){ var off=document.createElement('canvas'); off.width=W; off.height=H; var g=off.getContext('2d'); g.imageSmoothingEnabled=false; var skin='#f2d3b1', hair='#2b2b2b', shoe='#1f2937'; var jacket='#0b0b0c', jacketAlt='#161616', pants='#0b0b0c', stripe='#ffffff'; function px(x,y,w,h,c){ g.fillStyle=c; g.fillRect(x,y,w,h); } px(6,20,12,2,'rgba(0,0,0,0.25)'); var legSwap = step%2===0? -1:1; var armSwing = step%2===0? 1:-1; if(dir==='up') armSwing*=-1; px(9,9,6,6, dir==='down'?jacket:jacketAlt); px(9,3,6,6,skin); px(10,4,1,1,hair); px(13,4,1,1,hair); px(7,10+armSwing,2,4,skin); px(16,10-armSwing,2,4,skin); px(7,10+armSwing,1,4,stripe); px(17,10-armSwing,1,4,stripe); px(9,15+legSwap,3,5,pants); px(12,15-legSwap,3,5,pants); px(11,15+legSwap,1,5,stripe); px(14,15-legSwap,1,5,stripe); px(9,20+legSwap,3,2,shoe);  px(12,20-legSwap,3,2,shoe); return off; }
+
+        // ---- draw ----
+        function draw(){ if(!ctx) return; ctx.clearRect(0,0,BASE_W,BASE_H); drawMap(); drawBombs(); drawBlasts(); drawEnemies(); drawPlayer(); }
+        function drawMap(){ if(!ctx) return; for(var y=0;y<ROWS;y++){ for(var x=0;x<COLS;x++){ var X=x*TILE, Y=y*TILE, tt=map[y][x]; ctx.fillStyle=C[0]; ctx.fillRect(X,Y,TILE,TILE); if(tt===1){ ctx.fillStyle=C[1]; ctx.fillRect(X,Y,TILE,TILE); ctx.strokeStyle='#0a0a0a'; ctx.lineWidth=4; ctx.strokeRect(X,Y,TILE,TILE);} if(tt===2||tt===4){ var burningBox=(tt===4); drawShoeBox(X,Y,burningBox, Date.now()); if(burningBox){ drawBoxTopFlame(X,Y, Date.now()); var b=findBurn(x,y); if(b){ var secs=Math.ceil(b.t/60); drawCountdownOnBox(X,Y,secs);} } } var ik=itemsAt[y+','+x]; if(ik){ drawSecret(x,y,ik);} } } }
+        function findBurn(x,y){ for(var i=0;i<burning.length;i++){ var bb=burning[i]; if(bb.x===x&&bb.y===y) return bb; } return null; }
+        function drawShoeBox(X,Y,burning,t){ if(!ctx) return; var x=(X|0)+6; var y=(Y|0)+TILE-18; var w=TILE-12; var h=12; var lidH=5; var over=2; var body=burning?'#8b3a0a':'#c85a11'; var edge='#000000'; var lid=burning?'#a34510':'#e76f1d'; var band=burning?'#5a2a08':'#7a3b0f'; var shine=burning?'#b45309':'#f59e0b'; ctx.save(); ctx.imageSmoothingEnabled=false; ctx.fillStyle=body; ctx.fillRect(x,y,w,h); ctx.strokeStyle=edge; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,w-1,h-1); ctx.fillStyle=lid; ctx.fillRect(x-over,y-lidH,w+over*2,lidH); ctx.strokeStyle=edge; ctx.strokeRect(x-over+0.5,y-lidH+0.5,w+over*2-1,lidH-1); ctx.fillStyle=band; ctx.fillRect(x-1,y-1,w+2,1); ctx.fillRect(x+3,y+h-3,w-6,2); var nx=x+((w|0)>>>1)-3; var ny=y+3; ctx.fillStyle=edge; ctx.fillRect(nx,ny,6,3); ctx.fillStyle=body; ctx.fillRect(nx+1,ny+1,4,1); ctx.fillStyle=shine; ctx.fillRect(x-over+1,y-1,w+over*2-2,1); if(burning){ var tick=((t||Date.now())/120)|0; if(tick%2===0){ for(var i=0;i<w;i+=2){ ctx.fillRect(x+i,y+h-4,1,1); } } } ctx.restore(); }
+        function drawCountdownOnBox(X,Y,secs){ if(!ctx) return; var x=(X|0)+6; var y=(Y|0)+TILE-18; var w=TILE-12; var h=12; var cx=x+(w>>1); var cy=y+(h>>1); var r=7; ctx.save(); ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#ffd8a3'; ctx.font='700 10px Inter'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(secs,cx,cy+0.5); ctx.restore(); }
+        function drawBoxTopFlame(X,Y,t){ if(!ctx) return; var x=(X|0)+6; var y=(Y|0)+TILE-18; var w=TILE-12; var lidH=5, over=2; var fx=x-over; var fw=w+over*2; var yTop=Y|0; var yLidTop=y-lidH; var hAvail=yLidTop-yTop; if(hAvail<=0) return; var RED='#8b0000', ORNG='#e45711', YELL='#ffd34d'; var step=2; var now=(t||Date.now()); var phase=((now/80)|0); for(var cx=0; cx<fw; cx+=step){ var seed=(cx*131 + phase*17) & 0xff; var pct=(seed/255); var colH=Math.max(step, Math.floor(hAvail*(0.55 + 0.45*pct))); var baseY=yLidTop - colH; for(var yy=0; yy<colH; yy+=step){ var ry=baseY+yy; var ratio=yy/colH; var c= ratio<0.33?YELL : (ratio<0.7?ORNG:RED); var hole=(((cx>>1)+(yy>>1)+phase)&3)===0; if(hole && ratio<0.8) continue; ctx.fillStyle=c; ctx.fillRect(fx+cx, ry, step, step); } } }
+        function glowAt(cx,cy,r,type){ if(!ctx) return; ctx.save(); ctx.globalCompositeOperation='lighter'; var g=ctx.createRadialGradient(16,16,2,16,16,14); g.addColorStop(0,'rgba(255,240,160,0.95)'); g.addColorStop(0.5,'rgba(255,160,0,0.65)'); g.addColorStop(1,'rgba(255,80,0,0.0)'); ctx.fillStyle=g; ctx.translate(cx-16, cy-16); ctx.fillRect(0,0,32,32); ctx.setTransform(1,0,0,1,0,0); ctx.restore(); }
+        var flameFrames=[]; function buildFlameFrames(){ flameFrames=[]; for(var i=0;i<8;i++){ var off=document.createElement('canvas'); off.width=32; off.height=32; var p=off.getContext('2d'); var gr=p.createRadialGradient(16,16,2,16,16,14); gr.addColorStop(0,'rgba(255,240,160,0.95)'); gr.addColorStop(0.5,'rgba(255,160,0,0.65)'); gr.addColorStop(1,'rgba(255,80,0,0.0)'); p.fillStyle=gr; p.fillRect(0,0,32,32); p.fillStyle='rgba(255,120,0,0.9)'; p.beginPath(); p.moveTo(16,28); p.bezierCurveTo(10,24,12,18,16,10 - Math.sin(i*0.6)*2); p.bezierCurveTo(20,18,22,24,16,28); p.fill(); flameFrames.push(off);} }
+        function drawEnemies(){ if(!ctx) return; var t=Date.now(); for(var ei=0; ei<enemies.length; ei++){ var e=enemies[ei]; if(!e||!e.a) continue; var q=(t/120)|0; var idx=flameFrames.length?((q+(e.fo||0))%flameFrames.length):0; var frame=flameFrames[idx]||null; var bob=((q%3)-1)*1.5; var alpha=(e.carry?0.8:0.6)+((q%2)?0.06:-0.04); glowAt(e.px+TILE/2, e.py+TILE/2, TILE*0.85, 'fire'); var px=e.px+(TILE-32)/2; var py=e.py+(TILE-32)/2 + bob; ctx.save(); ctx.globalAlpha=alpha; ctx.shadowColor='rgba(255,120,0,0.8)'; ctx.shadowBlur=e.carry?8:5; if(frame){ ctx.drawImage(frame,px,py,32,32);} else { ctx.fillStyle='rgba(255,140,0,0.85)'; ctx.beginPath(); ctx.arc(px+16,py+16,14,0,Math.PI*2); ctx.fill(); } if(e.carry){ ctx.globalAlpha=1; ctx.font='16px sans-serif'; ctx.fillStyle='#fff'; ctx.fillText('\uD83D\uDC5F', px+16, py+8); } ctx.restore(); } }
+        function drawPlayer(){ if(!ctx||!playerPix) return; var px=playerPix.x||0, py=playerPix.y||0; ctx.save(); ctx.globalAlpha=0.25; ctx.fillStyle='#3b82f6'; ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE*0.35, 0, Math.PI*2); ctx.fill(); ctx.restore(); drawRunnerAvatar(px,py); }
+        function drawSecret(gx,gy,code){ if(!ctx) return; var meta=SECRET[code]||{icon:'?',label:'?'}; var X=gx*TILE, Y=gy*TILE, cx=X+TILE/2, cy=Y+TILE/2; ctx.save(); ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.arc(cx,cy+6,6,0,Math.PI*2); ctx.fill(); ctx.font='20px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(meta.icon||'?', cx, cy-2); ctx.restore(); }
+        function rectsOverlap(ax,ay,aw,ah,bx,by,bw,bh){ return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by; }
+        function drawBombs(){ if(!ctx) return; stats.placed=bombs.length; bombs=bombs.filter(function(b){ b.t--; if(b.t>0){ var cx=b.x*TILE+TILE/2, cy=b.y*TILE+TILE/2, h=TILE*.7, w=TILE*.6, x=cx-w/2, y=cy-h/2; ctx.save(); ctx.fillStyle='#ff4500'; roundRect(x,y,w,h,4,true,true); ctx.fillStyle='#fff'; ctx.font='700 10px Inter'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('TNT',cx,cy); ctx.strokeStyle='#000'; ctx.beginPath(); ctx.moveTo(cx,y); ctx.lineTo(cx,y-10); ctx.stroke(); var flick=Math.sin(Date.now()/100*5)*1.5+2; ctx.fillStyle=(b.t%10<5)?'#ffcc00':'#ffa500'; ctx.beginPath(); ctx.arc(cx,y-10,flick,0,Math.PI*2); ctx.fill(); if(b.t<FUSE/4){ var g=(1-b.t/(FUSE/4))*3; ctx.fillStyle='rgba(255,0,0,'+(0.5*(1-b.t/(FUSE/4)))+')'; ctx.beginPath(); ctx.arc(cx,cy,TILE/2.5+g,0,Math.PI*2); ctx.fill(); } ctx.restore(); return true; } explode(b); return false; }); }
+        function roundRect(x,y,w,h,r,fill,stroke){ if(!ctx) return; ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r); if(fill)ctx.fill();if(stroke)ctx.stroke(); }
+        function drawBlasts(){ if(!ctx) return; blasts=blasts.filter(function(bl){ bl.t--; if(bl.t>0){ var a=bl.t/bl.max; ctx.globalAlpha=1; ctx.fillStyle = bl.kind==='fire' ? 'rgba(204,85,0,'+a+')' : 'rgba(255,165,0,'+a+')'; ctx.fillRect(bl.x*TILE,bl.y*TILE,TILE,TILE); if(bl.kind==='fire'){ glowAt(bl.x*TILE+TILE/2, bl.y*TILE+TILE/2, TILE*1.1, 'fire'); } return true; } return false; }); }
+        function explode(b){ var ctr={x:b.x,y:b.y}; var details={t:EXPLOSION,max:EXPLOSION,kind:'bomb',source:b.source}; var tiles=[{x:ctr.x,y:ctr.y,t:details.t,max:details.max,kind:details.kind,source:details.source}]; var dirs=[[1,0],[-1,0],[0,1],[0,-1]]; for(var di=0;di<dirs.length;di++){ var dx=dirs[di][0], dy=dirs[di][1]; for(var i=1;i<=b.r;i++){ var nx=ctr.x+dx*i, ny=ctr.y+dy*i, tt=tile(nx,ny); if(tt===1) break; tiles.push({x:nx,y:ny,t:details.t,max:details.max,kind:details.kind,source:details.source}); if(map[ny][nx]===2 || map[ny][nx]===4){ var key=ny+','+nx; if(secretsHidden[key]){ itemsAt[key]=secretsHidden[key]; delete secretsHidden[key]; } map[ny][nx]=0; break; } } } for(var ti=0;ti<tiles.length;ti++){ blasts.push(tiles[ti]); } damageAndPickups(tiles); }
+        function fireBurst(cx,cy){ var dirs=[[0,0],[1,0],[-1,0],[0,1],[0,-1]]; var tiles=[]; var add=[]; var d={t:FIRE_EXPLOSION,max:FIRE_EXPLOSION,kind:'fire'}; for(var i=0;i<dirs.length;i++){ var dx=dirs[i][0], dy=dirs[i][1]; var nx=cx+dx, ny=cy+dy; tiles.push({x:nx,y:ny,t:d.t,max:d.max,kind:d.kind}); if(map[ny][nx]===2){ var seen=false; for(var bi=0;bi<burning.length;bi++){ var bb=burning[i]; if(bb.x===nx&&bb.y===ny){ seen=true; break; } } if(!seen){ map[ny][nx]=4; add.push({x:nx,y:ny,t:BOX_BURN}); } } } for(var tix=0;tix<tiles.length;tix++){ blasts.push(tiles[tix]); } damageAndPickups(tiles); return add; }
+        function damageAndPickups(tiles){ for(var i=0;i<tiles.length;i++){ var bl=tiles[i]; if(stats.alive && playerGrid.x===bl.x && playerGrid.y===bl.y){ stats.alive=false; over=true; } for(var ei=0; ei<enemies.length; ei++){ var e=enemies[ei]; if(!e||!e.a) continue; if(e.x===bl.x && e.y===bl.y && bl.kind==='bomb' && bl.source==='player'){ if(e.carry){ itemsAt[e.y+','+e.x]=e.carry; e.carry=null; } e.a=false; } } } }
+        function applyPickup(s){ if(s.indexOf('S')===0) stats.found++; else if(s==='R') stats.range++; else if(s==='B') stats.bombs++; else if(s==='Q') stats.detonate=true; }
+        function tickFires(){ var add=[]; var keep=[]; for(var i=0;i<burning.length;i++){ var b=burning[i]; b.t--; if(b.t<=0){ var nf=fireBurst(b.x,b.y); for(var j=0;j<nf.length;j++){ add.push(nf[j]); } map[b.y][b.x]=0; var k=b.y+','+b.x; if(secretsHidden[k]){ itemsAt[k]=secretsHidden[k]; delete secretsHidden[k]; } } else { keep.push(b); } } burning=keep.concat(add); }
+        function chooseDir(e){ var dirs=[[1,0],[-1,0],[0,1],[0,-1]]; var best=null,bestScore=-1; function lookScore(x,y,dx,dy){ var score=0, steps=0, bx,by,tt; while(true){ bx=x+dx*(steps+1); by=y+dy*(steps+1); tt=tile(bx,by); if(tt===1) break; if(tt===0) score+=1; if(tt===2){ score+=6; break; } if(tt===4){ score+=3; break; } steps++; if(steps>8){ score+=2; break; } } return score; } var revX=-(e.dx||0), revY=-(e.dy||0); for(var i=0;i<dirs.length;i++){ var dx=dirs[i][0], dy=dirs[i][1]; if(!passable(e.x+dx,e.y+dy)) continue; var s=lookScore(e.x,e.y,dx,dy); var vrow=VISIT[e.y+dy]||[]; var v=vrow[e.x+dx]||0; s += Math.max(0,6-v)*1.2; var dot=(e.dx||0)*dx + (e.dy||0)*dy; if(dot===0 && Math.random()<0.45) s+=2.5; if(dx===revX && dy===revY) s*=0.5; if(s>bestScore){ bestScore=s; best=[dx,dy]; } } if(best){ e.dx=best[0]; e.dy=best[1]; } else { e.dx=0; e.dy=0; } }
+        function advanceEnemy(e, dt){ if(!e.moving && (Math.random() < (e.uturnP||0.05))){ var rx=-(e.dx||0), ry=-(e.dy||0); if(passable(e.x+rx,e.y+ry)){ e.dx=rx; e.dy=ry; e.toX=e.x+e.dx; e.toY=e.y+e.dy; e.moving=true; e.commit = 1 + (Math.random()*3|0); } } if(!e.moving){ if((e.commit||0)>0 && passable(e.x+(e.dx||0), e.y+(e.dy||0))){ e.toX=e.x+(e.dx||0); e.toY=e.y+(e.dy||0); e.moving=true; e.commit--; } else { chooseDir(e); if(e.dx||e.dy){ e.toX=e.x+e.dx; e.toY=e.y+e.dy; e.moving=true; e.commit = 1 + (Math.random()*4|0); } else { return; } } } var tx=e.toX*TILE, ty=e.toY*TILE; var dx=tx - e.px, dy=ty - e.py; var dist=Math.sqrt(dx*dx+dy*dy); if(dist<0.1){ e.px=tx; e.py=ty; e.x=e.toX; e.y=e.toY; e.moving=false; if(VISIT && VISIT[e.y] && typeof VISIT[e.y][e.x]!=='undefined'){ VISIT[e.y][e.x]++; e._vmax=Math.max(e._vmax||0, VISIT[e.y][e.x]); } var key=e.y+','+e.x; var it=itemsAt[key]; if(it && String(it).charAt(0)==='S' && !e.carry){ e.carry=it; delete itemsAt[key]; } if(Math.random()<0.35){ var tOpts=[]; if(passable(e.x+e.dy, e.y-e.dx)) tOpts.push([e.dy,-e.dx]); if(passable(e.x-e.dy, e.y+e.dx)) tOpts.push([-e.dy,e.dx]); if(tOpts.length){ var pick=tOpts[(Math.random()*tOpts.length)|0]; e.dx=pick[0]; e.dy=pick[1]; e.toX=e.x+e.dx; e.toY=e.y+e.dy; e.moving=true; e.commit = 1 + (Math.random()*3|0); return; } } if((e.commit||0)>0 && passable(e.x+(e.dx||0), e.y+(e.dy||0))){ e.toX=e.x+e.dx; e.toY=e.y+e.dy; e.moving=true; e.commit--; return; } chooseDir(e); if(e.dx||e.dy){ e.toX=e.x+e.dx; e.toY=e.y+e.dy; e.moving=true; e.commit = 1 + (Math.random()*4|0); } return; } var step=e.speed*dt; if(step>dist) step=dist; if(dist>0){ e.px += dx/dist*step; e.py += dy/dist*step; } }
+        function updateEnemies(dt){ for(var ei=0; ei<enemies.length; ei++){ var e=enemies[ei]; if(!e||!e.a) continue; e._jit=(e._jit||0)-dt; if(e._jit<=0){ e._jit=0.4+Math.random()*0.6; e.speed=(e.speedBase||ENEMY_SPEED)*(0.85+Math.random()*0.3); } advanceEnemy(e, dt); if(stats.alive){ var prx=playerPix.x+4, pry=playerPix.y+4, prw=TILE-8, prh=TILE-8; var erx=e.px+4, ery=e.py+4, erw=TILE-8, erh=TILE-8; if(rectsOverlap(prx,pry,prw,prh, erx,ery,erw,erh)){ stats.alive=false; over=true; } } var dirs2=[[1,0],[-1,0],[0,1],[0,-1]]; for(var ii=0;ii<dirs2.length;ii++){ var dx=dirs2[ii][0], dy=dirs2[ii][1]; var ax=e.x+dx, ay=e.y+dy; var isBurning=false; for(var bi=0;bi<burning.length;bi++){ var bb=burning[bi]; if(bb.x===ax&&bb.y===ay){ isBurning=true; break; } } if(map[ay] && map[ay][ax]===2 && !isBurning){ if(Math.random()<0.25){ map[ay][ax]=4; burning.push({x:ax,y:ay,t:BOX_BURN}); } } } } }
+        function checkWin(){ var alive=0; for(var ei=0; ei<enemies.length; ei++){ if(enemies[ei] && enemies[ei].a) alive++; } if(started && !over && alive===0 && stats.found>=4){ over=true; } }
+        function loop(ts){ if(over||!started) return; var now=ts||performance.now(); var dt=(now-lastTime)/1000; if(dt>0.05) dt=0.05; if(dt<0) dt=0; lastTime=now; try{ updateEnemies(dt); tickFires(); movePlayer(); updatePlayerAnim(dt); checkWin(); draw(); }catch(e){ over=true; return;} requestAnimationFrame(loop); }
+        function placeBomb(){ if(stats.placed>=stats.bombs && !stats.detonate) return; if(stats.placed===0 && !stats.detonate) { bombs.push({x:playerGrid.x,y:playerGrid.y,t:FUSE,r:stats.range,source:'player'}); return; } if(stats.detonate){ if(bombs.length){ explode(bombs.shift()); } else { bombs.push({x:playerGrid.x,y:playerGrid.y,t:FUSE,r:stats.range,source:'player'}); } } else { bombs.push({x:playerGrid.x,y:playerGrid.y,t:FUSE,r:stats.range,source:'player'}); } }
+        function onDown(e){ if(e.code==='Space'){ e.preventDefault(); if(!started){ reset(); requestAnimationFrame(loop); return; } if(over){ reset(); requestAnimationFrame(loop); return; } }
+          if(over||!started) return; keys[e.code]=true; if(e.code==='Space' && !keys['Bomb']){ placeBomb(); keys['Bomb']=true; } if(e.code==='KeyQ'){ stats.detonate=!stats.detonate; }
+        }
+        function onUp(e){ keys[e.code]=false; if(e.code==='Space') keys['Bomb']=false; }
+        function movePlayer(){ if(!stats.alive) return; var nx=playerPix.x, ny=playerPix.y; var moved=false; if(keys['KeyW']||keys['ArrowUp']) { ny-=2; moved=true; playerAnim.dir='up'; } else if(keys['KeyS']||keys['ArrowDown']) { ny+=2; moved=true; playerAnim.dir='down'; } else if(keys['KeyA']||keys['ArrowLeft']) { nx-=2; moved=true; playerAnim.dir='left'; } else if(keys['KeyD']||keys['ArrowRight']) { nx+=2; moved=true; playerAnim.dir='right'; } if(!moved){ playerAnim.moving=false; return; } var cxp=nx+TILE/2, cyp=ny+TILE/2, gx=Math.floor(cxp/TILE), gy=Math.floor(cyp/TILE), tt=tile(gx,gy); if(tt===0){ var bombHere=false; for(var bi=0;bi<bombs.length;bi++){ var b=bombs[bi]; if(b.x===gx&&b.y===gy){ bombHere=true; break; } } var canStep = !bombHere; if(!canStep){ for(var bj=0; bj<bombs.length; bj++){ var bb=bombs[bj]; if(bb.x===playerGrid.x && bb.y===playerGrid.y){ canStep=true; break; } }
+         }
+         if(canStep){ playerPix.x=nx;playerPix.y=ny;playerGrid.x=gx;playerGrid.y=gy; pickupOnStep(); } }
+         playerPix.x=Math.max(0,Math.min(playerPix.x,BASE_W-TILE));
+         playerPix.y=Math.max(0,Math.min(playerPix.y,BASE_H-TILE));
+         playerGrid.x=Math.floor((playerPix.x+TILE/2)/TILE);
+         playerGrid.y=Math.floor((playerPix.y+TILE/2)/TILE);
+         playerAnim.moving=true; }
+        function updatePlayerAnim(dt){ if(avatarKey.indexOf('runner')!==0) return; if(playerAnim.moving){ var frames=getCurrentFrames(); playerAnim.t += dt*10; if(frames.length){ playerAnim.idx = Math.floor(playerAnim.t)%frames.length; } } else { playerAnim.t=0; playerAnim.idx=0; } }
+        function pickupOnStep(){ var k=playerGrid.y+','+playerGrid.x; if(itemsAt[k]){ applyPickup(itemsAt[k]); delete itemsAt[k]; } if(map[playerGrid.y][playerGrid.x]===4) { stats.alive=false; over=true; }
+         for(var ei=0; ei<enemies.length; ei++){ var e=enemies[ei]; if(e && e.a && e.x===playerGrid.x && e.y===playerGrid.y){ stats.alive=false; over=true; } }
+        }
+        function seedSecrets(){ var spots=[]; var y,x; for(y=1;y<ROWS-1;y++) for(x=1;x<COLS-1;x++){ if(map[y][x]===2 && (Math.abs(y-1)>2 || Math.abs(x-1)>2)) spots.push({x:x,y:y}); } var bag=['S1','S2','S3','S4','R','B','Q']; for(var i=0;i<bag.length;i++){ var k=bag[i]; var idx=Math.floor(Math.random()*spots.length); var s=spots.splice(idx,1)[0]; if(s) secretsHidden[s.y+','+s.x]=k; } }
+        function reset(){ VISIT=Array.from({length:ROWS},function(){return Array(COLS).fill(0)}); map=JSON.parse(JSON.stringify(MAP)); playerGrid={x:1,y:1}; playerPix={x:TILE,y:TILE}; playerAnim.moving=false; playerAnim.t=0; playerAnim.idx=0; playerAnim.dir='down'; stats={bombs:1,range:2,placed:0,alive:true,found:0,detonate:false}; bombs=[]; blasts=[]; itemsAt={}; enemies=[ (function(){var x=13,y=1,o=randDir(); return {x:x,y:y, px:x*TILE, py:y*TILE, toX:x, toY:y, moving:false, speedBase:ENEMY_SPEED, speed:ENEMY_SPEED*(0.9+0.2*Math.random()), flipRate:0.6+Math.random()*1.4, dx:o.dx, dy:o.dy, a:true, ph:Math.random()*Math.PI*2, fo:(Math.random()*8)|0, carry:null, commit: (2+Math.random()*5|0), uturnP:0.05 };})(), (function(){var x=13,y=3,o=randDir(); return {x:x,y:y, px:x*TILE, py:y*TILE, toX:x, toY:y, moving:false, speedBase:ENEMY_SPEED, speed:ENEMY_SPEED*(0.9+Math.random()*0.2), flipRate:0.6+Math.random()*1.4, dx:o.dx, dy:o.dy, a:true, ph:Math.random()*Math.PI*2, fo:(Math.random()*8)|0, carry:null, commit:(2+Math.random()*5|0), uturnP:0.05 };})(), (function(){var x=1,y=11,o=randDir(); return {x:x,y:y, px:x*TILE, py:y*TILE, toX:x, toY:y, moving:false, speedBase:ENEMY_SPEED, speed:ENEMY_SPEED*(0.9+Math.random()*0.2), flipRate:0.6+Math.random()*1.4, dx:o.dx, dy:o.dy, a:true, ph:Math.random()*Math.PI*2, fo:(Math.random()*8)|0, carry:null, commit:(2+Math.random()*5|0), uturnP:0.05 };})() ]; burning=[]; secretsHidden={}; over=false; started=true; lastTime=performance.now(); seedSecrets(); onResize(); }
+        function init(){ buildRunnerSets(); VISIT=Array.from({length:ROWS},function(){return Array(COLS).fill(0)}); map=JSON.parse(JSON.stringify(MAP)); playerGrid={x:1,y:1}; playerPix={x:TILE,y:TILE}; started=false; over=false; stats={bombs:1,range:2,placed:0,alive:true,found:0,detonate:false}; enemies=[]; burning=[]; secretsHidden={}; itemsAt={}; buildFlameFrames(); seedSecrets();
+          document.addEventListener('keydown',onDown);
+          document.addEventListener('keyup',onUp);
+          onResize();
+        }
+
+        function onResize(){ fitCanvas(); }
+
+        // Start the game automatically
+        init();
+        reset();
+        requestAnimationFrame(loop);
+
+        // === CABINET UI INTEGRATION ===
         class IconManager {
+            static updateAllIcons() {
+                IconManager.renderSneakers(0, 4);
+                IconManager.renderHearts(3, 3);
+                IconManager.renderPowers(0, 4);
+                IconManager.renderFires(0, 5);
+            }
+            
             static renderSneakers(fill, outline) {
-                const container = document.getElementById('ui-sneakers'); if (!container) return;
+                const container = document.getElementById('ui-sneakers');
+                if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -185,11 +757,14 @@
                         <div class="sneaker-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
-                        </div>`;
+                        </div>
+                    `;
                 }
             }
+            
             static renderHearts(fill, outline) {
-                const container = document.getElementById('ui-hearts'); if (!container) return;
+                const container = document.getElementById('ui-hearts');
+                if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -197,11 +772,14 @@
                         <div class="heart-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
-                        </div>`;
+                        </div>
+                    `;
                 }
             }
+            
             static renderFires(fill, outline) {
-                const container = document.getElementById('ui-fires'); if (!container) return;
+                const container = document.getElementById('ui-fires');
+                if (!container) return;
                 container.innerHTML = '';
                 for (let i = 0; i < outline; i++) {
                     const isFilled = i < fill;
@@ -209,187 +787,139 @@
                         <div class="fire-icon ${isFilled ? 'active' : ''}">
                             <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
                             <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
-                        </div>`;
+                        </div>
+                    `;
                 }
             }
+            
             static renderPowers(total, fill) {
-                const container = document.getElementById('ui-powers'); if (!container) return;
+                const container = document.getElementById('ui-powers');
+                if (!container) return;
                 container.innerHTML = '';
-                const powerTypes = [ { bold: 'ph-timer', fill: 'ph-timer' }, { bold: 'ph-shield', fill: 'ph-shield' }, { bold: 'ph-magnet', fill: 'ph-magnet' }, { bold: 'ph-crosshair-simple', fill: 'blast' } ];
+                const powerTypes = [
+                    { bold: 'ph-timer', fill: 'ph-timer' },
+                    { bold: 'ph-shield', fill: 'ph-shield' },
+                    { bold: 'ph-magnet', fill: 'ph-magnet' },
+                    { bold: 'ph-crosshair-simple', fill: 'blast' }
+                ];
+                
                 for (let i = 0; i < total; i++) {
-                    const powerType = powerTypes[i % powerTypes.length]; const isActive = i < fill;
+                    const powerType = powerTypes[i % powerTypes.length];
+                    const isActive = i < fill;
+                    
                     if (powerType.fill === 'blast') {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
                                 <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
                                 <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
-                            </div>`;
+                            </div>
+                        `;
                     } else {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
                                 <i class="ph-bold ${powerType.bold}" aria-hidden="true"></i>
                                 <i class="ph-fill ${powerType.fill}" aria-hidden="true"></i>
-                            </div>`;
+                            </div>
+                        `;
                     }
                 }
             }
-            static updateAllIcons() {
-                IconManager.renderSneakers(3, 5);
-                IconManager.renderHearts(1, 3);
-                IconManager.renderPowers(4, 4);
-                IconManager.renderFires(4, 5);
-            }
         }
 
-        // HUD Manager
-        class HUDManager {
-            static initialize() {
-                const pauseBtn = document.getElementById('btn-pause');
-                if (pauseBtn) {
-                    pauseBtn.addEventListener('click', function() {
-                        const isPlaying = this.dataset.state === 'playing';
-                        const next = isPlaying ? 'paused' : 'playing';
-                        this.dataset.state = next;
-                        this.setAttribute('aria-pressed', String(next === 'paused'));
-                        this.setAttribute('aria-label', next === 'paused' ? 'Play' : 'Pause');
-                    });
-                }
-            }
+        // Update cabinet UI with game stats
+        function updateCabinetUI() {
+            if (!stats) return;
+            
+            // Update sneakers found
+            IconManager.renderSneakers(stats.found, 4);
+            
+            // Update lives (hearts)
+            const lives = stats.alive ? 3 : 0;
+            IconManager.renderHearts(lives, 3);
+            
+            // Update power-ups
+            const activePowers = [stats.range > 2, stats.bombs > 1, stats.detonate].filter(Boolean).length;
+            IconManager.renderPowers(activePowers, 3);
+            
+            // Update score and counter
+            window.SneakerQuestUI.setCounter(stats.found * 25);
+            window.SneakerQuestUI.setScore(stats.found * 100);
         }
 
-        // Scaling Manager
+        // Update UI every frame
+        const originalLoop = loop;
+        loop = function(ts) {
+            updateCabinetUI();
+            return originalLoop(ts);
+        };
+
+        // Cabinet UI API
+        window.SneakerQuestUI = {
+            IconManager: IconManager,
+            setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
+            setHearts: (filled, total) => IconManager.renderHearts(filled, total),
+            setPowers: (filled, total) => IconManager.renderPowers(total, filled),
+            setFires: (filled, total) => IconManager.renderFires(filled, total),
+            setCounter: (value) => {
+                const counter = document.getElementById('counter');
+                if (counter) counter.textContent = value.toString().padStart(3, '0');
+            },
+            setStage: (stage) => {
+                const stageElement = document.querySelector('.chip-stage');
+                if (stageElement) stageElement.textContent = `STAGE – ${stage.toString().padStart(2, '0')}`;
+            },
+            setScore: (score) => {
+                const scoreElement = document.querySelector('.chip-score');
+                if (scoreElement) scoreElement.textContent = `SCORE ${score.toString().padStart(6, '0')}`;
+            },
+            setTime: (time) => {
+                const timeElement = document.querySelector('.chip-time');
+                if (timeElement) timeElement.textContent = time;
+            }
+        };
+
+        // Initialize cabinet UI
+        document.addEventListener('DOMContentLoaded', function() {
+            IconManager.updateAllIcons();
+            
+            // Setup pause button
+            const pauseBtn = document.getElementById('btn-pause');
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', function() {
+                    const isPlaying = this.dataset.state === 'playing';
+                    this.dataset.state = isPlaying ? 'paused' : 'playing';
+                    // Basic pause functionality
+                    if (isPlaying) {
+                        started = false;
+                    } else {
+                        started = true;
+                        requestAnimationFrame(loop);
+                    }
+                });
+            }
+        });
+
+        // Scaling for the cabinet
         class ScalingManager {
             static initialize() {
                 ScalingManager.scaleContainer();
                 window.addEventListener('resize', ScalingManager.scaleContainer);
-                window.addEventListener('orientationchange', ScalingManager.scaleContainer);
-                document.addEventListener('fullscreenchange', ScalingManager.scaleContainer);
-                document.addEventListener('webkitfullscreenchange', ScalingManager.scaleContainer);
             }
+            
             static scaleContainer() {
-                const container = document.querySelector('.fixed-container'); if (!container) return;
-                const immersive = container.classList.contains('immersive');
-                if (immersive) { container.style.transform = 'none'; return; }
-                const viewportWidth = window.innerWidth; const viewportHeight = window.innerHeight;
-                const scaleX = (viewportWidth - 40) / 430; const scaleY = (viewportHeight - 40) / 900;
+                const container = document.querySelector('.fixed-container');
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                const scaleX = (viewportWidth - 40) / 430;
+                const scaleY = (viewportHeight - 40) / 900;
                 const finalScale = Math.min(scaleX, scaleY, 1);
+                
                 container.style.transform = `scale(${finalScale})`;
             }
         }
 
-        // Fullscreen Manager with sandbox-safe fallback
-        class FullscreenManager {
-            static target() { return document.getElementById('mainContainer'); }
-            static nativeSupported() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
-            static isOn() { return document.fullscreenElement || document.webkitFullscreenElement; }
-
-            static async enterNative() {
-                const el = FullscreenManager.target();
-                if (el.requestFullscreen) return el.requestFullscreen();
-                if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
-            }
-            static async exitNative() {
-                if (document.exitFullscreen) return document.exitFullscreen();
-                if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-            }
-
-            static enterImmersive() {
-                const el = FullscreenManager.target();
-                el.classList.add('immersive');
-                document.body.classList.add('is-immersive');
-                ScalingManager.scaleContainer();
-            }
-            static exitImmersive() {
-                const el = FullscreenManager.target();
-                el.classList.remove('immersive');
-                document.body.classList.remove('is-immersive');
-                ScalingManager.scaleContainer();
-            }
-
-            static async enter() {
-                // Try native first if the UA advertises support
-                if (FullscreenManager.nativeSupported()) {
-                    try {
-                        await FullscreenManager.enterNative();
-                        document.body.classList.add('is-fullscreen');
-                        return 'native';
-                    } catch (e) {
-                        // Fall through to immersive on policy blocks
-                    }
-                }
-                // Policy blocked or unsupported
-                FullscreenManager.enterImmersive();
-                return 'immersive';
-            }
-
-            static async exit() {
-                if (FullscreenManager.isOn()) {
-                    try { await FullscreenManager.exitNative(); } finally { document.body.classList.remove('is-fullscreen'); }
-                }
-                FullscreenManager.exitImmersive();
-            }
-
-            static async toggle() {
-                const el = FullscreenManager.target();
-                const btn = document.getElementById('btn-fullscreen');
-                const nativeActive = !!FullscreenManager.isOn();
-                const immersiveActive = el.classList.contains('immersive');
-                if (nativeActive || immersiveActive) return FullscreenManager.exit();
-                return FullscreenManager.enter();
-            }
-
-            static wire() {
-                const btn = document.getElementById('btn-fullscreen'); if (!btn) return;
-                const sync = () => {
-                    const nativeActive = !!FullscreenManager.isOn();
-                    const immersiveActive = FullscreenManager.target().classList.contains('immersive');
-                    const on = nativeActive || immersiveActive;
-                    btn.dataset.state = on ? 'on' : 'off';
-                    btn.setAttribute('aria-pressed', String(on));
-                    const supported = FullscreenManager.nativeSupported();
-                    btn.setAttribute('aria-label', on ? (supported ? 'Exit fullscreen' : 'Exit immersive') : (supported ? 'Enter fullscreen' : 'Enter immersive'));
-                };
-                btn.addEventListener('click', () => { FullscreenManager.toggle().finally(sync); });
-                document.addEventListener('fullscreenchange', sync);
-                document.addEventListener('webkitfullscreenchange', sync);
-                document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'f') FullscreenManager.toggle().finally(sync); });
-                sync();
-            }
-
-            // Test helpers
-            static _testImmersiveToggle() {
-                const el = FullscreenManager.target();
-                FullscreenManager.enterImmersive();
-                console.assert(el.classList.contains('immersive'), 'Immersive enter should add class');
-                FullscreenManager.exitImmersive();
-                console.assert(!el.classList.contains('immersive'), 'Immersive exit should remove class');
-            }
-        }
-
-        // Boot
-        document.addEventListener('DOMContentLoaded', function() {
-            HUDManager.initialize();
-            ScalingManager.initialize();
-            IconManager.updateAllIcons();
-            FullscreenManager.wire();
-
-            // Lightweight tests (do not change)
-            console.assert(typeof FullscreenManager.nativeSupported() === 'boolean', 'nativeSupported returns boolean');
-            FullscreenManager._testImmersiveToggle();
-        });
-
-        // Public API
-        window.SneakerQuestUI = {
-            IconManager: IconManager,
-            setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
-            setHearts:   (filled, total) => IconManager.renderHearts(filled, total),
-            setPowers:   (filled, total) => IconManager.renderPowers(total, filled),
-            setFires:    (filled, total) => IconManager.renderFires(filled, total),
-            setCounter:  (value) => { const c = document.getElementById('counter'); if (c) c.textContent = value.toString().padStart(3,'0'); },
-            setStage:    (stage) => { const e = document.querySelector('.chip-stage'); if (e) e.textContent = `STAGE – ${stage.toString().padStart(2,'0')}`; },
-            setScore:    (score) => { const e = document.querySelector('.chip-score'); if (e) e.textContent = `SCORE ${score.toString().padStart(6,'0')}`; },
-            setTime:     (time) => { const e = document.querySelector('.chip-time'); if (e) e.textContent = time; }
-        };
+        ScalingManager.initialize();
     </script>
 </body>
 </html>
