@@ -27,11 +27,17 @@
             --led-glow: rgba(255, 58, 47, 0.45);
         }
 
+        /* === MOBILE LOCK MODE - NO SCROLLING, NO GAPS === */
         html, body {
             height: 100%;
             width: 100%;
             overflow: hidden;
             background: var(--bg-dark);
+            position: fixed; /* CRITICAL: Prevents any scrolling */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         body {
@@ -42,14 +48,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            overscroll-behavior: none;
+            padding: 0; /* NO PADDING - edge to edge */
+            overscroll-behavior: none; /* Prevents pull-to-refresh */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            touch-action: manipulation;
+            touch-action: none; /* CRITICAL: Disables all touch gestures */
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            /* Force full viewport usage */
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
         }
 
         .fixed-container {
@@ -57,6 +68,9 @@
             height: 900px;
             position: relative;
             transform-origin: center center;
+            /* Ensure it stays within bounds */
+            max-width: 100vw;
+            max-height: 100vh;
         }
 
         .cabinet {
@@ -89,6 +103,7 @@
             align-items: center;
             padding: 20px;
             gap: 20px;
+            overflow: hidden;
         }
 
         /* Marquee section */
@@ -356,7 +371,7 @@
             justify-content: center;
         }
 
-        /* Icon Containers - RESTORED ORIGINAL STYLES */
+        /* Icon Containers */
         #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers {
             display: flex;
             align-items: center;
@@ -367,7 +382,7 @@
             box-sizing: border-box;
         }
 
-        /* Sneaker Icons - RESTORED LAYERED STYLE */
+        /* Sneaker Icons */
         #ui-sneakers {
             gap: 3px;
         }
@@ -399,7 +414,7 @@
             opacity: 1;
         }
 
-        /* Heart Icons - RESTORED LAYERED STYLE */
+        /* Heart Icons */
         #ui-hearts {
             gap: 4px;
         }
@@ -431,7 +446,7 @@
             opacity: 1;
         }
 
-        /* Fire Icons - RESTORED LAYERED STYLE */
+        /* Fire Icons */
         #ui-fires {
             gap: 2px;
         }
@@ -463,7 +478,7 @@
             opacity: 1;
         }
 
-        /* Power-up Icons - RESTORED LAYERED STYLE */
+        /* Power-up Icons */
         #ui-powers {
             gap: 7px;
         }
@@ -495,7 +510,7 @@
             opacity: 1;
         }
 
-        /* Pause/Play Button - FIXED */
+        /* Pause/Play Button */
         .chip-btn {
             background: transparent;
             border: 0;
@@ -680,13 +695,77 @@
     </div>
 
     <script>
-        // === PROPER UNIFORM SCALING ===
+        // === MOBILE LOCK MODE MANAGER ===
+        class MobileLockMode {
+            static initialize() {
+                // CRITICAL: Prevent all touch behaviors that could cause scrolling
+                MobileLockMode.preventAllScrolling();
+                
+                // Initialize perfect scaling
+                ScalingManager.initialize();
+                
+                // Setup fullscreen button (with iOS awareness)
+                FullscreenManager.initialize();
+                
+                // Lock orientation changes
+                MobileLockMode.lockOrientation();
+                
+                console.log('🔒 Mobile Lock Mode Activated');
+            }
+            
+            static preventAllScrolling() {
+                // Prevent all default touch behaviors
+                document.addEventListener('touchstart', (e) => {
+                    if (e.touches.length > 1) e.preventDefault();
+                }, { passive: false });
+                
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault(); // BLOCK ALL SCROLLING
+                }, { passive: false });
+                
+                document.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+                
+                // Prevent context menu
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+                
+                // Prevent elastic scroll on iOS
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+            }
+            
+            static lockOrientation() {
+                // Try to lock orientation if supported
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('portrait').catch(() => {
+                        // Orientation lock not supported or failed
+                    });
+                }
+            }
+        }
+
+        // === PERFECT SCALING MANAGER ===
         class ScalingManager {
             static initialize() {
                 ScalingManager.scaleContainer();
-                window.addEventListener('resize', ScalingManager.scaleContainer);
+                
+                // Use resize observer for perfect scaling
+                const resizeObserver = new ResizeObserver(() => {
+                    ScalingManager.scaleContainer();
+                });
+                
+                resizeObserver.observe(document.body);
+                
+                // Handle orientation changes
                 window.addEventListener('orientationchange', () => {
-                    setTimeout(ScalingManager.scaleContainer, 100);
+                    setTimeout(() => {
+                        ScalingManager.scaleContainer();
+                        // Force address bar to stay consistent
+                        window.scrollTo(0, 0);
+                    }, 300);
                 });
             }
             
@@ -695,25 +774,72 @@
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
                 
-                // Calculate scale based on the smallest dimension to maintain aspect ratio
-                const scaleBasedOnWidth = (viewportWidth - 40) / 430;
-                const scaleBasedOnHeight = (viewportHeight - 40) / 900;
+                // Calculate perfect uniform scale
+                const scaleBasedOnWidth = viewportWidth / 430;
+                const scaleBasedOnHeight = viewportHeight / 900;
                 
-                // Use the smaller scale to ensure everything fits
-                const finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight, 1);
+                // Use the smaller scale to ensure everything fits perfectly
+                const finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight);
                 
+                // Apply the scale
                 container.style.transform = `scale(${finalScale})`;
+                
+                console.log(`📐 Scaling: ${finalScale.toFixed(3)} (${viewportWidth}x${viewportHeight})`);
             }
         }
 
-        // === ICON MANAGER - RESTORED ORIGINAL ===
+        // === FULLSCREEN MANAGER (iOS Aware) ===
+        class FullscreenManager {
+            static initialize() {
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', FullscreenManager.toggleFullscreen);
+                }
+            }
+
+            static toggleFullscreen() {
+                // On iOS, we can't do true fullscreen, but we can maximize the experience
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    FullscreenManager.toggleIOSMaximize();
+                    return;
+                }
+
+                // For other browsers, try true fullscreen
+                try {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen?.().catch(err => {
+                            console.log('Fullscreen not available');
+                        });
+                    } else {
+                        document.exitFullscreen?.();
+                    }
+                } catch (err) {
+                    console.log('Fullscreen error:', err);
+                }
+            }
+
+            static toggleIOSMaximize() {
+                // On iOS, we ensure the cabinet uses maximum available space
+                window.scrollTo(0, 0);
+                ScalingManager.scaleContainer();
+                
+                // Show feedback
+                const btn = document.getElementById('fullscreenBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="ph-fill ph-check"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 1000);
+            }
+        }
+
+        // === ICON MANAGER ===
         class IconManager {
             static updateAllIcons() {
-                // Default icon counts
-                IconManager.renderSneakers(3, 5);    // 3 filled, 5 total sneakers
-                IconManager.renderHearts(1, 3);      // 1 filled, 3 total hearts  
-                IconManager.renderPowers(4, 4);      // 4 filled, 4 total powers
-                IconManager.renderFires(4, 5);       // 4 filled, 5 total fires
+                IconManager.renderSneakers(3, 5);
+                IconManager.renderHearts(1, 3);
+                IconManager.renderPowers(4, 4);
+                IconManager.renderFires(4, 5);
             }
             
             static renderSneakers(fill, outline) {
@@ -783,8 +909,8 @@
                     if (powerType.fill === 'blast') {
                         container.innerHTML += `
                             <div class="power ${isActive ? 'active' : ''}">
-                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
-                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true" style="font-size: 20px;"></i>
+                                <i class="ph-bold ph-crosshair-simple" aria-hidden="true"></i>
+                                <i class="ph-fill ph-crosshair-simple" aria-hidden="true"></i>
                             </div>
                         `;
                     } else {
@@ -796,42 +922,6 @@
                         `;
                     }
                 }
-            }
-        }
-
-        // === SIMPLE FULLSCREEN (with iOS fallback) ===
-        class FullscreenManager {
-            static initialize() {
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                if (fullscreenBtn) {
-                    fullscreenBtn.addEventListener('click', FullscreenManager.toggleFullscreen);
-                }
-            }
-
-            static toggleFullscreen() {
-                // iOS doesn't support true fullscreen, so we'll maximize instead
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    FullscreenManager.toggleIOSMaximize();
-                    return;
-                }
-
-                try {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen?.().catch(err => {
-                            console.log('Fullscreen not available');
-                        });
-                    } else {
-                        document.exitFullscreen?.();
-                    }
-                } catch (err) {
-                    console.log('Fullscreen error:', err);
-                }
-            }
-
-            static toggleIOSMaximize() {
-                // For iOS, we just hide the URL bar and make it feel fullscreen
-                window.scrollTo(0, 1);
-                // The scaling manager will handle the rest
             }
         }
 
@@ -863,14 +953,13 @@
             window.addEventListener('resize', resizeCanvas);
         }
 
-        // === INITIALIZE EVERYTHING ===
+        // === INITIALIZE MOBILE LOCK MODE ===
         document.addEventListener('DOMContentLoaded', function() {
-            ScalingManager.initialize();
-            FullscreenManager.initialize();
+            MobileLockMode.initialize();
             IconManager.updateAllIcons();
             setupSimpleGame();
             
-            // Setup pause button properly
+            // Setup pause button
             const pauseBtn = document.getElementById('btn-pause');
             if (pauseBtn) {
                 pauseBtn.addEventListener('click', function() {
@@ -878,6 +967,11 @@
                     this.dataset.state = isPlaying ? 'paused' : 'playing';
                 });
             }
+            
+            // Force initial scroll to top (helps with address bar)
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
         });
 
         // Global UI API
