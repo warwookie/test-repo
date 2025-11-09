@@ -65,15 +65,6 @@
             overflow: hidden;
         }
 
-        /* Safe area handling for iPhone X+ */
-        @supports(padding: max(0px)) {
-            .fixed-container {
-                padding-left: max(0px, env(safe-area-inset-left));
-                padding-right: max(0px, env(safe-area-inset-right));
-                padding-bottom: max(0px, env(safe-area-inset-bottom));
-            }
-        }
-
         .fixed-container {
             width: 430px;
             height: 900px;
@@ -81,7 +72,6 @@
             transform-origin: center center;
             max-width: 100vw;
             max-height: 100vh;
-            /* Prevent any external margins */
             margin: 0 auto;
         }
 
@@ -640,20 +630,15 @@
         /* Mobile Safari specific fixes */
         @media screen and (max-width: 768px) {
             .fixed-container {
-                /* Conservative scaling for mobile */
-                transform: scale(0.85);
-            }
-            
-            /* Ensure the game canvas fits properly */
-            .crt {
-                min-height: 300px;
+                /* More aggressive scaling for mobile */
+                transform: scale(0.95);
             }
         }
 
         /* iPhone 8 specific optimization */
         @media screen and (max-width: 375px) and (max-height: 667px) {
             .fixed-container {
-                transform: scale(0.75);
+                transform: scale(0.82);
             }
         }
     </style>
@@ -733,14 +718,11 @@
                 // Prevent all scrolling and touch behaviors
                 MobileSafariLock.preventAllScrolling();
                 
-                // Initialize stable scaling
-                MobileSafariLock.initializeStableScaling();
+                // Initialize aggressive scaling to fill space
+                MobileSafariLock.initializeAggressiveScaling();
                 
-                // Setup fullscreen button (iOS aware)
+                // Setup fullscreen button
                 MobileSafariLock.initializeFullscreen();
-                
-                // Lock orientation if possible
-                MobileSafariLock.lockOrientation();
                 
                 console.log('📱 Mobile Safari Lock Mode Activated');
             }
@@ -748,70 +730,60 @@
             static preventAllScrolling() {
                 // Comprehensive touch event prevention
                 const preventDefault = (e) => {
-                    if (e.touches.length > 1 || e.targetTouches.length > 1) {
-                        e.preventDefault();
-                    }
+                    e.preventDefault();
                 };
                 
                 document.addEventListener('touchstart', preventDefault, { passive: false });
-                document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+                document.addEventListener('touchmove', preventDefault, { passive: false });
                 document.addEventListener('touchend', preventDefault, { passive: false });
                 document.addEventListener('touchcancel', preventDefault, { passive: false });
                 
                 // Prevent context menu
                 document.addEventListener('contextmenu', (e) => e.preventDefault());
                 
-                // Double tap prevention
-                let lastTap = 0;
-                document.addEventListener('touchend', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    if (tapLength < 500 && tapLength > 0) {
-                        e.preventDefault();
-                    }
-                    lastTap = currentTime;
-                }, { passive: false });
-                
                 // Force overflow hidden
                 document.body.style.overflow = 'hidden';
                 document.documentElement.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                document.body.style.height = '100%';
             }
             
-            static initializeStableScaling() {
+            static initializeAggressiveScaling() {
                 const container = document.querySelector('.fixed-container');
                 
                 const calculateOptimalScale = () => {
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
                     
-                    // Conservative scaling to ensure everything fits
-                    const scaleBasedOnWidth = (viewportWidth * 0.9) / 430;
-                    const scaleBasedOnHeight = (viewportHeight * 0.9) / 900;
+                    // More aggressive scaling to fill available space
+                    const scaleBasedOnWidth = viewportWidth / 430;
+                    const scaleBasedOnHeight = viewportHeight / 900;
                     
-                    // Use the smaller scale with some margin
-                    const finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight);
+                    // Use the smaller scale but be more aggressive about filling space
+                    let finalScale = Math.min(scaleBasedOnWidth, scaleBasedOnHeight);
                     
-                    return Math.min(finalScale, 1); // Never scale up beyond 100%
+                    // On mobile, be more aggressive about using available space
+                    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                        // Add a small buffer but be much more aggressive than before
+                        finalScale = Math.min(finalScale * 1.05, 1);
+                    }
+                    
+                    return finalScale;
                 };
                 
                 const applyScaling = () => {
                     const scale = calculateOptimalScale();
                     container.style.transform = `scale(${scale})`;
                     
-                    console.log(`📐 Mobile Scaling: ${scale.toFixed(3)} (${window.innerWidth}x${window.innerHeight})`);
+                    console.log(`📐 Aggressive Scaling: ${scale.toFixed(3)} (${window.innerWidth}x${window.innerHeight})`);
                 };
                 
-                // Initial scaling
+                // Initial scaling - apply immediately
                 applyScaling();
                 
-                // Handle resize events with debouncing
+                // Handle resize events with minimal delay
                 let resizeTimeout;
                 window.addEventListener('resize', () => {
                     clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(applyScaling, 250);
+                    resizeTimeout = setTimeout(applyScaling, 100);
                 });
                 
                 // Handle orientation changes
@@ -819,8 +791,27 @@
                     setTimeout(() => {
                         applyScaling();
                         window.scrollTo(0, 0);
-                    }, 500);
+                        // Force Safari to recalculate layout
+                        document.body.style.overflow = 'hidden';
+                    }, 350);
                 });
+                
+                // Additional iOS-specific stabilization
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    // Force initial positioning
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
+                    }, 100);
+                    
+                    // Prevent any remaining bounce
+                    document.addEventListener('touchmove', (e) => {
+                        if (e.scale !== 1) {
+                            e.preventDefault();
+                        }
+                    }, { passive: false });
+                }
             }
             
             static initializeFullscreen() {
@@ -863,18 +854,9 @@
                     btn.innerHTML = originalHTML;
                 }, 1000);
             }
-            
-            static lockOrientation() {
-                // Try to lock orientation if supported
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('portrait').catch(() => {
-                        // Orientation lock not supported or failed
-                    });
-                }
-            }
         }
 
-        // === ICON MANAGER (Unchanged) ===
+        // === ICON MANAGER ===
         class IconManager {
             static updateAllIcons() {
                 IconManager.renderSneakers(3, 5);
@@ -966,7 +948,7 @@
             }
         }
 
-        // === GAME SETUP (Unchanged) ===
+        // === GAME SETUP ===
         function setupSimpleGame() {
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
@@ -1009,23 +991,15 @@
                 });
             }
             
-            // Force initial scroll to top
+            // Force initial positioning
             setTimeout(() => {
                 window.scrollTo(0, 0);
-            }, 100);
-            
-            // Additional iOS stabilization
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                // Prevent bounce scrolling
-                document.body.addEventListener('touchmove', (e) => {
-                    if (e.target === document.body) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
-            }
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+            }, 150);
         });
 
-        // Global UI API (Unchanged)
+        // Global UI API
         window.SneakerQuestUI = {
             IconManager: IconManager,
             setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
