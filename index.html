@@ -10,46 +10,176 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    :root { --primary-color:#ff3a2f; --secondary-color:#d6c7a4; --bg-dark:#0a0a0a; --bg-medium:#1a1510; --bg-light:#2a2119; --wood-light:#b99b66; --wood-medium:#876a46; --wood-dark:#56432e; --screen-bg:#0a241f; --led-glow: rgba(255,58,47,0.45); --center-cell:90px; }
-    html, body { display:flex; align-items:flex-start; justify-content:center; overflow:hidden; padding:0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); background:var(--bg-dark); color:var(--secondary-color); font-family:system-ui, -apple-system, sans-serif; -webkit-user-select:none; user-select:none; min-height:100dvh; }
-    .fixed-container { width:430px; aspect-ratio:430 / 900; position:absolute; top:0; left:50%; transform-origin:top center; height:auto; max-width:100vw; margin:0; }
-    .cabinet { width:100%; height:100%; border-radius:28px; padding:14px; background:
+
+    :root {
+      --primary-color: #ff3a2f;
+      --secondary-color: #d6c7a4;
+      --bg-dark: #0a0a0a;
+      --bg-medium: #1a1510;
+      --bg-light: #2a2119;
+      --wood-light: #b99b66;
+      --wood-medium: #876a46;
+      --wood-dark: #56432e;
+      --screen-bg: #0a241f;
+      --led-glow: rgba(255, 58, 47, 0.45);
+      --center-cell: 90px;
+    }
+
+    html, body { display: flex; align-items: flex-start; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; min-height: 100dvh; }
+
+    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center; height: auto; max-width: 100vw; margin: 0; }
+
+    .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
       radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
       linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
       box-shadow: inset 0 0 0 2px var(--bg-light), 0 24px 40px rgba(0,0,0,.5), 0 6px 0 var(--bg-dark);
     }
-    .inner { width:100%; height:100%; border-radius:22px; background:linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d); box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium); position:relative; display:flex; flex-direction:column; align-items:center; padding:20px; gap:20px; overflow:hidden; }
-    .marquee { width:100%; height:90px; border-radius:18px; padding:12px 14px; background:linear-gradient(#2a2320, #1d1815); box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display:flex; align-items:center; justify-content:center; }
-    .led { width:100%; height:100%; border-radius:12px; background: radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%), repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 10px; position:relative; overflow:hidden; }
-    .mq-wrap { display:grid; justify-items:center; align-content:center; height:100%; }
-    .mq-title { font-size:27px; text-align:center; color:var(--primary-color); text-shadow:0 0 2px var(--primary-color), 0 0 8px var(--led-glow); font-family:'Press Start 2P', system-ui, -apple-system, sans-serif; }
-    .mq-sub { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:7px; letter-spacing:.12em; margin-top:6px; font-family:'Press Start 2P', system-ui, -apple-system, sans-serif; }
-    .mq-sub .chip-box { padding:4px 3px; border:2px solid var(--primary-color); border-radius:4px; color:var(--primary-color); }
-    .divider { width:100%; height:12px; border-radius:10px; background:linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
-    .crt-wrap { width:100%; border-radius:20px; padding:10px; background:linear-gradient(#3c2f26, #241e18); box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; }
-    .crt { width:100%; border-radius:11px; aspect-ratio:0.94; background: linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823); box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    #gameCanvas { width:100%; height:100%; display:block; image-rendering:pixelated; }
-    .tabs { width:100%; height:70px; border-radius:14px; background:linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display:grid; grid-template-columns:1fr auto 1fr; gap:10px; padding:10px 8px; text-align:center; }
-    .tab .led .line { font-size:10px; letter-spacing:.14em; color:var(--primary-color); font-family:'Press Start 2P', system-ui, -apple-system, sans-serif; }
-    .hud { width:100%; display:grid; grid-template-columns:1fr minmax(auto, var(--center-cell)) 1fr; gap:3px; }
-    .hud2 { width:100%; display:grid; grid-template-columns:1fr minmax(auto, var(--center-cell)) 1fr; gap:3px; margin-top:-2px; }
-    .slot { background:linear-gradient(#3a3227, #2c251e); border-radius:14px; padding:5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display:flex; align-items:center; justify-content:center; }
-    .slot > .led { height:100%; width:100%; border-radius:10px; padding:8px 10px; display:flex; align-items:center; justify-content:center; }
-    #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display:flex; align-items:center; justify-content:center; gap:6px; }
-    .bottom { width:100%; height:150px; }
-    .control-screen { position:relative; height:100%; border-radius:18px; padding:14px; display:grid; grid-template-columns:82% 20%; gap:14px; align-items:center; overflow:hidden; background:linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
-    .matrix { position:absolute; inset:6px; border-radius:14px; opacity:.9; mix-blend-mode:screen; pointer-events:none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
-  </style>
+
+    .inner { width: 100%; height: 100%; border-radius: 22px; background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d); box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium); position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; overflow: hidden; }
+
+    .marquee { width: 100%; height: 90px; border-radius: 18px; padding: 12px 14px; background: linear-gradient(#2a2320, #1d1815); box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display: flex; align-items: center; justify-content: center; }
+
+    .led { width: 100%; height: 100%; border-radius: 12px; background: radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%), repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; position: relative; overflow: hidden; }
+
+    .mq-wrap { display: grid; justify-items: center; align-content: center; height: 100%; }
+
+    .mq-title { font-size: 27px; text-align: center; user-select: none; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+
+    .mq-sub { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 7px; letter-spacing: .12em; margin-top: 6px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+    .mq-sub .chip { white-space: nowrap; }
+    .mq-sub .chip-box { padding: 4px 3px; border: 2px solid var(--primary-color); border-radius: 4px; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; }
+
+    @keyframes led-flicker { 0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } 50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); } 100% { opacity: 0.97; text-shadow: 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } }
+
+    .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
+
+    .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18); box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; position: relative; }
+
+    .crt { width: 100%; border-radius: 11px; aspect-ratio: 0.94; background: linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823); box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+
+    #gameCanvas { width: 100%; height: 100%; display: block; border-radius: 11px; image-rendering: pixelated; }
+
+    .tabs { width: 100%; height: 70px; border-radius: 14px; background: linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; padding: 10px 8px; text-align: center; font-weight: 800; letter-spacing: 0.08em; margin-top: -14px; }
+
+    .tab { display: flex; align-items: stretch; min-width: 0; }
+
+    .tab .led { height: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; }
+
+    .tab .led .line { font-size: 10px; letter-spacing: .14em; color: var(--primary-color); font-weight: 800; text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; white-space: nowrap; min-width: 0; }
+
+    .hud { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -16px; }
+    .hud .slot-heart{ height: 41px; }
+    .hud .slot-shoes{ height: 40px; }
+    .hud .slot-dots{ height: 40px; }
+
+    .hud2 { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -15px; }
+    .hud2 .slot-flames{ height: 40px; }
+
+    .slot-shoes, .slot-pause { justify-self: center; max-width: var(--center-cell); width: 100%; }
+    .hud2 .slot-bag{ height: 40px; }
+
+    .slot { background: linear-gradient(#3a3227, #2c251e); border-radius: 14px; padding: 5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 100%; width: 100%; }
+    .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
+    .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
+
+    #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box; }
+
+    .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
+    #ui-hearts { gap: 2px; }
+    #ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 20px; }
+
+    .slot-pause .chip-btn { min-width: auto; letter-spacing: .10em; font-size: 11px; }
+
+    #ui-sneakers { gap: 3px; }
+    .sneaker-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .sneaker-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .sneaker-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .sneaker-icon.active .sneaker-fill { opacity: 1; }
+
+    #ui-hearts { gap: 4px; }
+    .heart-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .heart-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .heart-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .heart-icon.active .heart-fill { opacity: 1; }
+
+    #ui-fires { gap: 2px; }
+    .fire-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .fire-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .fire-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .fire-icon.active .fire-fill { opacity: 1; }
+
+    #ui-powers { gap: 7px; }
+    .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .power.active .ph-fill { opacity: 1; }
+
+    .chip-btn { background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; color: var(--primary-color); font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+    .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
+    .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
+    #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
+    #btn-pause[data-state=paused] .word-play { opacity: 1; transform: none; }
+
+    .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
+    .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
+    .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
+
+    .bottom { width: 100%; height: 150px; margin-top: -13px; }
+
+    .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
+
+    .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
+
+    @media (max-width: 400px) { 
+      .mq-title{font-size:22px;} 
+      .mq-sub{font-size:6px;} 
+      .tab .led .line{font-size:9px; letter-spacing:.10em; white-space:nowrap;}
+    }
+    @media (max-width: 390px){
+      :root{ --center-cell: 86px; }
+      .hud, .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 2px; }
+      #ui-sneakers{gap:2px;} #ui-hearts{gap:2px;} #ui-fires{gap:2px;} #ui-powers{gap:5px;}
+      .sneaker-outline, .sneaker-fill,
+      .heart-outline,   .heart-fill,
+      .fire-outline,    .fire-fill,
+      .power .ph-bold,  .power .ph-fill { font-size: 18px; }
+      .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
+      .tab .led .line{font-size:9px; letter-spacing:.10em;}
+    }
+    @media (max-width: 360px){
+      :root{ --center-cell: 82px; }
+      .hud, .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; }
+      .tab .led .line{ font-size: 8.5px; letter-spacing: .08em; }
+      .sneaker-outline, .sneaker-fill,
+      .heart-outline,   .heart-fill,
+      .fire-outline,    .fire-fill,
+      .power .ph-bold,  .power .ph-fill { font-size: 17px; }
+    }
+  html, body { 
+      overscroll-behavior: none;
+      -webkit-user-select: none; user-select: none;
+      touch-action: none;
+      -ms-touch-action: none;
+  }
+</style>
+
+<style id="sq-final-overrides">
+  .control-buttons{ display:none !important; }
+  #btn2_panel, #jpad_canvas { z-index: 1; }
+  .btn2_keyproxy { z-index: 2; }
+</style>
+
+
 </head>
 <body>
   <div class="fixed-container" id="mainContainer">
     <div class="cabinet">
       <div class="inner">
-        <div class="marquee">
+        <div class="marquee" id="element-marquee">
           <div class="led">
             <div class="mq-wrap">
-              <div class="mq-title">SNEAKERQUEST</div>
-              <div class="mq-sub">
+              <div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+              <div class="line mq-sub">
                 <span class="chip chip-stage chip-box">STAGE&nbsp;–&nbsp;01</span>
                 <span class="chip chip-time chip-box">00:00:0</span>
                 <span class="chip chip-score chip-box">SCORE&nbsp;000000</span>
@@ -58,10 +188,12 @@
           </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider" id="element-divider"></div>
 
-        <div class="crt-wrap">
-          <div class="crt"><canvas id="gameCanvas"></canvas></div>
+        <div class="crt-wrap" id="element-crt">
+          <div class="crt">
+            <canvas id="gameCanvas"></canvas>
+          </div>
         </div>
 
         <div class="tabs" id="element-tabs">
@@ -70,1316 +202,34 @@
           <div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
         </div>
 
-        <div class="hud">
-          <div class="slot"><div class="led"><div class="line" id="ui-sneakers"></div></div></div>
-          <div class="slot"><div class="led"><div class="line" id="ui-hearts"></div></div></div>
-          <div class="slot"><div class="led"><div class="line" id="ui-powers"></div></div></div>
+        <div class="hud" id="element-hud1">
+          <div class="slot slot-heart"><div class="led"><div class="line" aria-label="Sneakers" id="ui-sneakers"></div></div></div>
+          <div class="slot slot-shoes"><div class="led"><div class="line" aria-label="Hearts" id="ui-hearts"></div></div></div>
+          <div class="slot slot-dots"><div class="led"><div class="line" aria-label="Powers" id="ui-powers"></div></div></div>
         </div>
 
-        <div class="hud2">
-          <div class="slot"><div class="led"><div class="line" id="ui-fires"></div></div></div>
-          <div class="slot"><div class="led"><div class="line">
-            <button class="chip-btn" id="btn-pause" type="button" data-state="playing">
-              <span class="word word-pause">PAUSE</span>
-              <span class="word word-play" style="display:none">PLAY</span>
+        <div class="hud2" id="element-hud2">
+          <div class="slot slot-flames"><div class="led"><div class="line" aria-label="Fire" id="ui-fires"></div></div></div>
+          <div class="slot slot-pause"><div class="led"><div class="line" aria-label="Pause / Play">
+            <button class="chip-btn" id="btn-pause" type="button" aria-pressed="false" aria-label="Pause" data-state="playing">
+              <span class="word word-pause" aria-hidden="false">PAUSE</span>
+              <span class="word word-play" aria-hidden="true">PLAY</span>
             </button>
           </div></div></div>
-          <div class="slot"><div class="led"><div class="line">
-            <i class="ph-fill ph-package"></i><span style="opacity:.8;letter-spacing:.12em">x</span><span id="counter">000</span>
+          <div class="slot slot-bag"><div class="led"><div class="line counter" aria-label="Box count">
+            <i class="ph-fill ph-package" aria-hidden="true"></i>
+            <span style="opacity:.8;letter-spacing:.12em">x</span>
+            <span class="seven" id="counter">000</span>
           </div></div></div>
         </div>
 
-        <div class="bottom">
-          <div class="control-screen">
+        <div class="bottom" id="element-bottom">
+          <div class="control-screen" id="element-controls">
             <div class="matrix" aria-hidden="true"></div>
-            <div id="controls-host" style="position:relative; width:100%; height:100%; border-radius:12px; overflow:hidden;">
-              <iframe id="controls-frame" title="Controls" style="position:absolute; inset:0; width:100%; height:100%; border:0; background:#000"
-                srcdoc='<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>Enhanced Controls — Bomb Morph System</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#070708; --pane:#080203; --ring:#1a0000; --radius:20px; --gap:16px;
-  }
-  html, body { height:100%; margin:0; }
-  body { background:var(--bg); color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
-
-  /* Frame */
-  #frame{ display:grid; place-items:center; height:100vh; }
-  #control-ui{
-    aspect-ratio: 2 / 1;
-    height: min(calc(100vw / 2), 100vh);
-    width: auto;
-    display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr;
-    overflow:hidden; gap:0;
-  }
-
-  /* Square panels */
-  .col-left, .col-right{
-    position:relative; aspect-ratio:1/1; background:var(--pane);
-    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 1px var(--ring), 0 20px 50px #000c;
-    border-radius:var(--radius); overflow:hidden; touch-action:none;
-  }
-  .pad{ position:absolute; inset:var(--gap); border-radius: calc(var(--radius) - 8px); overflow:hidden; }
-
-  /* Buttons overlay */
-  .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
-  #btn2_panel{ position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
-
-  /* Control buttons */
-  .control-buttons {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .btn2_temp, .btn2_special, .btn2_timer {
-    pointer-events: auto;
-    touch-action: manipulation;
-    background: #101012;
-    color: #eaeaea;
-    border: 1px solid #3a3a3a;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 12px;
-    line-height: 1;
-    z-index: 100;
-    position: relative;
-    font-family: ui-monospace, Consolas, Menlo, monospace;
-    cursor: pointer;
-  }
-  .btn2_temp:focus-visible, .btn2_special:focus-visible, .btn2_timer:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-  .btn2_special.active { background: #2a1010; border-color: #ff2a2a; }
-  .btn2_timer.active   { background: #102a10; border-color: #2aff2a; }
-
-  /* Keyboard proxies */
-  .btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%);
-    width:min(92%, 520px); height:44%; outline:none; border:0; background:transparent; pointer-events:auto; z-index:2; }
-  .btn2_keyproxy:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
-  #btn2_proxy_blast{ top:6%; }
-  #btn2_proxy_bomb{ bottom:6%; }
-
-  /* Joypad */
-  #jpad_canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-  #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
-
-  * { -webkit-user-select:none; user-select:none; }
-</style>
-</head>
-<body>
-<div id="frame">
-  <main id="control-ui" aria-label="Control surface">
-    <!-- Left: Buttons (Laser/Bomb) -->
-    <section id="left-area" class="col-left" aria-label="Buttons area">
-      <div class="pad">
-        <!-- Control buttons container -->
-        <div class="control-buttons">
-          <button id="btn2_temp" class="btn2_temp" aria-label="Start transition">▶ special</button>
-          <button id="btn2_timer" class="btn2_timer" aria-label="Toggle timer">⏰ timer</button>
-          <button id="btn2_special" class="btn2_special" aria-label="Toggle special">🔮 special</button>
-        </div>
-        <div class="btn2-overlay">
-          <button id="btn2_proxy_blast" class="btn2_keyproxy" role="button" aria-label="Laser" aria-pressed="false" tabindex="0"></button>
-          <button id="btn2_proxy_bomb"  class="btn2_keyproxy" role="button" aria-label="Bomb"  aria-pressed="false" tabindex="0"></button>
-          <canvas id="btn2_panel" width="560" height="560"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- Right: Joystick -->
-    <section id="right-area" class="col-right" aria-label="Joypad">
-      <div class="pad">
-        <canvas id="jpad_canvas"></canvas>
-        <output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output>
-      </div>
-    </section>
-  </main>
-</div>
-
-<script>
-/* Prevent page scrolling during control interactions */
-document.addEventListener(&#39;touchmove&#39;, (e)=>{
-  if(e.target.closest(&#39;#left-area, #right-area&#39;)) e.preventDefault();
-},{passive:false});
-
-/* =========================
-   JOYPAD (prefixed jpad_)
-========================= */
-(() => {
-  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
-  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
-  const RED=&#39;#ff2a2a&#39;, MID=&#39;#ff2a2acc&#39;, DIM=&#39;#ff2a2a66&#39;, OFF=&#39;#210000&#39;;
-  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
-
-  window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
-
-  const cvs=document.getElementById(&#39;jpad_canvas&#39;); const ctx=cvs.getContext(&#39;2d&#39;);
-  const readout=document.getElementById(&#39;jpad_status&#39;); const rightArea=document.getElementById(&#39;right-area&#39;);
-  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
-  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
-
-  function updateLayout(newWidth,newHeight){
-    if(newWidth<1||newHeight<1) return;
-    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
-
-    const targetRows=24;
-    PITCH=H/targetRows; DOT_R=PITCH*0.21;
-
-    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
-    if(COLS<1||ROWS<1) return;
-    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
-
-    joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3);
-
-    buf=new Float32Array(COLS*ROWS);
-    layoutReady=true;
-  }
-
-  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  function joyPointerToNorm(x,y){
-    const dx=x-joyCX, dy=y-joyCY;
-    const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
-    let rn=Math.min(dist/joyR,1);
-    if(rn<DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE);
-    rn=Math.pow(rn,RESPONSE);
-    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
-  }
-
-  cvs.addEventListener(&#39;pointerdown&#39;, e=>{
-    e.preventDefault();
-    const {x,y}=getPointerLocation(e);
-    try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
-    activePointers.set(e.pointerId,&#39;joy&#39;);
-    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
-  });
-  cvs.addEventListener(&#39;pointermove&#39;, e=>{
-    e.preventDefault();
-    if(activePointers.get(e.pointerId)!==&#39;joy&#39;) return;
-    const {x,y}=getPointerLocation(e);
-    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
-  });
-  function endPointer(e){
-    const t=activePointers.get(e.pointerId);
-    activePointers.delete(e.pointerId);
-    if(t===&#39;joy&#39;){
-      let any=false; for(const v of activePointers.values()) if(v===&#39;joy&#39;) any=true;
-      if(!any && AUTO_RETURN){ joyTX=0; joyTY=0; }
-    }
-  }
-  cvs.addEventListener(&#39;pointerup&#39;, endPointer);
-  cvs.addEventListener(&#39;pointercancel&#39;, endPointer);
-  cvs.addEventListener(&#39;pointerleave&#39;, endPointer);
-
-  function loop(){
-    outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
-    drawDMD(outX,outY);
-    window.jpad_state.x=outX; window.jpad_state.y=outY;
-    window.jpad_state.mag=Math.min(Math.hypot(outX,outY),1);
-    window.jpad_state.angle=Math.atan2(outY,outX);
-    readout.value = `x ${outX.toFixed(2)}, y ${outY.toFixed(2)}, |v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
-    requestAnimationFrame(loop);
-  }
-
-  function drawDMD(nx,ny){
-    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
-    ctx.clearRect(0,0,W,H);
-    const now=performance.now()*0.001;
-    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
-    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
-
-    for(let j=0;j<ROWS;j++){
-      for(let i=0;i<COLS;i++){
-        const idx=j*COLS+i;
-        buf[idx]=(buf[idx]||0)*DECAY;
-      }
-    }
-
-    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=wrap(now*1.6), sweepArcLength=Math.PI/3;
-
-    for(let j=0;j<ROWS;j++){
-      for(let i=0;i<COLS;i++){
-        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
-        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
-        if(mag>0.01){
-          const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
-          if(div>0.001){ const vx=jdx_wc/div+px, vy=jdy_wc/div+py; jdx=vx-joyCX; jdy=vy-joyCY; }
-        }
-        const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
-        buf[idx]+=calcRing(jd,joyR*0.25,ringThick)*0.22;
-        buf[idx]+=calcRing(jd,joyR*0.50,ringThick)*0.20;
-        buf[idx]+=calcRing(jd,joyR*0.75,ringThick)*0.18;
-        buf[idx]+=calcRing(jd,joyR*1.00,ringThick)*0.16;
-        buf[idx]+=calcRing(jd,joyR*DEADZONE,dzRingThick)*0.12;
-        const da=wrap(t-jang); if(jd<joyR*0.98 && da>0 && da<sweepArcLength) buf[idx]+=0.9;
-
-        if(mag>0.01){
-          let jb=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
-          jb=Math.max(jb,pulse01(sd/(PITCH*2.4),0.16)*STEM_GAIN);
-          const kd=Math.hypot(x-px,y-py);
-          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
-          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
-          jb=Math.max(jb, core*1.0+glow*0.9);
-          buf[idx]=Math.max(buf[idx], jb);
-        }
-        let b=buf[idx]||0;
-        b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2));
-        b += (noise2(i,j)-0.5)*0.06;
-        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
-      }
-    }
-  }
-
-  function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
-  function dotDraw(x,y,r,level){ if(level<=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level>=1?RED:(level>=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
-  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d<bd){ bd=d; best=s; } } return best; }
-  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
-  function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
-  function wrap(a){ a%=Math.PI*2; return a<0? a+Math.PI*2 : a; }
-  function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
-  function fract(x){ return x - Math.floor(x); }
-  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1<=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2<=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
-
-  const ro=new ResizeObserver(entries=>{
-    if(entries[0]){
-      const {width,height}=entries[0].contentRect;
-      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue(&#39;--gap&#39;))||16;
-      const w=Math.max(1, Math.floor(width - p*2));
-      const h=Math.max(1, Math.floor(height - p*2));
-      updateLayout(w,h);
-    }
-  });
-  ro.observe(rightArea);
-  requestAnimationFrame(loop);
-})();
-
-/* =========================
-   BUTTONS + BOMB MORPH
-========================= */
-(() => {
-(async function(){
-  // ====== Units & Canvas ======
-  const p=4, d=0.46*p; const W=560, H=560; const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const canvas=document.getElementById(&#39;btn2_panel&#39;); const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
-  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+&#39;px&#39;; canvas.style.height=H+&#39;px&#39;;
-  const ctx=canvas.getContext(&#39;2d&#39;); ctx.scale(DPR,DPR);
-  const nowS=()=>performance.now()/1000; const snap=v=>Math.round(v/p)*p;
-
-  // Easings
-  const easeInOut=t=> (t<0.5? 2*t*t : 1 - Math.pow(-2*t+2,2)/2);
-  const easeOutCubic = t=>1-Math.pow(1-t,3);
-  const easeInCubic  = t=>t*t*t;
-  const easeOutExpo  = t=> (t===1?1:1-Math.pow(2,-10*t));
-  const easeOutBack  = t=>{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
-
-  // ====== Colors ======
-  const RED=[255,58,58]; const col={ bright:&#39;rgba(255,58,58,1.0)&#39;, mediumA:0.70, dimFill:&#39;#1A0E0E&#39; };
-
-  // ====== Dot painters ======
-  function brightDotGradient(c,x,y){ const r2=2*d; const g=c.createRadialGradient(x,y,0,x,y,r2); const [r,gc,b]=RED; const tp=k=>clamp(k*(d/r2),0,1); g.addColorStop(0,`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.42),`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.75),`rgba(${r},${gc},${b},0.60)`); g.addColorStop(tp(1.30),`rgba(${r},${gc},${b},0.18)`); g.addColorStop(1,`rgba(${r},${gc},${b},0)`); return g; }
-  function idleDotGradient(c,x,y){ const r2=1.6*d; const g=c.createRadialGradient(x,y,0,x,y,r2); g.addColorStop(0,col.dimFill); g.addColorStop(0.7,col.dimFill); g.addColorStop(1,&#39;rgba(42,22,22,0.45)&#39;); return g; }
-  function drawBrightDot(c,x,y,a=1){ if(a<=0) return; c.save(); c.globalAlpha=a; c.fillStyle=brightDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fill(); c.restore(); }
-  function drawIdleDot(c,x,y){ c.fillStyle=idleDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d*0.5,0,Math.PI*2); c.fill(); }
-
-  // FAST path for explosion frames: flat fill, no gradients, no shadows
-  function drawBrightDotFast(c,x,y,a=1){ if(a<=0) return; c.save(); c.globalAlpha=a; c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fillStyle=col.bright; c.fill(); c.restore(); }
-
-  // ====== Geometry ======
-  function rrPath(c,r){ c.beginPath(); c.moveTo(r.x+r.r,r.y); c.lineTo(r.x+r.w-r.r,r.y); c.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); c.lineTo(r.x+r.w,r.y+r.h-r.r); c.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); c.lineTo(r.x+r.r,r.y+r.h); c.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); c.lineTo(r.x,r.y+r.r); c.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); c.closePath(); }
-  function path2DFor(r){ const p2=new Path2D(); p2.moveTo(r.x+r.r,r.y); p2.lineTo(r.x+r.w-r.r,r.y); p2.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); p2.lineTo(r.x+r.w,r.y+r.h-r.r); p2.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); p2.lineTo(r.x+r.r,r.y+r.h); p2.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); p2.lineTo(r.x,r.y+r.r); p2.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); p2.closePath(); return p2; }
-  function dedupe(pts,tol){ const out=[]; for(const a of pts){ let ok=true; for(const b of out){ const dx=a.x-b.x,dy=a.y-b.y; if(dx*dx+dy*dy<tol*tol){ ok=false; break; } } if(ok) out.push(a); } return out; }
-  function sampleRoundedRectDots(x,y,w,h,r){ const pts=[]; const step=p; const add=(X,Y)=>pts.push({x:snap(X),y:snap(Y)}); for(let X=x+r; X<=x+w-r; X+=step){ add(X,y); add(X,y+h); } for(let Y=y+r; Y<=y+h-r; Y+=step){ add(x,Y); add(x+w,Y); } const arc=(cx,cy,t0,t1)=>{ const thetaStep=step/r; const inc=t1>=t0?thetaStep:-thetaStep; for(let t=t0; inc>0? t<=t1 : t>=t1; t+=inc){ add(cx+r*Math.cos(t), cy+r*Math.sin(t)); } }; arc(x+r,y+r,Math.PI,1.5*Math.PI); arc(x+w-r,y+r,1.5*Math.PI,2*Math.PI); arc(x+w-r,y+h-r,0,0.5*Math.PI); arc(x+r,y+h-r,0.5*Math.PI,Math.PI); return dedupe(pts,0.35*p); }
-  function drawDottedRR(c, r, glow=true){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); if(!glow) return; const off=document.createElement(&#39;canvas&#39;); off.width=W; off.height=H; const o=off.getContext(&#39;2d&#39;); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
-  function drawInnerBandRR(c, r, rows=3){
-    const b_in=2.8*p; const mid=(rows-1)/2; let innerMost=null;
-    const off=document.createElement(&#39;canvas&#39;); off.width=W; off.height=H; const o=off.getContext(&#39;2d&#39;);
-    for(let i=0;i<rows;i++){
-      const oset=b_in+(i-mid)*p; const x=r.x+oset,y=r.y+oset,w=r.w-2*oset,h=r.h-2*oset,rad=r.r-oset;
-      const pts=sampleRoundedRectDots(x,y,w,h,rad);
-      c.save(); c.globalAlpha=col.mediumA; for(const pt of pts) drawBrightDot(c,pt.x,pt.y); c.restore();
-      for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
-      innerMost={x,y,w,h,r:rad};
-    }
-    c.save(); c.globalAlpha=0.25; c.filter=`blur(${2*p}px)`; c.drawImage(off,0,0); c.restore();
-    const pad=1*p; return {x:innerMost.x+pad,y:innerMost.y+pad,w:innerMost.w-2*pad,h:innerMost.h-2*pad,r:innerMost.r-pad};
-  }
-
-  // ====== Background ======
-  const bg=document.createElement(&#39;canvas&#39;); bg.width=W; bg.height=H; const bgc=bg.getContext(&#39;2d&#39;);
-  function drawIdleGrid(c){ for(let y=0;y<=H;y+=p){ for(let x=0;x<=W;x+=p){ drawIdleDot(c,x,y); } } }
-  function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr);
-    for(const pt of pts) drawBrightDot(c,pt.x,pt.y);
-    const off=document.createElement(&#39;canvas&#39;); off.width=W; off.height=H; const o=off.getContext(&#39;2d&#39;);
-    for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
-    c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore();
-    c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore();
-  }
-  drawIdleGrid(bgc); drawPerimeter(bgc);
-
-  // ====== Layouts ======
-  const gap=14*p, rad=6*p; const Bw=W-2*gap; const Bh=Math.round((H-3*gap)/2/p)*p; const x_btn=gap; const yTop=gap; const yBot=yTop+Bh+gap;
-  const centerOuter={x:gap, y:snap((H-Bh)/2), w:Bw, h:Bh, r:rad};
-  const topOuter   ={x:x_btn, y:yTop, w:Bw, h:Bh, r:rad};
-  const botOuter   ={x:x_btn, y:yBot, w:Bw, h:Bh, r:rad};
-
-  // ====== Chrome layers ======
-  const layerSingle=document.createElement(&#39;canvas&#39;); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext(&#39;2d&#39;);
-  const layerTwo=document.createElement(&#39;canvas&#39;); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext(&#39;2d&#39;);
-  drawDottedRR(ls, centerOuter, true); const faceBOMB_center = drawInnerBandRR(ls, centerOuter, 3);
-  drawDottedRR(lt, topOuter, true);  const faceLASER_final = drawInnerBandRR(lt, topOuter, 3);
-  drawDottedRR(lt, botOuter, true);  const faceBOMB_final  = drawInnerBandRR(lt, botOuter, 3);
-
-  // ====== Font raster ======
-  const FONT=&#39;Press Start 2P&#39;; await document.fonts.load(`32px &#39;${FONT}&#39;`); await document.fonts.ready;
-  function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px>=minPx; px-=8){ if(px+4<=rect.h) return px; } return minPx; }
-  function measureTextWidth(text,px){ const off=document.createElement(&#39;canvas&#39;); const c=off.getContext(&#39;2d&#39;); c.font=`${px}px &#39;${FONT}&#39;`; c.textBaseline=&#39;top&#39;; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
-  function rasterTextPoints(rect,text){
-    const px=pickFontPx(rect), pad=2; const off=document.createElement(&#39;canvas&#39;); const o=off.getContext(&#39;2d&#39;);
-    o.font=`${px}px &#39;${FONT}&#39;`; o.textBaseline=&#39;top&#39;; o.imageSmoothingEnabled=false; o.fillStyle=&#39;#fff&#39;;
-    const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0);
-    off.width=w+pad*2; off.height=h+pad*2;
-    o.font=`${px}px &#39;${FONT}&#39;`; o.textBaseline=&#39;top&#39;; o.fillStyle=&#39;#fff&#39;; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
-    const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2);
-    const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
-    function alpha(ix,iy){ if(ix<0||iy<0||ix>=iw||iy>=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
-    const pts=[];
-    for(let gy=dy; gy<dy+ih; gy+=p){
-      for(let gx=dx; gx<dx+iw; gx+=p){
-        const ix=gx-dx, iy=gy-dy; let a=0;
-        const offs=[0,p*0.33,p*0.66];
-        for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } }
-        if(a>thr){ pts.push({x:gx,y:gy}); }
-      }
-    }
-    return pts;
-  }
-
-  // ====== LASER Ammo System - 4 vertical sections ======
-  function getLaserSectionRects(faceRect) {
-    const sections = 4;
-    const sectionHeight = faceRect.h / sections;
-    const rects = [];
-    for (let i = 0; i < sections; i++) {
-      rects.push({
-        x: faceRect.x,
-        y: faceRect.y + i * sectionHeight,
-        w: faceRect.w,
-        h: sectionHeight,
-        r: faceRect.r
-      });
-    }
-    return rects;
-  }
-
-  // ====== State ======
-  const state = { 
-    mode: &#39;single&#39;, 
-    active: false, 
-    t0: 0,
-    activeReverse: false,
-    t0r: 0,
-    laserAmmo: 4, maxAmmo: 4,
-    specialActive: false,
-    timerPowerup: false,
-    bombDeployed: false,
-    bombArmed: false,
-    normalBomb: { active:false, phase:&#39;idle&#39;, t0:0, bombType:&#39;final&#39;, perimPts:[], center:{x:0,y:0},
-      implodeMs:3000, explodeMs:500 },
-    bombMorph: {
-      active: false,
-      phase: &#39;idle&#39;, // &#39;sucking&#39; | &#39;exploding&#39;
-      progress: 0,
-      startTime: 0,
-      duration: 700, // shorter for performance
-      bombType: &#39;center&#39;,
-      pairs: [],
-      extras: [],
-      meta: [],      // per-particle timing and jitter
-      blastSeed: 0,
-      autoExplode: false,
-    },
-    bombMorphTargets: {}
-  };
-
-  // track mode once
-  let __prevMode, __prevActive;
-
-  // ====== Text points ======
-  let bombWordDotsFinal, bombWordDotsCenter;
-  let laserWordDotsFinal; 
-  function getBombText(){ return &#39;BOMB X&#39;; }
-  function getLaserText(){ return &#39;LASER&#39;; }
-  function updateButtonText(){
-    bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
-    bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
-    laserWordDotsFinal = rasterTextPoints(faceLASER_final, getLaserText());
-  }
-  updateButtonText();
-
-  // ====== Group rows for cached build ======
-  function groupRowsTopDown(...lists){
-    const rows=new Map();
-    for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } }
-    const ys=[...rows.keys()].sort((a,b)=>a-b);
-    return ys.map(y=>({ y, pts: rows.get(y).sort((a,b)=>a.x-b.x), n: rows.get(y).length }));
-  }
-  const laserOuterPts = sampleRoundedRectDots(faceLASER_final.x,faceLASER_final.y,faceLASER_final.w,faceLASER_final.h,faceLASER_final.r);
-  const laserInnerBandPts = (function(){ const rows=3, b_in=2.8*p; const mid=(rows-1)/2; const acc=[]; for(let i=0;i<rows;i++){ const o=b_in+(i-mid)*p; const x=faceLASER_final.x+o, y=faceLASER_final.y+o, w=faceLASER_final.w-2*o, h=faceLASER_final.h-2*o, r=faceLASER_final.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) acc.push(pt); } return acc; })();
-  const laserRows = groupRowsTopDown(laserOuterPts, laserInnerBandPts, laserWordDotsFinal);
-
-  // ====== Masks ======
-  function buildFaceMask(rect){
-    const pts=[]; const off=document.createElement(&#39;canvas&#39;); off.width=W; off.height=H; const oc=off.getContext(&#39;2d&#39;); rrPath(oc, rect);
-    const isIn=(x,y)=>oc.isPointInPath(x+0.01,y+0.01);
-    for(let y=rect.y; y<=rect.y+rect.h; y+=p){ for(let x=rect.x; x<=rect.x+rect.w; x+=p){
-      const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0});
-    }}
-    const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r);
-    function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy <= (p*1.5)*(p*1.5)) return true; } return false; }
-    for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); }
-    return {pts};
-  }
-
-  const maskLASER = buildFaceMask(faceLASER_final);
-  const maskBOMB_bottom  = buildFaceMask(faceBOMB_final);
-  const maskBOMB_center  = buildFaceMask(faceBOMB_center);
-
-  function withPolar(mask, cx, cy){ return mask.pts.map(pt=>({x:pt.x,y:pt.y, perim:pt.perim, d:Math.hypot(pt.x-cx, pt.y-cy), a:Math.atan2(pt.y-cy, pt.x-cx)})); }
-  const cLaser = {x:snap(faceLASER_final.x+faceLASER_final.w/2), y:snap(faceLASER_final.y+faceLASER_final.h/2)};
-  const cBombB = {x:snap(faceBOMB_final.x+faceBOMB_final.w/2),   y:snap(faceBOMB_final.y+faceBOMB_final.h/2)};
-  const cBombC = {x:snap(faceBOMB_center.x+faceBOMB_center.w/2), y:snap(faceBOMB_center.y+faceBOMB_center.h/2)};
-
-  const laserDots = withPolar(maskLASER, cLaser.x, cLaser.y); 
-  const bombDotsB = withPolar(maskBOMB_bottom, cBombB.x, cBombB.y); 
-  const bombDotsC = withPolar(maskBOMB_center, cBombC.x, cBombC.y); 
-
-  // ====== LASER sections ======
-  const laserSectionRects = getLaserSectionRects(faceLASER_final);
-  const laserSectionMasks = laserSectionRects.map(rect => buildFaceMask(rect));
-
-  function qLevel(e){ const LEVELS=[0.00,0.18,0.36,0.64,1.00]; e=Math.max(0,Math.min(1,e)); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d<bd){ bd=d; best=L; } } return best; }
-  function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) >>> 0; return ((n % 9973) / 9973); }
-  function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
-  let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
-
-  const laserLabelPts = rasterTextPoints(faceLASER_final,&#39;LASER&#39;);
-  const sectionFlags = new Array(4).fill(0).map(() => new Uint8Array(laserDots.length));
-  for (let section = 0; section < 4; section++) {
-    const sectionMask = laserSectionMasks[section];
-    for (let k = 0; k < laserDots.length; k++) {
-      const pt = laserDots[k];
-      const inSection = sectionMask.pts.some(sectionPt => 
-        Math.abs(sectionPt.x - pt.x) < p && Math.abs(sectionPt.y - pt.y) < p
-      );
-      sectionFlags[section][k] = inSection ? 1 : 0;
-    }
-  }
-
-  function drawLaserArmed(t) {
-    for (let section = 0; section < 4; section++) {
-      if (section >= (4 - state.laserAmmo)) {
-        for (let k = 0; k < laserDots.length; k++) {
-          if (sectionFlags[section][k] === 1) {
-            const pt = laserDots[k];
-            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 7);
-            if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
-            drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
-          }
-        }
-      }
-    }
-    for (const pt of laserLabelPts){
-      let sect=-1;
-      for(let s=0;s<4;s++){
-        if (laserSectionMasks[s].pts.some(q=>Math.abs(q.x-pt.x)<p && Math.abs(q.y-pt.y)<p)){ sect=s; break; }
-      }
-      if (sect<0) continue;
-      if (sect >= (4 - state.laserAmmo)){
-        ctx.save(); ctx.fillStyle=&#39;#000&#39;; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
-      } else {
-        drawBrightDot(ctx, pt.x, pt.y, 0.8);
-      }
-    }
-  }
-
-  /* ===========================================
-     FILLED DISK + EXTRAS GENERATORS
-     =========================================== */
-
-  function sortByAngleThenRadius(center, arr){
-    return arr.map(pt=>{
-      const dx=pt.x-center.x, dy=pt.y-center.y;
-      return {pt, a:Math.atan2(dy,dx), r:Math.hypot(dx,dy)};
-    }).sort((u,v)=> u.a===v.a ? u.r-v.r : u.a-v.a).map(o=>o.pt);
-  }
-
-  function buildDiskForCount(center, faceRect, N){
-    const maxR = Math.min(faceRect.w, faceRect.h) * 0.40;
-    const pts=[]; const seen=new Set();
-    const stepR = p*0.9;
-    for(let rr=0; rr<=maxR && pts.length<N; rr+=stepR){
-      const stepAng = (rr<=p? Math.PI/6 : Math.max(p/(rr||1), 0.05));
-      for(let ang=0; ang<Math.PI*2 && pts.length<N; ang+=stepAng){
-        const x = snap(center.x + rr*Math.cos(ang));
-        const y = snap(center.y + rr*Math.sin(ang));
-        if (x>=faceRect.x && x<=faceRect.x+faceRect.w && y>=faceRect.y && y<=faceRect.y+faceRect.h){
-          const key=x+&#39;,&#39;+y;
-          if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
-        }
-      }
-    }
-    if (pts.length<N){
-      for(let ang=0; ang<Math.PI*2 && pts.length<N; ang+=Math.PI/128){
-        const x = snap(center.x + maxR*Math.cos(ang));
-        const y = snap(center.y + maxR*Math.sin(ang));
-        const key=x+&#39;,&#39;+y;
-        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
-      }
-    }
-    return sortByAngleThenRadius(center, pts).slice(0,N);
-  }
-
-  function buildInnerRing(center, faceRect, count){
-    if (count<=0) return [];
-    const R = Math.min(faceRect.w, faceRect.h) * 0.22;
-    const pts=[]; const seen=new Set();
-    for(let i=0;i<count;i++){
-      const ang = i*(Math.PI*2/count);
-      const x = snap(center.x + R*Math.cos(ang));
-      const y = snap(center.y + R*Math.sin(ang));
-      if (x>=faceRect.x && x<=faceRect.x+faceRect.w && y>=faceRect.y && y<=faceRect.y+faceRect.h){
-        const key=x+&#39;,&#39;+y;
-        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
-      }
-    }
-    return sortByAngleThenRadius(center, pts);
-  }
-
-  function buildSolidDisk(center, radius, faceRect, step=p){
-    const pts=[];
-    const y_step = step * 0.86602540378; // hex lattice sqrt(3)/2
-    let y = center.y - radius;
-    let row = 0;
-    while (y <= center.y + radius){
-      const x_offset = (row & 1) * (step * 0.5);
-      let x = center.x - radius + x_offset;
-      while (x <= center.x + radius){
-        const dx = x - center.x;
-        const dy = y - center.y;
-        if (dx*dx + dy*dy <= radius*radius){
-          const xs = Math.round(x/step)*step;
-          const ys = Math.round(y/step)*step;
-          if (xs>=faceRect.x && xs<=faceRect.x+faceRect.w && ys>=faceRect.y && ys<=faceRect.y+faceRect.h){
-            pts.push({x: xs, y: ys});
-          }
-        }
-        x += step;
-      }
-      y += y_step;
-      row += 1;
-    }
-    return dedupe(pts, 0.35*step);
-  }
-
-  function buildPairs(center, sourcePts, destPts){
-    const srcSorted = sortByAngleThenRadius(center, sourcePts);
-    const dstSorted = sortByAngleThenRadius(center, destPts);
-    const n = Math.min(srcSorted.length, dstSorted.length);
-    const pairs=new Array(n);
-    for(let i=0;i<n;i++){
-      const s=srcSorted[i], d=dstSorted[i];
-      pairs[i] = { sx:s.x, sy:s.y, dx:d.x, dy:d.y, cx:center.x, cy:center.y };
-    }
-    return pairs;
-  }
-
-  function makeTargets(faceRect, center, textPts){
-    const disk = buildDiskForCount(center, faceRect, textPts.length);
-    const extrasCount = Math.max(0, Math.floor(textPts.length*0.20)); // fewer extras
-    const extras = buildInnerRing(center, faceRect, extrasCount);
-    const R_outer = Math.min(faceRect.w, faceRect.h) * 0.40;
-    const R_inner = R_outer * 0.62;
-    const diskFillPts = buildSolidDisk(center, R_inner*0.96, faceRect, p);
-    return { center, faceRect, text:textPts.slice(), disk, extras, diskFillPts,
-             pairs_suck:    buildPairs(center, textPts, disk),   // words -> disk
-             pairs_explode: buildPairs(center, disk, textPts) }; // disk -> words
-  }
-
-  function initBombMorphSystem() {
-    const centerC = {x: faceBOMB_center.x + faceBOMB_center.w / 2, y: faceBOMB_center.y + faceBOMB_center.h / 2};
-    const centerF = {x: faceBOMB_final.x  + faceBOMB_final.w  / 2, y: faceBOMB_final.y  + faceBOMB_final.h  / 2};
-    state.bombMorphTargets.center = makeTargets(faceBOMB_center, centerC, bombWordDotsCenter);
-    state.bombMorphTargets.final  = makeTargets(faceBOMB_final,  centerF, bombWordDotsFinal);
-  }
-
-  // ====== Morph control ======
-  function startBombMorph(phase, bombType, durationOverride=null, autoExplode=false){
-    const T = state.bombMorphTargets[bombType];
-    state.bombMorph.active = true;
-    state.bombMorph.autoExplode = !!autoExplode;
-    state.bombMorph.phase = phase;           // &#39;sucking&#39; or &#39;exploding&#39;
-    state.bombMorph.progress = 0;
-    if (durationOverride!=null) { state.bombMorph.duration = durationOverride; }
-    state.bombMorph.startTime = nowS();
-    state.bombMorph.bombType = bombType;
-    state.bombMorph.pairs = (phase === &#39;sucking&#39;) ? T.pairs_suck.slice() : T.pairs_explode.slice();
-    state.bombMorph.extras = T.extras.slice();
-    state.bombMorph.blastSeed = Math.random()*1000;
-
-    // Per-particle meta, lighter trails
-    const pairs = state.bombMorph.pairs;
-    const cx=T.center.x, cy=T.center.y;
-    const staggerMax = 0.24; // smaller
-    state.bombMorph.meta = pairs.map((pr, i)=>{
-      const ang = Math.atan2((pr.sy-cy),(pr.sx-cx));
-      const base = (ang + Math.PI)/(Math.PI*2);        // 0..1 around the circle
-      const r = rand01((i+1)*131.7 + state.bombMorph.blastSeed);
-      const delay = Math.min(staggerMax, 0.10 + 0.16*base + 0.08*(r-0.5));
-      const jitter = (r-0.5)*0.25;                     // smaller
-      const sparkLen = 3 + Math.floor(r*5);            // shorter trails
-      const overshoot = 0.08 + 0.10*r;                 // reduced
-      return {delay, jitter, sparkLen, overshoot};
-    });
-  }
-
-  function updateBombMorph(t){
-    if (!state.bombMorph.active) return false;
-    const elapsed = (t - state.bombMorph.startTime) * 1000;
-    state.bombMorph.progress = Math.min(elapsed / state.bombMorph.duration, 1);
-    return (state.bombMorph.progress >= 1);
-  }
-
-  // ====== Normal bomb countdown helpers ======
-  function lerp(a,b,t){ return a + (b-a)*t; }
-  function prepareNormalBomb(bombType){
-    const face = (bombType===&#39;center&#39;) ? faceBOMB_center : faceBOMB_final;
-    const center = {
-      x: Math.round((face.x + face.w/2)/p)*p,
-      y: Math.round((face.y + face.h/2)/p)*p
-    };
-    // sample perimeter points of the face rect
-    const perim = sampleRoundedRectDots(face.x, face.y, face.w, face.h, face.r);
-    state.normalBomb.perimPts = perim;
-    state.normalBomb.center = center;
-  }
-
-  function startNormalBomb(bombType){
-    state.normalBomb.active = true;
-    state.normalBomb.phase = &#39;implode&#39;;
-    state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType;
-    prepareNormalBomb(bombType);
-  }
-
-  function drawNormalBomb(t){
-    if (!state.normalBomb.active) return false;
-    const nb = state.normalBomb;
-    const face = (nb.bombType===&#39;center&#39;) ? faceBOMB_center : faceBOMB_final;
-    const center = nb.center;
-    if (nb.phase===&#39;implode&#39;){
-      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.implodeMs));
-      // draw a single ring imploding from the perimeter toward center
-      const pts = nb.perimPts;
-      const skip = ((t*45)|0) & 1; // half-rate to keep light
-      for(let i=0;i<pts.length;i++){
-        if ((i & 1)===skip) continue;
-        const pt = pts[i];
-        const x = lerp(pt.x, center.x, u);
-        const y = lerp(pt.y, center.y, u);
-        // slightly fade as it converges
-        const a = 0.9 * (1 - 0.2*u);
-        drawBrightDotFast(ctx, x, y, a);
-      }
-      // when finished, switch to explode
-      if (u >= 1){ nb.phase=&#39;explode&#39;; nb.t0 = t; }
-      return false;
-    } else if (nb.phase===&#39;explode&#39;){
-      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.explodeMs));
-      const Rmax = Math.min(face.w, face.h)*0.48;
-      // two soft ripples expanding
-      const base = u;
-      const r1 = Rmax * base;
-      const r2 = Math.max(0, r1 - p*6);
-      const alpha1 = 0.30 * Math.max(0, 1 - base);
-      const alpha2 = 0.18 * Math.max(0, 1 - base*1.2);
-      if (alpha1>0){
-        const stepA = Math.PI/128; // sparse
-        for(let a=0;a<Math.PI*2;a+=stepA){
-          const x = Math.round((center.x + r1*Math.cos(a))/p)*p;
-          const y = Math.round((center.y + r1*Math.sin(a))/p)*p;
-          drawBrightDotFast(ctx, x, y, alpha1);
-        }
-      }
-      if (alpha2>0){
-        const stepB = Math.PI/128;
-        for(let a=0;a<Math.PI*2;a+=stepB){
-          const x = Math.round((center.x + r2*Math.cos(a))/p)*p;
-          const y = Math.round((center.y + r2*Math.sin(a))/p)*p;
-          drawBrightDotFast(ctx, x, y, alpha2);
-        }
-      }
-      if (u>=1){
-        // signal to game layer if hooked
-        try { window.dispatchEvent(new CustomEvent(&#39;normalBombExplode&#39;, {detail:{bombType: nb.bombType}})); } catch(e){}
-        nb.active=false; nb.phase=&#39;idle&#39;;
-        return true;
-      }
-      return false;
-    }
-    return false;
-  }
-
-  // ====== Normal bomb (no timer) ======
-  function startNormalBomb(bombType){
-    state.normalBomb.active = true;
-    state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &#39;center&#39; | &#39;final&#39;
-  }
-
-  function drawNormalBomb(t){
-    if (!state.normalBomb.active) return false;
-    const elapsed = (t - state.normalBomb.t0) * 1000;
-    const u = Math.max(0, Math.min(1, elapsed / state.normalBomb.duration));
-    const ease = (x)=> 1 - Math.pow(1-x, 3);
-    const bombType = state.normalBomb.bombType;
-    const T = bombType===&#39;center&#39; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
-    const textPts = bombType===&#39;center&#39; ? bombWordDotsCenter : bombWordDotsFinal;
-    const center = T.center;
-    const spread = Math.min(T.faceRect.w, T.faceRect.h) * 0.10; // small push
-    const k = Math.sin(u * Math.PI); // out and back
-    // outline pulse
-    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
-    const R_inner = R_outer*0.62;
-    const pulseA = 0.20 * k;
-    if (pulseA>0){
-      for(let a=0;a<Math.PI*2; a+=Math.PI/96){
-        const x = snap(center.x + R_outer*Math.cos(a));
-        const y = snap(center.y + R_outer*Math.sin(a));
-        drawBrightDotFast(ctx, x, y, pulseA);
-      }
-    }
-    // letters push outward slightly, then return
-    const skip = ((t*45)|0) & 1; // half rate
-    for(let i=0;i<textPts.length;i++){
-      if ((i & 1)===skip) continue;
-      const pt = textPts[i];
-      const dx = pt.x - center.x, dy = pt.y - center.y;
-      const len = Math.hypot(dx,dy) || 1;
-      const ox = dx/len * spread * k;
-      const oy = dy/len * spread * k;
-      drawBrightDotFast(ctx, pt.x + ox, pt.y + oy, 0.9);
-    }
-    return (u>=1);
-  }
-
-  function drawExtrasRing(t, T, alpha){
-    if (alpha<=0) return;
-    // draw fewer extras by skipping every other point while animating
-    let toggle = ((t*60)|0) & 1;
-    let idx = 0;
-    for(const pt of state.bombMorph.extras){
-      if (state.bombMorph.active && state.bombMorph.phase===&#39;exploding&#39; && ((idx++ & 1)===toggle)) continue;
-      drawBrightDotFast(ctx, pt.x, pt.y, alpha*0.9);
-    }
-  }
-
-  // Uniform armed sphere visualization
-  function drawUniformRing(center, radius, alpha=0.94){
-    const step = Math.max(Math.PI/128, p/(radius||1));
-    for(let a=0; a<Math.PI*2; a+=step){
-      const x = snap(center.x + radius*Math.cos(a));
-      const y = snap(center.y + radius*Math.sin(a));
-      drawBrightDotFast(ctx, x, y, alpha);
-    }
-  }
-
-  function drawUniformDisk(center, radius, alpha=0.5){
-    if (radius<=0) return;
-    const stepR = Math.max(p*1.2, d*1.4);
-    for(let rr=0; rr<=radius; rr+=stepR){
-      const stepA = Math.max(Math.PI/48, p/Math.max(rr, p));
-      for(let a=0; a<Math.PI*2; a+=stepA){
-        const x = snap(center.x + rr*Math.cos(a));
-        const y = snap(center.y + rr*Math.sin(a));
-        drawBrightDotFast(ctx, x, y, alpha);
-      }
-    }
-  }
-
-  function drawBombTimerEffect(t, bombFace, bombTextPts, targetKey) {
-    const T = state.bombMorphTargets[targetKey];
-    if (!T) return;
-    const center=T.center;
-    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
-    const R_inner = R_outer*0.62;
-
-    // Two clean concentric rings. Keep light.
-    drawUniformRing(center, R_outer, 0.94);
-    drawUniformRing(center, R_inner, 0.70);
-    // Solid fill from cached hex lattice
-    const fill = T.diskFillPts || [];
-    const skip = ((t*30)|0) & 1; // dynamic half-rate dithering
-    for(let i=0;i<fill.length;i++){
-      if ((i & 1)===skip) continue;
-      const pt = fill[i];
-      drawBrightDotFast(ctx, pt.x, pt.y, 0.36);
-    }
-
-    // No heavy shockwave here
-    // Black X overlay on last 30% of the word
-    let minX=Infinity,maxX=-Infinity;
-    for(const pt of bombTextPts){ minX=Math.min(minX,pt.x); maxX=Math.max(maxX,pt.x); }
-    const xStart=minX + (maxX-minX)*0.7;
-    for(const pt of bombTextPts){
-      if(pt.x>=xStart){
-        ctx.save(); ctx.fillStyle=&#39;#000&#39;;
-        ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill();
-        ctx.restore();
-      }
-    }
-  }
-
-  // Frame parity for particle subsampling
-  let frameParity = 0;
-
-  function drawBombMorph(t){
-    const prog = state.bombMorph.progress;
-    const phase = state.bombMorph.phase;
-    const pairs = state.bombMorph.pairs;
-    const meta  = state.bombMorph.meta;
-    const T = state.bombMorphTargets[state.bombMorph.bombType];
-
-    // Removed red center flare and shockwave to cut cost
-    // if (phase===&#39;exploding&#39;){ ... } // deleted
-
-    // Particle motion
-    for(let i=0;i<pairs.length;i++){
-      const pr = pairs[i];
-      const m  = meta[i] || {delay:0,jitter:0,sparkLen:4,overshoot:0.10};
-
-      // Subsample half the particles per frame during explosion
-      if (phase===&#39;exploding&#39; && ((i & 1) !== frameParity)) { continue; }
-
-      const local = Math.max(0, Math.min(1, (prog - m.delay) / (1 - m.delay + 1e-6)));
-
-      if (phase===&#39;sucking&#39;){
-        const swirl = m.jitter * (1-local);
-        const dir = Math.atan2(pr.dy-pr.sy, pr.dx-pr.sx) + swirl*0.25;
-        const len = Math.hypot(pr.dx-pr.sx, pr.dy-pr.sy);
-        const x = pr.sx + Math.cos(dir) * len * easeInOut(local);
-        const y = pr.sy + Math.sin(dir) * len * easeInOut(local);
-
-        // lighter trail
-        const trailN = Math.floor(m.sparkLen * (1-local));
-        for(let k=trailN; k>=1; k-=2){
-          const tk = Math.max(0, local - 0.02*k);
-          const xt = pr.sx + (pr.dx-pr.sx)*tk;
-          const yt = pr.sy + (pr.dy-pr.sy)*tk;
-          drawBrightDotFast(ctx, xt, yt, 0.35);
-        }
-
-        drawBrightDotFast(ctx, x, y, 0.9);
-      } else {
-        // Horizontal explosion path
-        const cx = T.center.x;
-        const sign = (pr.dx >= cx) ? 1 : -1;
-        const maxThrow = Math.min(T.faceRect.w*0.38, Math.abs(pr.dx - cx)*1.4 + 18);
-        const split = 0.55;
-
-        let x, y;
-
-        if (local < split){
-          const a = easeOutExpo(local / split);
-          const baseY = pr.sy;
-          const targetX = cx + sign * maxThrow;
-          x = pr.sx + (targetX - pr.sx) * a;
-          y = baseY;
-        } else {
-          const b = easeOutBack((local - split)/(1 - split));
-          const targetX = pr.dx;
-          const targetY = pr.dy;
-          const throwX  = cx + sign * maxThrow;
-          const throwY  = pr.sy;
-          x = throwX + (targetX - throwX) * b;
-          y = throwY + (targetY - throwY) * b;
-        }
-
-        // Lighter trail along the same path
-        const trailN = Math.floor(m.sparkLen);
-        for(let k=trailN; k>=1; k-=2){
-          const back = Math.max(0, local - 0.016*k);
-          let xt, yt;
-          if (back < split){
-            const a = easeOutExpo(back / split);
-            const targetX = cx + sign * maxThrow;
-            const baseY = pr.sy;
-            xt = pr.sx + (targetX - pr.sx) * a;
-            yt = baseY;
-          } else {
-            const b = easeOutBack((back - split)/(1 - split));
-            const targetX = pr.dx;
-            const targetY = pr.dy;
-            const throwX  = cx + sign * maxThrow;
-            const throwY  = pr.sy;
-            xt = throwX + (targetX - throwX) * b;
-            yt = throwY + (targetY - throwY) * b;
-          }
-          drawBrightDotFast(ctx, xt, yt, 0.35);
-        }
-
-        // Head particle
-        drawBrightDotFast(ctx, x, y, 0.9);
-
-        if (local > 0.95){
-          drawBrightDotFast(ctx, pr.dx, pr.dy, 0.9);
-        }
-      }
-    }
-
-    // Extras halo, already lightened
-    if (phase===&#39;sucking&#39;){ drawExtrasRing(t, T, Math.min(1, prog*1.0)); }
-    else { drawExtrasRing(t, T, Math.max(0, 1-prog)); }
-
-    // flip parity after drawing
-    frameParity ^= 1;
-  }
-
-  // ====== DPR-safe hit-testing (Path2D expects CSS pixels * DPR) ======
-  const pathLASER = path2DFor(faceLASER_final);
-  const pathBOMB_final = path2DFor(faceBOMB_final);
-  const pathBOMB_center = path2DFor(faceBOMB_center);
-
-  // ====== Sphere hit detection (CSS pixels) ======
-  function isPointInSphere(cssX, cssY, bombFace) {
-    if (!state.bombArmed) return false;
-    const centerX = bombFace.x + bombFace.w / 2;
-    const centerY = bombFace.y + bombFace.h / 2;
-    const radius = Math.min(bombFace.w, bombFace.h) * 0.40;
-    const dx = cssX - centerX;
-    const dy = cssY - centerY;
-    return (dx * dx + dy * dy) <= (radius * radius);
-  }
-
-  function startTransition() { if (state.mode === &#39;single&#39; && !state.active) { state.active = true; state.t0 = nowS(); } }
-  window.btn2_startTransition = startTransition;
-  document.addEventListener(&#39;keydown&#39;, (e) => { if (e.key === &#39;t&#39;) startTransition(); });
-
-  // ====== CLICK logic ======
-  canvas.addEventListener(&#39;click&#39;, (e) => {
-    const r = canvas.getBoundingClientRect(); 
-    const cssX = (e.clientX - r.left);
-    const cssY = (e.clientY - r.top);
-    const px  = cssX * DPR, py = cssY * DPR;
-
-    if (state.mode === &#39;single&#39; && !state.active) {
-      // Normal bomb path when no timer powerup: 3s suck then auto explode
-      if (!state.timerPowerup && ctx.isPointInPath(pathBOMB_center, px, py) && !state.bombMorph.active){
-        state.bombDeployed = true;
-        startBombMorph(&#39;sucking&#39;, &#39;center&#39;, 3000, true);
-        return;
-      }
-      if (state.timerPowerup && state.bombDeployed && state.bombArmed) {
-        if (isPointInSphere(cssX, cssY, faceBOMB_center) && !state.bombMorph.active) {
-          startBombMorph(&#39;exploding&#39;, &#39;center&#39;); // disk -> "BOMB X"
-          return;
-        }
-      }
-      if (ctx.isPointInPath(pathBOMB_center, px, py) && !state.bombMorph.active) {
-        if (state.timerPowerup && !state.bombDeployed) {
-          state.bombDeployed = true;
-          startBombMorph(&#39;sucking&#39;, &#39;center&#39;);   // "BOMB X" -> disk
-        }
-      }
-      return;
-    }
-
-    if (state.active) return;
-
-    if (state.timerPowerup && state.bombDeployed && state.bombArmed) {
-      if (isPointInSphere(cssX, cssY, faceBOMB_final) && !state.bombMorph.active) {
-        startBombMorph(&#39;exploding&#39;, &#39;final&#39;);
-        return;
-      }
-    }
-    if (ctx.isPointInPath(pathBOMB_final, px, py) && !state.bombMorph.active) {
-      if (!state.timerPowerup){
-        state.bombDeployed = true;
-        startBombMorph(&#39;sucking&#39;, &#39;final&#39;, 3000, true);
-      } else if (state.timerPowerup && !state.bombDeployed) {
-        state.bombDeployed = true;
-        startBombMorph(&#39;sucking&#39;, &#39;final&#39;);
-      }
-    }
-    else if (ctx.isPointInPath(pathLASER, px, py)) {
-      if (state.mode === &#39;two&#39; && state.specialActive && state.laserAmmo > 0) {
-        state.laserAmmo--;
-        if (state.laserAmmo === 0) {
-          state.specialActive = false;
-          document.getElementById(&#39;btn2_special&#39;).classList.remove(&#39;active&#39;);
-          state.activeReverse = true;
-          state.t0r = nowS();
-        }
-      }
-    }
-  });
-
-  // ====== Press visual ======
-  const press = { laser: { state: &#39;idle&#39;, t: 0 }, bomb: { state: &#39;idle&#39;, t: 0 } };
-  const perimLaser = laserDots.filter(pt => pt.perim);
-  const perimBombB = bombDotsB.filter(pt => pt.perim);
-  const perimBombC = bombDotsC.filter(pt => pt.perim);
-  const PRESS_IN_MS = 90, PRESS_OUT_MS = 140;
-  function pressK(which, t) {
-    const st = press[which];
-    if (st.state === &#39;down&#39;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_IN_MS / 1000))); return easeInCubic(u); }
-    if (st.state === &#39;up&#39;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_OUT_MS / 1000))); return 1 - easeOutCubic(u); }
-    return 0;
-  }
-  function drawPressOverlay(rect, perimPts, k) {
-    if (k <= 0) return;
-    ctx.save(); rrPath(ctx, rect); ctx.clip();
-    ctx.globalAlpha = 0.08 * k; ctx.fillStyle = &#39;#000&#39;; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-    ctx.globalAlpha = 0.10 * k; ctx.fillStyle = col.bright; ctx.fillRect(rect.x + p, rect.y + p, rect.w - 2 * p, rect.h - 2 * p);
-    ctx.restore();
-  }
-
-  // ====== PERF: pre-rasterize LASER rows ======
-  const laserRowImgs = laserRows.map(row => {
-    const off = document.createElement(&#39;canvas&#39;); off.width = W; off.height = H;
-    const octx = off.getContext(&#39;2d&#39;);
-    for (const pt of row.pts) drawBrightDotFast(octx, pt.x, pt.y, 0.9);
-    return off;
-  });
-
-  // ====== PERF throttle ======
-  let heavy = false;
-  let lastFrame = 0;
-  const FPS_HEAVY = 28, FPS_LIGHT = 60; // slightly lower heavy fps
-
-  // ====== Transition animation ======
-  const TRANS_MS = 900; const DOT_ALPHA = 0.9;
-  function drawLaserBuildTopDown_cached(u) {
-    const total = laserRowImgs.length; const f = u * total; const rFull = Math.floor(f); const frac = f - rFull;
-    for (let r = 0; r < Math.min(rFull, total); r++) ctx.drawImage(laserRowImgs[r], 0, 0);
-    if (rFull < total) {
-      const row = laserRows[rFull]; const m = Math.floor(row.n * easeInOut(frac));
-      for (let i = 0; i < m; i++) { const pt = row.pts[i]; drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA); }
-    }
-  }
-  function drawBombMoving(u) {
-    const stepsTotal = ((faceBOMB_final.y - faceBOMB_center.y) / p) | 0;
-    const frames = Math.max(1, stepsTotal+1);
-    const f=u*(frames-1); const s=Math.floor(f); const frac=easeInOut(f-s);
-    const yA = snap(faceBOMB_center.y + s*p);
-    const yB = snap(faceBOMB_center.y + (Math.min(s+1,frames-1))*p);
-    const yLerp = snap(yA + (yB - yA) * frac);
-    const outer = {x:botOuter.x, y:yLerp-1*p, w:botOuter.w, h:botOuter.h, r:botOuter.r};
-    const face  = {x:outer.x+1*p, y:yLerp, w:outer.w-2*p, h:outer.h-2*p, r:outer.r-1*p};
-
-    const outPts = sampleRoundedRectDots(outer.x,outer.y,outer.w,outer.h,outer.r);
-    const innerPts=(function(){ const d=[]; const b_in=2.8*p; const mid=1; for(let i=0;i<3;i++){ const o=b_in+(i-mid)*p; const x=outer.x+o, y=outer.y+o, w=outer.w-2*o, h=outer.h-2*o, r=outer.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) d.push(pt); } return d; })();
-    const dy = face.y - faceBOMB_final.y; const textPts = bombWordDotsFinal.map(pt=>({x:pt.x,y:pt.y+dy}));
-    for(const pt of outPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
-    for(const pt of innerPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
-    for(const pt of textPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
-  }
-
-  // ====== Main frame ======
-  function frame(ts) {
-    if (__prevMode !== state.mode || __prevActive !== state.active) {
-      if (state.active) { setProxiesEnabled(false); }
-      else { setProxiesEnabled(true); updateProxyForMode(); }
-      __prevMode = state.mode; __prevActive = state.active;
-    }
-    
-    heavy = state.active || state.bombMorph.active;
-
-    const targetDelta = 1000 / (heavy ? FPS_HEAVY : FPS_LIGHT);
-    if (ts - lastFrame < targetDelta) { requestAnimationFrame(frame); return; }
-    lastFrame = ts;
-
-    const t = nowS();
-    const done = state.bombMorph.active && updateBombMorph(t);
-
-    let doneNB = false;
-    if (state.normalBomb.active){ doneNB = drawNormalBomb(t); }
-
-    
-    ctx.clearRect(0, 0, W, H); ctx.drawImage(bg, 0, 0);
-
-    if (state.mode === &#39;single&#39; && !state.active) {
-      ctx.drawImage(layerSingle, 0, 0);
-      
-      if (state.bombMorph.active) {
-        drawBombMorph(t);
-      } else if (state.bombArmed) {
-        drawBombTimerEffect(t, faceBOMB_center, bombWordDotsCenter, &#39;center&#39;);
-      } else {
-        for (const pt of bombWordDotsCenter) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
-      }
-      
-      // lighter press overlay already handled
-    }
-    else if (state.active) {
-      const u = Math.max(0, Math.min(1, (nowS() - state.t0) * (1000 / TRANS_MS)));
-      drawLaserBuildTopDown_cached(u);
-      drawBombMoving(u);
-      if (u >= 1) { state.active = false; state.mode = &#39;two&#39;; }
-    }
-    else if (state.activeReverse) {
-      const uR = Math.max(0, Math.min(1, (nowS() - state.t0r) * (1000 / TRANS_MS)));
-      const uF = 1 - uR;
-      drawLaserBuildTopDown_cached(uF);
-      drawBombMoving(uF);
-      if (uR >= 1) {
-        state.activeReverse = false;
-        state.mode = &#39;single&#39;;
-        state.bombDeployed = false;
-        state.bombArmed = false;
-        __prevMode = undefined; __prevActive = undefined;
-      }
-    }
-    else {
-      ctx.drawImage(layerTwo, 0, 0);
-
-      if (state.bombMorph.active) {
-        drawBombMorph(t);
-      } else if (state.bombArmed) {
-        drawBombTimerEffect(t, faceBOMB_final, bombWordDotsFinal, &#39;final&#39;);
-      } else {
-        for (const pt of bombWordDotsFinal) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
-      }
-
-      drawLaserArmed(t);
-    }
-
-    if (doneNB){ state.normalBomb.active=false; }
-
-    if (done){
-      if (state.bombMorph.phase===&#39;sucking&#39;){
-        if (!state.timerPowerup && state.bombMorph.autoExplode){
-          // Immediately explode words back out
-          startBombMorph(&#39;exploding&#39;, state.bombMorph.bombType, 700, false);
-        } else {
-          state.bombArmed=true; // timer path: hold on sphere
-          state.bombMorph.active=false;
-        }
-      } else {
-        // finished exploding
-        state.bombArmed=false;
-        state.bombDeployed=false;
-        state.bombMorph.active=false;
-      }
-    }
-
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-
-  // ====== Keyboard proxies ======
-  function synthClickAt(clientX, clientY) {
-    const r = canvas.getBoundingClientRect();
-    const evt = new MouseEvent(&#39;click&#39;, { bubbles: true, cancelable: true, clientX: r.left + clientX, clientY: r.top + clientY });
-    canvas.dispatchEvent(evt);
-  }
-  const kLaser = document.getElementById(&#39;btn2_proxy_blast&#39;);
-  const kBomb = document.getElementById(&#39;btn2_proxy_bomb&#39;);
-
-  function updateProxyForMode() {
-    if (state.mode === &#39;single&#39; && !state.active) {
-      kLaser.style.display = &#39;none&#39;;
-      kBomb.style.top = &#39;4%&#39;;
-      kBomb.style.bottom = &#39;auto&#39;;
-      kBomb.style.height = &#39;92%&#39;;
-    } else {
-      kLaser.style.display = &#39;block&#39;;
-      kLaser.style.top = &#39;6%&#39;;
-      kLaser.style.height = &#39;44%&#39;;
-      kBomb.style.display = &#39;block&#39;;
-      kBomb.style.bottom = &#39;6%&#39;;
-      kBomb.style.top = &#39;auto&#39;;
-      kBomb.style.height = &#39;44%&#39;;
-    }
-  }
-  function setProxiesEnabled(enabled) {
-    const v = enabled ? &#39;auto&#39; : &#39;none&#39;;
-    kLaser.style.pointerEvents = v;
-    kBomb.style.pointerEvents = v;
-  }
-
-  kLaser.addEventListener(&#39;click&#39;, () => { 
-    const cx = faceLASER_final.x + faceLASER_final.w / 2;
-    const cy = faceLASER_final.y + faceLASER_final.h / 2;
-    synthClickAt(cx, cy); 
-    kLaser.setAttribute(&#39;aria-pressed&#39;, &#39;true&#39;); 
-    setTimeout(() => kLaser.setAttribute(&#39;aria-pressed&#39;, &#39;false&#39;), 150); 
-  });
-  kBomb.addEventListener(&#39;click&#39;, () => {
-    const rect = (state.mode === &#39;single&#39; && !state.active) ? faceBOMB_center : faceBOMB_final;
-    const cx = rect.x + rect.w / 2; const cy = rect.y + rect.h / 2;
-    synthClickAt(cx, cy);
-    kBomb.setAttribute(&#39;aria-pressed&#39;, &#39;true&#39;);
-    setTimeout(() => kBomb.setAttribute(&#39;aria-pressed&#39;, &#39;false&#39;), 150);
-  });
-
-  updateProxyForMode();
-
-  function keypressHandler(e, which) {
-    if (e.key === &#39;Enter&#39; || e.key === &#39; &#39;) { e.preventDefault(); if (which === &#39;laser&#39;) kLaser.click(); else kBomb.click(); }
-  }
-  kLaser.addEventListener(&#39;keydown&#39;, e => keypressHandler(e, &#39;laser&#39;));
-  kBomb.addEventListener(&#39;keydown&#39;, e => keypressHandler(e, &#39;bomb&#39;));
-
-  /* TEMP TRIGGER HOOK */
-  document.getElementById(&#39;btn2_temp&#39;).addEventListener(&#39;click&#39;, (e) => {
-    e.stopPropagation();
-    if (window.btn2_startTransition) window.btn2_startTransition();
-  });
-
-  // ====== Timer Power-up Toggle ======
-  document.getElementById(&#39;btn2_timer&#39;).addEventListener(&#39;click&#39;, (e) => {
-    e.stopPropagation();
-    state.timerPowerup = !state.timerPowerup;
-    state.bombDeployed = false;
-    state.bombArmed = false;
-    
-    const btn = document.getElementById(&#39;btn2_timer&#39;);
-    if (state.timerPowerup) btn.classList.add(&#39;active&#39;);
-    else btn.classList.remove(&#39;active&#39;);
-  });
-
-  // ====== Special Activation (4 LASER shots) ======
-  document.getElementById(&#39;btn2_special&#39;).addEventListener(&#39;click&#39;, (e) => {
-    e.stopPropagation();
-    state.specialActive = !state.specialActive;
-    
-    if (state.specialActive) {
-      if (state.mode === &#39;single&#39; && !state.active) {
-        startTransition();
-      }
-      state.laserAmmo = state.maxAmmo;
-      e.currentTarget.classList.add(&#39;active&#39;);
-    } else {
-      e.currentTarget.classList.remove(&#39;active&#39;);
-    }
-  });
-
-  // ====== Initialize targets ======
-  initBombMorphSystem();
-
-})();
-})();
-</script>
-</body>
-</html>
-'></iframe>
-            </div>
+            <main class="control-ui" aria-label="Control surface">
+              <section class="col-left"><div class="pad"></div></section>
+              <section class="col-right"><div class="pad"></div></section>
+            </main>
           </div>
         </div>
       </div>
@@ -1387,67 +237,210 @@ document.addEventListener(&#39;touchmove&#39;, (e)=>{
   </div>
 
   <script>
-    // State
-    window.state = window.state || { mode:'single', active:false, specialActive:false, timerPowerup:false, laserAmmo:4, maxAmmo:4 };
-
-    // Icons
-    const IconManager = {
-      renderSneakers(f,t){ const c=document.getElementById('ui-sneakers'); if(!c) return; c.innerHTML=''; for(let i=0;i<t;i++) c.innerHTML+=`<i class="ph-bold ph-sneaker" style="color:${i<f?'#d6c7a4':'#ff3a2f'};"></i>`; },
-      renderHearts(f,t){ const c=document.getElementById('ui-hearts'); if(!c) return; c.innerHTML=''; for(let i=0;i<t;i++) c.innerHTML+=`<i class="ph-bold ph-heart" style="color:${i<f?'#d6c7a4':'#ff3a2f'};"></i>`; },
-      renderPowers(t,f){ const c=document.getElementById('ui-powers'); if(!c) return; c.innerHTML=''; const types=['ph-timer','ph-shield','ph-magnet','ph-crosshair-simple']; for(let i=0;i<t;i++) c.innerHTML+=`<span class="power" aria-label="power"><i class="ph-bold ${types[i%types.length]}"></i><i class="ph-fill ${types[i%types.length]}"></i></span>`; },
-      renderFires(f,t){ const c=document.getElementById('ui-fires'); if(!c) return; c.innerHTML=''; for(let i=0;i<t;i++) c.innerHTML+=`<i class="ph-bold ph-fire" style="color:${i<f?'#d6c7a4':'#ff3a2f'};"></i>`; }
+    // Keep a minimal public state model
+    window.state = window.state || {
+      mode: 'single',
+      active: false,
+      specialActive: false,
+      timerPowerup: false,
+      laserAmmo: 4,
+      maxAmmo: 4
     };
-    IconManager.renderSneakers(3,5);
-    IconManager.renderHearts(1,3);
-    IconManager.renderPowers(4,4);
-    IconManager.renderFires(4,5);
+  </script>
 
-    // LIFE and Stopwatch bindings
-    (function() {
-      function findLife() {
-        const scope=document.getElementById('element-tabs');
-        if(!scope) return null;
-        const nodes=scope.querySelectorAll('*');
-        for(const n of nodes) if(((n.textContent||'').trim().toUpperCase())==='LIFE') return n;
-        return null;
+  <script>
+    class MobileSafariLock {
+      static initialize() {
+        MobileSafariLock.initializeAggressiveScaling();
       }
-      function setTimerIconFilled(on) {
-        const p=document.getElementById('ui-powers'); if(!p) return;
-        const wrap=[...p.querySelectorAll('.power')].find(w => w.querySelector('.ph-timer'));
-        if(!wrap) return;
-        wrap.classList.toggle('active', !!on);
-      }
-      // Stopwatch click target = wrapper
-      const p=document.getElementById('ui-powers');
-      if(p) {
-        const wrap=[...p.querySelectorAll('.power')].find(w => w.querySelector('.ph-timer'));
-        if(wrap) {
-          wrap.setAttribute('role','button');
-          wrap.setAttribute('tabindex','0');
-          wrap.style.cursor='pointer';
-          const toggle=() => { window.state.timerPowerup=!window.state.timerPowerup; setTimerIconFilled(window.state.timerPowerup); };
-          wrap.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
-          wrap.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggle(); } });
-          setTimerIconFilled(window.state.timerPowerup);
+
+      static initializeAggressiveScaling() {
+        const container = document.querySelector('.fixed-container');
+        if (!container) return;
+
+        const applyMeasuredFit = () => {
+          const vv = window.visualViewport;
+          const vh = vv ? vv.height : window.innerHeight;
+          const prev = container.style.transform;
+          container.style.transform = 'none';
+          const natH = Math.ceil(container.offsetHeight);
+          container.style.transform = prev;
+          const scale = Math.max(0.01, vh / Math.max(1, natH));
+          container.style.transform = `translateX(-50%) scale(${scale})`;
+        };
+
+        const schedule = () => requestAnimationFrame(applyMeasuredFit);
+        schedule();
+        let t;
+        window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(schedule, 80); });
+        window.addEventListener('orientationchange', () => setTimeout(schedule, 250));
+        window.addEventListener('pageshow', (e) => { if (e.persisted) schedule(); });
+        if (window.visualViewport) {
+          visualViewport.addEventListener('resize', schedule);
+          visualViewport.addEventListener('scroll', schedule);
         }
       }
-      // LIFE
-      const life=findLife();
-      if(life) {
-        life.style.cursor='pointer'; life.setAttribute('role','button'); life.setAttribute('tabindex','0');
-        const toggle=() => { window.state.specialActive=!window.state.specialActive; if(window.state.specialActive) window.state.laserAmmo=window.state.maxAmmo; life.classList.toggle('is-active', !!window.state.specialActive); };
-        life.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
-        life.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggle(); } });
-      }
-    })();
+    }
 
-    // Canvas text
-    (function() {
-      const canvas=document.getElementById('gameCanvas'); const ctx=canvas.getContext('2d');
-      function resize() { const crt=document.querySelector('.crt'); const w=crt.clientWidth, h=crt.clientHeight; const dpr=window.devicePixelRatio||1; canvas.style.width=w+'px'; canvas.style.height=h+'px'; canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); draw(); }
-      function draw() { const w=canvas.clientWidth, h=canvas.clientHeight; ctx.fillStyle='#0a241f'; ctx.fillRect(0,0,w,h); ctx.fillStyle='#d6c7a4'; ctx.font='20px "Press Start 2P"'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('SNEAKER BOMBER', w/2, h/2-20); ctx.fillText('SPACE TO START', w/2, h/2+20); }
-      resize(); addEventListener('resize', resize);
-    })();
+    class IconManager {
+      static updateAllIcons() {
+        IconManager.renderSneakers(3, 5);
+        IconManager.renderHearts(1, 3);
+        IconManager.renderPowers(4, 4);
+        IconManager.renderFires(4, 5);
+      }
+      static renderSneakers(fill, outline) {
+        const c = document.getElementById('ui-sneakers'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="sneaker-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderHearts(fill, outline) {
+        const c = document.getElementById('ui-hearts'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="heart-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderFires(fill, outline) {
+        const c = document.getElementById('ui-fires'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="fire-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderPowers(total, fill) {
+        const c = document.getElementById('ui-powers'); if (!c) return; c.innerHTML = '';
+        const types = [ { b:'ph-timer', f:'ph-timer' }, { b:'ph-shield', f:'ph-shield' }, { b:'ph-magnet', f:'ph-magnet' }, { b:'ph-crosshair-simple', f:'ph-crosshair-simple' } ];
+        for (let i = 0; i < total; i++) {
+          const t = types[i % types.length];
+          c.innerHTML += `
+            <div class="power ${i < fill ? 'active' : ''}">
+              <i class="ph-bold ${t.b}" aria-hidden="true"></i>
+              <i class="ph-fill ${t.f}" aria-hidden="true"></i>
+            </div>`;
+        }
+      }
+    }
+
+    function setupSimpleGame() {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        const crt = document.querySelector('.crt');
+        const cssW = crt.clientWidth;  const cssH = crt.clientHeight;
+
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        draw();
+      }
+
+      function draw() {
+        const w = canvas.clientWidth; const h = canvas.clientHeight;
+        ctx.fillStyle = '#0a241f'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#d6c7a4'; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('SNEAKER BOMBER', w / 2, h / 2 - 20);
+        ctx.fillText('SPACE TO START', w / 2, h / 2 + 20);
+      }
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MobileSafariLock.initialize();
+      IconManager.updateAllIcons();
+      setupSimpleGame();
+      const pauseBtn = document.getElementById('btn-pause');
+      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
+      setTimeout(() => { window.scrollTo(0, 0); }, 120);
+    });
+
+    // Public UI API
+    window.SneakerQuestUI = {
+      IconManager,
+      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
+      setHearts:   (f, t) => IconManager.renderHearts(f, t),
+      setPowers:   (f, t) => IconManager.renderPowers(t, f),
+      setFires:    (f, t) => IconManager.renderFires(f, t),
+      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
+      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
+      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
+      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
+    };
+  </script>
+
+  <!-- Minimal bindings per your logic. No layout changes. -->
+  <script>
+  (function(){
+    function findLife(){
+      var scope = document.querySelector('#element-tabs');
+      if(!scope) return null;
+      var candidates = [
+        '#element-tabs > div:nth-child(2) > div > div',
+        '#element-tabs > div:nth-child(2) > div',
+        '#element-tabs > div:nth-child(2)'
+      ];
+      for (var i=0;i<candidates.length;i++){
+        var n = document.querySelector(candidates[i]);
+        if (n) return n;
+      }
+      var all = scope.querySelectorAll('*');
+      for (var j=0;j<all.length;j++){
+        var t = (all[j].textContent || '').trim().toUpperCase();
+        if (t === 'LIFE') return all[j];
+      }
+      return null;
+    }
+
+    function setTimerIcon(el, on){
+      if (!el) return;
+      if (on){ el.classList.add('ph-fill'); el.classList.remove('ph'); }
+      else   { el.classList.remove('ph-fill'); el.classList.add('ph'); }
+    }
+
+    function bind(){
+      // Stopwatch icon in POWER-UPS row toggles timer
+      var timerEl = document.querySelector('#ui-powers .ph-timer');
+      if (timerEl){
+        timerEl.style.cursor = 'pointer';
+        timerEl.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          window.state.timerPowerup = !window.state.timerPowerup;
+          setTimerIcon(timerEl, window.state.timerPowerup);
+        });
+      }
+
+      // LIFE tab toggles special
+      var lifeEl = findLife();
+      if (lifeEl){
+        lifeEl.style.cursor = 'pointer';
+        lifeEl.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          window.state.specialActive = !window.state.specialActive;
+          if (window.state.specialActive){
+            window.state.laserAmmo = window.state.maxAmmo;
+          }
+          lifeEl.classList.toggle('is-active', !!window.state.specialActive);
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+    else bind();
+  })();
   </script>
 </body>
 </html>
