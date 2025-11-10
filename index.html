@@ -133,7 +133,7 @@
     .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
     .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
 
-    .bottom { width: 100%; height: 150px; margin-top: -13px; }
+    .bottom { width: 100%; height: 270px; margin-top: -13px; }  /* increased to fit controls */
 
     .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
 
@@ -172,20 +172,34 @@
       -ms-touch-action: none;
   }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-.control-buttons{ position:absolute; top:12px; left:12px; z-index:100; display:flex; flex-direction:column; gap:8px; }
-.btn2_temp,.btn2_special,.btn2_timer{ pointer-events:auto; touch-action:manipulation; background:#101012; color:#eaeaea; border:1px solid #3a3a3a; border-radius:10px; padding:8px 12px; font-size:12px; line-height:1; z-index:100; position:relative; font-family: ui-monospace,Consolas,Menlo,monospace; cursor:pointer; }
-.btn2_special.active{ background:#2a1010; border-color:#ff2a2a; }
-.btn2_timer.active{ background:#102a10; border-color:#2aff2a; }
-.btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
-#btn2_panel{ position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
-.btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%); width:min(92%, 520px); height:44%; outline:none; border:0; background:transparent; pointer-events:auto; z-index:2; }
-#btn2_proxy_blast{ top:6%; }
-#btn2_proxy_bomb{ bottom:6%; }
-#jpad_canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-#jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
+
+<style id="sq-final-overrides">
+  .control-buttons{ display:none !important; }
+  #btn2_panel, #jpad_canvas { z-index: 1; }
+  .btn2_keyproxy { z-index: 2; }
 </style>
+
+
+<style id="sq-mount-controls">
+  /* Ensure the control area has size when mounted inside #control-ui */
+  #control-ui{ margin-top:12px; }
+  #control-ui{
+    display:grid; grid-template-columns: 1fr 1fr; gap:0;
+    background:transparent;
+    width:100%; height:260px; /* visible size matches content */
+    position:relative;
+  }
+  #control-ui .col-left, #control-ui .col-right{
+    position:relative; border-radius:16px; overflow:hidden; background:#080203;
+    box-shadow: inset 0 0 0 1px #1a0000, 0 10px 30px rgba(0,0,0,0.5);
+  }
+  #control-ui .pad{ position:absolute; inset:12px; border-radius:12px; overflow:hidden; }
+  #btn2_panel, #jpad_canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%); width:min(92%,520px); outline:0; border:0; background:transparent; z-index:2; }
+  #btn2_proxy_blast{ top:6%; height:44%; }
+  #btn2_proxy_bomb{  bottom:6%; height:44%; }
+</style>
+
 </head>
 <body>
   <div class="fixed-container" id="mainContainer">
@@ -242,19 +256,19 @@
         <div class="bottom" id="element-bottom">
           <div class="control-screen" id="element-controls">
             <div class="matrix" aria-hidden="true"></div>
-            <main class="control-ui" aria-label="Control surface">
-              <section class="col-left"><div class="pad"><div class="control-buttons">
-  <button id="btn2_temp" class="btn2_temp" aria-label="Start transition">▶ special</button>
-  <button id="btn2_timer" class="btn2_timer" aria-label="Toggle timer">⏰ timer</button>
-  <button id="btn2_special" class="btn2_special" aria-label="Toggle special">🔮 special</button>
-</div>
-<div class="btn2-overlay">
-  <button id="btn2_proxy_blast" class="btn2_keyproxy" role="button" aria-label="Laser" aria-pressed="false" tabindex="0"></button>
-  <button id="btn2_proxy_bomb"  class="btn2_keyproxy" role="button" aria-label="Bomb"  aria-pressed="false" tabindex="0"></button>
-  <canvas id="btn2_panel" width="560" height="560"></canvas>
-</div></div></section>
-              <section class="col-right"><div class="pad"><canvas id="jpad_canvas"></canvas>
-<output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output></div></section>
+            <!-- Mounted controls directly here with id="control-ui" -->
+            <main id="control-ui" aria-label="Control surface">
+              <section class="col-left" aria-label="Buttons area"><div class="pad">
+                <div class="btn2-overlay">
+                  <button id="btn2_proxy_blast" class="btn2_keyproxy" role="button" aria-label="Laser" aria-pressed="false" tabindex="0"></button>
+                  <button id="btn2_proxy_bomb"  class="btn2_keyproxy" role="button" aria-label="Bomb"  aria-pressed="false" tabindex="0"></button>
+                  <canvas id="btn2_panel" width="560" height="560"></canvas>
+                </div>
+              </div></section>
+              <section class="col-right" aria-label="Joypad"><div class="pad">
+                <canvas id="jpad_canvas"></canvas>
+                <output id="jpad_status" aria-live="polite">x 0.00, y 0.00, |v| 0.00, θ 0.00</output>
+              </div></section>
             </main>
           </div>
         </div>
@@ -422,132 +436,71 @@
         // iOS focus zoom workaround not needed (no inputs <16px)
     })();
 </script>
-<script>
-document.addEventListener('touchmove', (e)=>{ if(e.target.closest('.col-left, .col-right')) e.preventDefault(); },{passive:false});
-(() => {
-  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
-  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
-  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
-  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
-  window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
-  const cvs=document.getElementById('jpad_canvas'); if(!cvs){return;} const ctx=cvs.getContext('2d');
-  const readout=document.getElementById('jpad_status'); const rightArea=document.querySelector('.col-right');
-  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
-  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
-  function updateLayout(newWidth,newHeight){ if(newWidth<1||newHeight<1) return; cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
-    const targetRows=24; PITCH=H/targetRows; DOT_R=PITCH*0.21; COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH); if(COLS<1||ROWS<1) return;
-    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2; joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3); buf=new Float32Array(COLS*ROWS); layoutReady=true; }
-  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  function joyPointerToNorm(x,y){ const dx=x-joyCX, dy=y-joyCY; const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx); let rn=Math.min(dist/joyR,1);
-    if(rn<DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE); rn=Math.pow(rn,RESPONSE); return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn }; }
-  cvs&&cvs.addEventListener('pointerdown', e=>{ e.preventDefault(); const {x,y}=getPointerLocation(e); try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
-    activePointers.set(e.pointerId,'joy'); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
-  cvs&&cvs.addEventListener('pointermove', e=>{ e.preventDefault(); if(activePointers.get(e.pointerId)!=='joy') return; const {x,y}=getPointerLocation(e); const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny; });
-  function endPointer(e){ const t=activePointers.get(e.pointerId); activePointers.delete(e.pointerId); if(t==='joy'){ let any=false; for(const v of activePointers.values()) if(v==='joy') any=true; if(!any && AUTO_RETURN){ joyTX=0; joyTY=0; } } }
-  cvs&&cvs.addEventListener('pointerup', endPointer); cvs&&cvs.addEventListener('pointercancel', endPointer); cvs&&cvs.addEventListener('pointerleave', endPointer);
-  function loop(){ outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH; drawDMD(outX,outY); window.jpad_state.x=outX; window.jpad_state.y=outY; window.jpad_state.mag=Math.min(Math.hypot(outX,outY),1); window.jpad_state.angle=Math.atan2(outY,outX);
-    if(readout) readout.value = `x ${outX.toFixed(2)}, y ${outY.toFixed(2)}, |v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`; requestAnimationFrame(loop); }
-  function drawDMD(nx,ny){ if(!layoutReady){ if(ctx) ctx.clearRect(0,0,W,H); return; } ctx.clearRect(0,0,W,H);
-    const now=performance.now()*0.001; const px=joyCX+nx*joyR, py=joyCY+ny*joyR;
-    for(let j=0;j<ROWS;j++){ for(let i=0;i<COLS;i++){ const idx=j*COLS+i; buf[idx]=(buf[idx]||0)*DECAY; } }
-    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=now*1.6, sweepArcLength=Math.PI/3;
-    for(let j=0;j<ROWS;j++){ for(let i=0;i<COLS;i++){ const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i; const jdx=x-joyCX, jdy=y-joyCY;
-      const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
-      buf[idx]+=max0(1-mabs(jd-joyR*0.25)/(ringThick*0.5))*0.22;
-      buf[idx]+=max0(1-mabs(jd-joyR*0.50)/(ringThick*0.5))*0.20;
-      buf[idx]+=max0(1-mabs(jd-joyR*0.75)/(ringThick*0.5))*0.18;
-      buf[idx]+=max0(1-mabs(jd-joyR*1.00)/(ringThick*0.5))*0.16;
-      buf[idx]+=max0(1-mabs(jd-joyR*0.15)/(dzRingThick*0.5))*0.12;
-      const da=(t-jang)%(Math.PI*2); if(da>0 && da<sweepArcLength) buf[idx]+=0.9;
-      let b=buf[idx]||0; b*=1 - clamp01((Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2) - 0.96) / 0.16);
-      const levels=[0,0.35,0.65,1]; let best=0,bd=1e9; for(const s of levels){ const d=Math.abs(b-s); if(d<bd){ bd=d; best=s; } }
-      const color= best>=1?RED:(best>=0.65?MID:DIM);
-      ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*best; ctx.beginPath(); ctx.arc(x,y,DOT_R,0,2*Math.PI); ctx.fillStyle=best>0?color:OFF; ctx.fill(); ctx.restore();
-    }} }
-  const max0=(x)=>Math.max(0,x); const mabs=Math.abs; const clamp01=(t)=>Math.min(1,Math.max(0,t));
-  const ro=new ResizeObserver(entries=>{ if(entries[0]){ const {width,height}=entries[0].contentRect; const p=parseFloat(getComputedStyle(rightArea).getPropertyValue('--gap'))||16; const w=Math.max(1, Math.floor(width - p*2)); const h=Math.max(1, Math.floor(height - p*2)); updateLayout(w,h);} });
-  if(rightArea) ro.observe(rightArea); requestAnimationFrame(loop);
-})();
 
-/* Buttons + Bomb/Laser (v14 + X-lock) */
-(() => {
-(async function(){
-  const p=4, d=0.46*p; const W=560, H=560; const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const canvas=document.getElementById('btn2_panel'); if(!canvas){return;} const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
-  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d'); ctx.scale(DPR,DPR);
-  const nowS=()=>performance.now()/1000; const snap=v=>Math.round(v/p)*p;
-  const easeInOut=t=> (t<0.5? 2*t*t : 1 - Math.pow(-2*t+2,2)/2), easeOutCubic=t=>1-Math.pow(1-t,3), easeInCubic=t=>t*t*t, easeOutExpo=t=> (t===1?1:1-Math.pow(2,-10*t)), easeOutBack=t=>{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
-  const col={ bright:'rgba(255,58,58,1.0)' };
-  function drawBrightDotFast(c,x,y,a=1){ if(a<=0)return; c.save(); c.globalAlpha=a; c.fillStyle=col.bright; c.beginPath(); c.arc(x,y,d*0.66,0,Math.PI*2); c.fill(); c.restore(); }
-  function brightDotGradient(c,x,y){ const r2=2*d; const g=c.createRadialGradient(x,y,0,x,y,r2); const r=255,gc=58,b=58; const tp=k=>clamp(k*(d/r2),0,1); g.addColorStop(0,`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.42),`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.75),`rgba(${r},${gc},${b},0.60)`); g.addColorStop(tp(1.30),`rgba(${r},${gc},${b},0.18)`); g.addColorStop(1,`rgba(${r},${gc},${b},0)`); return g; }
-  function drawBrightDot(c,x,y,a=1){ if(a<=0) return; c.save(); c.globalAlpha=a; c.fillStyle=brightDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fill(); c.restore(); }
-  function rrPath(c,r){ c.beginPath(); c.moveTo(r.x+r.r,r.y); c.lineTo(r.x+r.w-r.r,r.y); c.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); c.lineTo(r.x+r.w,r.y+r.h-r.r); c.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); c.lineTo(r.x+r.r,r.y+r.h); c.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); c.lineTo(r.x,r.y+r.r); c.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); c.closePath(); }
-  function path2DFor(r){ const p2=new Path2D(); p2.moveTo(r.x+r.r,r.y); p2.lineTo(r.x+r.w-r.r,r.y); p2.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); p2.lineTo(r.x+r.w,r.y+r.h-r.r); p2.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); p2.lineTo(r.x+r.r,r.y+r.h); p2.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); p2.lineTo(r.x,r.y+r.r); p2.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); p2.closePath(); return p2; }
-  function dedupe(pts,tol){ const out=[]; for(const a of pts){ let ok=true; for(const b of out){ const dx=a.x-b.x,dy=a.y-b.y; if(dx*dx+dy*dy<tol*tol){ ok=false; break; } } if(ok) out.push(a); } return out; }
-  function sampleRoundedRectDots(x,y,w,h,r){ const pts=[]; const step=p; const add=(X,Y)=>pts.push({x:snap(X),y:snap(Y)}); for(let X=x+r; X<=x+w-r; X+=step){ add(X,y); add(X,y+h); } for(let Y=y+r; Y<=y+h-r; Y+=step){ add(x,Y); add(x+w,Y); } const arc=(cx,cy,t0,t1)=>{ const thetaStep=step/r; const inc=t1>=t0?thetaStep:-thetaStep; for(let t=t0; inc>0? t<=t1 : t>=t1; t+=inc){ add(cx+r*Math.cos(t), cy+r*Math.sin(t)); } }; arc(x+r,y+r,Math.PI,1.5*Math.PI); arc(x+w-r,y+r,1.5*Math.PI,2*Math.PI); arc(x+w-r,y+h-r,0,0.5*Math.PI); arc(x+r,y+h-r,0.5*Math.PI,Math.PI); return dedupe(pts,0.35*p); }
-  function drawDottedRR(c, r){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d'); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
-  function drawInnerBandRR(c, r, rows=3){ const b_in=2.8*p; const mid=(rows-1)/2; let innerMost=null; const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d');
-    for(let i=0;i<rows;i++){ const oset=b_in+(i-mid)*p; const x=r.x+oset,y=r.y+oset,w=r.w-2*oset,h=r.h-2*oset,rad=r.r-oset; const pts=sampleRoundedRectDots(x,y,w,h,rad);
-      for(const pt of pts) drawBrightDot(c,pt.x,pt.y,0.70); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); innerMost={x,y,w,h,r:rad}; }
-    c.save(); c.globalAlpha=0.25; c.filter=`blur(${2*p}px)`; c.drawImage(off,0,0); c.restore(); const pad=1*p; return {x:innerMost.x+pad,y:innerMost.y+pad,w:innerMost.w-2*pad,h:innerMost.h-2*pad,r:innerMost.r-pad}; }
-  const bg=document.createElement('canvas'); bg.width=W; bg.height=H; const bgc=bg.getContext('2d');
-  function drawIdleGrid(c){ for(let y=0;y<=H;y+=p){ for(let x=0;x<=W;x+=p){ c.fillStyle='#1A0E0E'; c.beginPath(); c.arc(x,y,d*0.5,0,2*Math.PI); c.fill(); } } }
-  function drawPerimeter(c){ const inset=3*p, rr=10*p; drawDottedRR(c,{x:inset,y:inset,w:W-2*inset,h:H-2*inset,r:rr}); }
-  drawIdleGrid(bgc); drawPerimeter(bgc);
-  const gap=14*p, rad=6*p; const Bw=W-2*gap; const Bh=Math.round((H-3*gap)/2/p)*p; const x_btn=gap; const yTop=gap; const yBot=yTop+Bh+gap;
-  const centerOuter={x:gap, y:snap((H-Bh)/2), w:Bw, h:Bh, r:rad};
-  const topOuter   ={x:x_btn, y:yTop, w:Bw, h:Bh, r:rad};
-  const botOuter   ={x:x_btn, y:yBot, w:Bw, h:Bh, r:rad};
-  const layerSingle=document.createElement('canvas'); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext('2d');
-  const layerTwo=document.createElement('canvas'); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext('2d');
-  drawDottedRR(ls, centerOuter); const faceBOMB_center = drawInnerBandRR(ls, centerOuter, 3);
-  drawDottedRR(lt, topOuter);    const faceLASER_final = drawInnerBandRR(lt, topOuter, 3);
-  drawDottedRR(lt, botOuter);    const faceBOMB_final  = drawInnerBandRR(lt, botOuter, 3);
-  const FONT='Press Start 2P'; await document.fonts.load(`32px '${FONT}'`); await document.fonts.ready;
-  function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px>=minPx; px-=8){ if(px+4<=rect.h) return px; } return minPx; }
-  function measureTextWidth(text,px){ const off=document.createElement('canvas'); const c=off.getContext('2d'); c.font=`${px}px '${FONT}'`; c.textBaseline='top'; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
-  function rasterTextPoints(rect,text){ const px=pickFontPx(rect), pad=2; const off=document.createElement('canvas'); const o=off.getContext('2d'); o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.imageSmoothingEnabled=false; o.fillStyle='#fff';
-    const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0); off.width=w+pad*2; off.height=h+pad*2; o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.fillStyle='#fff'; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
-    const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2); const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
-    function alpha(ix,iy){ if(ix<0||iy<0||ix>=iw||iy>=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
-    const pts=[]; for(let gy=dy; gy<dy+ih; gy+=p){ for(let gx=dx; gx<dx+iw; gx+=p){ const ix=gx-dx, iy=gy-dy; let a=0; const offs=[0,p*0.33,p*0.66]; for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } } if(a>thr){ pts.push({x:gx,y:gy}); } } } return pts; }
-  function getBombText(){ return 'BOMB X'; } function getLaserText(){ return 'LASER'; }
-  let bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
-  let bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
-  let laserWordDotsFinal = rasterTextPoints(faceLASER_final, getLaserText());
-  const state = { mode: 'single', active: false, t0: 0, activeReverse:false, t0r:0, laserAmmo: 4, maxAmmo: 4, specialActive: false, timerPowerup: false, bombDeployed: false, bombArmed: false,
-    bombMorph: { active: false, phase: 'idle', progress: 0, startTime: 0, duration: 900, bombType: 'center', pairs: [], extras: [], meta: [], blastSeed: 0, autoExplode:false } };
-  function buildFaceMask(rect){ const pts=[]; const off=document.createElement('canvas'); off.width=W; off.height=H; const oc=off.getContext('2d'); rrPath(oc, rect);
-    const isIn=(x,y)=>oc.isPointInPath(x+0.01,y+0.01); for(let y=rect.y; y<=rect.y+rect.h; y+=p){ for(let x=rect.x; x<=rect.x+rect.w; x+=p){ const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y}); } }
-    const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r); function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy <= (p*1.5)*(p*1.5)) return true; } return false; }
-    for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); } return {pts, perim}; }
-  const maskLASER = buildFaceMask(faceLASER_final); const maskBOMB_bottom  = buildFaceMask(faceBOMB_final); const maskBOMB_centerM  = buildFaceMask(faceBOMB_center);
-  function withPolar(mask, cx, cy){ return mask.pts.map(pt=>({x:pt.x,y:pt.y, perim:pt.perim, d:Math.hypot(pt.x-cx, pt.y-cy), a:Math.atan2(pt.y-cy, pt.x-cx)})); }
-  const cLaser = {x:snap(faceLASER_final.x+faceLASER_final.w/2), y:snap(faceLASER_final.y+faceLASER_final.h/2)};
-  const cBombB = {x:snap(faceBOMB_final.x+faceBOMB_final.w/2),   y:snap(faceBOMB_final.y+faceBOMB_final.h/2)};
-  const cBombC = {x:snap(faceBOMB_center.x+faceBOMB_center.w/2), y:snap(faceBOMB_center.y+faceBOMB_center.h/2)};
-  const laserDots = withPolar(maskLASER, cLaser.x, cLaser.y); const bombDotsB = withPolar(maskBOMB_bottom, cBombB.x, cBombB.y); const bombDotsC = withPolar(maskBOMB_centerM, cBombC.x, cBombC.y);
-  function getLaserSectionRects(faceRect) { const sections = 4, sectionHeight = faceRect.h / sections, rects = []; for (let i = 0; i < sections; i++) rects.push({ x: faceRect.x, y: faceRect.y + i * sectionHeight, w: faceRect.w, h: sectionHeight, r: faceRect.r }); return rects; }
-  function buildMask(rect){ return buildFaceMask(rect); }
-  const laserSectionMasks = getLaserSectionRects(faceLASER_final).map(buildMask);
-  function groupRowsTopDown(...lists){ const rows=new Map(); for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } } const ys=[...rows.keys()].sort((a,b)=>a-b);
-    return ys.map(y=>({ y, pts: rows.get(y).sort((a,b)=>a.x-b.x), n: rows.get(y).length })); }
-  const laserOuterPts = sampleRoundedRectDots(faceLASER_final.x,faceLASER_final.y,faceLASER_final.w,faceLASER_final.h,faceLASER_final.r);
-  const laserInnerBandPts = (function(){ const rows=3, b_in=2.8*p; const mid=(rows-1)/2; const acc=[]; for(let i=0;i<rows;i++){ const o=b_in+(i-mid)*p; const x=faceLASER_final.x+o, y=faceLASER_final.y+o, w=faceLASER_final.w-2*o, h=faceLASER_final.h-2*o, r=faceLASER_final.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) acc.push(pt); } return acc; })();
-  const laserRows = groupRowsTopDown(laserOuterPts, laserInnerBandPts, rasterTextPoints(faceLASER_final,'LASER'));
-  const laserRowImgs = laserRows.map(row => { const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d'); for(const pt of row.pts) drawBrightDot(o,pt.x,pt.y,0.94); return off; });
-  function sortByAngleThenRadius(center, arr){ return arr.map(pt=>{ const dx=pt.x-center.x, dy=pt.y-center.y; return {pt, a:Math.atan2(dy,dx), r:Math.hypot(dx,dy)}; }).sort((u,v)=> u.a===v.a ? u.r-v.r : u.a-v.a).map(o=>o.pt); }
-  function buildDiskForCount(center, faceRect, N){ const maxR = Math.min(faceRect.w, faceRect.h) * 0.40; const pts=[]; const seen=new Set(); const stepR = p*0.9;
-    for(let rr=0; rr<=maxR && pts.length<N; rr+=stepR){ const stepAng = (rr<=p? Math.PI/6 : Math.max(p/(rr or 1), 0.05));  # noqa
-      for(let ang=0; ang<Math.PI*2 && pts.length<N; ang+=stepAng){ const x = snap(center.x + rr*Math.cos(ang)); const y = snap(center.y + rr*Math.sin(ang));
-        if (x>=faceRect.x && x<=faceRect.x+faceRect.w && y>=faceRect.y && y<=faceRect.y+faceRect.h){ const key=x+','+y; if(!seen.has(key)){ seen.add(key); pts.push({x,y}); } } } }
-    if (pts.length<N){ for(let ang=0; ang<Math.PI*2 && pts.length<N; ang+=Math.PI/128){ const x = snap(center.x + maxR*Math.cos(ang)); const y = snap(center.y + maxR*Math.sin(ang));
-      const key=x+','+y; if(!seen.has(key)){ seen.add(key); pts.push({x,y}); } } } return sortByAngleThenRadius(center, pts).slice(0,N); }
-  function buildInnerRing(center, faceRect, count){ if (count<=0) return []; const R = Math.min(faceRect.w, faceRect.h) * 0.22; const pts=[]; const seen=new Set();
-    for(let i=0;i<count;i++){ const ang = i*(Math.PI*2/count); const x = snap(center.x + R*Math.cos(ang)); const y = snap(center.y + R*Math.sin(ang));
-      if (x>=faceRect.x && x<=faceRect.x+faceRect.w && y>=faceRect.y && y<=faceRect.y+faceRect.h){ const key=x+','+y; if(!seen.has(key)){ seen.add(key); pts.push({x,y}); } } } return sortByAngleThenRadius(center, pts); }
-  def_buildPairs = (lambda center, src, dst: [{'sx':s['x'],'sy':s['y'],'dx':d['x'],'dy':d['y']} for s,d in zip(src, dst)])  # placeholder for readability
+<script>
+(function(){
+  const cfg = {
+    timerSel: '#ui-powers > div:nth-child(1) > i.ph-timer',
+    lifeSelCandidates: [
+      '#element-tabs > div:nth-child(2) > div > div',
+      '#element-tabs > div:nth-child(2) > div',
+      '#element-tabs > div:nth-child(2)'
+    ]
+  };
+
+  function setTimerIcon(el, on){
+    if (!el) return;
+    if (on){ el.classList.add('ph-fill'); el.classList.remove('ph'); }
+    else   { el.classList.remove('ph-fill'); el.classList.add('ph'); }
+  }
+
+  function bind(){
+    const timerEl =
+      document.querySelector(cfg.timerSel) ||
+      document.querySelector('#ui-powers i.ph-timer');
+    if (timerEl){
+      if (typeof state !== 'undefined') {
+        state.timerPowerup = timerEl.classList.contains('ph-fill');
+        state.bombDeployed = false;
+        state.bombArmed = false;
+      }
+      timerEl.style.cursor = 'pointer';
+      timerEl.addEventListener('click', (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        if (typeof state !== 'undefined') {
+          state.timerPowerup = !state.timerPowerup;
+          state.bombDeployed = false;
+          state.bombArmed = false;
+          setTimerIcon(timerEl, state.timerPowerup);
+        }
+      });
+    }
+
+    const lifeEl = cfg.lifeSelCandidates.map(s => document.querySelector(s)).find(Boolean);
+    if (lifeEl){
+      lifeEl.style.cursor = 'pointer';
+      lifeEl.addEventListener('click', (e)=>{
+        e.preventDefault(); e.stopPropagation();
+        if (typeof state === 'undefined') return;
+        state.specialActive = !state.specialActive;
+        if (state.specialActive){
+          if (state.mode === 'single' && !state.active) {
+            if (typeof window.btn2_startTransition === 'function') window.btn2_startTransition();
+          }
+          state.laserAmmo = state.maxAmmo;
+        }
+        lifeEl.classList.toggle('is-active', state.specialActive);
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
+})();
 </script>
+
+
+<!-- Removed the auto-injection script that created #sq-controls-host -->
+
 </body>
 </html>
