@@ -172,6 +172,13 @@
       -ms-touch-action: none;
   }
 </style>
+
+<style id="controls-constraints">
+  #element-controls{ position:relative; overflow:hidden; min-height:300px; }
+  #controlsFrame{ position:absolute; inset:12px; z-index:1; width:calc(100% - 24px); height:calc(100% - 24px); }
+  .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }
+</style>
+
 </head>
 <body>
   <div class="fixed-container" id="mainContainer">
@@ -227,6 +234,1336 @@
 
         <div class="bottom" id="element-bottom">
           <div class="control-screen" id="element-controls">
+<iframe id="controlsFrame" srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;style id=&quot;sq-probe-css&quot;&gt;
+  /* hide demo toggles if present */
+  #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none !important; }
+  /* force joystick readout visible */
+  #jpad_status { display:block !important; visibility:visible !important; opacity:1 !important; }
+  /* borders for debug */
+  #control-ui{ outline:1px solid rgba(0,255,255,.7); }
+  #left-area{ outline:1px solid rgba(255,0,0,.7); }
+  #right-area{ outline:1px solid rgba(0,255,0,.7); }
+  #btn2_panel{ outline:1px dashed rgba(255,128,0,.8); }
+  #jpad_canvas{ outline:1px dashed rgba(128,128,255,.8); }
+  /* fit to parent height */
+  #frame{ height:100% !important; }
+  #control-ui{ height:100% !important; width:100% !important; }
+&lt;/style&gt;
+
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, user-scalable=no&quot; /&gt;
+&lt;title&gt;Enhanced Controls — Bomb Morph System&lt;/title&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+  :root{
+    --bg:#070708; --pane:#080203; --ring:#1a0000; --radius:20px; --gap:16px;
+  }
+  html, body { height:100%; margin:0; }
+  body { background:var(--bg); color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
+
+  /* Frame */
+  #frame{ display:grid; place-items:center; height:100vh; }
+  #control-ui{
+    aspect-ratio: 2 / 1;
+    height: min(calc(100vw / 2), 100vh);
+    width: auto;
+    display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr;
+    overflow:hidden; gap:0;
+  }
+
+  /* Square panels */
+  .col-left, .col-right{
+    position:relative; aspect-ratio:1/1; background:var(--pane);
+    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 1px var(--ring), 0 20px 50px #000c;
+    border-radius:var(--radius); overflow:hidden; touch-action:none;
+  }
+  .pad{ position:absolute; inset:var(--gap); border-radius: calc(var(--radius) - 8px); overflow:hidden; }
+
+  /* Buttons overlay */
+  .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
+  #btn2_panel{ position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
+
+  /* Control buttons */
+  .control-buttons {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn2_temp, .btn2_special, .btn2_timer {
+    pointer-events: auto;
+    touch-action: manipulation;
+    background: #101012;
+    color: #eaeaea;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1;
+    z-index: 100;
+    position: relative;
+    font-family: ui-monospace, Consolas, Menlo, monospace;
+    cursor: pointer;
+  }
+  .btn2_temp:focus-visible, .btn2_special:focus-visible, .btn2_timer:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .btn2_special.active { background: #2a1010; border-color: #ff2a2a; }
+  .btn2_timer.active   { background: #102a10; border-color: #2aff2a; }
+
+  /* Keyboard proxies */
+  .btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%);
+    width:min(92%, 520px); height:44%; outline:none; border:0; background:transparent; pointer-events:auto; z-index:2; }
+  .btn2_keyproxy:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
+  #btn2_proxy_blast{ top:6%; }
+  #btn2_proxy_bomb{ bottom:6%; }
+
+  /* Joypad */
+  #jpad_canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
+
+  * { -webkit-user-select:none; user-select:none; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;frame&quot;&gt;
+  &lt;main id=&quot;control-ui&quot; aria-label=&quot;Control surface&quot;&gt;
+    &lt;!-- Left: Buttons (Laser/Bomb) --&gt;
+    &lt;section id=&quot;left-area&quot; class=&quot;col-left&quot; aria-label=&quot;Buttons area&quot;&gt;
+      &lt;div class=&quot;pad&quot;&gt;
+        &lt;!-- Control buttons container --&gt;
+        &lt;div class=&quot;control-buttons&quot;&gt;
+          &lt;button id=&quot;btn2_temp&quot; class=&quot;btn2_temp&quot; aria-label=&quot;Start transition&quot;&gt;▶ special&lt;/button&gt;
+          &lt;button id=&quot;btn2_timer&quot; class=&quot;btn2_timer&quot; aria-label=&quot;Toggle timer&quot;&gt;⏰ timer&lt;/button&gt;
+          &lt;button id=&quot;btn2_special&quot; class=&quot;btn2_special&quot; aria-label=&quot;Toggle special&quot;&gt;🔮 special&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;btn2-overlay&quot;&gt;
+          &lt;button id=&quot;btn2_proxy_blast&quot; class=&quot;btn2_keyproxy&quot; role=&quot;button&quot; aria-label=&quot;Laser&quot; aria-pressed=&quot;false&quot; tabindex=&quot;0&quot;&gt;&lt;/button&gt;
+          &lt;button id=&quot;btn2_proxy_bomb&quot;  class=&quot;btn2_keyproxy&quot; role=&quot;button&quot; aria-label=&quot;Bomb&quot;  aria-pressed=&quot;false&quot; tabindex=&quot;0&quot;&gt;&lt;/button&gt;
+          &lt;canvas id=&quot;btn2_panel&quot; width=&quot;560&quot; height=&quot;560&quot;&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Right: Joystick --&gt;
+    &lt;section id=&quot;right-area&quot; class=&quot;col-right&quot; aria-label=&quot;Joypad&quot;&gt;
+      &lt;div class=&quot;pad&quot;&gt;
+        &lt;canvas id=&quot;jpad_canvas&quot;&gt;&lt;/canvas&gt;
+        &lt;output id=&quot;jpad_status&quot; aria-live=&quot;polite&quot;&gt;x 0.00, y 0.00, |v| 0.00, θ 0.00&lt;/output&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+/* Prevent page scrolling during control interactions */
+document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
+  if(e.target.closest(&#x27;#left-area, #right-area&#x27;)) e.preventDefault();
+},{passive:false});
+
+/* =========================
+   JOYPAD (prefixed jpad_)
+========================= */
+(() =&gt; {
+  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
+  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
+  const RED=&#x27;#ff2a2a&#x27;, MID=&#x27;#ff2a2acc&#x27;, DIM=&#x27;#ff2a2a66&#x27;, OFF=&#x27;#210000&#x27;;
+  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
+
+  window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
+
+  const cvs=document.getElementById(&#x27;jpad_canvas&#x27;); const ctx=cvs.getContext(&#x27;2d&#x27;);
+  const readout=document.getElementById(&#x27;jpad_status&#x27;); const rightArea=document.getElementById(&#x27;right-area&#x27;);
+  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
+  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
+
+  function updateLayout(newWidth,newHeight){
+    if(newWidth&lt;1||newHeight&lt;1) return;
+    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
+
+    const targetRows=24;
+    PITCH=H/targetRows; DOT_R=PITCH*0.21;
+
+    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
+    if(COLS&lt;1||ROWS&lt;1) return;
+    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
+
+    joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3);
+
+    buf=new Float32Array(COLS*ROWS);
+    layoutReady=true;
+  }
+
+  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  function joyPointerToNorm(x,y){
+    const dx=x-joyCX, dy=y-joyCY;
+    const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
+    let rn=Math.min(dist/joyR,1);
+    if(rn&lt;DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE);
+    rn=Math.pow(rn,RESPONSE);
+    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
+  }
+
+  cvs.addEventListener(&#x27;pointerdown&#x27;, e=&gt;{
+    e.preventDefault();
+    const {x,y}=getPointerLocation(e);
+    try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
+    activePointers.set(e.pointerId,&#x27;joy&#x27;);
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+  });
+  cvs.addEventListener(&#x27;pointermove&#x27;, e=&gt;{
+    e.preventDefault();
+    if(activePointers.get(e.pointerId)!==&#x27;joy&#x27;) return;
+    const {x,y}=getPointerLocation(e);
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+  });
+  function endPointer(e){
+    const t=activePointers.get(e.pointerId);
+    activePointers.delete(e.pointerId);
+    if(t===&#x27;joy&#x27;){
+      let any=false; for(const v of activePointers.values()) if(v===&#x27;joy&#x27;) any=true;
+      if(!any &amp;&amp; AUTO_RETURN){ joyTX=0; joyTY=0; }
+    }
+  }
+  cvs.addEventListener(&#x27;pointerup&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointercancel&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
+
+  function loop(){
+    outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
+    drawDMD(outX,outY);
+    window.jpad_state.x=outX; window.jpad_state.y=outY;
+    window.jpad_state.mag=Math.min(Math.hypot(outX,outY),1);
+    window.jpad_state.angle=Math.atan2(outY,outX);
+    readout.value = `x ${outX.toFixed(2)}, y ${outY.toFixed(2)}, |v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
+    requestAnimationFrame(loop);
+  }
+
+  function drawDMD(nx,ny){
+    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
+    ctx.clearRect(0,0,W,H);
+    const now=performance.now()*0.001;
+    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
+    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
+
+    for(let j=0;j&lt;ROWS;j++){
+      for(let i=0;i&lt;COLS;i++){
+        const idx=j*COLS+i;
+        buf[idx]=(buf[idx]||0)*DECAY;
+      }
+    }
+
+    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=wrap(now*1.6), sweepArcLength=Math.PI/3;
+
+    for(let j=0;j&lt;ROWS;j++){
+      for(let i=0;i&lt;COLS;i++){
+        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
+        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
+        if(mag&gt;0.01){
+          const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
+          if(div&gt;0.001){ const vx=jdx_wc/div+px, vy=jdy_wc/div+py; jdx=vx-joyCX; jdy=vy-joyCY; }
+        }
+        const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
+        buf[idx]+=calcRing(jd,joyR*0.25,ringThick)*0.22;
+        buf[idx]+=calcRing(jd,joyR*0.50,ringThick)*0.20;
+        buf[idx]+=calcRing(jd,joyR*0.75,ringThick)*0.18;
+        buf[idx]+=calcRing(jd,joyR*1.00,ringThick)*0.16;
+        buf[idx]+=calcRing(jd,joyR*DEADZONE,dzRingThick)*0.12;
+        const da=wrap(t-jang); if(jd&lt;joyR*0.98 &amp;&amp; da&gt;0 &amp;&amp; da&lt;sweepArcLength) buf[idx]+=0.9;
+
+        if(mag&gt;0.01){
+          let jb=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
+          jb=Math.max(jb,pulse01(sd/(PITCH*2.4),0.16)*STEM_GAIN);
+          const kd=Math.hypot(x-px,y-py);
+          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
+          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
+          jb=Math.max(jb, core*1.0+glow*0.9);
+          buf[idx]=Math.max(buf[idx], jb);
+        }
+        let b=buf[idx]||0;
+        b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2));
+        b += (noise2(i,j)-0.5)*0.06;
+        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
+      }
+    }
+  }
+
+  function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
+  function dotDraw(x,y,r,level){ if(level&lt;=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level&gt;=1?RED:(level&gt;=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
+  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d&lt;bd){ bd=d; best=s; } } return best; }
+  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+  function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
+  function wrap(a){ a%=Math.PI*2; return a&lt;0? a+Math.PI*2 : a; }
+  function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
+  function fract(x){ return x - Math.floor(x); }
+  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1&lt;=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2&lt;=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
+
+  const ro=new ResizeObserver(entries=&gt;{
+    if(entries[0]){
+      const {width,height}=entries[0].contentRect;
+      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;))||16;
+      const w=Math.max(1, Math.floor(width - p*2));
+      const h=Math.max(1, Math.floor(height - p*2));
+      updateLayout(w,h);
+    }
+  });
+  ro.observe(rightArea);
+  requestAnimationFrame(loop);
+})();
+
+/* =========================
+   BUTTONS + BOMB MORPH
+========================= */
+(() =&gt; {
+(async function(){
+  // ====== Units &amp; Canvas ======
+  const p=4, d=0.46*p; const W=560, H=560; const clamp=(v,a,b)=&gt;Math.max(a,Math.min(b,v));
+  const canvas=document.getElementById(&#x27;btn2_panel&#x27;); const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
+  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+&#x27;px&#x27;; canvas.style.height=H+&#x27;px&#x27;;
+  const ctx=canvas.getContext(&#x27;2d&#x27;); ctx.scale(DPR,DPR);
+  const nowS=()=&gt;performance.now()/1000; const snap=v=&gt;Math.round(v/p)*p;
+
+  // Easings
+  const easeInOut=t=&gt; (t&lt;0.5? 2*t*t : 1 - Math.pow(-2*t+2,2)/2);
+  const easeOutCubic = t=&gt;1-Math.pow(1-t,3);
+  const easeInCubic  = t=&gt;t*t*t;
+  const easeOutExpo  = t=&gt; (t===1?1:1-Math.pow(2,-10*t));
+  const easeOutBack  = t=&gt;{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
+
+  // ====== Colors ======
+  const RED=[255,58,58]; const col={ bright:&#x27;rgba(255,58,58,1.0)&#x27;, mediumA:0.70, dimFill:&#x27;#1A0E0E&#x27; };
+
+  // ====== Dot painters ======
+  function brightDotGradient(c,x,y){ const r2=2*d; const g=c.createRadialGradient(x,y,0,x,y,r2); const [r,gc,b]=RED; const tp=k=&gt;clamp(k*(d/r2),0,1); g.addColorStop(0,`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.42),`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.75),`rgba(${r},${gc},${b},0.60)`); g.addColorStop(tp(1.30),`rgba(${r},${gc},${b},0.18)`); g.addColorStop(1,`rgba(${r},${gc},${b},0)`); return g; }
+  function idleDotGradient(c,x,y){ const r2=1.6*d; const g=c.createRadialGradient(x,y,0,x,y,r2); g.addColorStop(0,col.dimFill); g.addColorStop(0.7,col.dimFill); g.addColorStop(1,&#x27;rgba(42,22,22,0.45)&#x27;); return g; }
+  function drawBrightDot(c,x,y,a=1){ if(a&lt;=0) return; c.save(); c.globalAlpha=a; c.fillStyle=brightDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fill(); c.restore(); }
+  function drawIdleDot(c,x,y){ c.fillStyle=idleDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d*0.5,0,Math.PI*2); c.fill(); }
+
+  // FAST path for explosion frames: flat fill, no gradients, no shadows
+  function drawBrightDotFast(c,x,y,a=1){ if(a&lt;=0) return; c.save(); c.globalAlpha=a; c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fillStyle=col.bright; c.fill(); c.restore(); }
+
+  // ====== Geometry ======
+  function rrPath(c,r){ c.beginPath(); c.moveTo(r.x+r.r,r.y); c.lineTo(r.x+r.w-r.r,r.y); c.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); c.lineTo(r.x+r.w,r.y+r.h-r.r); c.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); c.lineTo(r.x+r.r,r.y+r.h); c.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); c.lineTo(r.x,r.y+r.r); c.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); c.closePath(); }
+  function path2DFor(r){ const p2=new Path2D(); p2.moveTo(r.x+r.r,r.y); p2.lineTo(r.x+r.w-r.r,r.y); p2.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); p2.lineTo(r.x+r.w,r.y+r.h-r.r); p2.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); p2.lineTo(r.x+r.r,r.y+r.h); p2.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); p2.lineTo(r.x,r.y+r.r); p2.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); p2.closePath(); return p2; }
+  function dedupe(pts,tol){ const out=[]; for(const a of pts){ let ok=true; for(const b of out){ const dx=a.x-b.x,dy=a.y-b.y; if(dx*dx+dy*dy&lt;tol*tol){ ok=false; break; } } if(ok) out.push(a); } return out; }
+  function sampleRoundedRectDots(x,y,w,h,r){ const pts=[]; const step=p; const add=(X,Y)=&gt;pts.push({x:snap(X),y:snap(Y)}); for(let X=x+r; X&lt;=x+w-r; X+=step){ add(X,y); add(X,y+h); } for(let Y=y+r; Y&lt;=y+h-r; Y+=step){ add(x,Y); add(x+w,Y); } const arc=(cx,cy,t0,t1)=&gt;{ const thetaStep=step/r; const inc=t1&gt;=t0?thetaStep:-thetaStep; for(let t=t0; inc&gt;0? t&lt;=t1 : t&gt;=t1; t+=inc){ add(cx+r*Math.cos(t), cy+r*Math.sin(t)); } }; arc(x+r,y+r,Math.PI,1.5*Math.PI); arc(x+w-r,y+r,1.5*Math.PI,2*Math.PI); arc(x+w-r,y+h-r,0,0.5*Math.PI); arc(x+r,y+h-r,0.5*Math.PI,Math.PI); return dedupe(pts,0.35*p); }
+  function drawDottedRR(c, r, glow=true){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); if(!glow) return; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
+  function drawInnerBandRR(c, r, rows=3){
+    const b_in=2.8*p; const mid=(rows-1)/2; let innerMost=null;
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
+    for(let i=0;i&lt;rows;i++){
+      const oset=b_in+(i-mid)*p; const x=r.x+oset,y=r.y+oset,w=r.w-2*oset,h=r.h-2*oset,rad=r.r-oset;
+      const pts=sampleRoundedRectDots(x,y,w,h,rad);
+      c.save(); c.globalAlpha=col.mediumA; for(const pt of pts) drawBrightDot(c,pt.x,pt.y); c.restore();
+      for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
+      innerMost={x,y,w,h,r:rad};
+    }
+    c.save(); c.globalAlpha=0.25; c.filter=`blur(${2*p}px)`; c.drawImage(off,0,0); c.restore();
+    const pad=1*p; return {x:innerMost.x+pad,y:innerMost.y+pad,w:innerMost.w-2*pad,h:innerMost.h-2*pad,r:innerMost.r-pad};
+  }
+
+  // ====== Background ======
+  const bg=document.createElement(&#x27;canvas&#x27;); bg.width=W; bg.height=H; const bgc=bg.getContext(&#x27;2d&#x27;);
+  function drawIdleGrid(c){ for(let y=0;y&lt;=H;y+=p){ for(let x=0;x&lt;=W;x+=p){ drawIdleDot(c,x,y); } } }
+  function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr);
+    for(const pt of pts) drawBrightDot(c,pt.x,pt.y);
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
+    for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
+    c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore();
+    c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore();
+  }
+  drawIdleGrid(bgc); drawPerimeter(bgc);
+
+  // ====== Layouts ======
+  const gap=14*p, rad=6*p; const Bw=W-2*gap; const Bh=Math.round((H-3*gap)/2/p)*p; const x_btn=gap; const yTop=gap; const yBot=yTop+Bh+gap;
+  const centerOuter={x:gap, y:snap((H-Bh)/2), w:Bw, h:Bh, r:rad};
+  const topOuter   ={x:x_btn, y:yTop, w:Bw, h:Bh, r:rad};
+  const botOuter   ={x:x_btn, y:yBot, w:Bw, h:Bh, r:rad};
+
+  // ====== Chrome layers ======
+  const layerSingle=document.createElement(&#x27;canvas&#x27;); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext(&#x27;2d&#x27;);
+  const layerTwo=document.createElement(&#x27;canvas&#x27;); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext(&#x27;2d&#x27;);
+  drawDottedRR(ls, centerOuter, true); const faceBOMB_center = drawInnerBandRR(ls, centerOuter, 3);
+  drawDottedRR(lt, topOuter, true);  const faceLASER_final = drawInnerBandRR(lt, topOuter, 3);
+  drawDottedRR(lt, botOuter, true);  const faceBOMB_final  = drawInnerBandRR(lt, botOuter, 3);
+
+  // ====== Font raster ======
+  const FONT=&#x27;Press Start 2P&#x27;; await document.fonts.load(`32px &#x27;${FONT}&#x27;`); await document.fonts.ready;
+  function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px&gt;=minPx; px-=8){ if(px+4&lt;=rect.h) return px; } return minPx; }
+  function measureTextWidth(text,px){ const off=document.createElement(&#x27;canvas&#x27;); const c=off.getContext(&#x27;2d&#x27;); c.font=`${px}px &#x27;${FONT}&#x27;`; c.textBaseline=&#x27;top&#x27;; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
+  function rasterTextPoints(rect,text){
+    const px=pickFontPx(rect), pad=2; const off=document.createElement(&#x27;canvas&#x27;); const o=off.getContext(&#x27;2d&#x27;);
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.imageSmoothingEnabled=false; o.fillStyle=&#x27;#fff&#x27;;
+    const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0);
+    off.width=w+pad*2; off.height=h+pad*2;
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.fillStyle=&#x27;#fff&#x27;; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
+    const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2);
+    const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
+    function alpha(ix,iy){ if(ix&lt;0||iy&lt;0||ix&gt;=iw||iy&gt;=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
+    const pts=[];
+    for(let gy=dy; gy&lt;dy+ih; gy+=p){
+      for(let gx=dx; gx&lt;dx+iw; gx+=p){
+        const ix=gx-dx, iy=gy-dy; let a=0;
+        const offs=[0,p*0.33,p*0.66];
+        for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } }
+        if(a&gt;thr){ pts.push({x:gx,y:gy}); }
+      }
+    }
+    return pts;
+  }
+
+  // ====== LASER Ammo System - 4 vertical sections ======
+  function getLaserSectionRects(faceRect) {
+    const sections = 4;
+    const sectionHeight = faceRect.h / sections;
+    const rects = [];
+    for (let i = 0; i &lt; sections; i++) {
+      rects.push({
+        x: faceRect.x,
+        y: faceRect.y + i * sectionHeight,
+        w: faceRect.w,
+        h: sectionHeight,
+        r: faceRect.r
+      });
+    }
+    return rects;
+  }
+
+  // ====== State ======
+  const state = { 
+    mode: &#x27;single&#x27;, 
+    active: false, 
+    t0: 0,
+    activeReverse: false,
+    t0r: 0,
+    laserAmmo: 4, maxAmmo: 4,
+    specialActive: false,
+    timerPowerup: false,
+    bombDeployed: false,
+    bombArmed: false,
+    normalBomb: { active:false, phase:&#x27;idle&#x27;, t0:0, bombType:&#x27;final&#x27;, perimPts:[], center:{x:0,y:0},
+      implodeMs:3000, explodeMs:500 },
+    bombMorph: {
+      active: false,
+      phase: &#x27;idle&#x27;, // &#x27;sucking&#x27; | &#x27;exploding&#x27;
+      progress: 0,
+      startTime: 0,
+      duration: 700, // shorter for performance
+      bombType: &#x27;center&#x27;,
+      pairs: [],
+      extras: [],
+      meta: [],      // per-particle timing and jitter
+      blastSeed: 0,
+      autoExplode: false,
+    },
+    bombMorphTargets: {}
+  };
+
+  // track mode once
+  let __prevMode, __prevActive;
+
+  // ====== Text points ======
+  let bombWordDotsFinal, bombWordDotsCenter;
+  let laserWordDotsFinal; 
+  function getBombText(){ return &#x27;BOMB X&#x27;; }
+  function getLaserText(){ return &#x27;LASER&#x27;; }
+  function updateButtonText(){
+    bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
+    bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
+    laserWordDotsFinal = rasterTextPoints(faceLASER_final, getLaserText());
+  }
+  updateButtonText();
+
+  // ====== Group rows for cached build ======
+  function groupRowsTopDown(...lists){
+    const rows=new Map();
+    for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } }
+    const ys=[...rows.keys()].sort((a,b)=&gt;a-b);
+    return ys.map(y=&gt;({ y, pts: rows.get(y).sort((a,b)=&gt;a.x-b.x), n: rows.get(y).length }));
+  }
+  const laserOuterPts = sampleRoundedRectDots(faceLASER_final.x,faceLASER_final.y,faceLASER_final.w,faceLASER_final.h,faceLASER_final.r);
+  const laserInnerBandPts = (function(){ const rows=3, b_in=2.8*p; const mid=(rows-1)/2; const acc=[]; for(let i=0;i&lt;rows;i++){ const o=b_in+(i-mid)*p; const x=faceLASER_final.x+o, y=faceLASER_final.y+o, w=faceLASER_final.w-2*o, h=faceLASER_final.h-2*o, r=faceLASER_final.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) acc.push(pt); } return acc; })();
+  const laserRows = groupRowsTopDown(laserOuterPts, laserInnerBandPts, laserWordDotsFinal);
+
+  // ====== Masks ======
+  function buildFaceMask(rect){
+    const pts=[]; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const oc=off.getContext(&#x27;2d&#x27;); rrPath(oc, rect);
+    const isIn=(x,y)=&gt;oc.isPointInPath(x+0.01,y+0.01);
+    for(let y=rect.y; y&lt;=rect.y+rect.h; y+=p){ for(let x=rect.x; x&lt;=rect.x+rect.w; x+=p){
+      const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0});
+    }}
+    const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r);
+    function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy &lt;= (p*1.5)*(p*1.5)) return true; } return false; }
+    for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); }
+    return {pts};
+  }
+
+  const maskLASER = buildFaceMask(faceLASER_final);
+  const maskBOMB_bottom  = buildFaceMask(faceBOMB_final);
+  const maskBOMB_center  = buildFaceMask(faceBOMB_center);
+
+  function withPolar(mask, cx, cy){ return mask.pts.map(pt=&gt;({x:pt.x,y:pt.y, perim:pt.perim, d:Math.hypot(pt.x-cx, pt.y-cy), a:Math.atan2(pt.y-cy, pt.x-cx)})); }
+  const cLaser = {x:snap(faceLASER_final.x+faceLASER_final.w/2), y:snap(faceLASER_final.y+faceLASER_final.h/2)};
+  const cBombB = {x:snap(faceBOMB_final.x+faceBOMB_final.w/2),   y:snap(faceBOMB_final.y+faceBOMB_final.h/2)};
+  const cBombC = {x:snap(faceBOMB_center.x+faceBOMB_center.w/2), y:snap(faceBOMB_center.y+faceBOMB_center.h/2)};
+
+  const laserDots = withPolar(maskLASER, cLaser.x, cLaser.y); 
+  const bombDotsB = withPolar(maskBOMB_bottom, cBombB.x, cBombB.y); 
+  const bombDotsC = withPolar(maskBOMB_center, cBombC.x, cBombC.y); 
+
+  // ====== LASER sections ======
+  const laserSectionRects = getLaserSectionRects(faceLASER_final);
+  const laserSectionMasks = laserSectionRects.map(rect =&gt; buildFaceMask(rect));
+
+  function qLevel(e){ const LEVELS=[0.00,0.18,0.36,0.64,1.00]; e=Math.max(0,Math.min(1,e)); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d&lt;bd){ bd=d; best=L; } } return best; }
+  function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) &gt;&gt;&gt; 0; return ((n % 9973) / 9973); }
+  function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
+  let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
+
+  const laserLabelPts = rasterTextPoints(faceLASER_final,&#x27;LASER&#x27;);
+  const sectionFlags = new Array(4).fill(0).map(() =&gt; new Uint8Array(laserDots.length));
+  for (let section = 0; section &lt; 4; section++) {
+    const sectionMask = laserSectionMasks[section];
+    for (let k = 0; k &lt; laserDots.length; k++) {
+      const pt = laserDots[k];
+      const inSection = sectionMask.pts.some(sectionPt =&gt; 
+        Math.abs(sectionPt.x - pt.x) &lt; p &amp;&amp; Math.abs(sectionPt.y - pt.y) &lt; p
+      );
+      sectionFlags[section][k] = inSection ? 1 : 0;
+    }
+  }
+
+  function drawLaserArmed(t) {
+    for (let section = 0; section &lt; 4; section++) {
+      if (section &gt;= (4 - state.laserAmmo)) {
+        for (let k = 0; k &lt; laserDots.length; k++) {
+          if (sectionFlags[section][k] === 1) {
+            const pt = laserDots[k];
+            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 7);
+            if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
+            drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
+          }
+        }
+      }
+    }
+    for (const pt of laserLabelPts){
+      let sect=-1;
+      for(let s=0;s&lt;4;s++){
+        if (laserSectionMasks[s].pts.some(q=&gt;Math.abs(q.x-pt.x)&lt;p &amp;&amp; Math.abs(q.y-pt.y)&lt;p)){ sect=s; break; }
+      }
+      if (sect&lt;0) continue;
+      if (sect &gt;= (4 - state.laserAmmo)){
+        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
+      } else {
+        drawBrightDot(ctx, pt.x, pt.y, 0.8);
+      }
+    }
+  }
+
+  /* ===========================================
+     FILLED DISK + EXTRAS GENERATORS
+     =========================================== */
+
+  function sortByAngleThenRadius(center, arr){
+    return arr.map(pt=&gt;{
+      const dx=pt.x-center.x, dy=pt.y-center.y;
+      return {pt, a:Math.atan2(dy,dx), r:Math.hypot(dx,dy)};
+    }).sort((u,v)=&gt; u.a===v.a ? u.r-v.r : u.a-v.a).map(o=&gt;o.pt);
+  }
+
+  function buildDiskForCount(center, faceRect, N){
+    const maxR = Math.min(faceRect.w, faceRect.h) * 0.40;
+    const pts=[]; const seen=new Set();
+    const stepR = p*0.9;
+    for(let rr=0; rr&lt;=maxR &amp;&amp; pts.length&lt;N; rr+=stepR){
+      const stepAng = (rr&lt;=p? Math.PI/6 : Math.max(p/(rr||1), 0.05));
+      for(let ang=0; ang&lt;Math.PI*2 &amp;&amp; pts.length&lt;N; ang+=stepAng){
+        const x = snap(center.x + rr*Math.cos(ang));
+        const y = snap(center.y + rr*Math.sin(ang));
+        if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
+          const key=x+&#x27;,&#x27;+y;
+          if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+        }
+      }
+    }
+    if (pts.length&lt;N){
+      for(let ang=0; ang&lt;Math.PI*2 &amp;&amp; pts.length&lt;N; ang+=Math.PI/128){
+        const x = snap(center.x + maxR*Math.cos(ang));
+        const y = snap(center.y + maxR*Math.sin(ang));
+        const key=x+&#x27;,&#x27;+y;
+        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+      }
+    }
+    return sortByAngleThenRadius(center, pts).slice(0,N);
+  }
+
+  function buildInnerRing(center, faceRect, count){
+    if (count&lt;=0) return [];
+    const R = Math.min(faceRect.w, faceRect.h) * 0.22;
+    const pts=[]; const seen=new Set();
+    for(let i=0;i&lt;count;i++){
+      const ang = i*(Math.PI*2/count);
+      const x = snap(center.x + R*Math.cos(ang));
+      const y = snap(center.y + R*Math.sin(ang));
+      if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
+        const key=x+&#x27;,&#x27;+y;
+        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+      }
+    }
+    return sortByAngleThenRadius(center, pts);
+  }
+
+  function buildSolidDisk(center, radius, faceRect, step=p){
+    const pts=[];
+    const y_step = step * 0.86602540378; // hex lattice sqrt(3)/2
+    let y = center.y - radius;
+    let row = 0;
+    while (y &lt;= center.y + radius){
+      const x_offset = (row &amp; 1) * (step * 0.5);
+      let x = center.x - radius + x_offset;
+      while (x &lt;= center.x + radius){
+        const dx = x - center.x;
+        const dy = y - center.y;
+        if (dx*dx + dy*dy &lt;= radius*radius){
+          const xs = Math.round(x/step)*step;
+          const ys = Math.round(y/step)*step;
+          if (xs&gt;=faceRect.x &amp;&amp; xs&lt;=faceRect.x+faceRect.w &amp;&amp; ys&gt;=faceRect.y &amp;&amp; ys&lt;=faceRect.y+faceRect.h){
+            pts.push({x: xs, y: ys});
+          }
+        }
+        x += step;
+      }
+      y += y_step;
+      row += 1;
+    }
+    return dedupe(pts, 0.35*step);
+  }
+
+  function buildPairs(center, sourcePts, destPts){
+    const srcSorted = sortByAngleThenRadius(center, sourcePts);
+    const dstSorted = sortByAngleThenRadius(center, destPts);
+    const n = Math.min(srcSorted.length, dstSorted.length);
+    const pairs=new Array(n);
+    for(let i=0;i&lt;n;i++){
+      const s=srcSorted[i], d=dstSorted[i];
+      pairs[i] = { sx:s.x, sy:s.y, dx:d.x, dy:d.y, cx:center.x, cy:center.y };
+    }
+    return pairs;
+  }
+
+  function makeTargets(faceRect, center, textPts){
+    const disk = buildDiskForCount(center, faceRect, textPts.length);
+    const extrasCount = Math.max(0, Math.floor(textPts.length*0.20)); // fewer extras
+    const extras = buildInnerRing(center, faceRect, extrasCount);
+    const R_outer = Math.min(faceRect.w, faceRect.h) * 0.40;
+    const R_inner = R_outer * 0.62;
+    const diskFillPts = buildSolidDisk(center, R_inner*0.96, faceRect, p);
+    return { center, faceRect, text:textPts.slice(), disk, extras, diskFillPts,
+             pairs_suck:    buildPairs(center, textPts, disk),   // words -&gt; disk
+             pairs_explode: buildPairs(center, disk, textPts) }; // disk -&gt; words
+  }
+
+  function initBombMorphSystem() {
+    const centerC = {x: faceBOMB_center.x + faceBOMB_center.w / 2, y: faceBOMB_center.y + faceBOMB_center.h / 2};
+    const centerF = {x: faceBOMB_final.x  + faceBOMB_final.w  / 2, y: faceBOMB_final.y  + faceBOMB_final.h  / 2};
+    state.bombMorphTargets.center = makeTargets(faceBOMB_center, centerC, bombWordDotsCenter);
+    state.bombMorphTargets.final  = makeTargets(faceBOMB_final,  centerF, bombWordDotsFinal);
+  }
+
+  // ====== Morph control ======
+  function startBombMorph(phase, bombType, durationOverride=null, autoExplode=false){
+    const T = state.bombMorphTargets[bombType];
+    state.bombMorph.active = true;
+    state.bombMorph.autoExplode = !!autoExplode;
+    state.bombMorph.phase = phase;           // &#x27;sucking&#x27; or &#x27;exploding&#x27;
+    state.bombMorph.progress = 0;
+    if (durationOverride!=null) { state.bombMorph.duration = durationOverride; }
+    state.bombMorph.startTime = nowS();
+    state.bombMorph.bombType = bombType;
+    state.bombMorph.pairs = (phase === &#x27;sucking&#x27;) ? T.pairs_suck.slice() : T.pairs_explode.slice();
+    state.bombMorph.extras = T.extras.slice();
+    state.bombMorph.blastSeed = Math.random()*1000;
+
+    // Per-particle meta, lighter trails
+    const pairs = state.bombMorph.pairs;
+    const cx=T.center.x, cy=T.center.y;
+    const staggerMax = 0.24; // smaller
+    state.bombMorph.meta = pairs.map((pr, i)=&gt;{
+      const ang = Math.atan2((pr.sy-cy),(pr.sx-cx));
+      const base = (ang + Math.PI)/(Math.PI*2);        // 0..1 around the circle
+      const r = rand01((i+1)*131.7 + state.bombMorph.blastSeed);
+      const delay = Math.min(staggerMax, 0.10 + 0.16*base + 0.08*(r-0.5));
+      const jitter = (r-0.5)*0.25;                     // smaller
+      const sparkLen = 3 + Math.floor(r*5);            // shorter trails
+      const overshoot = 0.08 + 0.10*r;                 // reduced
+      return {delay, jitter, sparkLen, overshoot};
+    });
+  }
+
+  function updateBombMorph(t){
+    if (!state.bombMorph.active) return false;
+    const elapsed = (t - state.bombMorph.startTime) * 1000;
+    state.bombMorph.progress = Math.min(elapsed / state.bombMorph.duration, 1);
+    return (state.bombMorph.progress &gt;= 1);
+  }
+
+  // ====== Normal bomb countdown helpers ======
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function prepareNormalBomb(bombType){
+    const face = (bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
+    const center = {
+      x: Math.round((face.x + face.w/2)/p)*p,
+      y: Math.round((face.y + face.h/2)/p)*p
+    };
+    // sample perimeter points of the face rect
+    const perim = sampleRoundedRectDots(face.x, face.y, face.w, face.h, face.r);
+    state.normalBomb.perimPts = perim;
+    state.normalBomb.center = center;
+  }
+
+  function startNormalBomb(bombType){
+    state.normalBomb.active = true;
+    state.normalBomb.phase = &#x27;implode&#x27;;
+    state.normalBomb.t0 = nowS();
+    state.normalBomb.bombType = bombType;
+    prepareNormalBomb(bombType);
+  }
+
+  function drawNormalBomb(t){
+    if (!state.normalBomb.active) return false;
+    const nb = state.normalBomb;
+    const face = (nb.bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
+    const center = nb.center;
+    if (nb.phase===&#x27;implode&#x27;){
+      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.implodeMs));
+      // draw a single ring imploding from the perimeter toward center
+      const pts = nb.perimPts;
+      const skip = ((t*45)|0) &amp; 1; // half-rate to keep light
+      for(let i=0;i&lt;pts.length;i++){
+        if ((i &amp; 1)===skip) continue;
+        const pt = pts[i];
+        const x = lerp(pt.x, center.x, u);
+        const y = lerp(pt.y, center.y, u);
+        // slightly fade as it converges
+        const a = 0.9 * (1 - 0.2*u);
+        drawBrightDotFast(ctx, x, y, a);
+      }
+      // when finished, switch to explode
+      if (u &gt;= 1){ nb.phase=&#x27;explode&#x27;; nb.t0 = t; }
+      return false;
+    } else if (nb.phase===&#x27;explode&#x27;){
+      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.explodeMs));
+      const Rmax = Math.min(face.w, face.h)*0.48;
+      // two soft ripples expanding
+      const base = u;
+      const r1 = Rmax * base;
+      const r2 = Math.max(0, r1 - p*6);
+      const alpha1 = 0.30 * Math.max(0, 1 - base);
+      const alpha2 = 0.18 * Math.max(0, 1 - base*1.2);
+      if (alpha1&gt;0){
+        const stepA = Math.PI/128; // sparse
+        for(let a=0;a&lt;Math.PI*2;a+=stepA){
+          const x = Math.round((center.x + r1*Math.cos(a))/p)*p;
+          const y = Math.round((center.y + r1*Math.sin(a))/p)*p;
+          drawBrightDotFast(ctx, x, y, alpha1);
+        }
+      }
+      if (alpha2&gt;0){
+        const stepB = Math.PI/128;
+        for(let a=0;a&lt;Math.PI*2;a+=stepB){
+          const x = Math.round((center.x + r2*Math.cos(a))/p)*p;
+          const y = Math.round((center.y + r2*Math.sin(a))/p)*p;
+          drawBrightDotFast(ctx, x, y, alpha2);
+        }
+      }
+      if (u&gt;=1){
+        // signal to game layer if hooked
+        try { window.dispatchEvent(new CustomEvent(&#x27;normalBombExplode&#x27;, {detail:{bombType: nb.bombType}})); } catch(e){}
+        nb.active=false; nb.phase=&#x27;idle&#x27;;
+        return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  // ====== Normal bomb (no timer) ======
+  function startNormalBomb(bombType){
+    state.normalBomb.active = true;
+    state.normalBomb.t0 = nowS();
+    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
+  }
+
+  function drawNormalBomb(t){
+    if (!state.normalBomb.active) return false;
+    const elapsed = (t - state.normalBomb.t0) * 1000;
+    const u = Math.max(0, Math.min(1, elapsed / state.normalBomb.duration));
+    const ease = (x)=&gt; 1 - Math.pow(1-x, 3);
+    const bombType = state.normalBomb.bombType;
+    const T = bombType===&#x27;center&#x27; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
+    const textPts = bombType===&#x27;center&#x27; ? bombWordDotsCenter : bombWordDotsFinal;
+    const center = T.center;
+    const spread = Math.min(T.faceRect.w, T.faceRect.h) * 0.10; // small push
+    const k = Math.sin(u * Math.PI); // out and back
+    // outline pulse
+    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
+    const R_inner = R_outer*0.62;
+    const pulseA = 0.20 * k;
+    if (pulseA&gt;0){
+      for(let a=0;a&lt;Math.PI*2; a+=Math.PI/96){
+        const x = snap(center.x + R_outer*Math.cos(a));
+        const y = snap(center.y + R_outer*Math.sin(a));
+        drawBrightDotFast(ctx, x, y, pulseA);
+      }
+    }
+    // letters push outward slightly, then return
+    const skip = ((t*45)|0) &amp; 1; // half rate
+    for(let i=0;i&lt;textPts.length;i++){
+      if ((i &amp; 1)===skip) continue;
+      const pt = textPts[i];
+      const dx = pt.x - center.x, dy = pt.y - center.y;
+      const len = Math.hypot(dx,dy) || 1;
+      const ox = dx/len * spread * k;
+      const oy = dy/len * spread * k;
+      drawBrightDotFast(ctx, pt.x + ox, pt.y + oy, 0.9);
+    }
+    return (u&gt;=1);
+  }
+
+  function drawExtrasRing(t, T, alpha){
+    if (alpha&lt;=0) return;
+    // draw fewer extras by skipping every other point while animating
+    let toggle = ((t*60)|0) &amp; 1;
+    let idx = 0;
+    for(const pt of state.bombMorph.extras){
+      if (state.bombMorph.active &amp;&amp; state.bombMorph.phase===&#x27;exploding&#x27; &amp;&amp; ((idx++ &amp; 1)===toggle)) continue;
+      drawBrightDotFast(ctx, pt.x, pt.y, alpha*0.9);
+    }
+  }
+
+  // Uniform armed sphere visualization
+  function drawUniformRing(center, radius, alpha=0.94){
+    const step = Math.max(Math.PI/128, p/(radius||1));
+    for(let a=0; a&lt;Math.PI*2; a+=step){
+      const x = snap(center.x + radius*Math.cos(a));
+      const y = snap(center.y + radius*Math.sin(a));
+      drawBrightDotFast(ctx, x, y, alpha);
+    }
+  }
+
+  function drawUniformDisk(center, radius, alpha=0.5){
+    if (radius&lt;=0) return;
+    const stepR = Math.max(p*1.2, d*1.4);
+    for(let rr=0; rr&lt;=radius; rr+=stepR){
+      const stepA = Math.max(Math.PI/48, p/Math.max(rr, p));
+      for(let a=0; a&lt;Math.PI*2; a+=stepA){
+        const x = snap(center.x + rr*Math.cos(a));
+        const y = snap(center.y + rr*Math.sin(a));
+        drawBrightDotFast(ctx, x, y, alpha);
+      }
+    }
+  }
+
+  function drawBombTimerEffect(t, bombFace, bombTextPts, targetKey) {
+    const T = state.bombMorphTargets[targetKey];
+    if (!T) return;
+    const center=T.center;
+    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
+    const R_inner = R_outer*0.62;
+
+    // Two clean concentric rings. Keep light.
+    drawUniformRing(center, R_outer, 0.94);
+    drawUniformRing(center, R_inner, 0.70);
+    // Solid fill from cached hex lattice
+    const fill = T.diskFillPts || [];
+    const skip = ((t*30)|0) &amp; 1; // dynamic half-rate dithering
+    for(let i=0;i&lt;fill.length;i++){
+      if ((i &amp; 1)===skip) continue;
+      const pt = fill[i];
+      drawBrightDotFast(ctx, pt.x, pt.y, 0.36);
+    }
+
+    // No heavy shockwave here
+    // Black X overlay on last 30% of the word
+    let minX=Infinity,maxX=-Infinity;
+    for(const pt of bombTextPts){ minX=Math.min(minX,pt.x); maxX=Math.max(maxX,pt.x); }
+    const xStart=minX + (maxX-minX)*0.7;
+    for(const pt of bombTextPts){
+      if(pt.x&gt;=xStart){
+        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  // Frame parity for particle subsampling
+  let frameParity = 0;
+
+  function drawBombMorph(t){
+    const prog = state.bombMorph.progress;
+    const phase = state.bombMorph.phase;
+    const pairs = state.bombMorph.pairs;
+    const meta  = state.bombMorph.meta;
+    const T = state.bombMorphTargets[state.bombMorph.bombType];
+
+    // Removed red center flare and shockwave to cut cost
+    // if (phase===&#x27;exploding&#x27;){ ... } // deleted
+
+    // Particle motion
+    for(let i=0;i&lt;pairs.length;i++){
+      const pr = pairs[i];
+      const m  = meta[i] || {delay:0,jitter:0,sparkLen:4,overshoot:0.10};
+
+      // Subsample half the particles per frame during explosion
+      if (phase===&#x27;exploding&#x27; &amp;&amp; ((i &amp; 1) !== frameParity)) { continue; }
+
+      const local = Math.max(0, Math.min(1, (prog - m.delay) / (1 - m.delay + 1e-6)));
+
+      if (phase===&#x27;sucking&#x27;){
+        const swirl = m.jitter * (1-local);
+        const dir = Math.atan2(pr.dy-pr.sy, pr.dx-pr.sx) + swirl*0.25;
+        const len = Math.hypot(pr.dx-pr.sx, pr.dy-pr.sy);
+        const x = pr.sx + Math.cos(dir) * len * easeInOut(local);
+        const y = pr.sy + Math.sin(dir) * len * easeInOut(local);
+
+        // lighter trail
+        const trailN = Math.floor(m.sparkLen * (1-local));
+        for(let k=trailN; k&gt;=1; k-=2){
+          const tk = Math.max(0, local - 0.02*k);
+          const xt = pr.sx + (pr.dx-pr.sx)*tk;
+          const yt = pr.sy + (pr.dy-pr.sy)*tk;
+          drawBrightDotFast(ctx, xt, yt, 0.35);
+        }
+
+        drawBrightDotFast(ctx, x, y, 0.9);
+      } else {
+        // Horizontal explosion path
+        const cx = T.center.x;
+        const sign = (pr.dx &gt;= cx) ? 1 : -1;
+        const maxThrow = Math.min(T.faceRect.w*0.38, Math.abs(pr.dx - cx)*1.4 + 18);
+        const split = 0.55;
+
+        let x, y;
+
+        if (local &lt; split){
+          const a = easeOutExpo(local / split);
+          const baseY = pr.sy;
+          const targetX = cx + sign * maxThrow;
+          x = pr.sx + (targetX - pr.sx) * a;
+          y = baseY;
+        } else {
+          const b = easeOutBack((local - split)/(1 - split));
+          const targetX = pr.dx;
+          const targetY = pr.dy;
+          const throwX  = cx + sign * maxThrow;
+          const throwY  = pr.sy;
+          x = throwX + (targetX - throwX) * b;
+          y = throwY + (targetY - throwY) * b;
+        }
+
+        // Lighter trail along the same path
+        const trailN = Math.floor(m.sparkLen);
+        for(let k=trailN; k&gt;=1; k-=2){
+          const back = Math.max(0, local - 0.016*k);
+          let xt, yt;
+          if (back &lt; split){
+            const a = easeOutExpo(back / split);
+            const targetX = cx + sign * maxThrow;
+            const baseY = pr.sy;
+            xt = pr.sx + (targetX - pr.sx) * a;
+            yt = baseY;
+          } else {
+            const b = easeOutBack((back - split)/(1 - split));
+            const targetX = pr.dx;
+            const targetY = pr.dy;
+            const throwX  = cx + sign * maxThrow;
+            const throwY  = pr.sy;
+            xt = throwX + (targetX - throwX) * b;
+            yt = throwY + (targetY - throwY) * b;
+          }
+          drawBrightDotFast(ctx, xt, yt, 0.35);
+        }
+
+        // Head particle
+        drawBrightDotFast(ctx, x, y, 0.9);
+
+        if (local &gt; 0.95){
+          drawBrightDotFast(ctx, pr.dx, pr.dy, 0.9);
+        }
+      }
+    }
+
+    // Extras halo, already lightened
+    if (phase===&#x27;sucking&#x27;){ drawExtrasRing(t, T, Math.min(1, prog*1.0)); }
+    else { drawExtrasRing(t, T, Math.max(0, 1-prog)); }
+
+    // flip parity after drawing
+    frameParity ^= 1;
+  }
+
+  // ====== DPR-safe hit-testing (Path2D expects CSS pixels * DPR) ======
+  const pathLASER = path2DFor(faceLASER_final);
+  const pathBOMB_final = path2DFor(faceBOMB_final);
+  const pathBOMB_center = path2DFor(faceBOMB_center);
+
+  // ====== Sphere hit detection (CSS pixels) ======
+  function isPointInSphere(cssX, cssY, bombFace) {
+    if (!state.bombArmed) return false;
+    const centerX = bombFace.x + bombFace.w / 2;
+    const centerY = bombFace.y + bombFace.h / 2;
+    const radius = Math.min(bombFace.w, bombFace.h) * 0.40;
+    const dx = cssX - centerX;
+    const dy = cssY - centerY;
+    return (dx * dx + dy * dy) &lt;= (radius * radius);
+  }
+
+  function startTransition() { if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) { state.active = true; state.t0 = nowS(); } }
+  window.btn2_startTransition = startTransition;
+  document.addEventListener(&#x27;keydown&#x27;, (e) =&gt; { if (e.key === &#x27;t&#x27;) startTransition(); });
+
+  // ====== CLICK logic ======
+  canvas.addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    const r = canvas.getBoundingClientRect(); 
+    const cssX = (e.clientX - r.left);
+    const cssY = (e.clientY - r.top);
+    const px  = cssX * DPR, py = cssY * DPR;
+
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      // Normal bomb path when no timer powerup: 3s suck then auto explode
+      if (!state.timerPowerup &amp;&amp; ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active){
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;, 3000, true);
+        return;
+      }
+      if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
+        if (isPointInSphere(cssX, cssY, faceBOMB_center) &amp;&amp; !state.bombMorph.active) {
+          startBombMorph(&#x27;exploding&#x27;, &#x27;center&#x27;); // disk -&gt; &quot;BOMB X&quot;
+          return;
+        }
+      }
+      if (ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active) {
+        if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
+          state.bombDeployed = true;
+          startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;);   // &quot;BOMB X&quot; -&gt; disk
+        }
+      }
+      return;
+    }
+
+    if (state.active) return;
+
+    if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
+      if (isPointInSphere(cssX, cssY, faceBOMB_final) &amp;&amp; !state.bombMorph.active) {
+        startBombMorph(&#x27;exploding&#x27;, &#x27;final&#x27;);
+        return;
+      }
+    }
+    if (ctx.isPointInPath(pathBOMB_final, px, py) &amp;&amp; !state.bombMorph.active) {
+      if (!state.timerPowerup){
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;, 3000, true);
+      } else if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;);
+      }
+    }
+    else if (ctx.isPointInPath(pathLASER, px, py)) {
+      if (state.mode === &#x27;two&#x27; &amp;&amp; state.specialActive &amp;&amp; state.laserAmmo &gt; 0) {
+        state.laserAmmo--;
+        if (state.laserAmmo === 0) {
+          state.specialActive = false;
+          document.getElementById(&#x27;btn2_special&#x27;).classList.remove(&#x27;active&#x27;);
+          state.activeReverse = true;
+          state.t0r = nowS();
+        }
+      }
+    }
+  });
+
+  // ====== Press visual ======
+  const press = { laser: { state: &#x27;idle&#x27;, t: 0 }, bomb: { state: &#x27;idle&#x27;, t: 0 } };
+  const perimLaser = laserDots.filter(pt =&gt; pt.perim);
+  const perimBombB = bombDotsB.filter(pt =&gt; pt.perim);
+  const perimBombC = bombDotsC.filter(pt =&gt; pt.perim);
+  const PRESS_IN_MS = 90, PRESS_OUT_MS = 140;
+  function pressK(which, t) {
+    const st = press[which];
+    if (st.state === &#x27;down&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_IN_MS / 1000))); return easeInCubic(u); }
+    if (st.state === &#x27;up&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_OUT_MS / 1000))); return 1 - easeOutCubic(u); }
+    return 0;
+  }
+  function drawPressOverlay(rect, perimPts, k) {
+    if (k &lt;= 0) return;
+    ctx.save(); rrPath(ctx, rect); ctx.clip();
+    ctx.globalAlpha = 0.08 * k; ctx.fillStyle = &#x27;#000&#x27;; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.globalAlpha = 0.10 * k; ctx.fillStyle = col.bright; ctx.fillRect(rect.x + p, rect.y + p, rect.w - 2 * p, rect.h - 2 * p);
+    ctx.restore();
+  }
+
+  // ====== PERF: pre-rasterize LASER rows ======
+  const laserRowImgs = laserRows.map(row =&gt; {
+    const off = document.createElement(&#x27;canvas&#x27;); off.width = W; off.height = H;
+    const octx = off.getContext(&#x27;2d&#x27;);
+    for (const pt of row.pts) drawBrightDotFast(octx, pt.x, pt.y, 0.9);
+    return off;
+  });
+
+  // ====== PERF throttle ======
+  let heavy = false;
+  let lastFrame = 0;
+  const FPS_HEAVY = 28, FPS_LIGHT = 60; // slightly lower heavy fps
+
+  // ====== Transition animation ======
+  const TRANS_MS = 900; const DOT_ALPHA = 0.9;
+  function drawLaserBuildTopDown_cached(u) {
+    const total = laserRowImgs.length; const f = u * total; const rFull = Math.floor(f); const frac = f - rFull;
+    for (let r = 0; r &lt; Math.min(rFull, total); r++) ctx.drawImage(laserRowImgs[r], 0, 0);
+    if (rFull &lt; total) {
+      const row = laserRows[rFull]; const m = Math.floor(row.n * easeInOut(frac));
+      for (let i = 0; i &lt; m; i++) { const pt = row.pts[i]; drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA); }
+    }
+  }
+  function drawBombMoving(u) {
+    const stepsTotal = ((faceBOMB_final.y - faceBOMB_center.y) / p) | 0;
+    const frames = Math.max(1, stepsTotal+1);
+    const f=u*(frames-1); const s=Math.floor(f); const frac=easeInOut(f-s);
+    const yA = snap(faceBOMB_center.y + s*p);
+    const yB = snap(faceBOMB_center.y + (Math.min(s+1,frames-1))*p);
+    const yLerp = snap(yA + (yB - yA) * frac);
+    const outer = {x:botOuter.x, y:yLerp-1*p, w:botOuter.w, h:botOuter.h, r:botOuter.r};
+    const face  = {x:outer.x+1*p, y:yLerp, w:outer.w-2*p, h:outer.h-2*p, r:outer.r-1*p};
+
+    const outPts = sampleRoundedRectDots(outer.x,outer.y,outer.w,outer.h,outer.r);
+    const innerPts=(function(){ const d=[]; const b_in=2.8*p; const mid=1; for(let i=0;i&lt;3;i++){ const o=b_in+(i-mid)*p; const x=outer.x+o, y=outer.y+o, w=outer.w-2*o, h=outer.h-2*o, r=outer.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) d.push(pt); } return d; })();
+    const dy = face.y - faceBOMB_final.y; const textPts = bombWordDotsFinal.map(pt=&gt;({x:pt.x,y:pt.y+dy}));
+    for(const pt of outPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+    for(const pt of innerPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+    for(const pt of textPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+  }
+
+  // ====== Main frame ======
+  function frame(ts) {
+    if (__prevMode !== state.mode || __prevActive !== state.active) {
+      if (state.active) { setProxiesEnabled(false); }
+      else { setProxiesEnabled(true); updateProxyForMode(); }
+      __prevMode = state.mode; __prevActive = state.active;
+    }
+    
+    heavy = state.active || state.bombMorph.active;
+
+    const targetDelta = 1000 / (heavy ? FPS_HEAVY : FPS_LIGHT);
+    if (ts - lastFrame &lt; targetDelta) { requestAnimationFrame(frame); return; }
+    lastFrame = ts;
+
+    const t = nowS();
+    const done = state.bombMorph.active &amp;&amp; updateBombMorph(t);
+
+    let doneNB = false;
+    if (state.normalBomb.active){ doneNB = drawNormalBomb(t); }
+
+    
+    ctx.clearRect(0, 0, W, H); ctx.drawImage(bg, 0, 0);
+
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      ctx.drawImage(layerSingle, 0, 0);
+      
+      if (state.bombMorph.active) {
+        drawBombMorph(t);
+      } else if (state.bombArmed) {
+        drawBombTimerEffect(t, faceBOMB_center, bombWordDotsCenter, &#x27;center&#x27;);
+      } else {
+        for (const pt of bombWordDotsCenter) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+      }
+      
+      // lighter press overlay already handled
+    }
+    else if (state.active) {
+      const u = Math.max(0, Math.min(1, (nowS() - state.t0) * (1000 / TRANS_MS)));
+      drawLaserBuildTopDown_cached(u);
+      drawBombMoving(u);
+      if (u &gt;= 1) { state.active = false; state.mode = &#x27;two&#x27;; }
+    }
+    else if (state.activeReverse) {
+      const uR = Math.max(0, Math.min(1, (nowS() - state.t0r) * (1000 / TRANS_MS)));
+      const uF = 1 - uR;
+      drawLaserBuildTopDown_cached(uF);
+      drawBombMoving(uF);
+      if (uR &gt;= 1) {
+        state.activeReverse = false;
+        state.mode = &#x27;single&#x27;;
+        state.bombDeployed = false;
+        state.bombArmed = false;
+        __prevMode = undefined; __prevActive = undefined;
+      }
+    }
+    else {
+      ctx.drawImage(layerTwo, 0, 0);
+
+      if (state.bombMorph.active) {
+        drawBombMorph(t);
+      } else if (state.bombArmed) {
+        drawBombTimerEffect(t, faceBOMB_final, bombWordDotsFinal, &#x27;final&#x27;);
+      } else {
+        for (const pt of bombWordDotsFinal) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+      }
+
+      drawLaserArmed(t);
+    }
+
+    if (doneNB){ state.normalBomb.active=false; }
+
+    if (done){
+      if (state.bombMorph.phase===&#x27;sucking&#x27;){
+        if (!state.timerPowerup &amp;&amp; state.bombMorph.autoExplode){
+          // Immediately explode words back out
+          startBombMorph(&#x27;exploding&#x27;, state.bombMorph.bombType, 700, false);
+        } else {
+          state.bombArmed=true; // timer path: hold on sphere
+          state.bombMorph.active=false;
+        }
+      } else {
+        // finished exploding
+        state.bombArmed=false;
+        state.bombDeployed=false;
+        state.bombMorph.active=false;
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ====== Keyboard proxies ======
+  function synthClickAt(clientX, clientY) {
+    const r = canvas.getBoundingClientRect();
+    const evt = new MouseEvent(&#x27;click&#x27;, { bubbles: true, cancelable: true, clientX: r.left + clientX, clientY: r.top + clientY });
+    canvas.dispatchEvent(evt);
+  }
+  const kLaser = document.getElementById(&#x27;btn2_proxy_blast&#x27;);
+  const kBomb = document.getElementById(&#x27;btn2_proxy_bomb&#x27;);
+
+  function updateProxyForMode() {
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      kLaser.style.display = &#x27;none&#x27;;
+      kBomb.style.top = &#x27;4%&#x27;;
+      kBomb.style.bottom = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;92%&#x27;;
+    } else {
+      kLaser.style.display = &#x27;block&#x27;;
+      kLaser.style.top = &#x27;6%&#x27;;
+      kLaser.style.height = &#x27;44%&#x27;;
+      kBomb.style.display = &#x27;block&#x27;;
+      kBomb.style.bottom = &#x27;6%&#x27;;
+      kBomb.style.top = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;44%&#x27;;
+    }
+  }
+  function setProxiesEnabled(enabled) {
+    const v = enabled ? &#x27;auto&#x27; : &#x27;none&#x27;;
+    kLaser.style.pointerEvents = v;
+    kBomb.style.pointerEvents = v;
+  }
+
+  kLaser.addEventListener(&#x27;click&#x27;, () =&gt; { 
+    const cx = faceLASER_final.x + faceLASER_final.w / 2;
+    const cy = faceLASER_final.y + faceLASER_final.h / 2;
+    synthClickAt(cx, cy); 
+    kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;); 
+    setTimeout(() =&gt; kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150); 
+  });
+  kBomb.addEventListener(&#x27;click&#x27;, () =&gt; {
+    const rect = (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) ? faceBOMB_center : faceBOMB_final;
+    const cx = rect.x + rect.w / 2; const cy = rect.y + rect.h / 2;
+    synthClickAt(cx, cy);
+    kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;);
+    setTimeout(() =&gt; kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150);
+  });
+
+  updateProxyForMode();
+
+  function keypressHandler(e, which) {
+    if (e.key === &#x27;Enter&#x27; || e.key === &#x27; &#x27;) { e.preventDefault(); if (which === &#x27;laser&#x27;) kLaser.click(); else kBomb.click(); }
+  }
+  kLaser.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;laser&#x27;));
+  kBomb.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;bomb&#x27;));
+
+  /* TEMP TRIGGER HOOK */
+  document.getElementById(&#x27;btn2_temp&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    if (window.btn2_startTransition) window.btn2_startTransition();
+  });
+
+  // ====== Timer Power-up Toggle ======
+  document.getElementById(&#x27;btn2_timer&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    state.timerPowerup = !state.timerPowerup;
+    state.bombDeployed = false;
+    state.bombArmed = false;
+    
+    const btn = document.getElementById(&#x27;btn2_timer&#x27;);
+    if (state.timerPowerup) btn.classList.add(&#x27;active&#x27;);
+    else btn.classList.remove(&#x27;active&#x27;);
+  });
+
+  // ====== Special Activation (4 LASER shots) ======
+  document.getElementById(&#x27;btn2_special&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    state.specialActive = !state.specialActive;
+    
+    if (state.specialActive) {
+      if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+        startTransition();
+      }
+      state.laserAmmo = state.maxAmmo;
+      e.currentTarget.classList.add(&#x27;active&#x27;);
+    } else {
+      e.currentTarget.classList.remove(&#x27;active&#x27;);
+    }
+  });
+
+  // ====== Initialize targets ======
+  initBombMorphSystem();
+
+})();
+})();
+&lt;/script&gt;
+
+&lt;script id=&quot;sq-probe-js&quot;&gt;
+(() =&gt; {
+  const box = document.createElement(&#x27;div&#x27;);
+  box.id = &#x27;sqProbeBox&#x27;;
+  Object.assign(box.style, {
+    position:&#x27;absolute&#x27;, right:&#x27;8px&#x27;, top:&#x27;8px&#x27;, zIndex:&#x27;9999&#x27;,
+    font:&#x27;11px ui-monospace,Consolas,Menlo,monospace&#x27;,
+    color:&#x27;#fff&#x27;, background:&#x27;rgba(0,0,0,.65)&#x27;, padding:&#x27;6px 8px&#x27;, borderRadius:&#x27;8px&#x27;
+  });
+  document.body.appendChild(box);
+  function sz(el){ if(!el) return &#x27;—&#x27;; const r=el.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)}`; }
+  function upd(){
+    const ui = document.getElementById(&#x27;control-ui&#x27;);
+    const L  = document.getElementById(&#x27;left-area&#x27;);
+    const R  = document.getElementById(&#x27;right-area&#x27;);
+    const panel = document.getElementById(&#x27;btn2_panel&#x27;);
+    const jpad  = document.getElementById(&#x27;jpad_canvas&#x27;);
+    box.textContent = [
+      `ui ${sz(ui)}`,
+      `L  ${sz(L)}  panel ${sz(panel)}`,
+      `R  ${sz(R)}  jpad  ${sz(jpad)}`
+    ].join(&#x27;  |  &#x27;);
+  }
+  upd(); setInterval(upd, 300);
+})();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+" title="SNEAKERQUEST Controls"></iframe>
+
             <div class="matrix" aria-hidden="true"></div>
             <main class="control-ui" aria-label="Control surface">
               <section class="col-left"><div class="pad"></div></section>
@@ -398,94 +1735,5 @@
         // iOS focus zoom workaround not needed (no inputs <16px)
     })();
 </script>
-
-  <!-- Step 1 bindings: state + LIFE + Stopwatch -->
-  <script>
-  (function(){
-    // Ensure base state
-    var defaultState = { mode:'single', active:false, specialActive:false, timerPowerup:false, laserAmmo:4, maxAmmo:4 };
-    window.state = Object.assign({}, defaultState, window.state || {});
-
-    function makeButtonish(el){
-      if(!el) return;
-      el.setAttribute('role', 'button');
-      el.setAttribute('tabindex', '0');
-      el.style.cursor = 'pointer';
-    }
-
-    function setupLife(){
-      var lifeTab = document.querySelector('.tabs .tab:nth-child(2)');
-      if (!lifeTab) return;
-      makeButtonish(lifeTab);
-
-      function toggleLife(){
-        window.state.specialActive = !window.state.specialActive;
-        if (window.state.specialActive) {
-          window.state.laserAmmo = window.state.maxAmmo;
-        }
-        // Visual hook if styles exist
-        lifeTab.classList.toggle('active', !!window.state.specialActive);
-      }
-
-      lifeTab.addEventListener('click', toggleLife);
-      lifeTab.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
-          e.preventDefault();
-          toggleLife();
-        }
-      });
-    }
-
-    function setupStopwatch(){
-      var container = document.getElementById('ui-powers');
-      if (!container) return;
-      // find the power wrapper that contains a timer icon
-      var nodes = Array.prototype.slice.call(container.querySelectorAll('.power'));
-      var timerPower = nodes.find(function(n){ return n.querySelector('.ph-timer'); });
-      if (!timerPower) return;
-
-      makeButtonish(timerPower);
-
-      function toggleTimer(){
-        window.state.timerPowerup = !window.state.timerPowerup;
-        timerPower.classList.toggle('active', !!window.state.timerPowerup);
-      }
-
-      // initial reflect
-      timerPower.classList.toggle('active', !!window.state.timerPowerup);
-
-      timerPower.addEventListener('click', toggleTimer);
-      timerPower.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
-          e.preventDefault();
-          toggleTimer();
-        }
-      });
-    }
-
-    function init(){
-      setupLife();
-
-      // powers are rendered dynamically; wait until present
-      var tries = 0;
-      (function waitForPowers(){
-        var container = document.getElementById('ui-powers');
-        if (container && container.children && container.children.length) {
-          setupStopwatch();
-        } else if (tries < 100) {
-          tries++;
-          setTimeout(waitForPowers, 50);
-        }
-      })();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
-  </script>
-
 </body>
 </html>
