@@ -3022,5 +3022,51 @@ document.addEventListener('touchmove', (e)=&gt;{
     }
   });
 })();
-</script></body>
+</script>
+<!-- [SQ-BASE-OVERRIDES] -->
+<style id="sq-base-overrides">
+:root { --center-cell: 90px !important; }
+
+/* Section offsets and sizes */
+#element-marquee { margin-top: -7px !important; }
+#element-divider { margin-top: -15px !important; }
+#element-crt     { margin-top: -11px !important; height: 350px !important; }
+#element-tabs    { margin-top: -14px !important; }
+#element-hud1    { margin-top: -16px !important; }
+#element-hud2    { margin-top: -15px !important; }
+#element-bottom  { height: 240px !important; }
+
+/* Marquee typography */
+.mq-title { font-size: 27px !important; transform: translate(0px, 0px) !important; }
+.mq-sub   { font-size: 7px !important;  transform: translate(0px, 0px) !important; }
+.mq-sub .chip-box { border-radius: 4px !important; padding: 4px 3px !important; }
+
+/* Gaps */
+#ui-sneakers { gap: 3px !important; }
+#ui-powers   { gap: 7px !important; }
+#ui-fires    { gap: 2px !important; }
+
+/* Slot heights */
+.hud .slot-heart   { height: 41px !important; }
+.hud .slot-shoes   { height: 40px !important; }
+.hud .slot-dots    { height: 40px !important; }
+.hud2 .slot-flames { height: 40px !important; }
+.hud2 .slot-pause  { height: 40px !important; }
+.hud2 .slot-bag    { height: 40px !important; }
+
+/* Control screen paddings */
+.control-screen { padding-top: 14px !important; padding-bottom: 14px !important; }
+
+/* Inner side paddings */
+.inner { padding-left: 10px !important; padding-right: 10px !important; }
+
+/* Controls transform and constraints */
+#element-controls { transform: translate(0px, 0px) scale(1) !important; min-height: 0 !important; }
+#controlsFrame { border: 0 !important; outline: 0 !important; }
+
+/* Main container scale */
+#mainContainer { transform: translateX(-50%) scale(1.33222) !important; transform-origin: top center !important; }
+</style>
+
+</body>
 </html>
