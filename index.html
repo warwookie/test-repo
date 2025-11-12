@@ -132,11 +132,11 @@
 
     .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
     .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
-    .counter .ph-package { font-size: 20px !important; color: var(--secondary-color) !important; filter: none !important; }
+    .counter .ph-package { font-size: 20px ; color: var(--secondary-color) ; filter: none ; }
 
     .bottom { width: 100%; height: 150px; margin-top: -13px; }
 
-    .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: linear-gradient(#1a1210, #0c0908); box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
+    .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: transparent; box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
 
     .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
 
@@ -192,7 +192,7 @@
 #power-stopwatch:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
 </style><style>
 /* Hide any leftover injected stopwatch button if present */
-#power-stopwatch { display: none !important; }
+#power-stopwatch { display: none ; }
 
 /* Power-ups word as activator visual states */
 .powerups-activator { cursor: pointer; }
@@ -256,18 +256,18 @@
 &lt;head&gt;
 &lt;style id=&quot;sq-probe-css&quot;&gt;
   /* hide demo toggles if present */
-  #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none !important; }
+  #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none ; }
   /* force joystick readout visible */
-  #jpad_status { display:block !important; visibility:visible !important; opacity:1 !important; }
+  #jpad_status { display:block ; visibility:visible ; opacity:1 ; }
   /* borders for debug */
   #control-ui{ outline:1px solid rgba(0,255,255,.7); }
-  #left-area{ outline:1px solid rgba(255,0,0,.7); }
+  #left-area{ outline: 1px solid rgba(255, 255, 0, .85); }
   #right-area{ outline:1px solid rgba(0,255,0,.7); }
   #btn2_panel{ outline:1px dashed rgba(255,128,0,.8); }
   #jpad_canvas{ outline:1px dashed rgba(128,128,255,.8); }
   /* fit to parent height */
-  #frame{ height:100% !important; }
-  #control-ui{ height:100% !important; width:100% !important; }
+  #frame{ height:100% ; }
+  #control-ui{ height:100% ; width:100% ; }
 &lt;/style&gt;
 
 &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -301,7 +301,7 @@
 
   /* Buttons overlay */
   .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
-  #btn2_panel{ position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
+  #btn2_panel{ position:absolute; inset:0; width:100% ; height:100% ; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
 
   /* Control buttons */
   .control-buttons {
@@ -1634,7 +1634,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     z-index: 7050; 
     box-shadow: 0 16px 40px #000c;
   }
-  #settingsPanel.open { display: flex !important; }
+  #settingsPanel.open { display: flex ; }
   #sHead { 
     display: flex; 
     align-items: center; 
@@ -3025,48 +3025,434 @@ document.addEventListener('touchmove', (e)=&gt;{
 </script>
 <!-- [SQ-BASE-OVERRIDES] -->
 <style id="sq-base-overrides">
-:root { --center-cell: 90px !important; }
+:root { --center-cell: 90px ; }
 
 /* Section offsets and sizes */
-#element-marquee { margin-top: -7px !important; }
-#element-divider { margin-top: -15px !important; }
-#element-crt     { margin-top: -11px !important; height: 350px !important; }
-#element-tabs    { margin-top: -14px !important; }
-#element-hud1    { margin-top: -16px !important; }
-#element-hud2    { margin-top: -15px !important; }
-#element-bottom  { height: 240px !important; }
+#element-marquee { margin-top: -7px ; }
+#element-divider { margin-top: -15px ; }
+#element-crt     { margin-top: -11px ; height: 350px ; }
+#element-tabs    { margin-top: -14px ; }
+#element-hud1    { margin-top: -16px ; }
+#element-hud2    { margin-top: -15px ; }
+#element-bottom  { height: 240px ; }
 
 /* Marquee typography */
-.mq-title { font-size: 27px !important; transform: translate(0px, 0px) !important; }
-.mq-sub   { font-size: 7px !important;  transform: translate(0px, 0px) !important; }
-.mq-sub .chip-box { border-radius: 4px !important; padding: 4px 3px !important; }
+.mq-title { font-size: 27px ; transform: translate(0px, 0px) ; }
+.mq-sub   { font-size: 7px ;  transform: translate(0px, 0px) ; }
+.mq-sub .chip-box { border-radius: 4px ; padding: 4px 3px ; }
 
 /* Gaps */
-#ui-sneakers { gap: 3px !important; }
-#ui-powers   { gap: 7px !important; }
-#ui-fires    { gap: 2px !important; }
+#ui-sneakers { gap: 3px ; }
+#ui-powers   { gap: 7px ; }
+#ui-fires    { gap: 2px ; }
 
 /* Slot heights */
-.hud .slot-heart   { height: 41px !important; }
-.hud .slot-shoes   { height: 40px !important; }
-.hud .slot-dots    { height: 40px !important; }
-.hud2 .slot-flames { height: 40px !important; }
-.hud2 .slot-pause  { height: 40px !important; }
-.hud2 .slot-bag    { height: 40px !important; }
+.hud .slot-heart   { height: 41px ; }
+.hud .slot-shoes   { height: 40px ; }
+.hud .slot-dots    { height: 40px ; }
+.hud2 .slot-flames { height: 40px ; }
+.hud2 .slot-pause  { height: 40px ; }
+.hud2 .slot-bag    { height: 40px ; }
 
 /* Control screen paddings */
-.control-screen { padding-top: 14px !important; padding-bottom: 14px !important; }
+.control-screen { padding-top: 14px ; padding-bottom: 14px ; }
 
 /* Inner side paddings */
-.inner { padding-left: 10px !important; padding-right: 10px !important; }
+.inner { padding-left: 10px ; padding-right: 10px ; }
 
 /* Controls transform and constraints */
-#element-controls { transform: translate(0px, 0px) scale(1) !important; min-height: 0 !important; }
-#controlsFrame { border: 0 !important; outline: 0 !important; }
+#element-controls { transform: translate(0px, 0px) scale(1) ; min-height: 0 ; }
+#controlsFrame { border: 0 ; outline: 0 ; }
 
 /* Main container scale */
-#mainContainer { transform: translateX(-50%) scale(1.33222) !important; transform-origin: top center !important; }
+#mainContainer { transform: translateX(-50%) scale(1.33222) ; transform-origin: top center ; }
 </style>
+
+
+<!-- [FLOAT-TUNER:TPL-START] -->
+<template id="float-tuner-tpl">
+  <style>
+    .wrap{ position:fixed; right:12px; bottom:12px; width:300px; max-height:70vh; overflow:auto;
+           background:#111; color:#eee; font:12px/1.4 ui-sans-serif,system-ui; border-radius:12px;
+           box-shadow:0 10px 30px rgba(0,0,0,.6); border:1px solid #333; padding:10px; }
+    h3{ margin:0 0 8px 0; font-size:13px; }
+    .row{ display:grid; grid-template-columns: 1fr 50px; gap:8px; align-items:center; margin:6px 0; }
+    label{ font-size:12px; }
+    input[type=range]{ width:100%; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .hint{ font-size:11px; opacity:.7; }
+    button.small{ padding:6px 10px; border:0; background:#222; color:#ddd; border-radius:8px; cursor:pointer; }
+  </style>
+  <div class="panel wrap" id="ftPanel">
+    <h3>Layout Tuner — Floating Controls</h3>
+
+    <div class="row"><label>Bottom Height <output id="o_bh">150</output>px</label>
+      <input id="v_bh" type="range" min="80" max="360" step="1" value="240"></div>
+
+    <div class="grid2">
+      <div>
+        <h3>LT2-L</h3>
+        <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" type="range" min="-200" max="200" step="1" value="0"></div>
+        <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" type="range" min="-120" max="120" step="1" value="0"></div>
+        <div class="row"><label>Scale <output id="o_ls">1</output></label><input id="v_ls" type="range" min="0.6" max="1.6" step="0.01" value="1"></div>
+      </div>
+      <div>
+        <h3>LT3-R</h3>
+        <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" type="range" min="-200" max="200" step="1" value="0"></div>
+        <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" type="range" min="-120" max="120" step="1" value="0"></div>
+        <div class="row"><label>Scale <output id="o_rs">1</output></label><input id="v_rs" type="range" min="0.6" max="1.6" step="0.01" value="1"></div>
+      </div>
+    </div>
+    <div class="hint">Buttons are on the left; Joystick is on the right. Background of the bay is transparent.</div>
+    <div style="margin-top:8px"><button id="ftClose" class="small">Close</button></div>
+  </div>
+</template>
+<!-- [FLOAT-TUNER:TPL-END] -->
+
+<!-- [FLOAT-TUNER:SCRIPT] -->
+<script>
+(function(){
+  // Create root and toggle button
+  var root = document.createElement('div');
+  root.id = 'float-tuner-root';
+  root.style.position = 'fixed';
+  root.style.right = '12px';
+  root.style.bottom = '12px';
+  root.style.zIndex = '100000';
+  document.body.appendChild(root);
+  var shadow = root.attachShadow({mode:'open'});
+  var tpl = document.getElementById('float-tuner-tpl');
+  if (tpl) shadow.appendChild(tpl.content.cloneNode(true));
+
+  var panel = shadow.getElementById('ftPanel');
+  var btn = document.createElement('button');
+  btn.id = 'ftToggle';
+  Object.assign(btn.style, {
+    position:'fixed', right:'12px', bottom:'12px', width:'40px', height:'40px',
+    borderRadius:'50%', border:'0', background:'#1a1410', color:'#e6d7b6',
+    boxShadow:'0 6px 16px rgba(0,0,0,.6)', cursor:'pointer', zIndex:'100001', fontSize:'18px'
+  });
+  btn.textContent='🎛️';
+  document.body.appendChild(btn);
+  panel.style.display = 'none';
+  btn.addEventListener('click', function(){
+    panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+  });
+  shadow.getElementById('ftClose').addEventListener('click', function(){ panel.style.display='none'; });
+
+  // Bind helper
+  function bind(id, outId, cb){
+    var el = shadow.getElementById(id), out = shadow.getElementById(outId);
+    if(!el) return;
+    function up(){ out && (out.textContent = el.value); cb && cb(el.value); }
+    el.addEventListener('input', up); up();
+  }
+
+  // Controls
+  var bottom = document.getElementById('element-bottom');
+  bind('v_bh','o_bh', function(v){ if(bottom){ bottom.style.height = v + 'px'; } });
+
+  // Access iframe content for left/right panels
+  var iframe = document.getElementById('controlsFrame');
+  function getDoc(){ try{ return iframe && (iframe.contentDocument || iframe.contentWindow.document); }catch(e){ return null; } }
+  function setTransform(el, x, y, s){
+    if(!el) return;
+    el.style.transform = 'translate('+x+'px,'+y+'px) scale('+s+')';
+    el.style.transformOrigin = 'center center';
+  }
+  var L = { x:0, y:0, s:1 }, R = { x:0, y:0, s:1 };
+  function refreshTargets(){
+    var doc = getDoc();
+    if(!doc) return {};
+    return {
+      left:  doc.getElementById('left-area'),
+      right: doc.getElementById('right-area')
+    };
+  }
+  var targets = refreshTargets();
+  if(iframe){ iframe.addEventListener('load', function(){ targets = refreshTargets(); }); }
+
+  bind('v_lx','o_lx', function(v){ L.x = parseFloat(v)||0; setTransform(targets.left,  L.x, L.y, L.s); });
+  bind('v_ly','o_ly', function(v){ L.y = parseFloat(v)||0; setTransform(targets.left,  L.x, L.y, L.s); });
+  bind('v_ls','o_ls', function(v){ L.s = parseFloat(v)||1; setTransform(targets.left,  L.x, L.y, L.s); });
+
+  bind('v_rx','o_rx', function(v){ R.x = parseFloat(v)||0; setTransform(targets.right, R.x, R.y, R.s); });
+  bind('v_ry','o_ry', function(v){ R.y = parseFloat(v)||0; setTransform(targets.right, R.x, R.y, R.s); });
+  bind('v_rs','o_rs', function(v){ R.s = parseFloat(v)||1; setTransform(targets.right, R.x, R.y, R.s); });
+
+  // Ensure background is transparent for the bay
+  var cs = document.querySelector('#element-bottom .control-screen');
+  if (cs) cs.style.background = 'transparent';
+})();
+</script>
+
+
+<!-- [LT2:TPL-START] -->
+<template id="lt2-tuner-tpl">
+  <style>
+    :host{ all:initial; }
+    .wrap{ position:fixed; right:64px; bottom:12px; width:320px; max-height:72vh; overflow:auto;
+      background:#0f0f10; color:#e7e7e7; font:12px/1.4 ui-sans-serif,system-ui; border-radius:14px;
+      box-shadow:0 12px 28px rgba(0,0,0,.65); border:1px solid #2c2c2e; padding:12px; }
+    h3{ margin:0 0 8px 0; font-size:13px; letter-spacing:.02em; }
+    .row{ display:grid; grid-template-columns: 1fr 64px; gap:8px; align-items:center; margin:6px 0; }
+    label{ font-size:12px; }
+    input[type=range]{ width:100%; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .hint{ font-size:11px; opacity:.7; margin-top:6px; }
+    button.small{ padding:6px 10px; border:0; background:#222; color:#ddd; border-radius:8px; cursor:pointer; }
+  </style>
+  <div class="wrap" id="lt2Panel" tabindex="-1">
+    <h3>LT2 • Floating Controls</h3>
+    <div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label><input id="v_bh" type="range" min="80" max="360" step="1" value="240"></div>
+    <div class="grid2">
+      <div>
+        <h3>LT2-L</h3>
+        <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" type="range" min="-240" max="240" step="1" value="0"></div>
+        <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" type="range" min="-200" max="200" step="1" value="0"></div>
+        <div class="row"><label>Scale Content <output id="o_ls">1</output></label><input id="v_ls" type="range" min="0.6" max="1.8" step="0.01" value="1"></div>
+      </div>
+      <div>
+        <h3>LT3-R</h3>
+        <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" type="range" min="-240" max="240" step="1" value="0"></div>
+        <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" type="range" min="-200" max="200" step="1" value="0"></div>
+        <div class="row"><label>Scale Content <output id="o_rs">1</output></label><input id="v_rs" type="range" min="0.6" max="1.8" step="0.01" value="1"></div>
+      </div>
+    </div>
+    <div class="hint">Wrappers translate only. Content scales inside panels.</div>
+    <h3>Fine Tune • LT2-L Content</h3>
+    <div class="row"><label>Content X <output id="o_lcx">0</output>px</label><input id="v_lcx" type="range" min="-200" max="200" step="1" value="0"></div>
+    <div class="row"><label>Content Y <output id="o_lcy">0</output>px</label><input id="v_lcy" type="range" min="-200" max="200" step="1" value="0"></div>
+    <div class="row"><label>Content Scale X <output id="o_lsx">1</output></label><input id="v_lsx" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
+    <div class="row"><label>Content Scale Y <output id="o_lsy">1</output></label><input id="v_lsy" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
+
+    <h3>Fine Tune • LT3-R Content</h3>
+    <div class="row"><label>Content X <output id="o_rcx">0</output>px</label><input id="v_rcx" type="range" min="-200" max="200" step="1" value="0"></div>
+    <div class="row"><label>Content Y <output id="o_rcy">0</output>px</label><input id="v_rcy" type="range" min="-200" max="200" step="1" value="0"></div>
+    <div class="row"><label>Content Scale X <output id="o_rsx">1</output></label><input id="v_rsx" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
+    <div class="row"><label>Content Scale Y <output id="o_rsy">1</output></label><input id="v_rsy" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
+    <div style="margin-top:8px"><button id="lt2Close" class="small">Close</button></div>
+  </div>
+</template>
+<!-- [LT2:TPL-END] -->
+
+
+<!-- [LT2:SCRIPT] -->
+<script>
+(function(){
+  var root = document.createElement('div');
+  root.id = 'lt2-root';
+  root.style.position='fixed'; root.style.right='12px'; root.style.bottom='12px'; root.style.zIndex='100010';
+  document.body.appendChild(root);
+  var sh = root.attachShadow({mode:'open'});
+  var tpl = document.getElementById('lt2-tuner-tpl'); if(tpl) sh.appendChild(tpl.content.cloneNode(true));
+
+  var tgl = document.createElement('button');
+  Object.assign(tgl.style,{position:'fixed', right:'60px', bottom:'12px', width:'40px', height:'40px', borderRadius:'50%', border:'0', background:'#1a1410', color:'#e6d7b6', boxShadow:'0 6px 16px rgba(0,0,0,.6)', cursor:'pointer', zIndex:'100011', fontSize:'18px'});
+  tgl.id='lt2Toggle'; tgl.textContent='LT2'; document.body.appendChild(tgl);
+  var panel = sh.getElementById('lt2Panel'); panel.style.display='none';
+  tgl.addEventListener('click', function(){ panel.style.display = panel.style.display==='none' ? 'block':'none'; });
+  sh.getElementById('lt2Close').addEventListener('click', function(){ panel.style.display='none'; });
+
+  function bind(id, outId, cb){ var el=sh.getElementById(id), out=sh.getElementById(outId); if(!el) return;
+    function up(){ out && (out.textContent=el.value); cb && cb(parseFloat(el.value)); }
+    el.addEventListener('input', up); up(); }
+
+  var bottom = document.getElementById('element-bottom');
+  bind('v_bh','o_bh', function(v){ if(bottom){ bottom.style.height = v + 'px'; }});
+
+  var iframe = document.getElementById('controlsFrame');
+  function doc(){ try{ return iframe && (iframe.contentDocument || iframe.contentWindow.document); }catch(e){ return null; } }
+
+  function ensureStyle(){
+    var d = doc(); if(!d) return false;
+    if(d.getElementById('lt2-style')) return true;
+    var css = d.createElement('style'); css.id='lt2-style';
+    css.textContent = [
+      '.col-left .pad{ transform: translate(var(--lt2-lx,0px), var(--lt2-ly,0px)) scale(var(--lt2-left,1)); transform-origin:center center; overflow:hidden; }',
+      '.col-right .pad{ transform: translate(var(--lt2-rx,0px), var(--lt2-ry,0px)) scale(var(--lt2-right,1)); transform-origin:center center; overflow:hidden; }',
+      /* Force canvases to match the pad viewport so overlays line up */
+      '#btn2_panel{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
+      '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
+      '.col-left .pad .btn2-overlay,',
+      '.col-left .pad .btn2_keyproxy,',
+      '.col-left .pad #btn2_panel{',
+      '  transform: translate(var(--lt2-lcx,0px), var(--lt2-lcy,0px)) scale(var(--lt2-lsx,1), var(--lt2-lsy,1));',
+      '  transform-origin: center center;',
+      '}',
+      '.col-right .pad #jpad_canvas,',
+      '.col-right .pad #jpad_state,',
+      '.col-right .pad #jpad_status{',
+      '  transform: translate(var(--lt2-rcx,0px), var(--lt2-rcy,0px)) scale(var(--lt2-rsx,1), var(--lt2-rsy,1));',
+      '  transform-origin: center center;',
+      '}',
+    ].join('\n');
+    d.head.appendChild(css);
+    return true;
+  }
+
+  function setVar(k,v){ var d=doc(); if(!d) return; d.documentElement.style.setProperty(k, v); }
+  // Defaults
+  setVar('--lt2-left','1');
+  setVar('--lt2-right','1');
+  setVar('--lt2-lx','0px');
+  setVar('--lt2-ly','0px');
+  setVar('--lt2-rx','0px');
+  setVar('--lt2-ry','0px');
+
+  
+  // Fine-tune content inside panels
+  bind('v_lcx','o_lcx', function(v){ ensureStyle(); setVar('--lt2-lcx', v+'px'); });
+  bind('v_lcy','o_lcy', function(v){ ensureStyle(); setVar('--lt2-lcy', v+'px'); });
+  bind('v_lsx','o_lsx', function(v){ ensureStyle(); setVar('--lt2-lsx', String(v)); });
+  bind('v_lsy','o_lsy', function(v){ ensureStyle(); setVar('--lt2-lsy', String(v)); });
+
+  bind('v_rcx','o_rcx', function(v){ ensureStyle(); setVar('--lt2-rcx', v+'px'); });
+  bind('v_rcy','o_rcy', function(v){ ensureStyle(); setVar('--lt2-rcy', v+'px'); });
+  bind('v_rsx','o_rsx', function(v){ ensureStyle(); setVar('--lt2-rsx', String(v)); });
+  bind('v_rsy','o_rsy', function(v){ ensureStyle(); setVar('--lt2-rsy', String(v)); });
+// Bind sliders to CSS vars inside iframe
+  bind('v_lx','o_lx', function(v){ ensureStyle(); setVar('--lt2-lx', v+'px'); });
+  bind('v_ly','o_ly', function(v){ ensureStyle(); setVar('--lt2-ly', v+'px'); });
+  bind('v_rx','o_rx', function(v){ ensureStyle(); setVar('--lt2-rx', v+'px'); });
+  bind('v_ry','o_ry', function(v){ ensureStyle(); setVar('--lt2-ry', v+'px'); });
+  bind('v_ls','o_ls', function(v){ ensureStyle(); setVar('--lt2-left', String(v)); });
+  bind('v_rs','o_rs', function(v){ ensureStyle(); setVar('--lt2-right', String(v)); });
+
+  // Init when iframe loads and via short polling
+  function init(){ ensureStyle(); var cs = document.querySelector('#element-bottom .control-screen'); if(cs){ cs.style.background='transparent'; } }
+  if(iframe){ iframe.addEventListener('load', init); }
+  init();
+  var n=0, timer=setInterval(function(){ init(); if(++n>30) clearInterval(timer); }, 200);
+
+  // Escape closes panel
+  function onKey(e){ if(e.key==='Escape'){ panel.style.display='none'; } }
+  document.addEventListener('keydown', onKey);
+})();
+</script>
+
+
+
+<script id="lt2-shadow-split-loader">
+(function(){
+  function injectIntoIframe(){
+    var iframe = document.getElementById('controlsFrame');
+    if(!iframe) return;
+    function tryRun(){
+      try{
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if(!doc || !doc.body) return false;
+        if (doc.getElementById('lt2-shadow-split')) return true; // already injected
+
+        var s = doc.createElement('script');
+        s.id = 'lt2-shadow-split';
+        s.type = 'text/javascript';
+        s.text = `
+          (function(){
+            if (window.__lt2ShadowSplitApplied) return;
+            window.__lt2ShadowSplitApplied = true;
+
+            function makeShadow(padEl, side){
+              if (!padEl) return;
+              var host = document.createElement('div');
+              host.setAttribute('data-lt2-shadow', side);
+              host.style.position = 'absolute';
+              host.style.inset = '0';
+              padEl.style.position = 'relative';
+              padEl.appendChild(host);
+              var root = host.attachShadow({mode:'open'});
+
+              var style = document.createElement('style');
+              style.textContent = [
+                ':host{ display:block; width:100%; height:100%; }',
+                '#control-ui-L, #control-ui-R{ position:relative; width:100%; height:100%; aspect-ratio:1/1; }',
+                '#control-ui-L, #control-ui-R{ outline: none; }',
+                'canvas, .btn2-overlay, .btn2_keyproxy, #jpad_status, #jpad_state{',
+                '  position:absolute; inset:0; width:100% !important; height:100% !important;',
+                '  image-rendering: pixelated; pointer-events:auto;',
+                '}',
+                (side==='left' ? [
+                  '#btn2_panel, .btn2-overlay, .btn2_keyproxy{',
+                  '  transform: translate(var(--lt2-lcx,0px), var(--lt2-lcy,0px)) scale(var(--lt2-lsx,1), var(--lt2-lsy,1));',
+                  '  transform-origin: center center;',
+                  '}'
+                ].join('\n') : ''),
+                (side==='left' ? '#control-ui-L{ outline: 1px solid rgba(255,255,0,.85); }' : ''),
+                (side==='right' ? '#control-ui-R{ outline: 1px solid rgba(255,105,180,.85); }' : ''),
+                (side==='right' ? [
+                  '#jpad_canvas, #jpad_status, #jpad_state{',
+                  '  transform: translate(var(--lt2-rcx,0px), var(--lt2-rcy,0px)) scale(var(--lt2-rsx,1), var(--lt2-rsy,1));',
+                  '  transform-origin: center center;',
+                  '}'
+                ].join('\n') : '')
+              ].join('\n');
+
+              var wrap = document.createElement('div');
+              wrap.id = (side==='left' ? 'control-ui-L' : 'control-ui-R');
+              root.appendChild(style);
+              root.appendChild(wrap);
+
+              if (side==='left'){
+                var btn = padEl.querySelector('#btn2_panel');
+                if (btn) wrap.appendChild(btn);
+                var ov = padEl.querySelector('.btn2-overlay');
+                if (ov) wrap.appendChild(ov);
+                var kp = padEl.querySelector('.btn2_keyproxy');
+                if (kp) wrap.appendChild(kp);
+              } else {
+                var jp = padEl.querySelector('#jpad_canvas');
+                if (jp) wrap.appendChild(jp);
+                var js = padEl.querySelector('#jpad_status');
+                if (js) wrap.appendChild(js);
+                var st = padEl.querySelector('#jpad_state');
+                if (st) wrap.appendChild(st);
+              }
+            }
+
+            function run(){
+              var leftPad = document.querySelector('.col-left .pad');
+              var rightPad = document.querySelector('.col-right .pad');
+              if (leftPad && !leftPad.querySelector('[data-lt2-shadow="left"]')) makeShadow(leftPad,'left');
+              if (rightPad && !rightPad.querySelector('[data-lt2-shadow="right"]')) makeShadow(rightPad,'right');
+            }
+
+            // Some builds populate the pads after load; observe if needed
+            var mo = new MutationObserver(function(){
+              run();
+            });
+            mo.observe(document.documentElement, {childList:true, subtree:true});
+
+            if (document.readyState === 'loading'){
+              document.addEventListener('DOMContentLoaded', run);
+            } else {
+              run();
+            }
+          })();
+        `;
+        doc.body.appendChild(s);
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    if (!tryRun()){
+      // Retry after load and on a short timer to catch late DOM
+      iframe.addEventListener('load', tryRun, {once:true});
+      var retries = 20;
+      var t = setInterval(function(){
+        if (tryRun() || --retries <= 0) clearInterval(t);
+      }, 250);
+    }
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', injectIntoIframe);
+  } else {
+    injectIntoIframe();
+  }
+})();
+</script>
 
 </body>
 </html>
