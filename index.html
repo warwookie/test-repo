@@ -30,8 +30,7 @@
 
     /* bottom-pinned layout (single body rule above) */
 
-    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center;   transform: translateX(-50%);
-height: auto; max-width: 100vw; margin: 0; }
+    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center; height: auto; max-width: 100vw; margin: 0; }
 
     .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
       radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
@@ -94,7 +93,7 @@ height: auto; max-width: 100vw; margin: 0; }
 
     /* Tighter middle-slot spacing */
     .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
-    #ui-hearts { gap: 2px; }
+    
     #ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 20px; }
 
     /* Pause button should not force wide box */
@@ -149,7 +148,7 @@ height: auto; max-width: 100vw; margin: 0; }
     @media (max-width: 390px){
       :root{ --center-cell: 86px; }
       .hud, .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 2px; }
-      #ui-sneakers{gap:2px;} #ui-hearts{gap:2px;} #ui-fires{gap:2px;} #ui-powers{gap:5px;}
+      #ui-sneakers{gap:2px;}  #ui-fires{gap:2px;} #ui-powers{gap:5px;}
       .sneaker-outline, .sneaker-fill,
       .heart-outline,   .heart-fill,
       .fire-outline,    .fire-fill,
@@ -172,13 +171,11 @@ height: auto; max-width: 100vw; margin: 0; }
       -webkit-user-select: none; user-select: none;
       touch-action: none; /* block pinch/pan */
       -ms-touch-action: none;
-  }
-</style>
+  }</style>
 <style id="controls-constraints">
   #element-controls{ position:relative; overflow:hidden; min-height:300px; }
   #controlsFrame{ position:absolute; inset:12px; z-index:1; width:calc(100% - 24px); height:calc(100% - 24px); }
-  .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }
-</style>
+  .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }</style>
 <style>
 /* LIFE tab interactive state */
 .tab-life { cursor: pointer; }
@@ -188,21 +185,13 @@ height: auto; max-width: 100vw; margin: 0; }
   filter: saturate(1.4);
 }
 
-/* Stopwatch button uses existing .power rules; add button reset */
-#power-stopwatch { background: transparent; border: 0; padding: 0; margin: 0; }
-#power-stopwatch:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
-</style><style>
+/* Stopwatch button uses existing .power rules; add button reset */</style><style>
 /* Hide any leftover injected stopwatch button if present */
-#power-stopwatch { display: none ; }
 
 /* Power-ups word as activator visual states */
 .powerups-activator { cursor: pointer; }
 .powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
-.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }
-</style><style>
-.powerups-activator { cursor: pointer; }
-.powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
-.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }
+.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }</style><style>
 </style></head>
 <body>
 <div class="fixed-container" id="mainContainer">
@@ -259,7 +248,7 @@ height: auto; max-width: 100vw; margin: 0; }
   /* hide demo toggles if present */
   #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none ; }
   /* force joystick readout visible */
-  #jpad_status { display:block ; visibility:visible ; opacity:1 ; }
+  #jpad_status { display: none !important; visibility: hidden !important; opacity: 0 !important; }
   /* borders for debug */
   #control-ui{ outline:1px solid rgba(0,255,255,.7); }
   #left-area{ outline:1px solid rgba(255,0,0,.7); }
@@ -377,7 +366,11 @@ height: auto; max-width: 100vw; margin: 0; }
   &lt;/main&gt;
 &lt;/div&gt;
 
-&lt;script&gt;
+&lt;script&gt;function __jpadNoise(v){ return JPAD_LIGHT_MODE ? 0 : v; }
+// === Joystick Light Mode &amp; FPS ===
+const JPAD_LIGHT_MODE = (typeof window.name === 'string' &amp;&amp; /(?:^|;)\s*jpadLight=1\b/.test(window.name)) ? true : false;
+let __jpadFpsLast = 0, __jpadFps = 0, __jpadFpsT = 0;
+
 /* Prevent page scrolling during control interactions */
 document.addEventListener('touchmove', (e)=&gt;{
   if(e.target.closest('#left-area, #right-area')) e.preventDefault();
@@ -403,7 +396,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     if(newWidth&lt;1||newHeight&lt;1) return;
     cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
 
-    const targetRows=24;
+    const targetRows = JPAD_LIGHT_MODE ? 18 : 24;
     PITCH=H/targetRows; DOT_R=PITCH*0.21;
 
     COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
@@ -511,7 +504,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   }
 
   function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
-  function dotDraw(x,y,r,level){ if(level&lt;=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level&gt;=1?RED:(level&gt;=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=8*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
+  function dotDraw(x,y,r,level){ if(level&lt;=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level&gt;=1?RED:(level&gt;=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=(JPAD_LIGHT_MODE ? 0 : 8)*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
   function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d&lt;bd){ bd=d; best=s; } } return best; }
   function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
   function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
@@ -1549,34 +1542,30 @@ document.addEventListener('touchmove', (e)=&gt;{
 
 })();
 })();
-&lt;/script&gt;
 
-&lt;script id=&quot;sq-probe-js&quot;&gt;
-(() =&gt; {
-  const box = document.createElement('div');
-  box.id = 'sqProbeBox';
-  Object.assign(box.style, {
-    position:'absolute', right:'8px', top:'8px', zIndex:'9999',
-    font:'11px ui-monospace,Consolas,Menlo,monospace',
-    color:'#fff', background:'rgba(0,0,0,.65)', padding:'6px 8px', borderRadius:'8px'
-  });
-  document.body.appendChild(box);
-  function sz(el){ if(!el) return '—'; const r=el.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)}`; }
-  function upd(){
-    const ui = document.getElementById('control-ui');
-    const L  = document.getElementById('left-area');
-    const R  = document.getElementById('right-area');
-    const panel = document.getElementById('btn2_panel');
-    const jpad  = document.getElementById('jpad_canvas');
-    box.textContent = [
-      `ui ${sz(ui)}`,
-      `L  ${sz(L)}  panel ${sz(panel)}`,
-      `R  ${sz(R)}  jpad  ${sz(jpad)}`
-    ].join('  |  ');
+// FPS meter hook
+(function(){
+  const __fpsUpdateMs = 500;
+  function __jpadFpsOnFrame(ts){
+    if(__jpadFpsLast){ const dt = ts - __jpadFpsLast; if (dt&gt;0) __jpadFps = 1000/dt; }
+    __jpadFpsLast = ts;
+    if(!__jpadFpsT || ts - __jpadFpsT &gt;= __fpsUpdateMs){
+      __jpadFpsT = ts;
+      try{
+        const el = document.getElementById('jpad_status');
+        if(el){
+          const base = el.textContent.replace(/\s*FPS:.*$/,'').trim();
+          el.textContent = base + '  FPS: ' + Math.round(__jpadFps);
+        }
+      }catch(e){}
+    }
+    requestAnimationFrame(__jpadFpsOnFrame);
   }
-  upd(); setInterval(upd, 300);
+  requestAnimationFrame(__jpadFpsOnFrame);
 })();
 &lt;/script&gt;
+
+
 
 &lt;/body&gt;
 &lt;/html&gt;
@@ -1695,8 +1684,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     flex: 1; border: none; background: var(--settings-border); color: var(--settings-accent); 
     border-radius: 6px; padding: 8px; cursor: pointer; min-width: 70px; font-size: 11px; font-weight: 600;
   }
-  #copyMsg { font-size: 10px; opacity: 0; transition: opacity .3s ease; margin-left: 10px; white-space: nowrap; color: #ff3a2f; }
-</style>
+  #copyMsg { font-size: 10px; opacity: 0; transition: opacity .3s ease; margin-left: 10px; white-space: nowrap; color: #ff3a2f; }</style>
 <button aria-label="Open settings" id="settingsBtn" title="Settings">⚙️</button>
 <div aria-label="Settings" aria-modal="false" id="settingsPanel" role="dialog" tabindex="-1">
 <div id="sHead">
@@ -2759,171 +2747,59 @@ document.addEventListener('touchmove', (e)=&gt;{
 <script>
 (function(){
   function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready(function(){
-    const iframe = document.getElementById('controlsFrame');
-
-    // --- LIFE tab wiring ---
-    const lifeTab = document.querySelector('#element-tabs > div:nth-child(2)');
-    if (lifeTab){
-      lifeTab.classList.add('tab-life');
-      lifeTab.setAttribute('role','button');
-      lifeTab.setAttribute('tabindex','0');
-      lifeTab.setAttribute('aria-pressed','false');
-      const setLifeActive=(on)=>{
-        lifeTab.classList.toggle('active', !!on);
-        lifeTab.setAttribute('aria-pressed', on ? 'true' : 'false');
-      };
-      const triggerLaserSpecial=()=>{
-        try{
-          if(!iframe || !iframe.contentWindow) return;
-          const doc = iframe.contentWindow.document;
-          const btn = doc && doc.getElementById('btn2_special');
-          if(btn){ btn.click(); }
-          // Visual feedback pulse
-          setLifeActive(true);
-          setTimeout(()=>setLifeActive(false), 700);
-        }catch(_){ /* no-op */ }
-      };
-      lifeTab.addEventListener('click', triggerLaserSpecial);
-      lifeTab.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          triggerLaserSpecial();
-        }
-      });
-
-      // Also reflect clicks inside iframe to glow LIFE tab briefly
-      const attachIframeListeners=()=>{
-        try{
-          const doc = iframe.contentWindow.document;
-          const btn = doc.getElementById('btn2_special');
-          if(btn){
-            btn.addEventListener('click', ()=>{
-              setLifeActive(true);
-              setTimeout(()=>setLifeActive(false), 700);
-            });
-          }
-        }catch(_){}
-      };
-      if(iframe){ iframe.addEventListener('load', attachIframeListeners); if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){ attachIframeListeners(); } }
-    }
-
-    // --- Stopwatch in powers HUD ---
-    const powers = document.getElementById('ui-powers');
-    let stopwatch = document.getElementById('power-stopwatch');
-    if(powers && !stopwatch){
-      stopwatch = document.createElement('button');
-      stopwatch.id = 'power-stopwatch';
-      stopwatch.className = 'power';
-      stopwatch.type = 'button';
-      stopwatch.setAttribute('aria-pressed','false');
-      stopwatch.setAttribute('aria-label','Timer power-up');
-      stopwatch.innerHTML = '<i class="ph-bold ph-timer" aria-hidden="true"></i><i class="ph-fill ph-timer" aria-hidden="true"></i>';
-      powers.prepend(stopwatch);
-    }
-
-    function syncFromIframe(){
-      try{
-        const doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
-        if(!doc) return;
-        const timerBtn = doc.getElementById('btn2_timer');
-        if(stopwatch && timerBtn){
-          const on = timerBtn.classList.contains('active');
-          stopwatch.classList.toggle('active', on);
-          stopwatch.setAttribute('aria-pressed', on ? 'true' : 'false');
-        }
-      }catch(_){}
-    }
-
-    function toggleTimer(){
-      try{
-        const doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
-        if(!doc) return;
-        const timerBtn = doc.getElementById('btn2_timer');
-        if(timerBtn){ timerBtn.click(); }
-        // Re-sync shortly after click
-        setTimeout(syncFromIframe, 50);
-      }catch(_){}
-    }
-
-    if(stopwatch){
-      stopwatch.addEventListener('click', toggleTimer);
-      stopwatch.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          toggleTimer();
-        }
-      });
-    }
-
-    if(iframe){
-      iframe.addEventListener('load', syncFromIframe);
-      if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){ syncFromIframe(); }
-    }
-  });
-})();
+  ready
 </script><script>
-// Patch: ensure clicks on #ui-powers > div:nth-child(1) > i.ph-fill.ph-timer toggle the timer.
 (function(){
-  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready(function(){
+  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  onReady(function(){
     var iframe = document.getElementById('controlsFrame');
-    var powers = document.getElementById('ui-powers');
-    if(!powers) return;
+    var lifeTab = document.querySelector('#element-tabs > div:nth-child(2)');
+    if(!lifeTab) return;
+    lifeTab.classList.add('tab-life');
+    lifeTab.setAttribute('role','button');
+    lifeTab.setAttribute('tabindex','0');
+    lifeTab.setAttribute('aria-pressed','false');
 
-    var firstDiv = powers.querySelector(':scope > div:nth-child(1)') || document.querySelector('#ui-powers > div:nth-child(1)');
-    if(!firstDiv) return;
-
-    // Provide button semantics to the first power widget as well.
-    if(!firstDiv.hasAttribute('role')) firstDiv.setAttribute('role','button');
-    if(!firstDiv.hasAttribute('tabindex')) firstDiv.tabIndex = 0;
-    if(!firstDiv.hasAttribute('aria-pressed')) firstDiv.setAttribute('aria-pressed','false');
-
-    function syncFromIframe(){
+    function setLifeActive(on){
+      lifeTab.classList.toggle('active', !!on);
+      lifeTab.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    function clickInControls(){
       try{
-        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
-        if(!doc) return;
-        var timerBtn = doc.getElementById('btn2_timer');
-        if(timerBtn){
-          var on = timerBtn.classList.contains('active');
-          firstDiv.classList.toggle('active', on);
-          firstDiv.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if(!iframe || !iframe.contentWindow) return;
+        var d = iframe.contentDocument || iframe.contentWindow.document;
+        var btn = d && d.getElementById('btn2_special');
+        if(btn){ btn.click(); }
+        setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700);
+      }catch(_){/* no-op */}
+    }
+    lifeTab.addEventListener('click', clickInControls);
+    lifeTab.addEventListener('keydown', function(e){
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); clickInControls(); }
+    });
+
+    // Reflect iframe clicks back to the LIFE tab (visual pulse only)
+    function attachIframeListeners(){
+      try{
+        var d = iframe && (iframe.contentDocument || iframe.contentWindow && iframe.contentWindow.document);
+        if(!d) return;
+        var btn = d.getElementById('btn2_special');
+        if(btn){
+          btn.addEventListener('click', function(){ setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700); });
         }
       }catch(_){}
     }
-
-    function toggleTimerFix(){
-      try{
-        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
-        if(!doc) return;
-        var timerBtn = doc.getElementById('btn2_timer');
-        if(timerBtn){ timerBtn.click(); }
-        setTimeout(syncFromIframe, 50);
-      }catch(_){}
-    }
-
-    // Click on either outline or fill timer icon should toggle.
-    firstDiv.addEventListener('click', function(e){
-      var icon = e.target.closest('.ph-timer');
-      if(icon){ e.preventDefault(); toggleTimerFix(); }
-    });
-
-    // Keyboard support for the whole widget.
-    firstDiv.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' || e.key === ' '){
-        e.preventDefault();
-        toggleTimerFix();
-      }
-    });
-
-    // Keep in sync when iframe loads.
     if(iframe){
-      iframe.addEventListener('load', syncFromIframe);
-      if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){ syncFromIframe(); }
+      iframe.addEventListener('load', attachIframeListeners, { once:false });
+      // if already loaded
+      try{
+        if((iframe.contentDocument||iframe.contentWindow.document).readyState==='complete'){ attachIframeListeners(); }
+      }catch(_){}
     }
   });
 })();
-</script><script>
+</script>
+<script>
 (function(){
   function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
   ready(function(){
@@ -3066,8 +2942,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 #controlsFrame { border: 0 ; outline: 0 ; }
 
 /* Main container scale */
-#mainContainer { transform: translateX(-50%) scale(1.33222) ; transform-origin: top center ; }
-</style>
+#mainContainer { transform: translateX(-50%) scale(1.33222) ; transform-origin: top center ; }</style>
 
 
 <!-- [FLOAT-TUNER:TPL-START] -->
