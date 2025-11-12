@@ -190,6 +190,18 @@
 /* Stopwatch button uses existing .power rules; add button reset */
 #power-stopwatch { background: transparent; border: 0; padding: 0; margin: 0; }
 #power-stopwatch:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+</style><style>
+/* Hide any leftover injected stopwatch button if present */
+#power-stopwatch { display: none !important; }
+
+/* Power-ups word as activator visual states */
+.powerups-activator { cursor: pointer; }
+.powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
+.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }
+</style><style>
+.powerups-activator { cursor: pointer; }
+.powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
+.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }
 </style></head>
 <body>
 <div class="fixed-container" id="mainContainer">
@@ -2846,6 +2858,167 @@ document.addEventListener('touchmove', (e)=&gt;{
     if(iframe){
       iframe.addEventListener('load', syncFromIframe);
       if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){ syncFromIframe(); }
+    }
+  });
+})();
+</script><script>
+// Patch: ensure clicks on #ui-powers > div:nth-child(1) > i.ph-fill.ph-timer toggle the timer.
+(function(){
+  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function(){
+    var iframe = document.getElementById('controlsFrame');
+    var powers = document.getElementById('ui-powers');
+    if(!powers) return;
+
+    var firstDiv = powers.querySelector(':scope > div:nth-child(1)') || document.querySelector('#ui-powers > div:nth-child(1)');
+    if(!firstDiv) return;
+
+    // Provide button semantics to the first power widget as well.
+    if(!firstDiv.hasAttribute('role')) firstDiv.setAttribute('role','button');
+    if(!firstDiv.hasAttribute('tabindex')) firstDiv.tabIndex = 0;
+    if(!firstDiv.hasAttribute('aria-pressed')) firstDiv.setAttribute('aria-pressed','false');
+
+    function syncFromIframe(){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){
+          var on = timerBtn.classList.contains('active');
+          firstDiv.classList.toggle('active', on);
+          firstDiv.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+      }catch(_){}
+    }
+
+    function toggleTimerFix(){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){ timerBtn.click(); }
+        setTimeout(syncFromIframe, 50);
+      }catch(_){}
+    }
+
+    // Click on either outline or fill timer icon should toggle.
+    firstDiv.addEventListener('click', function(e){
+      var icon = e.target.closest('.ph-timer');
+      if(icon){ e.preventDefault(); toggleTimerFix(); }
+    });
+
+    // Keyboard support for the whole widget.
+    firstDiv.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        toggleTimerFix();
+      }
+    });
+
+    // Keep in sync when iframe loads.
+    if(iframe){
+      iframe.addEventListener('load', syncFromIframe);
+      if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){ syncFromIframe(); }
+    }
+  });
+})();
+</script><script>
+(function(){
+  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function(){
+    var iframe = document.getElementById('controlsFrame');
+    var tabsRoot = document.querySelector('#element-tabs');
+    if(!tabsRoot) return;
+
+    var boundEl = null;
+
+    function findPowerUpsEl(){
+      // 1) Try the exact selector first
+      var el = document.querySelector('#element-tabs > div:nth-child(3) > div > div');
+      if(el) return el;
+
+      // 2) Fallback: search descendants for text "power-ups" (case-insensitive, trim spaces)
+      var walker = document.createTreeWalker(tabsRoot, NodeFilter.SHOW_ELEMENT, null);
+      var candidate = null;
+      while(walker.nextNode()){
+        var n = walker.currentNode;
+        var txt = (n.textContent || '').trim().toLowerCase();
+        if(txt === 'power-ups' || txt === 'power ups' || txt.includes('power-ups')){
+          candidate = n;
+          break;
+        }
+      }
+      return candidate;
+    }
+
+    function syncFromIframe(target){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc || !target) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){
+          var on = timerBtn.classList.contains('active');
+          target.classList.toggle('active', on);
+          target.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+      }catch(_){}
+    }
+
+    function toggleTimer(target){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){ timerBtn.click(); }
+        setTimeout(function(){ syncFromIframe(target); }, 60);
+        if(target){
+          target.classList.add('pulse');
+          setTimeout(function(){ target.classList.remove('pulse'); }, 220);
+        }
+      }catch(_){}
+    }
+
+    function bind(){
+      var el = findPowerUpsEl();
+      if(!el || el === boundEl) return;
+      // Remove previous listeners by cloning if we had one
+      if(boundEl && boundEl.parentNode){
+        var clone = boundEl.cloneNode(true);
+        boundEl.parentNode.replaceChild(clone, boundEl);
+      }
+      boundEl = el;
+      // Semantics
+      boundEl.setAttribute('role','button');
+      boundEl.setAttribute('tabindex','0');
+      if(!boundEl.hasAttribute('aria-pressed')) boundEl.setAttribute('aria-pressed','false');
+      boundEl.classList.add('powerups-activator');
+
+      boundEl.addEventListener('click', function(e){
+        e.preventDefault();
+        toggleTimer(boundEl);
+      });
+      boundEl.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggleTimer(boundEl);
+        }
+      });
+
+      // Initial sync
+      syncFromIframe(boundEl);
+    }
+
+    bind();
+
+    // Re-bind if the tabs re-render
+    var mo = new MutationObserver(function(){ bind(); });
+    mo.observe(tabsRoot, { childList: true, subtree: true });
+
+    if(iframe){
+      iframe.addEventListener('load', function(){ syncFromIframe(boundEl); });
+      if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){
+        syncFromIframe(boundEl);
+      }
     }
   });
 })();
