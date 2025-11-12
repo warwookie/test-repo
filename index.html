@@ -30,7 +30,8 @@
 
     /* bottom-pinned layout (single body rule above) */
 
-    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center; height: auto; max-width: 100vw; margin: 0; }
+    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center;   transform: translateX(-50%);
+height: auto; max-width: 100vw; margin: 0; }
 
     .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
       radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
@@ -261,7 +262,7 @@
   #jpad_status { display:block ; visibility:visible ; opacity:1 ; }
   /* borders for debug */
   #control-ui{ outline:1px solid rgba(0,255,255,.7); }
-  #left-area{ outline: 1px solid rgba(255, 255, 0, .85); }
+  #left-area{ outline:1px solid rgba(255,0,0,.7); }
   #right-area{ outline:1px solid rgba(0,255,0,.7); }
   #btn2_panel{ outline:1px dashed rgba(255,128,0,.8); }
   #jpad_canvas{ outline:1px dashed rgba(128,128,255,.8); }
@@ -3091,13 +3092,13 @@ document.addEventListener('touchmove', (e)=&gt;{
 
     <div class="grid2">
       <div>
-        <h3>LT2-L</h3>
+        <h3>Buttons (Left)</h3>
         <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" type="range" min="-200" max="200" step="1" value="0"></div>
         <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" type="range" min="-120" max="120" step="1" value="0"></div>
         <div class="row"><label>Scale <output id="o_ls">1</output></label><input id="v_ls" type="range" min="0.6" max="1.6" step="0.01" value="1"></div>
       </div>
       <div>
-        <h3>LT3-R</h3>
+        <h3>Joystick (Right)</h3>
         <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" type="range" min="-200" max="200" step="1" value="0"></div>
         <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" type="range" min="-120" max="120" step="1" value="0"></div>
         <div class="row"><label>Scale <output id="o_rs">1</output></label><input id="v_rs" type="range" min="0.6" max="1.6" step="0.01" value="1"></div>
@@ -3207,30 +3208,19 @@ document.addEventListener('touchmove', (e)=&gt;{
     <div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label><input id="v_bh" type="range" min="80" max="360" step="1" value="240"></div>
     <div class="grid2">
       <div>
-        <h3>LT2-L</h3>
+        <h3>Buttons (Left)</h3>
         <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" type="range" min="-240" max="240" step="1" value="0"></div>
         <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" type="range" min="-200" max="200" step="1" value="0"></div>
         <div class="row"><label>Scale Content <output id="o_ls">1</output></label><input id="v_ls" type="range" min="0.6" max="1.8" step="0.01" value="1"></div>
       </div>
       <div>
-        <h3>LT3-R</h3>
+        <h3>Joystick (Right)</h3>
         <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" type="range" min="-240" max="240" step="1" value="0"></div>
         <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" type="range" min="-200" max="200" step="1" value="0"></div>
         <div class="row"><label>Scale Content <output id="o_rs">1</output></label><input id="v_rs" type="range" min="0.6" max="1.8" step="0.01" value="1"></div>
       </div>
     </div>
     <div class="hint">Wrappers translate only. Content scales inside panels.</div>
-    <h3>Fine Tune • LT2-L Content</h3>
-    <div class="row"><label>Content X <output id="o_lcx">0</output>px</label><input id="v_lcx" type="range" min="-200" max="200" step="1" value="0"></div>
-    <div class="row"><label>Content Y <output id="o_lcy">0</output>px</label><input id="v_lcy" type="range" min="-200" max="200" step="1" value="0"></div>
-    <div class="row"><label>Content Scale X <output id="o_lsx">1</output></label><input id="v_lsx" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
-    <div class="row"><label>Content Scale Y <output id="o_lsy">1</output></label><input id="v_lsy" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
-
-    <h3>Fine Tune • LT3-R Content</h3>
-    <div class="row"><label>Content X <output id="o_rcx">0</output>px</label><input id="v_rcx" type="range" min="-200" max="200" step="1" value="0"></div>
-    <div class="row"><label>Content Y <output id="o_rcy">0</output>px</label><input id="v_rcy" type="range" min="-200" max="200" step="1" value="0"></div>
-    <div class="row"><label>Content Scale X <output id="o_rsx">1</output></label><input id="v_rsx" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
-    <div class="row"><label>Content Scale Y <output id="o_rsy">1</output></label><input id="v_rsy" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
     <div style="margin-top:8px"><button id="lt2Close" class="small">Close</button></div>
   </div>
 </template>
@@ -3273,19 +3263,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       '.col-right .pad{ transform: translate(var(--lt2-rx,0px), var(--lt2-ry,0px)) scale(var(--lt2-right,1)); transform-origin:center center; overflow:hidden; }',
       /* Force canvases to match the pad viewport so overlays line up */
       '#btn2_panel{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
-      '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
-      '.col-left .pad .btn2-overlay,',
-      '.col-left .pad .btn2_keyproxy,',
-      '.col-left .pad #btn2_panel{',
-      '  transform: translate(var(--lt2-lcx,0px), var(--lt2-lcy,0px)) scale(var(--lt2-lsx,1), var(--lt2-lsy,1));',
-      '  transform-origin: center center;',
-      '}',
-      '.col-right .pad #jpad_canvas,',
-      '.col-right .pad #jpad_state,',
-      '.col-right .pad #jpad_status{',
-      '  transform: translate(var(--lt2-rcx,0px), var(--lt2-rcy,0px)) scale(var(--lt2-rsx,1), var(--lt2-rsy,1));',
-      '  transform-origin: center center;',
-      '}',
+      '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }'
     ].join('\n');
     d.head.appendChild(css);
     return true;
@@ -3300,18 +3278,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   setVar('--lt2-rx','0px');
   setVar('--lt2-ry','0px');
 
-  
-  // Fine-tune content inside panels
-  bind('v_lcx','o_lcx', function(v){ ensureStyle(); setVar('--lt2-lcx', v+'px'); });
-  bind('v_lcy','o_lcy', function(v){ ensureStyle(); setVar('--lt2-lcy', v+'px'); });
-  bind('v_lsx','o_lsx', function(v){ ensureStyle(); setVar('--lt2-lsx', String(v)); });
-  bind('v_lsy','o_lsy', function(v){ ensureStyle(); setVar('--lt2-lsy', String(v)); });
-
-  bind('v_rcx','o_rcx', function(v){ ensureStyle(); setVar('--lt2-rcx', v+'px'); });
-  bind('v_rcy','o_rcy', function(v){ ensureStyle(); setVar('--lt2-rcy', v+'px'); });
-  bind('v_rsx','o_rsx', function(v){ ensureStyle(); setVar('--lt2-rsx', String(v)); });
-  bind('v_rsy','o_rsy', function(v){ ensureStyle(); setVar('--lt2-rsy', String(v)); });
-// Bind sliders to CSS vars inside iframe
+  // Bind sliders to CSS vars inside iframe
   bind('v_lx','o_lx', function(v){ ensureStyle(); setVar('--lt2-lx', v+'px'); });
   bind('v_ly','o_ly', function(v){ ensureStyle(); setVar('--lt2-ly', v+'px'); });
   bind('v_rx','o_rx', function(v){ ensureStyle(); setVar('--lt2-rx', v+'px'); });
@@ -3331,128 +3298,6 @@ document.addEventListener('touchmove', (e)=&gt;{
 })();
 </script>
 
-
-
-<script id="lt2-shadow-split-loader">
-(function(){
-  function injectIntoIframe(){
-    var iframe = document.getElementById('controlsFrame');
-    if(!iframe) return;
-    function tryRun(){
-      try{
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        if(!doc || !doc.body) return false;
-        if (doc.getElementById('lt2-shadow-split')) return true; // already injected
-
-        var s = doc.createElement('script');
-        s.id = 'lt2-shadow-split';
-        s.type = 'text/javascript';
-        s.text = `
-          (function(){
-            if (window.__lt2ShadowSplitApplied) return;
-            window.__lt2ShadowSplitApplied = true;
-
-            function makeShadow(padEl, side){
-              if (!padEl) return;
-              var host = document.createElement('div');
-              host.setAttribute('data-lt2-shadow', side);
-              host.style.position = 'absolute';
-              host.style.inset = '0';
-              padEl.style.position = 'relative';
-              padEl.appendChild(host);
-              var root = host.attachShadow({mode:'open'});
-
-              var style = document.createElement('style');
-              style.textContent = [
-                ':host{ display:block; width:100%; height:100%; }',
-                '#control-ui-L, #control-ui-R{ position:relative; width:100%; height:100%; aspect-ratio:1/1; }',
-                '#control-ui-L, #control-ui-R{ outline: none; }',
-                'canvas, .btn2-overlay, .btn2_keyproxy, #jpad_status, #jpad_state{',
-                '  position:absolute; inset:0; width:100% !important; height:100% !important;',
-                '  image-rendering: pixelated; pointer-events:auto;',
-                '}',
-                (side==='left' ? [
-                  '#btn2_panel, .btn2-overlay, .btn2_keyproxy{',
-                  '  transform: translate(var(--lt2-lcx,0px), var(--lt2-lcy,0px)) scale(var(--lt2-lsx,1), var(--lt2-lsy,1));',
-                  '  transform-origin: center center;',
-                  '}'
-                ].join('\n') : ''),
-                (side==='left' ? '#control-ui-L{ outline: 1px solid rgba(255,255,0,.85); }' : ''),
-                (side==='right' ? '#control-ui-R{ outline: 1px solid rgba(255,105,180,.85); }' : ''),
-                (side==='right' ? [
-                  '#jpad_canvas, #jpad_status, #jpad_state{',
-                  '  transform: translate(var(--lt2-rcx,0px), var(--lt2-rcy,0px)) scale(var(--lt2-rsx,1), var(--lt2-rsy,1));',
-                  '  transform-origin: center center;',
-                  '}'
-                ].join('\n') : '')
-              ].join('\n');
-
-              var wrap = document.createElement('div');
-              wrap.id = (side==='left' ? 'control-ui-L' : 'control-ui-R');
-              root.appendChild(style);
-              root.appendChild(wrap);
-
-              if (side==='left'){
-                var btn = padEl.querySelector('#btn2_panel');
-                if (btn) wrap.appendChild(btn);
-                var ov = padEl.querySelector('.btn2-overlay');
-                if (ov) wrap.appendChild(ov);
-                var kp = padEl.querySelector('.btn2_keyproxy');
-                if (kp) wrap.appendChild(kp);
-              } else {
-                var jp = padEl.querySelector('#jpad_canvas');
-                if (jp) wrap.appendChild(jp);
-                var js = padEl.querySelector('#jpad_status');
-                if (js) wrap.appendChild(js);
-                var st = padEl.querySelector('#jpad_state');
-                if (st) wrap.appendChild(st);
-              }
-            }
-
-            function run(){
-              var leftPad = document.querySelector('.col-left .pad');
-              var rightPad = document.querySelector('.col-right .pad');
-              if (leftPad && !leftPad.querySelector('[data-lt2-shadow="left"]')) makeShadow(leftPad,'left');
-              if (rightPad && !rightPad.querySelector('[data-lt2-shadow="right"]')) makeShadow(rightPad,'right');
-            }
-
-            // Some builds populate the pads after load; observe if needed
-            var mo = new MutationObserver(function(){
-              run();
-            });
-            mo.observe(document.documentElement, {childList:true, subtree:true});
-
-            if (document.readyState === 'loading'){
-              document.addEventListener('DOMContentLoaded', run);
-            } else {
-              run();
-            }
-          })();
-        `;
-        doc.body.appendChild(s);
-        return true;
-      }catch(e){
-        return false;
-      }
-    }
-
-    if (!tryRun()){
-      // Retry after load and on a short timer to catch late DOM
-      iframe.addEventListener('load', tryRun, {once:true});
-      var retries = 20;
-      var t = setInterval(function(){
-        if (tryRun() || --retries <= 0) clearInterval(t);
-      }, 250);
-    }
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', injectIntoIframe);
-  } else {
-    injectIntoIframe();
-  }
-})();
-</script>
 
 </body>
 </html>
