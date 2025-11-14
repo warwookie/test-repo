@@ -3119,8 +3119,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 </div>
 </div>
 <div class="hint">Wrappers translate only. Content scales inside panels.</div>
-<div style="margin-top:8px"><button aria-pressed="false" class="small" id="lt2FloatToggle" type="button">Float</button>
-<button class="small" id="lt2Close">Close</button></div>
+<div style="margin-top:8px"> <button class="small" id="lt2FloatToggle" type="button">Float</button><button class="small" id="lt2Close">Close</button></div>
 </div>
 </template>
 <!-- [LT2:TPL-END] -->
@@ -3380,7 +3379,168 @@ document.addEventListener('touchmove', (e)=&gt;{
   function onKey(e){ if(e.key==='Escape'){ panel.style.display='none'; } }
   document.addEventListener('keydown', onKey);
 })();
-</script>
+</script><script>(function(){
+  function setup(){
+    var root = document.getElementById('lt2-root');
+    if(!root || !root.shadowRoot) return false;
+    var sh = root.shadowRoot;
+    var panel = sh.getElementById('lt2Panel');
+    var floatBtn = sh.getElementById('lt2FloatToggle');
+    var wrap = sh.querySelector('.wrap');
+    if(!panel || !floatBtn || !wrap) return false;
+
+    var floating = false;
+    var dragging = false;
+    var offsetX = 0, offsetY = 0;
+
+    function applyDocked(){
+      wrap.style.left = '';
+      wrap.style.top = '';
+      wrap.style.right = '64px';
+      wrap.style.bottom = '12px';
+    }
+
+    function applyFloating(x, y){
+      wrap.style.right = 'auto';
+      wrap.style.bottom = 'auto';
+      wrap.style.left = x + 'px';
+      wrap.style.top = y + 'px';
+    }
+
+    function startDrag(ev){
+      if(!floating) return;
+      var t = ev.target;
+      var tag = t && t.tagName ? t.tagName.toLowerCase() : '';
+      if(tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea' || tag === 'label')
+        return;
+      dragging = true;
+      var r = wrap.getBoundingClientRect();
+      offsetX = ev.clientX - r.left;
+      offsetY = ev.clientY - r.top;
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      ev.preventDefault();
+    }
+
+    function onMove(ev){
+      if(!dragging) return;
+      applyFloating(ev.clientX - offsetX, ev.clientY - offsetY);
+    }
+
+    function onUp(){
+      dragging = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    }
+
+    floatBtn.addEventListener('click', function(){
+      floating = !floating;
+      floatBtn.setAttribute('aria-pressed', floating ? 'true' : 'false');
+      floatBtn.textContent = floating ? 'Dock' : 'Float';
+      if(!floating){
+        applyDocked();
+      } else {
+        var r = wrap.getBoundingClientRect();
+        applyFloating(r.left, r.top);
+      }
+    });
+
+    panel.addEventListener('pointerdown', startDrag);
+    applyDocked();
+    return true;
+  }
+
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
+  }
+})();</script><script>(function(){
+  function setup(){
+    var root = document.getElementById('lt2-root');
+    if(!root || !root.shadowRoot) return false;
+    var sh = root.shadowRoot;
+
+    // Create floating COPY button near LT2 toggle
+    var btn = document.createElement('button');
+    Object.assign(btn.style,{
+      position:'fixed',
+      right:'60px',
+      bottom:'64px',
+      padding:'6px 10px',
+      borderRadius:'12px',
+      border:'0',
+      background:'#222',
+      color:'#eee',
+      font:'11px system-ui, -apple-system, BlinkMacSystemFont',
+      cursor:'pointer',
+      zIndex:'100012',
+      boxShadow:'0 4px 12px rgba(0,0,0,.6)'
+    });
+    btn.textContent = 'COPY JSON';
+    btn.id = 'lt2CopyJson';
+    document.body.appendChild(btn);
+
+    function getVal(id){
+      var el = sh.getElementById(id);
+      return el ? parseFloat(el.value) : null;
+    }
+
+    function buildPayload(){
+      return {
+        prompt: "Here is a COPY JSON snapshot from the unified LT2 tuner. Task: apply these values as the new default tuner state (outer + inner) without changing layout, theming, or behavior.",
+        outer:{
+          bottomHeight: getVal('ft_v_bh'),
+          left:{ x:getVal('ft_v_lx'), y:getVal('ft_v_ly'), scale:getVal('ft_v_ls') },
+          right:{ x:getVal('ft_v_rx'), y:getVal('ft_v_ry'), scale:getVal('ft_v_rs') }
+        },
+        inner:{
+          bottomHeight: getVal('v_bh'),
+          left:{ x:getVal('v_lx'), y:getVal('v_ly'), scale:getVal('v_ls') },
+          right:{ x:getVal('v_rx'), y:getVal('v_ry'), scale:getVal('v_rs') }
+        }
+      };
+    }
+
+    function doCopy(){
+      var json = JSON.stringify(buildPayload(), null, 2);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(json).then(function(){
+          btn.textContent = 'COPIED';
+          setTimeout(function(){ btn.textContent = 'COPY JSON'; }, 800);
+        }).catch(function(){
+          fallback();
+        });
+      } else {
+        fallback();
+      }
+
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = json;
+        ta.style.position='fixed';
+        ta.style.opacity='0';
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand('copy'); }catch(e){}
+        document.body.removeChild(ta);
+        btn.textContent = 'COPIED';
+        setTimeout(function(){ btn.textContent = 'COPY JSON'; }, 800);
+      }
+    }
+
+    btn.addEventListener('click', doCopy);
+    return true;
+  }
+
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
+  }
+})();</script>
 <!-- [UNIFIED-TUNER:SCRIPT] -->
 <script>
 (function(){
@@ -3602,83 +3762,5 @@ bindRange('v_rs', 'o_rs', function(raw) {
 </script>
 <!-- [UNIFIED-TUNER:SCRIPT-END] -->
 <div id="unified-tuner-root"></div>
-<script>(function(){
-  function setup(){
-    var root = document.getElementById('lt2-root');
-    if(!root || !root.shadowRoot) return false;
-    var sh = root.shadowRoot;
-    var panel = sh.getElementById('lt2Panel');
-    var floatBtn = sh.getElementById('lt2FloatToggle');
-    var wrap = sh.querySelector('.wrap');
-    if(!panel || !floatBtn || !wrap) return false;
-
-    var floating = false;
-    var dragging = false;
-    var offsetX = 0, offsetY = 0;
-
-    function applyDocked(){
-      wrap.style.left = '';
-      wrap.style.top = '';
-      wrap.style.right = '64px';
-      wrap.style.bottom = '12px';
-    }
-
-    function applyFloating(x, y){
-      wrap.style.right = 'auto';
-      wrap.style.bottom = 'auto';
-      wrap.style.left = x + 'px';
-      wrap.style.top = y + 'px';
-    }
-
-    function startDrag(ev){
-      if(!floating) return;
-      var t = ev.target;
-      var tag = t && t.tagName ? t.tagName.toLowerCase() : '';
-      if(tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea' || tag === 'label')
-        return;
-      dragging = true;
-      var r = wrap.getBoundingClientRect();
-      offsetX = ev.clientX - r.left;
-      offsetY = ev.clientY - r.top;
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp);
-      ev.preventDefault();
-    }
-
-    function onMove(ev){
-      if(!dragging) return;
-      applyFloating(ev.clientX - offsetX, ev.clientY - offsetY);
-    }
-
-    function onUp(ev){
-      dragging = false;
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-    }
-
-    floatBtn.addEventListener('click', function(){
-      floating = !floating;
-      floatBtn.setAttribute('aria-pressed', floating ? 'true' : 'false');
-      floatBtn.textContent = floating ? 'Dock' : 'Float';
-      if(!floating){
-        applyDocked();
-      } else {
-        var r = wrap.getBoundingClientRect();
-        applyFloating(r.left, r.top);
-      }
-    });
-
-    panel.addEventListener('pointerdown', startDrag);
-
-    applyDocked();
-    return true;
-  }
-
-  if(!setup()){
-    var tries = 0;
-    var timer = setInterval(function(){
-      if(setup() || ++tries > 40) clearInterval(timer);
-    }, 200);
-  }
-})();</script></body>
+</body>
 </html>
