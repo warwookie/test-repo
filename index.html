@@ -2982,76 +2982,87 @@ document.addEventListener('touchmove', (e)=&gt;{
 <!-- [FLOAT-TUNER:TPL-END] -->
 <!-- [FLOAT-TUNER:SCRIPT] -->
 <script>(function(){
-  var lt2root = document.getElementById('lt2-root');
-  if(!lt2root || !lt2root.shadowRoot) return;
-  var shadow = lt2root.shadowRoot;
-  var iframe = document.getElementById('controlsFrame');
+  function setup(){
+    var lt2root = document.getElementById('lt2-root');
+    if(!lt2root || !lt2root.shadowRoot) return false;
+    var shadow = lt2root.shadowRoot;
+    var iframe = document.getElementById('controlsFrame');
 
-  function getDoc(){
-    if(!iframe) return null;
-    try { return iframe.contentDocument || iframe.contentWindow.document; }
-    catch(e){ return null; }
-  }
-
-  function setTransform(el, x, y, s){
-    if(!el) return;
-    el.style.transform = 'translate(' + (x||0) + 'px,' + (y||0) + 'px) scale(' + (s||1) + ')';
-    el.style.transformOrigin = 'center center';
-  }
-
-  function bind(id, outId, cb){
-    var el = shadow.getElementById(id), out = shadow.getElementById(outId);
-    if(!el) return;
-    function up(){
-      if(out) out.textContent = el.value;
-      cb && cb(parseFloat(el.value));
+    function getDoc(){
+      if(!iframe) return null;
+      try { return iframe.contentDocument || iframe.contentWindow.document; }
+      catch(e){ return null; }
     }
-    el.addEventListener('input', up);
-    up();
+
+    function setTransform(el, x, y, s){
+      if(!el) return;
+      el.style.transform = 'translate(' + (x||0) + 'px,' + (y||0) + 'px) scale(' + (s||1) + ')';
+      el.style.transformOrigin = 'center center';
+    }
+
+    function bind(id, outId, cb){
+      var el = shadow.getElementById(id), out = shadow.getElementById(outId);
+      if(!el) return;
+      function up(){
+        if(out) out.textContent = el.value;
+        cb && cb(parseFloat(el.value));
+      }
+      el.addEventListener('input', up);
+      up();
+    }
+
+    var bottom = document.getElementById('element-bottom');
+    bind('ft_v_bh','ft_o_bh', function(v){
+      if(bottom){ bottom.style.height = v + 'px'; }
+    });
+
+    var targets = { left: null, right: null };
+    function refreshTargets(){
+      var d = getDoc();
+      if(!d) return;
+      targets.left  = d.getElementById('left-area');
+      targets.right = d.getElementById('right-area');
+    }
+    if(iframe){ iframe.addEventListener('load', refreshTargets); }
+    refreshTargets();
+
+    var L = { x:0, y:0, s:1 }, R = { x:0, y:0, s:1 };
+
+    bind('ft_v_lx','ft_o_lx', function(v){
+      L.x = parseFloat(v)||0;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+    bind('ft_v_ly','ft_o_ly', function(v){
+      L.y = parseFloat(v)||0;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+    bind('ft_v_ls','ft_o_ls', function(v){
+      L.s = parseFloat(v)||1;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+
+    bind('ft_v_rx','ft_o_rx', function(v){
+      R.x = parseFloat(v)||0;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+    bind('ft_v_ry','ft_o_ry', function(v){
+      R.y = parseFloat(v)||0;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+    bind('ft_v_rs','ft_o_rs', function(v){
+      R.s = parseFloat(v)||1;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+
+    return true;
   }
 
-  var bottom = document.getElementById('element-bottom');
-  bind('ft_v_bh','ft_o_bh', function(v){
-    if(bottom){ bottom.style.height = v + 'px'; }
-  });
-
-  var targets = { left: null, right: null };
-  function refreshTargets(){
-    var d = getDoc();
-    if(!d) return;
-    targets.left  = d.getElementById('left-area');
-    targets.right = d.getElementById('right-area');
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
   }
-  if(iframe){ iframe.addEventListener('load', refreshTargets); }
-  refreshTargets();
-
-  var L = { x:0, y:0, s:1 }, R = { x:0, y:0, s:1 };
-
-  bind('ft_v_lx','ft_o_lx', function(v){
-    L.x = parseFloat(v)||0;
-    setTransform(targets.left,  L.x, L.y, L.s);
-  });
-  bind('ft_v_ly','ft_o_ly', function(v){
-    L.y = parseFloat(v)||0;
-    setTransform(targets.left,  L.x, L.y, L.s);
-  });
-  bind('ft_v_ls','ft_o_ls', function(v){
-    L.s = parseFloat(v)||1;
-    setTransform(targets.left,  L.x, L.y, L.s);
-  });
-
-  bind('ft_v_rx','ft_o_rx', function(v){
-    R.x = parseFloat(v)||0;
-    setTransform(targets.right, R.x, R.y, R.s);
-  });
-  bind('ft_v_ry','ft_o_ry', function(v){
-    R.y = parseFloat(v)||0;
-    setTransform(targets.right, R.x, R.y, R.s);
-  });
-  bind('ft_v_rs','ft_o_rs', function(v){
-    R.s = parseFloat(v)||1;
-    setTransform(targets.right, R.x, R.y, R.s);
-  });
 })();</script>
 <!-- [LT2:TPL-START] -->
 <template id="lt2-tuner-tpl">
