@@ -1688,7 +1688,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <button aria-label="Open settings" id="settingsBtn" title="Settings">⚙️</button>
 <div aria-label="Settings" aria-modal="false" id="settingsPanel" role="dialog" tabindex="-1">
 <div id="sHead">
-<div id="sTitle">LAYOUT TUNER</div>
+<div id="sTitle">Settings 1</div>
 <div id="sBtns">
 <button id="sMin" title="Minimize" type="button">–</button>
 <button id="sClose" title="Close" type="button">✕</button>
@@ -1865,7 +1865,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="sv" id="o_ctrl_scale">1.00</div><button class="lock-btn">🔒</button></div>
 </div>
 </div>
-<div id="sFoot"><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
+<div id="sFoot"><button id="sMove" type="button">Move</button><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
 </div>
 </template>
 <!-- [SQ-TUNER:TPL-END] -->
@@ -1934,6 +1934,7 @@ document.addEventListener('touchmove', (e)=&gt;{
         settingsPanel.style.display = 'none';
       }
     }
+
   }
 
   // Event listeners
