@@ -1894,6 +1894,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   const sMin = shadow.getElementById('sMin');
   const sReset = shadow.getElementById('sReset');
   const btnCopyJSON = shadow.getElementById('btnCopyJSON');
+  const sMove = shadow.getElementById('sMove');
 
   // Toggle button for panel
   const toggleBtn = document.createElement('button');
@@ -1949,7 +1950,42 @@ document.addEventListener('touchmove', (e)=&gt;{
   });
   if (sMin) sMin.addEventListener('click', togglePanel);
 
-  // Scale guard implementation
+  
+  // Simple move drag for Settings 1 panel
+  if (sMove && settingsPanel) {
+    let isDraggingPanel = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    sMove.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const rect = settingsPanel.getBoundingClientRect();
+      dragOffsetX = ev.clientX - rect.left;
+      dragOffsetY = ev.clientY - rect.top;
+      isDraggingPanel = true;
+      window.addEventListener('pointermove', onPanelDrag);
+      window.addEventListener('pointerup', onPanelDragEnd);
+    });
+
+    function onPanelDrag(ev) {
+      if (!isDraggingPanel) return;
+      settingsPanel.style.position = 'fixed';
+      settingsPanel.style.left = (ev.clientX - dragOffsetX) + 'px';
+      settingsPanel.style.top = (ev.clientY - dragOffsetY) + 'px';
+      settingsPanel.style.right = 'auto';
+      settingsPanel.style.bottom = 'auto';
+    }
+
+    function onPanelDragEnd() {
+      if (!isDraggingPanel) return;
+      isDraggingPanel = false;
+      window.removeEventListener('pointermove', onPanelDrag);
+      window.removeEventListener('pointerup', onPanelDragEnd);
+    }
+  }
+
+
+// Scale guard implementation
   const vScale = shadow.getElementById('v_scale');
   const oScale = shadow.getElementById('o_scale');
   const mainContainer = document.getElementById('mainContainer');
