@@ -56,26 +56,6 @@
     @keyframes led-flicker { 0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } 50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); } 100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } }
 
     .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
-    .divider-inner {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      transform: translateX(-50%) scaleX(0.15);
-      transform-origin: center;
-      /* Dot-matrix red band, centered */
-      background-color: transparent;
-      background-image:
-        radial-gradient(circle, rgba(255,58,47,0.85) 0, rgba(255,58,47,0.85) 1px, transparent 2px);
-      background-size: 8px 8px;
-      background-repeat: repeat-x;
-      background-position: center;
-      mix-blend-mode: screen;
-      pointer-events: none;
-      transition: transform 260ms ease-out;
-    }
-
 
     .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18); box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; position: relative; }
 
@@ -1773,8 +1753,8 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="sg">
 <h4>CRT</h4>
 <div class="sr"><label for="v_crt_h">CRT Height (px)</label>
-<input id="v_crt_h" max="1000" min="0" step="1" type="number" value="0"/>
-<div class="sv" id="o_crt_h">0</div><button class="lock-btn">🔒</button></div>
+<input id="v_crt_h" max="1000" min="0" step="1" type="number" value="350"/>
+<div class="sv" id="o_crt_h">350</div><button class="lock-btn">🔒</button></div>
 </div>
 <!-- Marquee -->
 <div class="sg">
@@ -1852,23 +1832,23 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="sg">
 <h4>HUD Slot Heights</h4>
 <div class="sr"><label for="v_slotsneakers">Slot Sneakers Height</label>
-<input id="v_slotsneakers" max="60" min="30" step="1" type="range" value="41"/>
-<div class="sv" id="o_slotsneakers">41</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotsneakers" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotsneakers">33</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_slotshoes">Slot Shoes Height</label>
-<input id="v_slotshoes" max="60" min="30" step="1" type="range" value="40"/>
-<div class="sv" id="o_slotshoes">40</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotshoes" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotshoes">33</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_slotdots">Slot Dots Height</label>
-<input id="v_slotdots" max="60" min="30" step="1" type="range" value="40"/>
-<div class="sv" id="o_slotdots">40</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotdots" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotdots">33</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_slotflames">Slot Flames Height</label>
-<input id="v_slotflames" max="60" min="30" step="1" type="range" value="40"/>
-<div class="sv" id="o_slotflames">40</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotflames" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotflames">33</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_slotpause">Slot Pause Height</label>
-<input id="v_slotpause" max="60" min="30" step="1" type="range" value="40"/>
-<div class="sv" id="o_slotpause">40</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotpause" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotpause">33</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_slotbag">Slot Bag Height</label>
-<input id="v_slotbag" max="60" min="30" step="1" type="range" value="40"/>
-<div class="sv" id="o_slotbag">40</div><button class="lock-btn">🔒</button></div>
+<input id="v_slotbag" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotbag">33</div><button class="lock-btn">🔒</button></div>
 </div>
 </div>
 <!-- Controls Panel Transform -->
@@ -1885,7 +1865,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="sv" id="o_ctrl_scale">1.00</div><button class="lock-btn">🔒</button></div>
 </div>
 </div>
-<div id="sFoot"><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
+<div id="sFoot"><button id="sMove" type="button">Move</button><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
 </div>
 </template>
 <!-- [SQ-TUNER:TPL-END] -->
@@ -1914,6 +1894,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   const sMin = shadow.getElementById('sMin');
   const sReset = shadow.getElementById('sReset');
   const btnCopyJSON = shadow.getElementById('btnCopyJSON');
+  const sMove = shadow.getElementById('sMove');
 
   // Toggle button for panel
   const toggleBtn = document.createElement('button');
@@ -1954,6 +1935,7 @@ document.addEventListener('touchmove', (e)=&gt;{
         settingsPanel.style.display = 'none';
       }
     }
+
   }
 
   // Event listeners
@@ -1968,7 +1950,42 @@ document.addEventListener('touchmove', (e)=&gt;{
   });
   if (sMin) sMin.addEventListener('click', togglePanel);
 
-  // Scale guard implementation
+  
+  // Simple move drag for Settings 1 panel
+  if (sMove && settingsPanel) {
+    let isDraggingPanel = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    sMove.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const rect = settingsPanel.getBoundingClientRect();
+      dragOffsetX = ev.clientX - rect.left;
+      dragOffsetY = ev.clientY - rect.top;
+      isDraggingPanel = true;
+      window.addEventListener('pointermove', onPanelDrag);
+      window.addEventListener('pointerup', onPanelDragEnd);
+    });
+
+    function onPanelDrag(ev) {
+      if (!isDraggingPanel) return;
+      settingsPanel.style.position = 'fixed';
+      settingsPanel.style.left = (ev.clientX - dragOffsetX) + 'px';
+      settingsPanel.style.top = (ev.clientY - dragOffsetY) + 'px';
+      settingsPanel.style.right = 'auto';
+      settingsPanel.style.bottom = 'auto';
+    }
+
+    function onPanelDragEnd() {
+      if (!isDraggingPanel) return;
+      isDraggingPanel = false;
+      window.removeEventListener('pointermove', onPanelDrag);
+      window.removeEventListener('pointerup', onPanelDragEnd);
+    }
+  }
+
+
+// Scale guard implementation
   const vScale = shadow.getElementById('v_scale');
   const oScale = shadow.getElementById('o_scale');
   const mainContainer = document.getElementById('mainContainer');
@@ -2485,16 +2502,14 @@ document.addEventListener('touchmove', (e)=&gt;{
       firesFill: firesFill?.value || '',
       firesOutline: firesOutline?.value || ''
     };
-
-    // Instructional prompt for Settings 1 JSON export
-    data.prompt = "Here is a COPY JSON snapshot from the Settings 1 layout tuner panel. Task: apply these values as the new default Settings 1 configuration without changing layout, theming, or behavior.";
-
+    
     return data;
   }
 
   if (btnCopyJSON) {
     btnCopyJSON.addEventListener('click', function() {
       const data = collectLayoutData();
+      data.prompt = 'Here is a COPY JSON snapshot from the Settings 1 layout tuner panel. Task: apply these values as the new default Settings 1 configuration without changing layout, theming, or behavior.';
       const json = JSON.stringify(data, null, 2);
       
       // Update preview
@@ -2928,13 +2943,16 @@ document.addEventListener('touchmove', (e)=&gt;{
 :root { --center-cell: 90px ; }
 
 /* Section offsets and sizes */
-#element-marquee { margin-top: -7px ; }
-#element-divider { margin-top: -15px ; }
-#element-crt     { margin-top: -11px ; height: auto ; min-height: 350px ; }
-#element-tabs    { margin-top: -14px ; }
+#element-marquee { margin-top: -10px ; }
+#element-divider { margin-top: -13px ; }
+#element-crt     { margin-top: -12px ; }
+#element-tabs    { margin-top: -12px ; }
 #element-hud1    { margin-top: -16px ; }
-#element-hud2    { margin-top: -15px ; }
+#element-hud2    { margin-top: -16px ; }
 #element-bottom  { height: 240px ; }
+
+/* CRT default height from Settings 1 snapshot */
+#element-crt .crt { height: 350px ; aspect-ratio: auto ; }
 
 /* Marquee typography */
 .mq-title { font-size: 27px ; transform: translate(0px, 0px) ; }
@@ -2947,15 +2965,15 @@ document.addEventListener('touchmove', (e)=&gt;{
 #ui-fires    { gap: 2px ; }
 
 /* Slot heights */
-.hud .slot-heart   { height: 41px ; }
-.hud .slot-shoes   { height: 40px ; }
-.hud .slot-dots    { height: 40px ; }
-.hud2 .slot-flames { height: 40px ; }
-.hud2 .slot-pause  { height: 40px ; }
-.hud2 .slot-bag    { height: 40px ; }
+.hud .slot-heart   { height: 33px ; }
+.hud .slot-shoes   { height: 33px ; }
+.hud .slot-dots    { height: 33px ; }
+.hud2 .slot-flames { height: 33px ; }
+.hud2 .slot-pause  { height: 33px ; }
+.hud2 .slot-bag    { height: 33px ; }
 
 /* Control screen paddings */
-.control-screen { padding-top: 14px ; padding-bottom: 14px ; }
+.control-screen { padding-top: 13px ; padding-bottom: 14px ; }
 
 /* Inner side paddings */
 .inner { padding-left: 10px ; padding-right: 10px ; }
@@ -3785,42 +3803,5 @@ bindRange('v_rs', 'o_rs', function(raw) {
 </script>
 <!-- [UNIFIED-TUNER:SCRIPT-END] -->
 <div id="unified-tuner-root"></div>
-
-<script>
-// Fire proximity divider indicator for element-divider
-// This can later be driven by the actual game logic instead of the timer below.
-(function() {
-  const divider = document.getElementById('element-divider');
-  if (!divider) return;
-
-  // Ensure inner visual element exists
-  let inner = divider.querySelector('.divider-inner');
-  if (!inner) {
-    inner = document.createElement('div');
-    inner.className = 'divider-inner';
-    divider.style.position = divider.style.position || 'relative';
-    divider.appendChild(inner);
-  }
-
-  // Game-facing hook: call this with a value between 0 (far) and 1 (very close)
-  window.updateFireProximity = function(intensity) {
-    const clamped = Math.max(0, Math.min(1, intensity));
-    const base = 0.12; // idle bar size
-    const scale = base + clamped * (1.0 - base);
-    inner.style.transform = 'translateX(-50%) scaleX(' + scale.toFixed(3) + ')';
-  };
-
-  // Temporary demo: animate the bar every 10 seconds to simulate proximity changes.
-  // Replace this interval later with real game-driven calls to updateFireProximity().
-  let phase = 0;
-  setInterval(function() {
-    // Simple wave between 0 and 1 over a few steps
-    const steps = [0.1, 0.35, 0.7, 1.0, 0.7, 0.35];
-    const idx = phase % steps.length;
-    window.updateFireProximity(steps[idx]);
-    phase++;
-  }, 10000);
-})();
-</script>
 </body>
 </html>
