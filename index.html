@@ -2518,27 +2518,41 @@ document.addEventListener('touchmove', (e)=&gt;{
         jsonPreview.value = json;
       }
       
-      // Create download
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sq_layout_export.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      // Show confirmation
-      const copyMsg = shadow.getElementById('copyMsg');
-      if (copyMsg) {
-        copyMsg.textContent = 'Exported!';
-        copyMsg.style.opacity = '1';
-        setTimeout(() => {
-          copyMsg.style.opacity = '0';
-        }, 2000);
+      // Copy to clipboard instead of downloading
+      function showMsg(msg) {
+        const copyMsg = shadow.getElementById('copyMsg');
+        if (copyMsg) {
+          copyMsg.textContent = 'Copied!';
+          copyMsg.style.opacity = '1';
+          setTimeout(() => {
+            copyMsg.style.opacity = '0';
+          }, 2000);
+        }
+      }
+
+      function fallbackCopy() {
+        const ta = document.createElement('textarea');
+        ta.value = json;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        showMsg('Copied!');
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(() => {
+          showMsg('Copied!');
+        }).catch(() => {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
       }
     });
+  
   }
 
   // Reset functionality
