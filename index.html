@@ -134,11 +134,24 @@
     .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
     .counter .ph-package { font-size: 20px ; color: var(--secondary-color) ; filter: none ; }
 
-    .bottom { width: 100%; height: 150px; margin-top: -13px; }
+    .bottom {
+  width: 100%;
+  height: 150px;
+  margin-top: -13px;
+}
 
-    .control-screen { position: relative; height: 100%; border-radius: 18px; padding: 14px; display: grid; grid-template-columns: 82% 20%; gap: 14px; align-items: center; overflow: hidden; background: transparent; box-shadow: inset 0 0 0 2px #1a1510, inset 0 16px 30px rgba(0,0,0,.4), 0 3px 0 #0a0807; }
+    .control-screen {
+  position: relative;
+  height: 100%;
+  border-radius: 16px;
+  padding: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .matrix { position: absolute; inset: 6px; border-radius: 14px; opacity: .9; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle at center, #140202 40%, #090101 42%, transparent 43%) 0 0 / 10px 10px repeat; }
+    
 
     @media (max-width: 400px) { 
       .mq-title{font-size:22px;} 
@@ -174,7 +187,7 @@
   }</style>
 <style id="controls-constraints">
   #element-controls{ position:relative; overflow:hidden; min-height:300px; }
-  #controlsFrame{ position:absolute; inset:12px; z-index:1; width:calc(100% - 24px); height:calc(100% - 24px); }
+  #controlsFrame{ position:relative; width:100%; height:100%; border:0; }
   .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }</style>
 <style>
 /* LIFE tab interactive state */
@@ -192,7 +205,27 @@
 .powerups-activator { cursor: pointer; }
 .powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
 .powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }</style><style>
-</style></head>
+</style>
+<style>
+/* Single-panel control bezel: outer cabinet cleanup */
+.bottom {
+  width: 100%;
+  height: 150px;
+  margin-top: -13px;
+}
+
+.control-screen {
+  position: relative;
+  height: 100%;
+  border-radius: 16px;
+  padding: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+</head>
 <body>
 <div class="fixed-container" id="mainContainer">
 <div class="cabinet">
@@ -241,6 +274,7 @@
 </div>
 <div class="bottom" id="element-bottom">
 <div class="control-screen" id="element-controls">
+
 <iframe id="controlsFrame" srcdoc="&lt;!doctype html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
@@ -256,7 +290,6 @@
   #btn2_panel{ outline:1px dashed rgba(255,128,0,.8); }
   #jpad_canvas{ outline:1px dashed rgba(128,128,255,.8); }
   /* fit to parent height */
-  #frame{ height:100% ; }
   #control-ui{ height:100% ; width:100% ; }
 &lt;/style&gt;
 
@@ -272,20 +305,30 @@
   body { background:var(--bg); color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
 
   /* Frame */
-  #frame{ display:grid; place-items:center; height:100vh; }
-  #control-ui{
-    aspect-ratio: 2 / 1;
-    height: min(calc(100vw / 2), 100vh);
-    width: auto;
-    display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr;
-    overflow:hidden; gap:0;
+  #control-ui {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    gap: 0;
   }
 
   /* Square panels */
-  .col-left, .col-right{
-    position:relative; aspect-ratio:1/1; background:var(--pane);
-    box-shadow: inset 0 0 0 2px #000, inset 0 0 0 1px var(--ring), 0 20px 50px #000c;
-    border-radius:var(--radius); overflow:hidden; touch-action:none;
+  .col-left,
+  .col-right {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--pane);
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 1px var(--ring),
+      0 20px 50px #000c;
+    border-radius: var(--radius);
+    overflow: hidden;
+    touch-action: none;
   }
   .pad{ position:absolute; inset:var(--gap); border-radius: calc(var(--radius) - 8px); overflow:hidden; }
 
@@ -337,7 +380,6 @@
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;div id=&quot;frame&quot;&gt;
   &lt;main id=&quot;control-ui&quot; aria-label=&quot;Control surface&quot;&gt;
     &lt;!-- Left: Buttons (Laser/Bomb) --&gt;
     &lt;section id=&quot;left-area&quot; class=&quot;col-left&quot; aria-label=&quot;Buttons area&quot;&gt;
@@ -363,8 +405,7 @@
         &lt;output id=&quot;jpad_status&quot; aria-live=&quot;polite&quot;&gt;x 0.00, y 0.00, |v| 0.00, θ 0.00&lt;/output&gt;
       &lt;/div&gt;
     &lt;/section&gt;
-  &lt;/main&gt;
-&lt;/div&gt;
+      &lt;/main&gt;
 
 &lt;script&gt;function __jpadNoise(v){ return JPAD_LIGHT_MODE ? 0 : v; }
 // === Joystick Light Mode &amp; FPS ===
@@ -1570,11 +1611,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 &lt;/body&gt;
 &lt;/html&gt;
 " title="SNEAKERQUEST Controls"></iframe>
-<div aria-hidden="true" class="matrix"></div>
-<main aria-label="Control surface" class="control-ui">
-<section class="col-left"><div class="pad"></div></section>
-<section class="col-right"><div class="pad"></div></section>
-</main>
+<div aria-hidden="true" class="matrix">
 </div>
 </div>
 </div>
@@ -3014,20 +3051,20 @@ document.addEventListener('touchmove', (e)=&gt;{
   </style>
 <div class="panel wrap" id="ftPanel">
 <h3>Layout Tuner — Floating Controls</h3>
-<div class="row"><label>Bottom Height <output id="o_bh">150</output>px</label>
+<div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label>
 <input id="v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
 <div class="grid2">
 <div>
 <h3>Buttons (Left)</h3>
 <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" max="200" min="-200" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" max="120" min="-120" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale <output id="o_ls">1</output></label><input id="v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1"/></div>
+<div class="row"><label>Scale <output id="o_ls">1.35</output></label><input id="v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1.35"/></div>
 </div>
 <div>
 <h3>Joystick (Right)</h3>
 <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="200" min="-200" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="120" min="-120" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale <output id="o_rs">1</output></label><input id="v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1"/></div>
+<div class="row"><label>Scale <output id="o_rs">1.24</output></label><input id="v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1.24"/></div>
 </div>
 </div>
 <div class="hint">Buttons are on the left; Joystick is on the right. Background of the bay is transparent.</div>
@@ -3138,7 +3175,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div id="outer-controls-section">
 <h3>Container layout (outer)</h3>
 <h3>Layout Tuner — Floating Controls</h3>
-<div class="row"><label>Bottom Height <output id="ft_o_bh">150</output>px</label>
+<div class="row"><label>Bottom Height <output id="ft_o_bh">240</output>px</label>
 <input id="ft_v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
 <div class="grid2">
 <div>
@@ -3164,13 +3201,13 @@ document.addEventListener('touchmove', (e)=&gt;{
 <h3>Buttons (Left)</h3>
 <div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" max="240" min="-240" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" max="200" min="-200" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale Content <output id="o_ls">1</output></label><input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1"/></div>
+<div class="row"><label>Scale Content <output id="o_ls">1.35</output></label><input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1.35"/></div>
 </div>
 <div>
 <h3>Joystick (Right)</h3>
 <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="240" min="-240" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="200" min="-200" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale Content <output id="o_rs">1</output></label><input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1"/></div>
+<div class="row"><label>Scale Content <output id="o_rs">1.24</output></label><input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/></div>
 </div>
 </div>
 <div class="hint">Wrappers translate only. Content scales inside panels.</div>
@@ -3331,9 +3368,9 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="field">
 <label for="v_ls">
 <span>Scale</span>
-<output id="o_ls">1.0</output>
+<output id="o_ls">1.35</output>
 </label>
-<input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1"/>
+<input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1.35"/>
 </div>
 </section>
 <!-- Right controls panel -->
@@ -3356,9 +3393,9 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="field">
 <label for="v_rs">
 <span>Scale</span>
-<output id="o_rs">1.0</output>
+<output id="o_rs">1.24</output>
 </label>
-<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1"/>
+<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/>
 </div>
 </section>
 <button class="close" id="unifiedClose" type="button">Close</button>
