@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<title>SNEAKERQUEST</title>
+<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_task8_1.html</title>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
@@ -284,13 +284,17 @@
   /* force joystick readout visible */
   #jpad_status { display: none !important; visibility: hidden !important; opacity: 0 !important; }
   /* borders for debug */
-  #control-ui{ outline:1px solid rgba(0,255,255,.7); }
+  #control-ui{
+    height:100%;
+    width:100%;
+    box-sizing:border-box;
+    border-radius:var(--radius);
+    border:1px solid rgba(0,255,255,.7);
+  }
   #left-area{ outline:1px solid rgba(255,0,0,.7); }
   #right-area{ outline:1px solid rgba(0,255,0,.7); }
   #btn2_panel{ outline:1px dashed rgba(255,128,0,.8); }
   #jpad_canvas{ outline:1px dashed rgba(128,128,255,.8); }
-  /* fit to parent height */
-  #control-ui{ height:100% ; width:100% ; }
 &lt;/style&gt;
 
 &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -302,7 +306,7 @@
     --bg:#070708; --pane:#080203; --ring:#1a0000; --radius:20px; --gap:16px;
   }
   html, body { height:100%; margin:0; }
-  body { background:var(--bg); color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
+  body { background: transparent; color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
 
   /* Frame */
   #control-ui {
@@ -3182,7 +3186,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <h3>Buttons (Left)</h3>
 <div class="row"><label>X <output id="ft_o_lx">0</output>px</label><input id="ft_v_lx" max="200" min="-200" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="ft_o_ly">0</output>px</label><input id="ft_v_ly" max="120" min="-120" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale <output id="ft_o_ls">1.45</output></label><input id="ft_v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1.45"/></div>
+<div class="row"><label>Scale <output id="ft_o_ls">1</output></label><input id="ft_v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1"/></div>
 </div>
 <div>
 <h3>Joystick (Right)</h3>
@@ -3195,7 +3199,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div style="margin-top:8px"></div>
 </div>
 <h3>LT2 • Floating Controls</h3>
-<div class="row"><label>Bottom Height <output id="o_bh">173</output>px</label><input id="v_bh" max="360" min="80" step="1" type="range" value="173"/></div>
+<div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label><input id="v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
 <div class="grid2">
 <div>
 <h3>Buttons (Left)</h3>
@@ -3343,9 +3347,9 @@ document.addEventListener('touchmove', (e)=&gt;{
 <div class="field">
 <label for="v_bh">
 <span>Bottom height</span>
-<output id="o_bh">173</output>
+<output id="o_bh">240</output>
 </label>
-<input id="v_bh" max="360" min="80" step="1" type="range" value="173"/>
+<input id="v_bh" max="360" min="80" step="1" type="range" value="240"/>
 </div>
 </section>
 <!-- Left controls panel -->
