@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_task8_1.html</title>
+<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_task9_1.html</title>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
@@ -3038,7 +3038,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 #controlsFrame { border: 0 ; outline: 0 ; }
 
 /* Main container scale */
-#mainContainer { transform: translateX(-50%) scale(1.33222) ; transform-origin: top center ; }</style>
+#mainContainer { transform-origin: top center; }</style>
 <!-- [FLOAT-TUNER:TPL-START] -->
 <template id="float-tuner-tpl">
 <style>
@@ -3858,5 +3858,39 @@ bindRange('v_rs', 'o_rs', function(raw) {
 </script>
 <!-- [UNIFIED-TUNER:SCRIPT-END] -->
 <div id="unified-tuner-root"></div>
+
+<script>
+(function () {
+  var BASE_TRANSLATE = 'translateX(-50%)';
+  var BASE_SCALE = 1.33222;
+  var container = document.getElementById('mainContainer');
+  if (!container) return;
+
+  function applyCabinetScale() {
+    // Reset to baseline transform for measurement
+    container.style.transform = BASE_TRANSLATE + ' scale(' + BASE_SCALE + ')';
+
+    var rect = container.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+
+    if (!rect.width || !rect.height || !vw || !vh) return;
+
+    var scaleX = vw / rect.width;
+    var scaleY = vh / rect.height;
+
+    // Do not grow beyond the baseline; only shrink if needed
+    var fitFactor = Math.min(1, scaleX, scaleY);
+    var finalScale = BASE_SCALE * fitFactor;
+
+    container.style.transform = BASE_TRANSLATE + ' scale(' + finalScale + ')';
+  }
+
+  window.addEventListener('load', applyCabinetScale);
+  window.addEventListener('resize', applyCabinetScale);
+  window.addEventListener('orientationchange', applyCabinetScale);
+})();
+</script>
+
 </body>
 </html>
