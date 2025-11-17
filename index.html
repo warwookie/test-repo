@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_task9_1.html</title>
+<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_ZAQ11_scaledCabinet.html</title>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
@@ -24,13 +24,25 @@
       --screen-bg: #0a241f;
       --led-glow: rgba(255, 58, 47, 0.45);
       --center-cell: 90px; /* shared target width for middle HUD cells (hearts & pause) */
+      --cabinet-vmargin: 16px;
     }
 
     html, body { display: flex; align-items: flex-start; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; min-height: 100dvh; }
 
     /* bottom-pinned layout (single body rule above) */
 
-    .fixed-container { width: 430px; aspect-ratio: 430 / 900; position: absolute; top: 0; left: 50%; transform-origin: top center; height: auto; max-width: 100vw; margin: 0; }
+    .fixed-container {
+  position: absolute;
+  top: var(--cabinet-vmargin);
+  left: 50%;
+  transform-origin: top center;
+
+  /* fixed design size; scaling happens in JS */
+  width: 430px;
+  height: 900px;
+
+  margin: 0;
+}
 
     .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
       radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
@@ -186,7 +198,7 @@
       -ms-touch-action: none;
   }</style>
 <style id="controls-constraints">
-  #element-controls{ position:relative; overflow:hidden; min-height:300px; }
+  #element-controls{ position:relative; overflow:hidden; height:100%; min-height:0; }
   #controlsFrame{ position:relative; width:100%; height:100%; border:0; }
   .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }</style>
 <style>
@@ -3867,7 +3879,6 @@ bindRange('v_rs', 'o_rs', function(raw) {
   if (!container) return;
 
   function applyCabinetScale() {
-    // Reset to baseline transform for measurement
     container.style.transform = BASE_TRANSLATE + ' scale(' + BASE_SCALE + ')';
 
     var rect = container.getBoundingClientRect();
@@ -3879,7 +3890,6 @@ bindRange('v_rs', 'o_rs', function(raw) {
     var scaleX = vw / rect.width;
     var scaleY = vh / rect.height;
 
-    // Do not grow beyond the baseline; only shrink if needed
     var fitFactor = Math.min(1, scaleX, scaleY);
     var finalScale = BASE_SCALE * fitFactor;
 
@@ -3892,5 +3902,45 @@ bindRange('v_rs', 'o_rs', function(raw) {
 })();
 </script>
 
+<script>
+(function () {
+  const CABINET_W = 430;
+  const CABINET_H = 900;
+  const root = document.documentElement;
+  const container = document.getElementById('mainContainer');
+  if (!container) return;
+
+  function layoutCabinet() {
+    // Read CSS margin variable; default to 16px
+    const margin = parseFloat(
+      getComputedStyle(root).getPropertyValue('--cabinet-vmargin')
+    ) || 16;
+
+    const vw = window.innerWidth || root.clientWidth;
+    const vh = window.innerHeight || root.clientHeight;
+
+    // Height we can actually use after top + bottom margins
+    const availableHeight = Math.max(0, vh - margin * 2);
+
+    // Scale factors to fit width and height
+    const scaleX = vw / CABINET_W;
+    const scaleY = availableHeight / CABINET_H;
+
+    // Final uniform scale: fit both constraints, never upscale above 1
+    const scale = Math.min(1, scaleX, scaleY);
+
+    // Position and scale:
+    // - top margin
+    // - horizontally centered
+    container.style.top = margin + 'px';
+    container.style.transform = 'translateX(-50%) scale(' + scale + ')';
+  }
+
+  window.addEventListener('resize', layoutCabinet);
+  window.addEventListener('orientationchange', layoutCabinet);
+  window.addEventListener('load', layoutCabinet);
+  layoutCabinet();
+})();
+</script>
 </body>
 </html>
