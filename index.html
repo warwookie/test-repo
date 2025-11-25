@@ -706,6 +706,12 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   // Easings
   const easeInOut=t=&gt; (t&lt;0.5? 2*t*t : 1 - Math.pow(-2*t+2,2)/2);
+  const easeInOutFastMid = (t) =&gt; {
+    // Bomb suck-in sped up per DR2 spec.
+    t = Math.max(0, Math.min(1, t));
+    const boosted = Math.pow(t, 0.7);
+    return easeInOut(boosted);
+  };
   const easeOutCubic = t=&gt;1-Math.pow(1-t,3);
   const easeInCubic  = t=&gt;t*t*t;
   const easeOutExpo  = t=&gt; (t===1?1:1-Math.pow(2,-10*t));
@@ -899,7 +905,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function qLevel(e){ const LEVELS=[0.00,0.18,0.36,0.64,1.00]; e=Math.max(0,Math.min(1,e)); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d&lt;bd){ bd=d; best=L; } } return best; }
   function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) &gt;&gt;&gt; 0; return ((n % 9973) / 9973); }
   function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
-  let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
+  let HOT_BASE=0.52, HOT_NOISE=0.12, RIM_INTENSITY=0.18; // Laser intensity tuned down per DR2 spec.
 
   const laserLabelPts = rasterTextPoints(faceLASER_final,&#x27;LASER&#x27;);
   const sectionFlags = new Array(4).fill(0).map(() =&gt; new Uint8Array(laserDots.length));
@@ -920,7 +926,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         for (let k = 0; k &lt; laserDots.length; k++) {
           if (sectionFlags[section][k] === 1) {
             const pt = laserDots[k];
-            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 7);
+            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 4.0);
             if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
             drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
           }
@@ -1068,7 +1074,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     // Per-particle meta, lighter trails
     const pairs = state.bombMorph.pairs;
     const cx=T.center.x, cy=T.center.y;
-    const staggerMax = 0.24; // smaller
+    const staggerMax = 0.18; // smaller // Bomb suck-in sped up per DR2 spec.
     state.bombMorph.meta = pairs.map((pr, i)=&gt;{
       const ang = Math.atan2((pr.sy-cy),(pr.sx-cx));
       const base = (ang + Math.PI)/(Math.PI*2);        // 0..1 around the circle
@@ -1305,8 +1311,9 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const swirl = m.jitter * (1-local);
         const dir = Math.atan2(pr.dy-pr.sy, pr.dx-pr.sx) + swirl*0.25;
         const len = Math.hypot(pr.dx-pr.sx, pr.dy-pr.sy);
-        const x = pr.sx + Math.cos(dir) * len * easeInOut(local);
-        const y = pr.sy + Math.sin(dir) * len * easeInOut(local);
+        const motion = easeInOutFastMid(local); // Bomb suck-in sped up per DR2 spec.
+        const x = pr.sx + Math.cos(dir) * len * motion;
+        const y = pr.sy + Math.sin(dir) * len * motion;
 
         // lighter trail
         const trailN = Math.floor(m.sparkLen * (1-local));
