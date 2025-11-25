@@ -546,493 +546,151 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
    JOYPAD (prefixed jpad_)
 ========================= */
 (() =&gt; {
-  const DEADZONE = 0.15, RESPONSE = 1.20, SMOOTH = 0.22, AUTO_RETURN = true;
-  let PITCH = 10, DOT_R = 2.6; const LEVELS = [0, 0.35, 0.65, 1];
-  const RED = &#x27;#ff2a2a&#x27;, MID = &#x27;#ff2a2acc&#x27;, DIM = &#x27;#ff2a2a66&#x27;, OFF = &#x27;#210000&#x27;;
-  const DECAY = 0.90; let buf; const KNOB_CORE = 0.10, KNOB_GLOWR = 0.30, STEM_GAIN = 0.80;
+  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
+  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
+  const RED=&#x27;#ff2a2a&#x27;, MID=&#x27;#ff2a2acc&#x27;, DIM=&#x27;#ff2a2a66&#x27;, OFF=&#x27;#210000&#x27;;
+  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
 
-  // DR2: Laser Arrow-Pad Mode (Part 2) – shared globals
-  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
-  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
+  window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
 
-  window.jpad_state = { x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
+  const cvs=document.getElementById(&#x27;jpad_canvas&#x27;); const ctx=cvs.getContext(&#x27;2d&#x27;);
+  const readout=document.getElementById(&#x27;jpad_status&#x27;); const rightArea=document.getElementById(&#x27;right-area&#x27;);
+  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
+  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
 
-  const cvs = document.getElementById(&#x27;jpad_canvas&#x27;);
-  const ctx = cvs.getContext(&#x27;2d&#x27;);
-  const readout = document.getElementById(&#x27;jpad_status&#x27;);
-  const rightArea = document.getElementById(&#x27;right-area&#x27;);
-
-  let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
-  let layoutReady = false;
-  let outX = 0, outY = 0, joyTX = 0, joyTY = 0;
-  const activePointers = new Map();
-
-  // DR2: Laser Arrow-Pad Mode (Part 2) – geometry &amp; animation
-  let arrowGeom = null;          // { up:[], right:[], down:[], left:[], center:[] }
-  let arrowHitRects = null;      // { up:{x,y,w,h}, ... }
-  const arrowPulse = { up:0, right:0, down:0, left:0 };
-  let arrowIntro = 0;            // 0..1 suck-in when arrow mode enters
-  let lastArrowMode = false;
-
-  function updateLayout(newWidth, newHeight) {
-    if (newWidth &lt; 1 || newHeight &lt; 1) return;
-    cvs.width = newWidth; cvs.height = newHeight; W = newWidth; H = newHeight;
+  function updateLayout(newWidth,newHeight){
+    if(newWidth&lt;1||newHeight&lt;1) return;
+    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
 
     const targetRows = JPAD_LIGHT_MODE ? 18 : 24;
-    PITCH = H / targetRows; DOT_R = PITCH * 0.21;
+    PITCH=H/targetRows; DOT_R=PITCH*0.21;
 
-    COLS = Math.floor(W / PITCH); ROWS = Math.floor(H / PITCH);
-    if (COLS &lt; 1 || ROWS &lt; 1) return;
-    OX = (W - COLS * PITCH) / 2 + PITCH / 2;
-    OY = (H - ROWS * PITCH) / 2 + PITCH / 2;
+    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
+    if(COLS&lt;1||ROWS&lt;1) return;
+    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
 
-    joyCX = W * 0.5; joyCY = H * 0.5; joyR = (Math.min(W, H) / 2) - (PITCH * 1.5);
+    joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3);
 
-    buf = new Float32Array(COLS * ROWS);
-    layoutReady = true;
-
-    buildArrowPadGeometry();
-    buildArrowHitRects();
+    buf=new Float32Array(COLS*ROWS);
+    layoutReady=true;
   }
 
-  function getPointerLocation(e) {
-    const r = cvs.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+  function joyPointerToNorm(x,y){
+    const dx=x-joyCX, dy=y-joyCY;
+    const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
+    let rn=Math.min(dist/joyR,1);
+    if(rn&lt;DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE);
+    rn=Math.pow(rn,RESPONSE);
+    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
   }
 
-  function joyPointerToNorm(x, y) {
-    const dx = x - joyCX, dy = y - joyCY;
-    const dist = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
-    let rn = Math.min(dist / joyR, 1);
-    if (rn &lt; DEADZONE) rn = 0;
-    else rn = (rn - DEADZONE) / (1 - DEADZONE);
-    rn = Math.pow(rn, RESPONSE);
-    return { nx: Math.cos(ang) * rn, ny: Math.sin(ang) * rn };
-  }
-
-  // DR2: Laser Arrow-Pad Mode (Part 2) – rectangular hit areas
-  function buildArrowHitRects() {
-    if (!layoutReady) return;
-    const midY = H * (1 / 3);
-    const midY2 = H * (2 / 3);
-    const midX = W * 0.5;
-    arrowHitRects = {
-      up:    { x:0,     y:0,      w:W,      h:midY        },
-      down:  { x:0,     y:midY2,  w:W,      h:H - midY2   },
-      left:  { x:0,     y:midY,   w:midX,   h:midY2-midY  },
-      right: { x:midX,  y:midY,   w:W-midX, h:midY2-midY  }
-    };
-  }
-
-  function hitTestArrow(x, y) {
-    if (!arrowHitRects || !window.laserArrowMode) return null;
-    for (const dir of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
-      const r = arrowHitRects[dir];
-      if (!r) continue;
-      if (x &gt;= r.x &amp;&amp; x &lt;= r.x + r.w &amp;&amp; y &gt;= r.y &amp;&amp; y &lt;= r.y + r.h) return dir;
-    }
-    return null;
-  }
-
-  cvs.addEventListener(&#x27;pointerdown&#x27;, e =&gt; {
+  cvs.addEventListener(&#x27;pointerdown&#x27;, e=&gt;{
     e.preventDefault();
-    const { x, y } = getPointerLocation(e);
-    try { cvs.setPointerCapture(e.pointerId); } catch(_){}
-    activePointers.set(e.pointerId, &#x27;joy&#x27;);
-
-    if (window.laserArrowMode) {
-      const dir = hitTestArrow(x, y);
-      if (dir) {
-        window.laserDirection = dir;
-        arrowPulse[dir] = 1.0;
-      }
-    } else {
-      const v = joyPointerToNorm(x, y);
-      joyTX = v.nx; joyTY = v.ny;
-    }
+    const {x,y}=getPointerLocation(e);
+    try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
+    activePointers.set(e.pointerId,&#x27;joy&#x27;);
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
   });
-
-  cvs.addEventListener(&#x27;pointermove&#x27;, e =&gt; {
+  cvs.addEventListener(&#x27;pointermove&#x27;, e=&gt;{
     e.preventDefault();
-    if (activePointers.get(e.pointerId) !== &#x27;joy&#x27;) return;
-    const { x, y } = getPointerLocation(e);
-
-    if (window.laserArrowMode) {
-      const dir = hitTestArrow(x, y);
-      if (dir) {
-        window.laserDirection = dir;
-        arrowPulse[dir] = 1.0;
-      }
-    } else {
-      const v = joyPointerToNorm(x, y);
-      joyTX = v.nx; joyTY = v.ny;
-    }
+    if(activePointers.get(e.pointerId)!==&#x27;joy&#x27;) return;
+    const {x,y}=getPointerLocation(e);
+    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
   });
-
-  function endPointer(e) {
-    const t = activePointers.get(e.pointerId);
+  function endPointer(e){
+    const t=activePointers.get(e.pointerId);
     activePointers.delete(e.pointerId);
-    if (t === &#x27;joy&#x27;) {
-      if (window.laserArrowMode) {
-        // keep last laserDirection
-      } else if (AUTO_RETURN) {
-        let any = false;
-        for (const v of activePointers.values()) if (v === &#x27;joy&#x27;) { any = true; break; }
-        if (!any) { joyTX = 0; joyTY = 0; }
-      }
+    if(t===&#x27;joy&#x27;){
+      let any=false; for(const v of activePointers.values()) if(v===&#x27;joy&#x27;) any=true;
+      if(!any &amp;&amp; AUTO_RETURN){ joyTX=0; joyTY=0; }
     }
   }
   cvs.addEventListener(&#x27;pointerup&#x27;, endPointer);
   cvs.addEventListener(&#x27;pointercancel&#x27;, endPointer);
   cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
 
-  function loop() {
-    const arrowMode = !!window.laserArrowMode;
-
-    if (arrowMode !== lastArrowMode) {
-      if (arrowMode) {
-        arrowIntro = 0;
-      } else {
-        for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) arrowPulse[k] = 0;
-        joyTX = 0; joyTY = 0;
-      }
-      lastArrowMode = arrowMode;
-    }
-
-    if (arrowMode) {
-      outX += (0 - outX) * SMOOTH;
-      outY += (0 - outY) * SMOOTH;
-
-      arrowIntro = Math.min(1, arrowIntro + 0.10);
-      for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
-        arrowPulse[k] *= 0.86;
-      }
-
-      drawDMD(0, 0);
-
-      const dir = window.laserDirection || &#x27;up&#x27;;
-      let vx = 0, vy = 0;
-      if (dir === &#x27;up&#x27;) vy = -1;
-      else if (dir === &#x27;down&#x27;) vy = 1;
-      else if (dir === &#x27;left&#x27;) vx = -1;
-      else if (dir === &#x27;right&#x27;) vx = 1;
-
-      window.jpad_state.x = vx;
-      window.jpad_state.y = vy;
-      window.jpad_state.mag = 1;
-      window.jpad_state.angle = Math.atan2(vy, vx);
-    } else {
-      outX += (joyTX - outX) * SMOOTH;
-      outY += (joyTY - outY) * SMOOTH;
-
-      drawDMD(outX, outY);
-
-      window.jpad_state.x = outX;
-      window.jpad_state.y = outY;
-      window.jpad_state.mag = Math.min(Math.hypot(outX, outY), 1);
-      window.jpad_state.angle = Math.atan2(outY, outX);
-    }
-
-    if (readout) {
-      readout.value =
-        `x ${window.jpad_state.x.toFixed(2)}, y ${window.jpad_state.y.toFixed(2)}, ` +
-        `|v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
-    }
-
+  function loop(){
+    outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
+    drawDMD(outX,outY);
+    window.jpad_state.x=outX; window.jpad_state.y=outY;
+    window.jpad_state.mag=Math.min(Math.hypot(outX,outY),1);
+    window.jpad_state.angle=Math.atan2(outY,outX);
+    readout.value = `x ${outX.toFixed(2)}, y ${outY.toFixed(2)}, |v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
     requestAnimationFrame(loop);
   }
 
-  // DR2: Laser Arrow-Pad Mode (Part 2) – DMD rendering
-  
-function buildArrowPadGeometry() {
-  if (!layoutReady) return;
-
-  const snap = v =&gt; Math.round(v / PITCH) * PITCH;
-
-  arrowGeom = {
-    up:    [],
-    right: [],
-    down:  [],
-    left:  [],
-    center:[]
-  };
-
-  const cx = joyCX;
-  const cy = joyCY;
-
-  // Circle + arrow-cross symbol:
-  // outer ring + inner disc + four arrow stems + heads
-  const ringMidR   = joyR * 0.90;
-  const ringThick  = joyR * 0.20;
-  const ringInnerR = ringMidR - ringThick * 0.5;
-  const ringOuterR = ringMidR + ringThick * 0.5;
-
-  const centerR      = joyR * 0.28;        // central disc radius
-  const shaftHalfW   = centerR * 0.55;     // arrow shaft half-width
-  const shaftLen     = (ringInnerR - centerR) * 0.55;
-  const headLen      = (ringInnerR - centerR) * 0.45;
-  const headHalfWMax = shaftHalfW * 1.6;   // arrowhead base width
-
-  // --- ring + inner disc go into arrowGeom.center ---
-  for (let j = 0; j &lt; ROWS; j++) {
-    for (let i = 0; i &lt; COLS; i++) {
-      const x = OX + i * PITCH;
-      const y = OY + j * PITCH;
-      const dx = x - cx;
-      const dy = y - cy;
-      const d  = Math.hypot(dx, dy);
-
-      // outer circular ring
-      if (d &gt;= ringInnerR &amp;&amp; d &lt;= ringOuterR) {
-        arrowGeom.center.push({ x: snap(x), y: snap(y) });
-      }
-      // inner filled disc
-      else if (d &lt;= centerR) {
-        arrowGeom.center.push({ x: snap(x), y: snap(y) });
-      }
-    }
-  }
-
-  // --- helper to add one arrow (stem + head) into a list ---
-  function addArrow(list, dir) {
-    const isVertical = (dir === 'up' || dir === 'down');
-    const sign = (dir === 'up' || dir === 'left') ? -1 : 1;
-
-    // distances along arrow axis from center
-    const shaftStartR = centerR;
-    const shaftEndR   = centerR + shaftLen;
-    const headBaseR   = shaftEndR;
-    const headTipR    = headBaseR + headLen;   // near the ring
-
-    for (let j = 0; j &lt; ROWS; j++) {
-      for (let i = 0; i &lt; COLS; i++) {
-        const x = OX + i * PITCH;
-        const y = OY + j * PITCH;
-
-        const lx = x - cx;
-        const ly = y - cy;
-
-        let along, off;
-        if (isVertical) {
-          along = sign * ly;   // distance along the arrow axis
-          off   = lx;          // sideways distance
-        } else {
-          along = sign * lx;
-          off   = ly;
-        }
-
-        // only consider dots in front of the center, up to near the ring
-        if (along &lt;= shaftStartR || along &gt; headTipR) continue;
-
-        const absOff = Math.abs(off);
-        let inside = false;
-
-        // Shaft: rectangle extending from center disc towards head
-        if (along &gt;= shaftStartR &amp;&amp; along &lt;= shaftEndR) {
-          if (absOff &lt;= shaftHalfW) inside = true;
-        }
-
-        // Head: isosceles triangle, wide at base, narrow at tip
-        if (!inside &amp;&amp; along &gt; headBaseR &amp;&amp; along &lt;= headTipR) {
-          const t = (along - headBaseR) / (headTipR - headBaseR); // 0 at base, 1 at tip
-          const w = headHalfWMax * (1 - t);                       // taper to point
-          if (absOff &lt;= w) inside = true;
-        }
-
-        if (inside) {
-          list.push({ x: snap(x), y: snap(y) });
-        }
-      }
-    }
-  }
-
-  // Four directional arrows
-  addArrow(arrowGeom.up,    'up');
-  addArrow(arrowGeom.right, 'right');
-  addArrow(arrowGeom.down,  'down');
-  addArrow(arrowGeom.left,  'left');
-}
-
-
-  function drawArrowPad() {
-    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
-    if (!arrowGeom) buildArrowPadGeometry();
-
+  function drawDMD(nx,ny){
+    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
     ctx.clearRect(0,0,W,H);
+    const now=performance.now()*0.001;
+    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
+    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
 
-    const activeDir = window.laserDirection || &#x27;up&#x27;;
-
-    function drawCluster(list, key) {
-      if (!list || !list.length) return;
-      const isArrow = (key !== &#x27;center&#x27;);
-      const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
-
-      let base = isArrow ? 0.55 : 0.45;
-      if (key === activeDir) base = 0.95;
-
-      const level = Math.min(1, base + pulse * 0.5);
-      const suck  = 1 - arrowIntro;
-
-      for (const pt of list) {
-        const dx = pt.x - joyCX;
-        const dy = pt.y - joyCY;
-        const pressIn = isArrow ? (arrowPulse[key] || 0) * 0.25 : 0;
-        const factor = 1 - 0.22 * suck - 0.18 * pressIn;
-        const sx = joyCX + dx * factor;
-        const sy = joyCY + dy * factor;
-        dotDraw(sx, sy, DOT_R, level);
+    for(let j=0;j&lt;ROWS;j++){
+      for(let i=0;i&lt;COLS;i++){
+        const idx=j*COLS+i;
+        buf[idx]=(buf[idx]||0)*DECAY;
       }
     }
 
-    drawCluster(arrowGeom.center, &#x27;center&#x27;);
-    drawCluster(arrowGeom.up,    &#x27;up&#x27;);
-    drawCluster(arrowGeom.right, &#x27;right&#x27;);
-    drawCluster(arrowGeom.down,  &#x27;down&#x27;);
-    drawCluster(arrowGeom.left,  &#x27;left&#x27;);
-  }
+    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=wrap(now*1.6), sweepArcLength=Math.PI/3;
 
-  function drawDMD(nx, ny) {
-    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
-
-    if (window.laserArrowMode) {
-      drawArrowPad();
-      return;
-    }
-
-    ctx.clearRect(0,0,W,H);
-    const now = performance.now() * 0.001;
-    const px = joyCX + nx * joyR, py = joyCY + ny * joyR, mag = Math.hypot(nx, ny);
-    const knobCoreR = joyR * KNOB_CORE, knobGlowR = joyR * KNOB_GLOWR;
-
-    for (let j=0; j&lt;ROWS; j++) {
-      for (let i=0; i&lt;COLS; i++) {
-        const idx = j * COLS + i;
-        buf[idx] = (buf[idx] || 0) * DECAY;
-      }
-    }
-
-    const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
-    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 3;
-
-    for (let j=0; j&lt;ROWS; j++) {
-      for (let i=0; i&lt;COLS; i++) {
-        const x = OX + i * PITCH, y = OY + j * PITCH;
-        const idx = j * COLS + i;
-
-        const jdx_un = x - joyCX, jdy_un = y - joyCY;
-        let jdx = jdx_un, jdy = jdy_un;
-
-        if (mag &gt; 0.01) {
-          const suck = Math.min(0.8, mag * 1.2);
-          const jdx_wc = x - px, jdy_wc = y - py;
-          const div = (1 - suck);
-          if (div &gt; 0.001) {
-            const vx = jdx_wc / div + px;
-            const vy = jdy_wc / div + py;
-            jdx = vx - joyCX; jdy = vy - joyCY;
-          }
+    for(let j=0;j&lt;ROWS;j++){
+      for(let i=0;i&lt;COLS;i++){
+        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
+        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
+        if(mag&gt;0.01){
+          const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
+          if(div&gt;0.001){ const vx=jdx_wc/div+px, vy=jdy_wc/div+py; jdx=vx-joyCX; jdy=vy-joyCY; }
         }
+        const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
+        buf[idx]+=calcRing(jd,joyR*0.25,ringThick)*0.22;
+        buf[idx]+=calcRing(jd,joyR*0.50,ringThick)*0.20;
+        buf[idx]+=calcRing(jd,joyR*0.75,ringThick)*0.18;
+        buf[idx]+=calcRing(jd,joyR*1.00,ringThick)*0.16;
+        buf[idx]+=calcRing(jd,joyR*DEADZONE,dzRingThick)*0.12;
+        const da=wrap(t-jang); if(jd&lt;joyR*0.98 &amp;&amp; da&gt;0 &amp;&amp; da&lt;sweepArcLength) buf[idx]+=0.9;
 
-        const jd = Math.hypot(jdx, jdy), jang = Math.atan2(jdy, jdx);
-        buf[idx] += calcRing(jd, joyR*0.25, ringThick) * 0.22;
-        buf[idx] += calcRing(jd, joyR*0.50, ringThick) * 0.20;
-        buf[idx] += calcRing(jd, joyR*0.75, ringThick) * 0.18;
-        buf[idx] += calcRing(jd, joyR*1.00, ringThick) * 0.16;
-        buf[idx] += calcRing(jd, joyR*DEADZONE, dzRingThick) * 0.12;
-
-        const da = wrap(t - jang);
-        if (jd &lt; joyR*0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
-
-        if (mag &gt; 0.01) {
-          let jb = 0;
-          const sd = segDist(joyCX, joyCY, px, py, x, y);
-          const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
-          jb = Math.max(jb, stemPulse);
-          const kd = Math.hypot(x - px, y - py);
-          const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
-          const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
-          jb = Math.max(jb, core * 1.0 + glow * 0.9);
-          buf[idx] = Math.max(buf[idx], jb);
+        if(mag&gt;0.01){
+          let jb=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
+          jb=Math.max(jb,pulse01(sd/(PITCH*2.4),0.16)*STEM_GAIN);
+          const kd=Math.hypot(x-px,y-py);
+          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
+          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
+          jb=Math.max(jb, core*1.0+glow*0.9);
+          buf[idx]=Math.max(buf[idx], jb);
         }
-
-        let b = buf[idx] || 0;
-        b *= 1 - smoothStep(0.96, 1.12, Math.hypot(x - W/2, y - H/2) / (Math.min(W, H) / 2));
-        b += (noise2(i, j) - 0.5) * 0.06;
-
-        dotDraw(x, y, DOT_R, quantize(Math.max(0, b)));
+        let b=buf[idx]||0;
+        b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2));
+        b += (noise2(i,j)-0.5)*0.06;
+        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
       }
     }
   }
 
-  function calcRing(d, r0, thick) {
-    return Math.max(0, 1 - Math.abs(d - r0) / (thick * 0.5));
-  }
-
-  function dotDraw(x, y, r, level) {
-    if (level &lt;= 0) {
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2*Math.PI);
-      ctx.fillStyle = OFF;
-      ctx.fill();
-      return;
-    }
-    const color = level &gt;= 1 ? RED : (level &gt;= 0.65 ? MID : DIM);
-    ctx.save();
-    ctx.shadowColor = color;
-    ctx.shadowBlur = (JPAD_LIGHT_MODE ? 0 : 8) * level;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2*Math.PI);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function quantize(v) {
-    let best = 0, bd = 1e9;
-    for (const s of LEVELS) {
-      const d = Math.abs(v - s);
-      if (d &lt; bd) { bd = d; best = s; }
-    }
-    return best;
-  }
-
-  function smoothStep(a, b, x) {
-    const t = Math.min(1, Math.max(0, (x-a)/(b-a)));
-    return t*t*(3 - 2*t);
-  }
-
-  function pulse01(x, w) {
-    return Math.max(0, 1 - smoothStep(0, w, x));
-  }
-
-  function wrap(a) {
-    a %= Math.PI * 2;
-    return a &lt; 0 ? a + Math.PI * 2 : a;
-  }
-
+  function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
+  function dotDraw(x,y,r,level){ if(level&lt;=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level&gt;=1?RED:(level&gt;=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=(JPAD_LIGHT_MODE ? 0 : 8)*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
+  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d&lt;bd){ bd=d; best=s; } } return best; }
+  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+  function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
+  function wrap(a){ a%=Math.PI*2; return a&lt;0? a+Math.PI*2 : a; }
   function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
   function fract(x){ return x - Math.floor(x); }
-  function segDist(ax,ay,bx,by,px,py){
-    const vx=bx-ax, vy=by-ay, wx=px-ax, wy=py-ay;
-    const c1 = vx*wx + vy*wy; if (c1 &lt;= 0) return Math.hypot(px-ax,py-ay);
-    const c2 = vx*vx + vy*vy; if (c2 &lt;= c1) return Math.hypot(px-bx,py-by);
-    const t = c1 / c2; const sx = ax + t*vx, sy = ay + t*vy;
-    return Math.hypot(px-sx,py-sy);
-  }
+  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1&lt;=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2&lt;=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
 
-  const ro = new ResizeObserver(entries =&gt; {
-    if (entries[0]) {
-      const { width, height } = entries[0].contentRect;
-      const p = parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;)) || 16;
-      const w = Math.max(1, Math.floor(width - p*2));
-      const h = Math.max(1, Math.floor(height - p*2));
-      updateLayout(w, h);
+  const ro=new ResizeObserver(entries=&gt;{
+    if(entries[0]){
+      const {width,height}=entries[0].contentRect;
+      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;))||16;
+      const w=Math.max(1, Math.floor(width - p*2));
+      const h=Math.max(1, Math.floor(height - p*2));
+      updateLayout(w,h);
     }
   });
   ro.observe(rightArea);
   requestAnimationFrame(loop);
-})()
-;
+})();
 
 /* =========================
    BUTTONS + BOMB MORPH
@@ -1153,10 +811,6 @@ function buildArrowPadGeometry() {
   }
 
   // ====== State ======
-
-  // DR2: Laser Arrow-Pad Mode (Part 2) – ensure shared globals exist
-  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
-  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
   const state = { 
     mode: &#x27;single&#x27;, 
     active: false, 
@@ -1242,12 +896,64 @@ function buildArrowPadGeometry() {
   const laserSectionRects = getLaserSectionRects(faceLASER_final);
   const laserSectionMasks = laserSectionRects.map(rect =&gt; buildFaceMask(rect));
 
+  // DR-A: precompute structured LASER bars for cartridge-style display.
+  const laserBars = laserSectionRects.map((rect) =&gt; {
+    const inset = 1.5 * p;
+    const x0 = rect.x + inset;
+    const y0 = rect.y + inset;
+    const x1 = rect.x + rect.w - inset;
+    const y1 = rect.y + rect.h - inset;
+    const pts = [];
+    let rowIndex = 0;
+    for (let y = y0; y &lt;= y1; y += p){
+      for (let x = x0; x &lt;= x1; x += p){
+        pts.push({
+          x: snap(x),
+          y: snap(y),
+          row: rowIndex
+        });
+      }
+      rowIndex++;
+    }
+    return { pts, rows: rowIndex };
+  });
+
+
   function qLevel(e){ const LEVELS=[0.00,0.18,0.36,0.64,1.00]; e=Math.max(0,Math.min(1,e)); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d&lt;bd){ bd=d; best=L; } } return best; }
   function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) &gt;&gt;&gt; 0; return ((n % 9973) / 9973); }
   function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
   let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
 
   const laserLabelPts = rasterTextPoints(faceLASER_final,&#x27;LASER&#x27;);
+
+  // DR-A: capsule around LASER word for a clean label plate.
+  const laserLabelBounds = (() =&gt; {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const pt of laserLabelPts){
+      if (pt.x &lt; minX) minX = pt.x;
+      if (pt.x &gt; maxX) maxX = pt.x;
+      if (pt.y &lt; minY) minY = pt.y;
+      if (pt.y &gt; maxY) maxY = pt.y;
+    }
+    const padX = 2 * p;
+    const padY = 1.5 * p;
+    return {
+      x: minX - padX,
+      y: minY - padY,
+      w: (maxX - minX) + 2 * padX,
+      h: (maxY - minY) + 2 * padY,
+      r: faceLASER_final.r * 0.35
+    };
+  })();
+
+  const laserLabelCapsuleDots = sampleRoundedRectDots(
+    laserLabelBounds.x,
+    laserLabelBounds.y,
+    laserLabelBounds.w,
+    laserLabelBounds.h,
+    laserLabelBounds.r
+  );
+
   const sectionFlags = new Array(4).fill(0).map(() =&gt; new Uint8Array(laserDots.length));
   for (let section = 0; section &lt; 4; section++) {
     const sectionMask = laserSectionMasks[section];
@@ -1261,31 +967,47 @@ function buildArrowPadGeometry() {
   }
 
   function drawLaserArmed(t) {
-    for (let section = 0; section &lt; 4; section++) {
-      if (section &gt;= (4 - state.laserAmmo)) {
-        for (let k = 0; k &lt; laserDots.length; k++) {
-          if (sectionFlags[section][k] === 1) {
-            const pt = laserDots[k];
-            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 7);
-            if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
-            drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
-          }
-        }
+  const activeStart = 4 - state.laserAmmo;
+  const ammoFrac = Math.max(0, Math.min(1, state.laserAmmo / 4));
+
+  // DR-A: LASER cartridge look.
+  // - 4 solid charge bars, one per section.
+  // - Subtle vertical sweep inside any active bar.
+  const sweepSpeed = 1.5;
+  for (let s = 0; s &lt; 4; s++){
+    if (s &lt; activeStart) continue; // this bar is depleted
+
+    const bar = laserBars[s];
+    if (!bar) continue;
+    const rows = bar.rows || 1;
+    const phase = (t * sweepSpeed + s * 0.4) % rows;
+    const sweepRow = phase | 0;
+
+    for (const pt of bar.pts){
+      let level = 0.55 + 0.30 * ammoFrac; // core brightness
+      if (pt.row === sweepRow){
+        level = Math.min(1, level + 0.25); // moving highlight stripe
       }
-    }
-    for (const pt of laserLabelPts){
-      let sect=-1;
-      for(let s=0;s&lt;4;s++){
-        if (laserSectionMasks[s].pts.some(q=&gt;Math.abs(q.x-pt.x)&lt;p &amp;&amp; Math.abs(q.y-pt.y)&lt;p)){ sect=s; break; }
-      }
-      if (sect&lt;0) continue;
-      if (sect &gt;= (4 - state.laserAmmo)){
-        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
-      } else {
-        drawBrightDot(ctx, pt.x, pt.y, 0.8);
-      }
+      drawBrightDot(ctx, pt.x, pt.y, qLevel(level));
     }
   }
+
+  // LASER label capsule: bright plate at the top.
+  const labelBaseLevel = state.laserAmmo &gt; 0 ? 0.80 : 0.40;
+  for (const pt of laserLabelCapsuleDots){
+    drawBrightDot(ctx, pt.x, pt.y, qLevel(labelBaseLevel));
+  }
+
+  // LASER word: solid black, always readable, carved out of the plate.
+  for (const pt of laserLabelPts){
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, d * 0.95, 0, Math.PI * 2);
+    ctx.fillStyle = &#x27;#000&#x27;;
+    ctx.fill();
+    ctx.restore();
+  }
+}
 
   /* ===========================================
      FILLED DISK + EXTRAS GENERATORS
@@ -1871,16 +1593,6 @@ function buildArrowPadGeometry() {
 
   // ====== Main frame ======
   function frame(ts) {
-
-    // DR2: Laser Arrow-Pad Mode (Part 2)
-    const prevLaserMode = !!window.laserArrowMode;
-    const wantLaserMode =
-      (state.mode === &#x27;two&#x27;) &amp;&amp; state.specialActive &amp;&amp; (state.laserAmmo &gt; 0);
-
-    window.laserArrowMode = wantLaserMode;
-    if (!wantLaserMode &amp;&amp; prevLaserMode) {
-      window.laserDirection = &#x27;up&#x27;;
-    }
     if (__prevMode !== state.mode || __prevActive !== state.active) {
       if (state.active) { setProxiesEnabled(false); }
       else { setProxiesEnabled(true); updateProxyForMode(); }
