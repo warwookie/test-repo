@@ -759,76 +759,94 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const cx = joyCX;
     const cy = joyCY;
 
-    // DR2: Laser Arrow-Pad Mode (Part 2) – Celtic-cross style:
-    // outer ring + inner disc + four bars (up/right/down/left)
-    const ringMidR   = joyR * 0.90;
-    const ringThick  = joyR * 0.20;
-    const ringInnerR = ringMidR - ringThick * 0.5;
-    const ringOuterR = ringMidR + ringThick * 0.5;
+    // DR2: Laser Arrow-Pad Mode (Part 2) – crosshair-style, larger joystick arrows
+    const armLen   = joyR * 0.80;
+    const armHalfW = PITCH * 1.8;
+    const headLen  = PITCH * 2.2;
+    const centerSize = PITCH * 2.4;
 
-    const centerR    = joyR * 0.28;   // central disc radius
-    const barHalfW   = centerR * 0.85; // bar thickness (half-width)
-    const barReachR  = ringInnerR * 0.98; // where bars stop, just inside ring
-
-    // Build ring + center disc into arrowGeom.center
-    for (let j = 0; j &lt; ROWS; j++) {
-      for (let i = 0; i &lt; COLS; i++) {
-        const x = OX + i * PITCH;
-        const y = OY + j * PITCH;
-        const dx = x - cx;
-        const dy = y - cy;
-        const d  = Math.hypot(dx, dy);
-
-        // outer ring band
-        if (d &gt;= ringInnerR &amp;&amp; d &lt;= ringOuterR) {
-          arrowGeom.center.push({ x: snap(x), y: snap(y) });
-        }
-        // inner disc
-        else if (d &lt;= centerR) {
-          arrowGeom.center.push({ x: snap(x), y: snap(y) });
+    function fillRect(list, x0,y0,x1,y1) {
+      for (let y = y0; y &lt;= y1; y += PITCH) {
+        for (let x = x0; x &lt;= x1; x += PITCH) {
+          list.push({ x:snap(x), y:snap(y) });
         }
       }
     }
-
-    function addBar(list, orient) {
-      if (orient === &#x27;up&#x27; || orient === &#x27;down&#x27;) {
-        const sign = (orient === &#x27;up&#x27;) ? -1 : 1;
-        const yStart = cy + sign * centerR;
-        const yEnd   = cy + sign * barReachR;
-
-        for (let j = 0; j &lt; ROWS; j++) {
-          for (let i = 0; i &lt; COLS; i++) {
-            const x = OX + i * PITCH;
-            const y = OY + j * PITCH;
-            if (x &lt; cx - barHalfW || x &gt; cx + barHalfW) continue;
-            if (sign &lt; 0) { if (y &gt; yStart || y &lt; yEnd) continue; }
-            else          { if (y &lt; yStart || y &gt; yEnd) continue; }
-            list.push({ x: snap(x), y: snap(y) });
-          }
-        }
-      } else {
-        const sign = (orient === &#x27;left&#x27;) ? -1 : 1;
-        const xStart = cx + sign * centerR;
-        const xEnd   = cx + sign * barReachR;
-
-        for (let j = 0; j &lt; ROWS; j++) {
-          for (let i = 0; i &lt; COLS; i++) {
-            const x = OX + i * PITCH;
-            const y = OY + j * PITCH;
-            if (y &lt; cy - barHalfW || y &gt; cy + barHalfW) continue;
-            if (sign &lt; 0) { if (x &gt; xStart || x &lt; xEnd) continue; }
-            else          { if (x &lt; xStart || x &gt; xEnd) continue; }
-            list.push({ x: snap(x), y: snap(y) });
-          }
-        }
+    function fillRow(list, x0,x1,y) {
+      for (let x = x0; x &lt;= x1; x += PITCH) {
+        list.push({ x:snap(x), y:snap(y) });
       }
     }
 
-    // Four cardinal bars
-    addBar(arrowGeom.up,    &#x27;up&#x27;);
-    addBar(arrowGeom.down,  &#x27;down&#x27;);
-    addBar(arrowGeom.left,  &#x27;left&#x27;);
-    addBar(arrowGeom.right, &#x27;right&#x27;);
+    const cHalf = centerSize * 0.5;
+    fillRect(arrowGeom.center, cx - cHalf, cy - cHalf, cx + cHalf, cy + cHalf);
+
+    const gapLen        = PITCH * 0.8;
+    const upTrunkTop    = cy - armLen;
+    const upTrunkBottom = cy - cHalf - gapLen;
+    const upTrunkLeft   = cx - armHalfW;
+    const upTrunkRight  = cx + armHalfW;
+    fillRect(arrowGeom.up, upTrunkLeft, upTrunkTop, upTrunkRight, upTrunkBottom);
+
+    const upHeadBaseY = upTrunkTop;
+    const upHeadTipY  = upTrunkTop - headLen;
+    const upSteps = 3;
+    for (let s=0; s&lt;upSteps; s++) {
+      const t = s / (upSteps-1 || 1);
+      const rowY = upHeadBaseY - t * headLen;
+      const half = armHalfW + PITCH * (1 - t);
+      fillRow(arrowGeom.up, cx - half, cx + half, rowY);
+    }
+
+    const dnTrunkBottom = cy + armLen;
+    const dnTrunkTop    = cy + cHalf + gapLen;
+    const dnTrunkLeft   = cx - armHalfW;
+    const dnTrunkRight  = cx + armHalfW;
+    fillRect(arrowGeom.down, dnTrunkLeft, dnTrunkTop, dnTrunkRight, dnTrunkBottom);
+
+    const dnHeadBaseY = dnTrunkBottom;
+    const dnHeadTipY  = dnTrunkBottom + headLen;
+    for (let s=0; s&lt;upSteps; s++) {
+      const t = s / (upSteps-1 || 1);
+      const rowY = dnHeadBaseY + t * headLen;
+      const half = armHalfW + PITCH * (1 - t);
+      fillRow(arrowGeom.down, cx - half, cx + half, rowY);
+    }
+
+    const lfTrunkLeft   = cx - armLen;
+    const lfTrunkRight  = cx - cHalf - gapLen;
+    const lfTrunkTop    = cy - armHalfW;
+    const lfTrunkBottom = cy + armHalfW;
+    fillRect(arrowGeom.left, lfTrunkLeft, lfTrunkTop, lfTrunkRight, lfTrunkBottom);
+
+    const lfHeadBaseX = lfTrunkLeft;
+    const lfHeadTipX  = lfTrunkLeft - headLen;
+    const lfSteps = 3;
+    for (let s=0; s&lt;lfSteps; s++) {
+      const t = s / (lfSteps-1 || 1);
+      const colX = lfHeadBaseX - t * headLen;
+      const half = armHalfW + PITCH * (1 - t);
+      for (let y = cy - half; y &lt;= cy + half; y += PITCH) {
+        arrowGeom.left.push({ x:snap(colX), y:snap(y) });
+      }
+    }
+
+    const rtTrunkRight  = cx + armLen;
+    const rtTrunkLeft   = cx + cHalf + gapLen;
+    const rtTrunkTop    = cy - armHalfW;
+    const rtTrunkBottom = cy + armHalfW;
+    fillRect(arrowGeom.right, rtTrunkLeft, rtTrunkTop, rtTrunkRight, rtTrunkBottom);
+
+    const rtHeadBaseX = rtTrunkRight;
+    const rtHeadTipX  = rtTrunkRight + headLen;
+    for (let s=0; s&lt;lfSteps; s++) {
+      const t = s / (lfSteps-1 || 1);
+      const colX = rtHeadBaseX + t * headLen;
+      const half = armHalfW + PITCH * (1 - t);
+      for (let y = cy - half; y &lt;= cy + half; y += PITCH) {
+        arrowGeom.right.push({ x:snap(colX), y:snap(y) });
+      }
+    }
   }
 
   function drawArrowPad() {
@@ -4400,166 +4418,6 @@ bindRange('v_rs', 'o_rs', function(raw) {
   window.addEventListener('orientationchange', layoutCabinet);
   window.addEventListener('load', layoutCabinet);
   layoutCabinet();
-})();
-</script>
-
-<script>
-(function() {
-  // Dot-matrix arrow-cross mask imported from standalone joystick preview
-  const maskRows = [
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000001111111110000000000000000000000000000000000",
-  "00000000000000000000000000000001111111111111111110000000000000000000000000000000",
-  "00000000000000000000000000001111111100000000000111100000000000000000000000000000",
-  "00000000000000000000000000111100000000000000000000111100000000000000000000000000",
-  "00000000000000000000000011110000000000011100000000001111000000000000000000000000",
-  "00000000000000000000001111000000000000111100000000000011110000000000000000000000",
-  "00000000000000000000011100000000000001111111000000000000111000000000000000000000",
-  "00000000000000000000111000000000000011111111000000000000011100000000000000000000",
-  "00000000000000000001110000000000000111111111100000000000001110000000000000000000",
-  "00000000000000000011100000000000001111111111110000000000000011000000000000000000",
-  "00000000000000000111000000000000011111111111111000000000000001100000000000000000",
-  "00000000000000001110000000000000111111111111111100000000000000110000000000000000",
-  "00000000000000001100000000000001111111111111111110000000000000111000000000000000",
-  "00000000000000011000000000000011111111111111111111000000000000011100000000000000",
-  "00000000000000111000000000000000000111111111110000000000000000001100000000000000",
-  "00000000000000110000000000000000000111111111100000000000000000000110000000000000",
-  "00000000000001110000000000000000000111111111100000000000000000000111000000000000",
-  "00000000000001100000000000000000000111111111100000000000000000000011000000000000",
-  "00000000000011000000000000000000000111111111100000000000000000000001100000000000",
-  "00000000000011000000000000000000000111111111100000000000000000000001100000000000",
-  "00000000000110000000000000000000000111111111100000000000000000000001100000000000",
-  "00000000000110000000000000000000000111111111100000000000010000000001100000000000",
-  "00000000000110000000001000000000000111111111100000000000011000000000110000000000",
-  "00000000001100000000011100000000000111111111100000000000011100000000110000000000",
-  "00000000001100000000111100000000000111111111100000000000011110000000110000000000",
-  "00000000001100000001111100000000000111111111100000000000011111000000010000000000",
-  "00000000001100000011111000000000001111111111100000000000011111100000011000000000",
-  "00000000001100000111111111111111111111111111111111111111111111110000011000000000",
-  "00000000001100001111111111111111111111111111111111111111111111111000011000000000",
-  "00000000011100011111111111111111111111111111111111111111111111111100011000000000",
-  "00000000011000111111111111111111111111111111111111111111111111111110011000000000",
-  "00000000011001111111111111111111111111111111111111111111111111111111011000000000",
-  "00000000011001111111111111111111111111111111111111111111111111111100011000000000",
-  "00000000011000111111111111111111111111111111111111111111111111111100011000000000",
-  "00000000011000011111111111111111111111111111111111111111111111110000011000000000",
-  "00000000011000001111111111111111111111111111111111111111111111100000011000000000",
-  "00000000001000000111111111111100001111111111100000000000111111000000011000000000",
-  "00000000001100000011111000000000001111111111100000000000011110000000011000000000",
-  "00000000001100000001111100000000001111111111100000000000011100000000110000000000",
-  "00000000001100000000111100000000001111111111100000000000111000000000110000000000",
-  "00000000001100000000011100000000001111111111100000000000110000000000110000000000",
-  "00000000000110000000001000000000001111111111100000000000100000000001100000000000",
-  "00000000000110000000000000000000001111111111100000000000000000000001100000000000",
-  "00000000000011000000000000000000001111111111100000000000000000000011000000000000",
-  "00000000000011000000000000000000001111111111100000000000000000000111000000000000",
-  "00000000000011100000000000000000001111111111100000000000000000000110000000000000",
-  "00000000000001100000000000000000001111111111100000000000000000001100000000000000",
-  "00000000000000110000000000000000001111111111110100000000000000001100000000000000",
-  "00000000000000111000000000000111111111111111111111000000000000011000000000000000",
-  "00000000000000011100000000000011111111111111111110000000000000111000000000000000",
-  "00000000000000001110000000000001111111111111111100000000000001110000000000000000",
-  "00000000000000000111000000000000111111111111111000000000000011100000000000000000",
-  "00000000000000000011000000000000011111111111110000000000000111000000000000000000",
-  "00000000000000000001110000000000001111111111100000000000001110000000000000000000",
-  "00000000000000000000111000000000000111111111000000000000011100000000000000000000",
-  "00000000000000000000011100000000000011111110000000000000111000000000000000000000",
-  "00000000000000000000001111000000000001111100000000000011110000000000000000000000",
-  "00000000000000000000000011110000000000111000000000000111000000000000000000000000",
-  "00000000000000000000000001111110000000010000000000111110000000000000000000000000",
-  "00000000000000000000000000001111110000000000001111111000000000000000000000000000",
-  "00000000000000000000000000000011111111111111111111100000000000000000000000000000",
-  "00000000000000000000000000000000001111111111110000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
-];
-
-  // Override buildArrowPadGeometry to use maskRows but keep all other logic intact.
-  window.buildArrowPadGeometry = function buildArrowPadGeometry() {
-    if (!window.layoutReady) return;
-
-    const snap = v => Math.round(v / PITCH) * PITCH;
-
-    window.arrowGeom = {
-      up:    [],
-      right: [],
-      down:  [],
-      left:  [],
-      center:[]
-    };
-
-    const cx = window.joyCX;
-    const cy = window.joyCY;
-
-    const maskH = maskRows.length;
-    const maskW = maskRows[0].length;
-    const cxMask = (maskW - 1) / 2;
-    const cyMask = (maskH - 1) / 2;
-
-    let maskRad = 0;
-    for (let j = 0; j < maskH; j++) {
-      const row = maskRows[j];
-      for (let i = 0; i < maskW; i++) {
-        if (row[i] !== '1') continue;
-        const dxI = i - cxMask;
-        const dyJ = j - cyMask;
-        const d = Math.hypot(dxI, dyJ);
-        if (d > maskRad) maskRad = d;
-      }
-    }
-    if (maskRad <= 0) return;
-
-    const scale = (joyR * 0.9) / maskRad;
-
-    const centerThresh = maskRad * 0.36;
-    const ringInner    = maskRad * 0.78;
-    const ringOuter    = maskRad * 1.02;
-
-    for (let j = 0; j < maskH; j++) {
-      const row = maskRows[j];
-      for (let i = 0; i < maskW; i++) {
-        if (row[i] !== '1') continue;
-
-        const dxI = i - cxMask;
-        const dyJ = j - cyMask;
-        const dist = Math.hypot(dxI, dyJ);
-
-        const x = snap(cx + dxI * scale);
-        const y = snap(cy + dyJ * scale);
-
-        let target;
-
-        if (dist <= centerThresh || (dist >= ringInner && dist <= ringOuter)) {
-          target = arrowGeom.center;
-        } else {
-          const ax = dxI;
-          const ay = dyJ;
-          if (Math.abs(ax) >= Math.abs(ay)) {
-            target = (ax >= 0) ? arrowGeom.right : arrowGeom.left;
-          } else {
-            target = (ay >= 0) ? arrowGeom.down : arrowGeom.up;
-          }
-        }
-
-        target.push({ x, y });
-      }
-    }
-  };
 })();
 </script>
 </body>
