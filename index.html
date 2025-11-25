@@ -743,86 +743,116 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
   // DR2: Laser Arrow-Pad Mode (Part 2) – DMD rendering
-  function buildArrowPadGeometry() {
-    if (!layoutReady) return;
+  
+function buildArrowPadGeometry() {
+  if (!layoutReady) return;
 
-    const snap = v =&gt; Math.round(v / PITCH) * PITCH;
+  const snap = v =&gt; Math.round(v / PITCH) * PITCH;
 
-    arrowGeom = {
-      up:    [],
-      right: [],
-      down:  [],
-      left:  [],
-      center:[]
-    };
+  arrowGeom = {
+    up:    [],
+    right: [],
+    down:  [],
+    left:  [],
+    center:[]
+  };
 
-    const cx = joyCX;
-    const cy = joyCY;
+  const cx = joyCX;
+  const cy = joyCY;
 
-    // DR2: Laser Arrow-Pad Mode (Part 2) – circular crosshair style:
-    // one ring, four inner directional pads (no joystick base)
-    const outerR  = joyR * 0.95;
-    const innerR  = joyR * 0.65;
-    const ringTol = PITCH * 0.7;
+  // Circle + arrow-cross symbol:
+  // outer ring + inner disc + four arrow stems + heads
+  const ringMidR   = joyR * 0.90;
+  const ringThick  = joyR * 0.20;
+  const ringInnerR = ringMidR - ringThick * 0.5;
+  const ringOuterR = ringMidR + ringThick * 0.5;
 
-    const padRadius   = innerR * 0.55;   // distance from center to each pad center
-    const pillHalfL   = PITCH * 2.4;     // length along direction axis
-    const pillHalfW   = PITCH * 1.4;     // thickness perpendicular to direction axis
+  const centerR      = joyR * 0.28;        // central disc radius
+  const shaftHalfW   = centerR * 0.55;     // arrow shaft half-width
+  const shaftLen     = (ringInnerR - centerR) * 0.55;
+  const headLen      = (ringInnerR - centerR) * 0.45;
+  const headHalfWMax = shaftHalfW * 1.6;   // arrowhead base width
 
-    // Build ring (stored in arrowGeom.center)
+  // --- ring + inner disc go into arrowGeom.center ---
+  for (let j = 0; j &lt; ROWS; j++) {
+    for (let i = 0; i &lt; COLS; i++) {
+      const x = OX + i * PITCH;
+      const y = OY + j * PITCH;
+      const dx = x - cx;
+      const dy = y - cy;
+      const d  = Math.hypot(dx, dy);
+
+      // outer circular ring
+      if (d &gt;= ringInnerR &amp;&amp; d &lt;= ringOuterR) {
+        arrowGeom.center.push({ x: snap(x), y: snap(y) });
+      }
+      // inner filled disc
+      else if (d &lt;= centerR) {
+        arrowGeom.center.push({ x: snap(x), y: snap(y) });
+      }
+    }
+  }
+
+  // --- helper to add one arrow (stem + head) into a list ---
+  function addArrow(list, dir) {
+    const isVertical = (dir === 'up' || dir === 'down');
+    const sign = (dir === 'up' || dir === 'left') ? -1 : 1;
+
+    // distances along arrow axis from center
+    const shaftStartR = centerR;
+    const shaftEndR   = centerR + shaftLen;
+    const headBaseR   = shaftEndR;
+    const headTipR    = headBaseR + headLen;   // near the ring
+
     for (let j = 0; j &lt; ROWS; j++) {
       for (let i = 0; i &lt; COLS; i++) {
         const x = OX + i * PITCH;
         const y = OY + j * PITCH;
-        const dx = x - cx;
-        const dy = y - cy;
-        const d  = Math.hypot(dx, dy);
-        if (Math.abs(d - innerR) &lt;= ringTol) {
-          arrowGeom.center.push({ x: snap(x), y: snap(y) });
+
+        const lx = x - cx;
+        const ly = y - cy;
+
+        let along, off;
+        if (isVertical) {
+          along = sign * ly;   // distance along the arrow axis
+          off   = lx;          // sideways distance
+        } else {
+          along = sign * lx;
+          off   = ly;
+        }
+
+        // only consider dots in front of the center, up to near the ring
+        if (along &lt;= shaftStartR || along &gt; headTipR) continue;
+
+        const absOff = Math.abs(off);
+        let inside = false;
+
+        // Shaft: rectangle extending from center disc towards head
+        if (along &gt;= shaftStartR &amp;&amp; along &lt;= shaftEndR) {
+          if (absOff &lt;= shaftHalfW) inside = true;
+        }
+
+        // Head: isosceles triangle, wide at base, narrow at tip
+        if (!inside &amp;&amp; along &gt; headBaseR &amp;&amp; along &lt;= headTipR) {
+          const t = (along - headBaseR) / (headTipR - headBaseR); // 0 at base, 1 at tip
+          const w = headHalfWMax * (1 - t);                       // taper to point
+          if (absOff &lt;= w) inside = true;
+        }
+
+        if (inside) {
+          list.push({ x: snap(x), y: snap(y) });
         }
       }
     }
-
-    function addPill(list, px, py, orient) {
-      // orient: &#x27;up&#x27;/&#x27;down&#x27; (vertical pill) or &#x27;left&#x27;/&#x27;right&#x27; (horizontal pill)
-      if (orient === &#x27;up&#x27; || orient === &#x27;down&#x27;) {
-        const y0 = py - pillHalfL, y1 = py + pillHalfL;
-        const x0 = px - pillHalfW, x1 = px + pillHalfW;
-        for (let y = y0; y &lt;= y1; y += PITCH) {
-          for (let x = x0; x &lt;= x1; x += PITCH) {
-            const u = (y - py) / pillHalfL;   // along axis
-            const v = (x - px) / pillHalfW;   // across axis
-            if (u*u + v*v &lt;= 1.0) {
-              list.push({ x: snap(x), y: snap(y) });
-            }
-          }
-        }
-      } else {
-        const x0 = px - pillHalfL, x1 = px + pillHalfL;
-        const y0 = py - pillHalfW, y1 = py + pillHalfW;
-        for (let y = y0; y &lt;= y1; y += PITCH) {
-          for (let x = x0; x &lt;= x1; x += PITCH) {
-            const u = (x - px) / pillHalfL;
-            const v = (y - py) / pillHalfW;
-            if (u*u + v*v &lt;= 1.0) {
-              list.push({ x: snap(x), y: snap(y) });
-            }
-          }
-        }
-      }
-    }
-
-    // Four pads, aligned to up/right/down/left
-    const upCY    = cy - padRadius;
-    const downCY  = cy + padRadius;
-    const leftCX  = cx - padRadius;
-    const rightCX = cx + padRadius;
-
-    addPill(arrowGeom.up,    cx,      upCY,    &#x27;up&#x27;);
-    addPill(arrowGeom.down,  cx,      downCY,  &#x27;down&#x27;);
-    addPill(arrowGeom.left,  leftCX,  cy,      &#x27;left&#x27;);
-    addPill(arrowGeom.right, rightCX, cy,      &#x27;right&#x27;);
   }
+
+  // Four directional arrows
+  addArrow(arrowGeom.up,    'up');
+  addArrow(arrowGeom.right, 'right');
+  addArrow(arrowGeom.down,  'down');
+  addArrow(arrowGeom.left,  'left');
+}
+
 
   function drawArrowPad() {
     if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
