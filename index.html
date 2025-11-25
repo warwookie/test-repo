@@ -546,151 +546,463 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
    JOYPAD (prefixed jpad_)
 ========================= */
 (() =&gt; {
-  const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
-  let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
-  const RED=&#x27;#ff2a2a&#x27;, MID=&#x27;#ff2a2acc&#x27;, DIM=&#x27;#ff2a2a66&#x27;, OFF=&#x27;#210000&#x27;;
-  const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
+  const DEADZONE = 0.15, RESPONSE = 1.20, SMOOTH = 0.22, AUTO_RETURN = true;
+  let PITCH = 10, DOT_R = 2.6; const LEVELS = [0, 0.35, 0.65, 1];
+  const RED = &#x27;#ff2a2a&#x27;, MID = &#x27;#ff2a2acc&#x27;, DIM = &#x27;#ff2a2a66&#x27;, OFF = &#x27;#210000&#x27;;
+  const DECAY = 0.90; let buf; const KNOB_CORE = 0.10, KNOB_GLOWR = 0.30, STEM_GAIN = 0.80;
 
-  window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
+  // DR2: Laser Arrow-Pad Mode (Part 2) – shared globals
+  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
+  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
 
-  const cvs=document.getElementById(&#x27;jpad_canvas&#x27;); const ctx=cvs.getContext(&#x27;2d&#x27;);
-  const readout=document.getElementById(&#x27;jpad_status&#x27;); const rightArea=document.getElementById(&#x27;right-area&#x27;);
-  let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
-  let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
+  window.jpad_state = { x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
 
-  function updateLayout(newWidth,newHeight){
-    if(newWidth&lt;1||newHeight&lt;1) return;
-    cvs.width=newWidth; cvs.height=newHeight; W=newWidth; H=newHeight;
+  const cvs = document.getElementById(&#x27;jpad_canvas&#x27;);
+  const ctx = cvs.getContext(&#x27;2d&#x27;);
+  const readout = document.getElementById(&#x27;jpad_status&#x27;);
+  const rightArea = document.getElementById(&#x27;right-area&#x27;);
+
+  let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
+  let layoutReady = false;
+  let outX = 0, outY = 0, joyTX = 0, joyTY = 0;
+  const activePointers = new Map();
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – geometry &amp; animation
+  let arrowGeom = null;          // { up:[], right:[], down:[], left:[], center:[] }
+  let arrowHitRects = null;      // { up:{x,y,w,h}, ... }
+  const arrowPulse = { up:0, right:0, down:0, left:0 };
+  let arrowIntro = 0;            // 0..1 suck-in when arrow mode enters
+  let lastArrowMode = false;
+
+  function updateLayout(newWidth, newHeight) {
+    if (newWidth &lt; 1 || newHeight &lt; 1) return;
+    cvs.width = newWidth; cvs.height = newHeight; W = newWidth; H = newHeight;
 
     const targetRows = JPAD_LIGHT_MODE ? 18 : 24;
-    PITCH=H/targetRows; DOT_R=PITCH*0.21;
+    PITCH = H / targetRows; DOT_R = PITCH * 0.21;
 
-    COLS=Math.floor(W/PITCH); ROWS=Math.floor(H/PITCH);
-    if(COLS&lt;1||ROWS&lt;1) return;
-    OX=(W-COLS*PITCH)/2 + PITCH/2; OY=(H-ROWS*PITCH)/2 + PITCH/2;
+    COLS = Math.floor(W / PITCH); ROWS = Math.floor(H / PITCH);
+    if (COLS &lt; 1 || ROWS &lt; 1) return;
+    OX = (W - COLS * PITCH) / 2 + PITCH / 2;
+    OY = (H - ROWS * PITCH) / 2 + PITCH / 2;
 
-    joyCX=W*0.5; joyCY=H*0.5; joyR=(Math.min(W,H)/2)-(PITCH*3);
+    joyCX = W * 0.5; joyCY = H * 0.5; joyR = (Math.min(W, H) / 2) - (PITCH * 1.5);
 
-    buf=new Float32Array(COLS*ROWS);
-    layoutReady=true;
+    buf = new Float32Array(COLS * ROWS);
+    layoutReady = true;
+
+    buildArrowPadGeometry();
+    buildArrowHitRects();
   }
 
-  function getPointerLocation(e){ const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
-  function joyPointerToNorm(x,y){
-    const dx=x-joyCX, dy=y-joyCY;
-    const dist=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
-    let rn=Math.min(dist/joyR,1);
-    if(rn&lt;DEADZONE) rn=0; else rn=(rn-DEADZONE)/(1-DEADZONE);
-    rn=Math.pow(rn,RESPONSE);
-    return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
+  function getPointerLocation(e) {
+    const r = cvs.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
-  cvs.addEventListener(&#x27;pointerdown&#x27;, e=&gt;{
+  function joyPointerToNorm(x, y) {
+    const dx = x - joyCX, dy = y - joyCY;
+    const dist = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    let rn = Math.min(dist / joyR, 1);
+    if (rn &lt; DEADZONE) rn = 0;
+    else rn = (rn - DEADZONE) / (1 - DEADZONE);
+    rn = Math.pow(rn, RESPONSE);
+    return { nx: Math.cos(ang) * rn, ny: Math.sin(ang) * rn };
+  }
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – rectangular hit areas
+  function buildArrowHitRects() {
+    if (!layoutReady) return;
+    const midY = H * (1 / 3);
+    const midY2 = H * (2 / 3);
+    const midX = W * 0.5;
+    arrowHitRects = {
+      up:    { x:0,     y:0,      w:W,      h:midY        },
+      down:  { x:0,     y:midY2,  w:W,      h:H - midY2   },
+      left:  { x:0,     y:midY,   w:midX,   h:midY2-midY  },
+      right: { x:midX,  y:midY,   w:W-midX, h:midY2-midY  }
+    };
+  }
+
+  function hitTestArrow(x, y) {
+    if (!arrowHitRects || !window.laserArrowMode) return null;
+    for (const dir of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
+      const r = arrowHitRects[dir];
+      if (!r) continue;
+      if (x &gt;= r.x &amp;&amp; x &lt;= r.x + r.w &amp;&amp; y &gt;= r.y &amp;&amp; y &lt;= r.y + r.h) return dir;
+    }
+    return null;
+  }
+
+  cvs.addEventListener(&#x27;pointerdown&#x27;, e =&gt; {
     e.preventDefault();
-    const {x,y}=getPointerLocation(e);
-    try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
-    activePointers.set(e.pointerId,&#x27;joy&#x27;);
-    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+    const { x, y } = getPointerLocation(e);
+    try { cvs.setPointerCapture(e.pointerId); } catch(_){}
+    activePointers.set(e.pointerId, &#x27;joy&#x27;);
+
+    if (window.laserArrowMode) {
+      const dir = hitTestArrow(x, y);
+      if (dir) {
+        window.laserDirection = dir;
+        arrowPulse[dir] = 1.0;
+      }
+    } else {
+      const v = joyPointerToNorm(x, y);
+      joyTX = v.nx; joyTY = v.ny;
+    }
   });
-  cvs.addEventListener(&#x27;pointermove&#x27;, e=&gt;{
+
+  cvs.addEventListener(&#x27;pointermove&#x27;, e =&gt; {
     e.preventDefault();
-    if(activePointers.get(e.pointerId)!==&#x27;joy&#x27;) return;
-    const {x,y}=getPointerLocation(e);
-    const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
+    if (activePointers.get(e.pointerId) !== &#x27;joy&#x27;) return;
+    const { x, y } = getPointerLocation(e);
+
+    if (window.laserArrowMode) {
+      const dir = hitTestArrow(x, y);
+      if (dir) {
+        window.laserDirection = dir;
+        arrowPulse[dir] = 1.0;
+      }
+    } else {
+      const v = joyPointerToNorm(x, y);
+      joyTX = v.nx; joyTY = v.ny;
+    }
   });
-  function endPointer(e){
-    const t=activePointers.get(e.pointerId);
+
+  function endPointer(e) {
+    const t = activePointers.get(e.pointerId);
     activePointers.delete(e.pointerId);
-    if(t===&#x27;joy&#x27;){
-      let any=false; for(const v of activePointers.values()) if(v===&#x27;joy&#x27;) any=true;
-      if(!any &amp;&amp; AUTO_RETURN){ joyTX=0; joyTY=0; }
+    if (t === &#x27;joy&#x27;) {
+      if (window.laserArrowMode) {
+        // keep last laserDirection
+      } else if (AUTO_RETURN) {
+        let any = false;
+        for (const v of activePointers.values()) if (v === &#x27;joy&#x27;) { any = true; break; }
+        if (!any) { joyTX = 0; joyTY = 0; }
+      }
     }
   }
   cvs.addEventListener(&#x27;pointerup&#x27;, endPointer);
   cvs.addEventListener(&#x27;pointercancel&#x27;, endPointer);
   cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
 
-  function loop(){
-    outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
-    drawDMD(outX,outY);
-    window.jpad_state.x=outX; window.jpad_state.y=outY;
-    window.jpad_state.mag=Math.min(Math.hypot(outX,outY),1);
-    window.jpad_state.angle=Math.atan2(outY,outX);
-    readout.value = `x ${outX.toFixed(2)}, y ${outY.toFixed(2)}, |v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
+  function loop() {
+    const arrowMode = !!window.laserArrowMode;
+
+    if (arrowMode !== lastArrowMode) {
+      if (arrowMode) {
+        arrowIntro = 0;
+      } else {
+        for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) arrowPulse[k] = 0;
+        joyTX = 0; joyTY = 0;
+      }
+      lastArrowMode = arrowMode;
+    }
+
+    if (arrowMode) {
+      outX += (0 - outX) * SMOOTH;
+      outY += (0 - outY) * SMOOTH;
+
+      arrowIntro = Math.min(1, arrowIntro + 0.10);
+      for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
+        arrowPulse[k] *= 0.86;
+      }
+
+      drawDMD(0, 0);
+
+      const dir = window.laserDirection || &#x27;up&#x27;;
+      let vx = 0, vy = 0;
+      if (dir === &#x27;up&#x27;) vy = -1;
+      else if (dir === &#x27;down&#x27;) vy = 1;
+      else if (dir === &#x27;left&#x27;) vx = -1;
+      else if (dir === &#x27;right&#x27;) vx = 1;
+
+      window.jpad_state.x = vx;
+      window.jpad_state.y = vy;
+      window.jpad_state.mag = 1;
+      window.jpad_state.angle = Math.atan2(vy, vx);
+    } else {
+      outX += (joyTX - outX) * SMOOTH;
+      outY += (joyTY - outY) * SMOOTH;
+
+      drawDMD(outX, outY);
+
+      window.jpad_state.x = outX;
+      window.jpad_state.y = outY;
+      window.jpad_state.mag = Math.min(Math.hypot(outX, outY), 1);
+      window.jpad_state.angle = Math.atan2(outY, outX);
+    }
+
+    if (readout) {
+      readout.value =
+        `x ${window.jpad_state.x.toFixed(2)}, y ${window.jpad_state.y.toFixed(2)}, ` +
+        `|v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
+    }
+
     requestAnimationFrame(loop);
   }
 
-  function drawDMD(nx,ny){
-    if(!layoutReady){ ctx.clearRect(0,0,W,H); return; }
-    ctx.clearRect(0,0,W,H);
-    const now=performance.now()*0.001;
-    const px=joyCX+nx*joyR, py=joyCY+ny*joyR, mag=Math.hypot(nx,ny);
-    const knobCoreR=joyR*KNOB_CORE, knobGlowR=joyR*KNOB_GLOWR;
+  // DR2: Laser Arrow-Pad Mode (Part 2) – DMD rendering
+  function buildArrowPadGeometry() {
+    if (!layoutReady) return;
 
-    for(let j=0;j&lt;ROWS;j++){
-      for(let i=0;i&lt;COLS;i++){
-        const idx=j*COLS+i;
-        buf[idx]=(buf[idx]||0)*DECAY;
+    const snap = v =&gt; Math.round(v / PITCH) * PITCH;
+
+    arrowGeom = {
+      up:    [],
+      right: [],
+      down:  [],
+      left:  [],
+      center:[]
+    };
+
+    const cx = joyCX;
+    const cy = joyCY;
+
+    // DR2: Laser Arrow-Pad Mode (Part 2) – circular crosshair style:
+    // one ring, four inner directional pads (no joystick base)
+    const outerR  = joyR * 0.95;
+    const innerR  = joyR * 0.65;
+    const ringTol = PITCH * 0.7;
+
+    const padRadius   = innerR * 0.55;   // distance from center to each pad center
+    const pillHalfL   = PITCH * 2.4;     // length along direction axis
+    const pillHalfW   = PITCH * 1.4;     // thickness perpendicular to direction axis
+
+    // Build ring (stored in arrowGeom.center)
+    for (let j = 0; j &lt; ROWS; j++) {
+      for (let i = 0; i &lt; COLS; i++) {
+        const x = OX + i * PITCH;
+        const y = OY + j * PITCH;
+        const dx = x - cx;
+        const dy = y - cy;
+        const d  = Math.hypot(dx, dy);
+        if (Math.abs(d - innerR) &lt;= ringTol) {
+          arrowGeom.center.push({ x: snap(x), y: snap(y) });
+        }
       }
     }
 
-    const ringThick=PITCH*0.75, dzRingThick=PITCH*0.5, t=wrap(now*1.6), sweepArcLength=Math.PI/3;
-
-    for(let j=0;j&lt;ROWS;j++){
-      for(let i=0;i&lt;COLS;i++){
-        const x=OX+i*PITCH, y=OY+j*PITCH; const idx=j*COLS+i;
-        const jdx_un=x-joyCX, jdy_un=y-joyCY; let jdx=jdx_un, jdy=jdy_un;
-        if(mag&gt;0.01){
-          const suck=Math.min(0.8,mag*1.2); const jdx_wc=x-px, jdy_wc=y-py; const div=(1-suck);
-          if(div&gt;0.001){ const vx=jdx_wc/div+px, vy=jdy_wc/div+py; jdx=vx-joyCX; jdy=vy-joyCY; }
+    function addPill(list, px, py, orient) {
+      // orient: &#x27;up&#x27;/&#x27;down&#x27; (vertical pill) or &#x27;left&#x27;/&#x27;right&#x27; (horizontal pill)
+      if (orient === &#x27;up&#x27; || orient === &#x27;down&#x27;) {
+        const y0 = py - pillHalfL, y1 = py + pillHalfL;
+        const x0 = px - pillHalfW, x1 = px + pillHalfW;
+        for (let y = y0; y &lt;= y1; y += PITCH) {
+          for (let x = x0; x &lt;= x1; x += PITCH) {
+            const u = (y - py) / pillHalfL;   // along axis
+            const v = (x - px) / pillHalfW;   // across axis
+            if (u*u + v*v &lt;= 1.0) {
+              list.push({ x: snap(x), y: snap(y) });
+            }
+          }
         }
-        const jd=Math.hypot(jdx,jdy), jang=Math.atan2(jdy,jdx);
-        buf[idx]+=calcRing(jd,joyR*0.25,ringThick)*0.22;
-        buf[idx]+=calcRing(jd,joyR*0.50,ringThick)*0.20;
-        buf[idx]+=calcRing(jd,joyR*0.75,ringThick)*0.18;
-        buf[idx]+=calcRing(jd,joyR*1.00,ringThick)*0.16;
-        buf[idx]+=calcRing(jd,joyR*DEADZONE,dzRingThick)*0.12;
-        const da=wrap(t-jang); if(jd&lt;joyR*0.98 &amp;&amp; da&gt;0 &amp;&amp; da&lt;sweepArcLength) buf[idx]+=0.9;
-
-        if(mag&gt;0.01){
-          let jb=0; const sd=segDist(joyCX,joyCY,px,py,x,y);
-          jb=Math.max(jb,pulse01(sd/(PITCH*2.4),0.16)*STEM_GAIN);
-          const kd=Math.hypot(x-px,y-py);
-          const core=Math.exp(-Math.pow(kd/knobCoreR,2));
-          const glow=Math.exp(-Math.pow(Math.max(0,kd-knobCoreR)/knobGlowR,2));
-          jb=Math.max(jb, core*1.0+glow*0.9);
-          buf[idx]=Math.max(buf[idx], jb);
+      } else {
+        const x0 = px - pillHalfL, x1 = px + pillHalfL;
+        const y0 = py - pillHalfW, y1 = py + pillHalfW;
+        for (let y = y0; y &lt;= y1; y += PITCH) {
+          for (let x = x0; x &lt;= x1; x += PITCH) {
+            const u = (x - px) / pillHalfL;
+            const v = (y - py) / pillHalfW;
+            if (u*u + v*v &lt;= 1.0) {
+              list.push({ x: snap(x), y: snap(y) });
+            }
+          }
         }
-        let b=buf[idx]||0;
-        b*=1 - smoothStep(0.96,1.12, Math.hypot(x-W/2,y-H/2)/(Math.min(W,H)/2));
-        b += (noise2(i,j)-0.5)*0.06;
-        dotDraw(x,y,DOT_R, quantize(Math.max(0,b)));
+      }
+    }
+
+    // Four pads, aligned to up/right/down/left
+    const upCY    = cy - padRadius;
+    const downCY  = cy + padRadius;
+    const leftCX  = cx - padRadius;
+    const rightCX = cx + padRadius;
+
+    addPill(arrowGeom.up,    cx,      upCY,    &#x27;up&#x27;);
+    addPill(arrowGeom.down,  cx,      downCY,  &#x27;down&#x27;);
+    addPill(arrowGeom.left,  leftCX,  cy,      &#x27;left&#x27;);
+    addPill(arrowGeom.right, rightCX, cy,      &#x27;right&#x27;);
+  }
+
+  function drawArrowPad() {
+    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+    if (!arrowGeom) buildArrowPadGeometry();
+
+    ctx.clearRect(0,0,W,H);
+
+    const activeDir = window.laserDirection || &#x27;up&#x27;;
+
+    function drawCluster(list, key) {
+      if (!list || !list.length) return;
+      const isArrow = (key !== &#x27;center&#x27;);
+      const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
+
+      let base = isArrow ? 0.55 : 0.45;
+      if (key === activeDir) base = 0.95;
+
+      const level = Math.min(1, base + pulse * 0.5);
+      const suck  = 1 - arrowIntro;
+
+      for (const pt of list) {
+        const dx = pt.x - joyCX;
+        const dy = pt.y - joyCY;
+        const pressIn = isArrow ? (arrowPulse[key] || 0) * 0.25 : 0;
+        const factor = 1 - 0.22 * suck - 0.18 * pressIn;
+        const sx = joyCX + dx * factor;
+        const sy = joyCY + dy * factor;
+        dotDraw(sx, sy, DOT_R, level);
+      }
+    }
+
+    drawCluster(arrowGeom.center, &#x27;center&#x27;);
+    drawCluster(arrowGeom.up,    &#x27;up&#x27;);
+    drawCluster(arrowGeom.right, &#x27;right&#x27;);
+    drawCluster(arrowGeom.down,  &#x27;down&#x27;);
+    drawCluster(arrowGeom.left,  &#x27;left&#x27;);
+  }
+
+  function drawDMD(nx, ny) {
+    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+
+    if (window.laserArrowMode) {
+      drawArrowPad();
+      return;
+    }
+
+    ctx.clearRect(0,0,W,H);
+    const now = performance.now() * 0.001;
+    const px = joyCX + nx * joyR, py = joyCY + ny * joyR, mag = Math.hypot(nx, ny);
+    const knobCoreR = joyR * KNOB_CORE, knobGlowR = joyR * KNOB_GLOWR;
+
+    for (let j=0; j&lt;ROWS; j++) {
+      for (let i=0; i&lt;COLS; i++) {
+        const idx = j * COLS + i;
+        buf[idx] = (buf[idx] || 0) * DECAY;
+      }
+    }
+
+    const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
+    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 3;
+
+    for (let j=0; j&lt;ROWS; j++) {
+      for (let i=0; i&lt;COLS; i++) {
+        const x = OX + i * PITCH, y = OY + j * PITCH;
+        const idx = j * COLS + i;
+
+        const jdx_un = x - joyCX, jdy_un = y - joyCY;
+        let jdx = jdx_un, jdy = jdy_un;
+
+        if (mag &gt; 0.01) {
+          const suck = Math.min(0.8, mag * 1.2);
+          const jdx_wc = x - px, jdy_wc = y - py;
+          const div = (1 - suck);
+          if (div &gt; 0.001) {
+            const vx = jdx_wc / div + px;
+            const vy = jdy_wc / div + py;
+            jdx = vx - joyCX; jdy = vy - joyCY;
+          }
+        }
+
+        const jd = Math.hypot(jdx, jdy), jang = Math.atan2(jdy, jdx);
+        buf[idx] += calcRing(jd, joyR*0.25, ringThick) * 0.22;
+        buf[idx] += calcRing(jd, joyR*0.50, ringThick) * 0.20;
+        buf[idx] += calcRing(jd, joyR*0.75, ringThick) * 0.18;
+        buf[idx] += calcRing(jd, joyR*1.00, ringThick) * 0.16;
+        buf[idx] += calcRing(jd, joyR*DEADZONE, dzRingThick) * 0.12;
+
+        const da = wrap(t - jang);
+        if (jd &lt; joyR*0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
+
+        if (mag &gt; 0.01) {
+          let jb = 0;
+          const sd = segDist(joyCX, joyCY, px, py, x, y);
+          const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
+          jb = Math.max(jb, stemPulse);
+          const kd = Math.hypot(x - px, y - py);
+          const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
+          const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
+          jb = Math.max(jb, core * 1.0 + glow * 0.9);
+          buf[idx] = Math.max(buf[idx], jb);
+        }
+
+        let b = buf[idx] || 0;
+        b *= 1 - smoothStep(0.96, 1.12, Math.hypot(x - W/2, y - H/2) / (Math.min(W, H) / 2));
+        b += (noise2(i, j) - 0.5) * 0.06;
+
+        dotDraw(x, y, DOT_R, quantize(Math.max(0, b)));
       }
     }
   }
 
-  function calcRing(d,r0,thick){ return Math.max(0,1-Math.abs(d-r0)/(thick*0.5)); }
-  function dotDraw(x,y,r,level){ if(level&lt;=0){ ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=OFF; ctx.fill(); return; } const color= level&gt;=1?RED:(level&gt;=0.65?MID:DIM); ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=(JPAD_LIGHT_MODE ? 0 : 8)*level; ctx.beginPath(); ctx.arc(x,y,r,0,2*Math.PI); ctx.fillStyle=color; ctx.fill(); ctx.restore(); }
-  function quantize(v){ let best=0,bd=1e9; for(const s of LEVELS){ const d=Math.abs(v-s); if(d&lt;bd){ bd=d; best=s; } } return best; }
-  function smoothStep(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
-  function pulse01(x,w){ return Math.max(0,1 - smoothStep(0,w,x)); }
-  function wrap(a){ a%=Math.PI*2; return a&lt;0? a+Math.PI*2 : a; }
+  function calcRing(d, r0, thick) {
+    return Math.max(0, 1 - Math.abs(d - r0) / (thick * 0.5));
+  }
+
+  function dotDraw(x, y, r, level) {
+    if (level &lt;= 0) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2*Math.PI);
+      ctx.fillStyle = OFF;
+      ctx.fill();
+      return;
+    }
+    const color = level &gt;= 1 ? RED : (level &gt;= 0.65 ? MID : DIM);
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = (JPAD_LIGHT_MODE ? 0 : 8) * level;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function quantize(v) {
+    let best = 0, bd = 1e9;
+    for (const s of LEVELS) {
+      const d = Math.abs(v - s);
+      if (d &lt; bd) { bd = d; best = s; }
+    }
+    return best;
+  }
+
+  function smoothStep(a, b, x) {
+    const t = Math.min(1, Math.max(0, (x-a)/(b-a)));
+    return t*t*(3 - 2*t);
+  }
+
+  function pulse01(x, w) {
+    return Math.max(0, 1 - smoothStep(0, w, x));
+  }
+
+  function wrap(a) {
+    a %= Math.PI * 2;
+    return a &lt; 0 ? a + Math.PI * 2 : a;
+  }
+
   function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
   function fract(x){ return x - Math.floor(x); }
-  function segDist(ax,ay,bx,by,px,py){ const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay; const c1=vx*wx+vy*wy; if(c1&lt;=0) return Math.hypot(px-ax,py-ay); const c2=vx*vx+vy*vy; if(c2&lt;=c1) return Math.hypot(px-bx,py-by); const t=c1/c2; const sx=ax+t*vx, sy=ay+t*vy; return Math.hypot(px-sx,py-sy); }
+  function segDist(ax,ay,bx,by,px,py){
+    const vx=bx-ax, vy=by-ay, wx=px-ax, wy=py-ay;
+    const c1 = vx*wx + vy*wy; if (c1 &lt;= 0) return Math.hypot(px-ax,py-ay);
+    const c2 = vx*vx + vy*vy; if (c2 &lt;= c1) return Math.hypot(px-bx,py-by);
+    const t = c1 / c2; const sx = ax + t*vx, sy = ay + t*vy;
+    return Math.hypot(px-sx,py-sy);
+  }
 
-  const ro=new ResizeObserver(entries=&gt;{
-    if(entries[0]){
-      const {width,height}=entries[0].contentRect;
-      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;))||16;
-      const w=Math.max(1, Math.floor(width - p*2));
-      const h=Math.max(1, Math.floor(height - p*2));
-      updateLayout(w,h);
+  const ro = new ResizeObserver(entries =&gt; {
+    if (entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      const p = parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;)) || 16;
+      const w = Math.max(1, Math.floor(width - p*2));
+      const h = Math.max(1, Math.floor(height - p*2));
+      updateLayout(w, h);
     }
   });
   ro.observe(rightArea);
   requestAnimationFrame(loop);
-})();
+})()
+;
 
 /* =========================
    BUTTONS + BOMB MORPH
@@ -811,6 +1123,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
   // ====== State ======
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – ensure shared globals exist
+  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
+  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
   const state = { 
     mode: &#x27;single&#x27;, 
     active: false, 
@@ -1525,6 +1841,16 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   // ====== Main frame ======
   function frame(ts) {
+
+    // DR2: Laser Arrow-Pad Mode (Part 2)
+    const prevLaserMode = !!window.laserArrowMode;
+    const wantLaserMode =
+      (state.mode === &#x27;two&#x27;) &amp;&amp; state.specialActive &amp;&amp; (state.laserAmmo &gt; 0);
+
+    window.laserArrowMode = wantLaserMode;
+    if (!wantLaserMode &amp;&amp; prevLaserMode) {
+      window.laserDirection = &#x27;up&#x27;;
+    }
     if (__prevMode !== state.mode || __prevActive !== state.active) {
       if (state.active) { setProxiesEnabled(false); }
       else { setProxiesEnabled(true); updateProxyForMode(); }
@@ -3207,7 +3533,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 <h3>Joystick (Right)</h3>
 <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="200" min="-200" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="120" min="-120" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale <output id="o_rs">1.4</output></label><input id="v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1.4"/></div>
+<div class="row"><label>Scale <output id="o_rs">1.24</output></label><input id="v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1.24"/></div>
 </div>
 </div>
 <div class="hint">Buttons are on the left; Joystick is on the right. Background of the bay is transparent.</div>
@@ -3350,7 +3676,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 <h3>Joystick (Right)</h3>
 <div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="240" min="-240" step="1" type="range" value="0"/></div>
 <div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="200" min="-200" step="1" type="range" value="0"/></div>
-<div class="row"><label>Scale Content <output id="o_rs">1.4</output></label><input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.4"/></div>
+<div class="row"><label>Scale Content <output id="o_rs">1.24</output></label><input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/></div>
 </div>
 </div>
 <div class="hint">Wrappers translate only. Content scales inside panels.</div>
@@ -3536,9 +3862,9 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 <div class="field">
 <label for="v_rs">
 <span>Scale</span>
-<output id="o_rs">1.4</output>
+<output id="o_rs">1.24</output>
 </label>
-<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.4"/>
+<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/>
 </div>
 </section>
 <button class="close" id="unifiedClose" type="button">Close</button>
