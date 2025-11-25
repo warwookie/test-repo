@@ -148,127 +148,75 @@
 
     .bottom {
   width: 100%;
-  height: 150px;
+  height: 240px;
   margin-top: -13px;
+
   border-radius: 18px;
   overflow: hidden;
-}
 
-    .control-screen {
-  position: relative;
-  height: 100%;
-  border-radius: 14px;
-  padding: 14px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  background:
+    radial-gradient(circle at 50% -40%, #2b1a12 0, #050303 55%, #020101 100%);
 
-    
-
-    @media (max-width: 400px) { 
-      .mq-title{font-size:22px;} 
-      .mq-sub{font-size:6px;} 
-      .tab .led .line{font-size:9px; letter-spacing:.10em; white-space:nowrap;}
-    }
-    @media (max-width: 390px){
-      :root{ --center-cell: 86px; }
-      .hud, .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 2px; }
-      #ui-sneakers{gap:2px;}  #ui-fires{gap:2px;} #ui-powers{gap:5px;}
-      .sneaker-outline, .sneaker-fill,
-      .heart-outline,   .heart-fill,
-      .fire-outline,    .fire-fill,
-      .power .ph-bold,  .power .ph-fill { font-size: 18px; }
-      .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
-      .tab .led .line{font-size:9px; letter-spacing:.10em;}
-    }
-    @media (max-width: 360px){
-      :root{ --center-cell: 82px; }
-      .hud, .hud2{ grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; }
-      .tab .led .line{ font-size: 8.5px; letter-spacing: .08em; }
-      .sneaker-outline, .sneaker-fill,
-      .heart-outline,   .heart-fill,
-      .fire-outline,    .fire-fill,
-      .power .ph-bold,  .power .ph-fill { font-size: 17px; }
-    }
-    /* Disable zoom + selection */
-  html, body { 
-      overscroll-behavior: none;
-      -webkit-user-select: none; user-select: none;
-      touch-action: none; /* block pinch/pan */
-      -ms-touch-action: none;
-  }</style>
-<style id="controls-constraints">
-  #element-controls{ position:relative; overflow:hidden; height:100%; min-height:0; }
-  #controlsFrame{ position:relative; width:100%; height:100%; border:0; }
-  .tabs, #element-hud1, #element-hud2 { position:relative; z-index:3; }</style>
-<style>
-/* LIFE tab interactive state */
-.tab-life { cursor: pointer; }
-.tab-life[role="button"] .led { transition: box-shadow .18s ease, filter .18s ease; }
-.tab-life.active .led {
-  box-shadow: 0 0 0 2px var(--primary-color) inset, 0 0 12px var(--led-glow);
-  filter: saturate(1.4);
-}
-
-/* Stopwatch button uses existing .power rules; add button reset */</style><style>
-/* Hide any leftover injected stopwatch button if present */
-
-/* Power-ups word as activator visual states */
-.powerups-activator { cursor: pointer; }
-.powerups-activator.pulse { text-shadow: 0 0 8px var(--primary-color, currentColor); }
-.powerups-activator.active { text-decoration: underline; text-underline-offset: 4px; }</style><style>
-</style>
-<style>
-/* Single-panel control bezel: outer cabinet cleanup */
-.bottom {
-  width: 100%;
-  height: 150px;
-  margin-top: -13px;
-}
-
-.control-screen {
-  position: relative;
-  height: 100%;
-  border-radius: 16px;
-  padding: 14px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>
-
-<style>
-/* Bottom cabinet bay – dark recessed strip */
-.bottom {
-  width: 100%;
-  height: 150px;
-  margin-top: -13px;
-  background: linear-gradient(#1b1511, #0e0a08);
   box-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.85),
-    0 4px 10px rgba(0, 0, 0, 0.85);
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 -2px 4px rgba(0, 0, 0, 0.9),
+    0 8px 18px rgba(0, 0, 0, 0.95);
 }
 
-/* Recessed bay interior (around the iframe) */
 .control-screen {
   position: relative;
   height: 100%;
-  padding: 6px;
-  border-radius: 10px;
-  background: #050303;
+  padding: 0 6px;
+
+  border-radius: 16px;
+
+  background:
+    radial-gradient(circle at 20% 0, rgba(40, 0, 0, 0.35) 0, transparent 48%),
+    #050303;
+
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.9),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.7);
+    inset 0 -3px 6px rgba(0, 0, 0, 0.85);
+
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Optional inner bezel if a .control-glass wrapper is used */
+.control-glass {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+
+  border-radius: 16px;
+
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(120, 16, 12, 0.45) 0,
+      #050101 55%,
+      #020000 100%
+    );
+
+  border: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 58, 47, 0.08),
+    0 0 12px rgba(120, 16, 12, 0.45);
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#controlsFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* .control-glass wrapper is used */
 .control-glass {
   width: 100%;
   height: 100%;
@@ -339,7 +287,7 @@
 </div></div></div>
 </div>
 <div class="bottom" id="element-bottom">
-<div class="control-screen" id="element-controls">
+<div class="control-screen" id="element-controls" style="transform: translate(0px, 0px) scale(1.04);">
 
 <iframe id="controlsFrame" srcdoc="&lt;!doctype html&gt;
 &lt;html lang=&quot;en&quot;&gt;
@@ -350,21 +298,39 @@
   /* force joystick readout visible */
   #jpad_status { display: none !important; visibility: hidden !important; opacity: 0 !important; }
   /* borders for debug */
-  #control-ui{
-    height:100%;
-    width:100%;
-    box-sizing:border-box;
-    border-radius:var(--radius);
-    border:1px solid rgba(40,0,0,0.85);
-    background:#050303;
-  }
-  #left-area,
-  #right-area,
-  #btn2_panel,
-  #jpad_canvas{
-    outline:none;
-    border:none;
-  }
+  #control-ui {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--radius);
+
+  /* dark base plate, dot-matrix texture, no directional glow */
+  background:
+    repeating-radial-gradient(circle at 0 0,
+      #120304 0px,
+      #120304 1px,
+      #080102 1px,
+      #080102 2px
+    ),
+    #050203;
+
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.9);
+}
+
+#left-area,
+#right-area,
+#btn2_panel,
+#jpad_canvas {
+  outline: none;
+  border: none;
+}
+
+canvas {
+  outline: none;
+  border: none;
+}
 &lt;/style&gt;
 
 &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -404,11 +370,47 @@
     overflow: hidden;
     touch-action: none;
   }
-  .pad{ position:absolute; inset:var(--gap); border-radius: calc(var(--radius) - 8px); overflow:hidden; }
+  .pad {
+  position: absolute;
+  inset: var(--gap);
+  border-radius: calc(var(--radius) - 8px);
+  overflow: hidden;
+}
+
+/* Unified DMD dot overlay across buttons + joystick */
+.pad::before {
+  content: &quot;&quot;;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(circle,
+      rgba(255, 90, 70, 0.28) 0,
+      rgba(255, 90, 70, 0.28) 1px,
+      transparent 1px
+    );
+  background-size: 4px 4px;
+  mix-blend-mode: screen;
+  opacity: 0.32;
+}
 
   /* Buttons overlay */
   .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
-  #btn2_panel{ position:absolute; inset:0; width:100% ; height:100% ; image-rendering:pixelated; display:block; z-index:1; pointer-events:none; }
+  #btn2_panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  /* unify dot-matrix intensity with joystick */
+  image-rendering: pixelated;
+  filter: contrast(0.9) brightness(0.9);
+
+  z-index: 1;
+  pointer-events: none;
+}
 
   /* Control buttons */
   .control-buttons {
@@ -447,7 +449,17 @@
   #btn2_proxy_bomb{ bottom:6%; }
 
   /* Joypad */
-  #jpad_canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #jpad_canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  /* match button canvas dot-matrix handling */
+  image-rendering: pixelated;
+  filter: contrast(0.9) brightness(0.9);
+}
   #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
 
   * { -webkit-user-select:none; user-select:none; }
@@ -460,14 +472,25 @@
     height: 100%;
 
     border-radius: 18px;
-    background: radial-gradient(circle at 20% 0%, #180303, #050101);
-    border: 1px solid #190001;
+
+    /* match base plate; no directional red glow */
+    background:
+      repeating-radial-gradient(circle at 0 0,
+        #140305 0px,
+        #140305 1px,
+        #070103 1px,
+        #070103 2px
+      ),
+      #050203;
+
+    border: 1px solid rgba(8, 0, 0, 0.75);
 
     box-shadow:
-      inset 0 2px 4px rgba(0, 0, 0, 0.85),
-      0 0 6px rgba(255, 58, 47, 0.25);
+      inset 0 3px 5px rgba(0, 0, 0, 0.95),
+      inset 0 -3px 7px rgba(0, 0, 0, 0.9);
 
     overflow: hidden;
+    touch-action: none;
   }
 
   .pad {
@@ -475,8 +498,11 @@
     inset: var(--gap);
     border-radius: calc(18px - 8px);
     overflow: hidden;
-  }
-&lt;/style&gt;
+  }bsolute;
+    inset: var(--gap);
+    border-radius: calc(18px - 8px);
+    overflow: hidden;
+  }&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;main id=&quot;control-ui&quot; aria-label=&quot;Control surface&quot;&gt;
@@ -508,12 +534,12 @@
 
 &lt;script&gt;function __jpadNoise(v){ return JPAD_LIGHT_MODE ? 0 : v; }
 // === Joystick Light Mode &amp; FPS ===
-const JPAD_LIGHT_MODE = (typeof window.name === 'string' &amp;&amp; /(?:^|;)\s*jpadLight=1\b/.test(window.name)) ? true : false;
+const JPAD_LIGHT_MODE = (typeof window.name === &#x27;string&#x27; &amp;&amp; /(?:^|;)\s*jpadLight=1\b/.test(window.name)) ? true : false;
 let __jpadFpsLast = 0, __jpadFps = 0, __jpadFpsT = 0;
 
 /* Prevent page scrolling during control interactions */
-document.addEventListener('touchmove', (e)=&gt;{
-  if(e.target.closest('#left-area, #right-area')) e.preventDefault();
+document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
+  if(e.target.closest(&#x27;#left-area, #right-area&#x27;)) e.preventDefault();
 },{passive:false});
 
 /* =========================
@@ -522,13 +548,13 @@ document.addEventListener('touchmove', (e)=&gt;{
 (() =&gt; {
   const DEADZONE=0.15, RESPONSE=1.20, SMOOTH=0.22, AUTO_RETURN=true;
   let PITCH=10, DOT_R=2.6; const LEVELS=[0,0.35,0.65,1];
-  const RED='#ff2a2a', MID='#ff2a2acc', DIM='#ff2a2a66', OFF='#210000';
+  const RED=&#x27;#ff2a2a&#x27;, MID=&#x27;#ff2a2acc&#x27;, DIM=&#x27;#ff2a2a66&#x27;, OFF=&#x27;#210000&#x27;;
   const DECAY=0.90; let buf; const KNOB_CORE=0.10, KNOB_GLOWR=0.30, STEM_GAIN=0.80;
 
   window.jpad_state={ x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
 
-  const cvs=document.getElementById('jpad_canvas'); const ctx=cvs.getContext('2d');
-  const readout=document.getElementById('jpad_status'); const rightArea=document.getElementById('right-area');
+  const cvs=document.getElementById(&#x27;jpad_canvas&#x27;); const ctx=cvs.getContext(&#x27;2d&#x27;);
+  const readout=document.getElementById(&#x27;jpad_status&#x27;); const rightArea=document.getElementById(&#x27;right-area&#x27;);
   let W=0,H=0,COLS=0,ROWS=0,OX=0,OY=0, joyCX=0,joyCY=0,joyR=0; let layoutReady=false;
   let outX=0,outY=0, joyTX=0,joyTY=0; const activePointers=new Map();
 
@@ -559,30 +585,30 @@ document.addEventListener('touchmove', (e)=&gt;{
     return { nx:Math.cos(ang)*rn, ny:Math.sin(ang)*rn };
   }
 
-  cvs.addEventListener('pointerdown', e=&gt;{
+  cvs.addEventListener(&#x27;pointerdown&#x27;, e=&gt;{
     e.preventDefault();
     const {x,y}=getPointerLocation(e);
     try{ cvs.setPointerCapture(e.pointerId);}catch(_){}
-    activePointers.set(e.pointerId,'joy');
+    activePointers.set(e.pointerId,&#x27;joy&#x27;);
     const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
   });
-  cvs.addEventListener('pointermove', e=&gt;{
+  cvs.addEventListener(&#x27;pointermove&#x27;, e=&gt;{
     e.preventDefault();
-    if(activePointers.get(e.pointerId)!=='joy') return;
+    if(activePointers.get(e.pointerId)!==&#x27;joy&#x27;) return;
     const {x,y}=getPointerLocation(e);
     const v=joyPointerToNorm(x,y); joyTX=v.nx; joyTY=v.ny;
   });
   function endPointer(e){
     const t=activePointers.get(e.pointerId);
     activePointers.delete(e.pointerId);
-    if(t==='joy'){
-      let any=false; for(const v of activePointers.values()) if(v==='joy') any=true;
+    if(t===&#x27;joy&#x27;){
+      let any=false; for(const v of activePointers.values()) if(v===&#x27;joy&#x27;) any=true;
       if(!any &amp;&amp; AUTO_RETURN){ joyTX=0; joyTY=0; }
     }
   }
-  cvs.addEventListener('pointerup', endPointer);
-  cvs.addEventListener('pointercancel', endPointer);
-  cvs.addEventListener('pointerleave', endPointer);
+  cvs.addEventListener(&#x27;pointerup&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointercancel&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
 
   function loop(){
     outX+=(joyTX-outX)*SMOOTH; outY+=(joyTY-outY)*SMOOTH;
@@ -656,7 +682,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   const ro=new ResizeObserver(entries=&gt;{
     if(entries[0]){
       const {width,height}=entries[0].contentRect;
-      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue('--gap'))||16;
+      const p=parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;))||16;
       const w=Math.max(1, Math.floor(width - p*2));
       const h=Math.max(1, Math.floor(height - p*2));
       updateLayout(w,h);
@@ -673,9 +699,9 @@ document.addEventListener('touchmove', (e)=&gt;{
 (async function(){
   // ====== Units &amp; Canvas ======
   const p=4, d=0.46*p; const W=560, H=560; const clamp=(v,a,b)=&gt;Math.max(a,Math.min(b,v));
-  const canvas=document.getElementById('btn2_panel'); const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
-  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d'); ctx.scale(DPR,DPR);
+  const canvas=document.getElementById(&#x27;btn2_panel&#x27;); const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
+  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+&#x27;px&#x27;; canvas.style.height=H+&#x27;px&#x27;;
+  const ctx=canvas.getContext(&#x27;2d&#x27;); ctx.scale(DPR,DPR);
   const nowS=()=&gt;performance.now()/1000; const snap=v=&gt;Math.round(v/p)*p;
 
   // Easings
@@ -686,11 +712,11 @@ document.addEventListener('touchmove', (e)=&gt;{
   const easeOutBack  = t=&gt;{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
 
   // ====== Colors ======
-  const RED=[255,58,58]; const col={ bright:'rgba(255,58,58,1.0)', mediumA:0.70, dimFill:'#1A0E0E' };
+  const RED=[255,58,58]; const col={ bright:&#x27;rgba(255,58,58,1.0)&#x27;, mediumA:0.70, dimFill:&#x27;#1A0E0E&#x27; };
 
   // ====== Dot painters ======
   function brightDotGradient(c,x,y){ const r2=2*d; const g=c.createRadialGradient(x,y,0,x,y,r2); const [r,gc,b]=RED; const tp=k=&gt;clamp(k*(d/r2),0,1); g.addColorStop(0,`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.42),`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.75),`rgba(${r},${gc},${b},0.60)`); g.addColorStop(tp(1.30),`rgba(${r},${gc},${b},0.18)`); g.addColorStop(1,`rgba(${r},${gc},${b},0)`); return g; }
-  function idleDotGradient(c,x,y){ const r2=1.6*d; const g=c.createRadialGradient(x,y,0,x,y,r2); g.addColorStop(0,col.dimFill); g.addColorStop(0.7,col.dimFill); g.addColorStop(1,'rgba(42,22,22,0.45)'); return g; }
+  function idleDotGradient(c,x,y){ const r2=1.6*d; const g=c.createRadialGradient(x,y,0,x,y,r2); g.addColorStop(0,col.dimFill); g.addColorStop(0.7,col.dimFill); g.addColorStop(1,&#x27;rgba(42,22,22,0.45)&#x27;); return g; }
   function drawBrightDot(c,x,y,a=1){ if(a&lt;=0) return; c.save(); c.globalAlpha=a; c.fillStyle=brightDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fill(); c.restore(); }
   function drawIdleDot(c,x,y){ c.fillStyle=idleDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d*0.5,0,Math.PI*2); c.fill(); }
 
@@ -702,10 +728,10 @@ document.addEventListener('touchmove', (e)=&gt;{
   function path2DFor(r){ const p2=new Path2D(); p2.moveTo(r.x+r.r,r.y); p2.lineTo(r.x+r.w-r.r,r.y); p2.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); p2.lineTo(r.x+r.w,r.y+r.h-r.r); p2.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); p2.lineTo(r.x+r.r,r.y+r.h); p2.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); p2.lineTo(r.x,r.y+r.r); p2.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); p2.closePath(); return p2; }
   function dedupe(pts,tol){ const out=[]; for(const a of pts){ let ok=true; for(const b of out){ const dx=a.x-b.x,dy=a.y-b.y; if(dx*dx+dy*dy&lt;tol*tol){ ok=false; break; } } if(ok) out.push(a); } return out; }
   function sampleRoundedRectDots(x,y,w,h,r){ const pts=[]; const step=p; const add=(X,Y)=&gt;pts.push({x:snap(X),y:snap(Y)}); for(let X=x+r; X&lt;=x+w-r; X+=step){ add(X,y); add(X,y+h); } for(let Y=y+r; Y&lt;=y+h-r; Y+=step){ add(x,Y); add(x+w,Y); } const arc=(cx,cy,t0,t1)=&gt;{ const thetaStep=step/r; const inc=t1&gt;=t0?thetaStep:-thetaStep; for(let t=t0; inc&gt;0? t&lt;=t1 : t&gt;=t1; t+=inc){ add(cx+r*Math.cos(t), cy+r*Math.sin(t)); } }; arc(x+r,y+r,Math.PI,1.5*Math.PI); arc(x+w-r,y+r,1.5*Math.PI,2*Math.PI); arc(x+w-r,y+h-r,0,0.5*Math.PI); arc(x+r,y+h-r,0.5*Math.PI,Math.PI); return dedupe(pts,0.35*p); }
-  function drawDottedRR(c, r, glow=true){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); if(!glow) return; const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d'); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
+  function drawDottedRR(c, r, glow=true){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); if(!glow) return; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
   function drawInnerBandRR(c, r, rows=3){
     const b_in=2.8*p; const mid=(rows-1)/2; let innerMost=null;
-    const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d');
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
     for(let i=0;i&lt;rows;i++){
       const oset=b_in+(i-mid)*p; const x=r.x+oset,y=r.y+oset,w=r.w-2*oset,h=r.h-2*oset,rad=r.r-oset;
       const pts=sampleRoundedRectDots(x,y,w,h,rad);
@@ -718,11 +744,11 @@ document.addEventListener('touchmove', (e)=&gt;{
   }
 
   // ====== Background ======
-  const bg=document.createElement('canvas'); bg.width=W; bg.height=H; const bgc=bg.getContext('2d');
+  const bg=document.createElement(&#x27;canvas&#x27;); bg.width=W; bg.height=H; const bgc=bg.getContext(&#x27;2d&#x27;);
   function drawIdleGrid(c){ for(let y=0;y&lt;=H;y+=p){ for(let x=0;x&lt;=W;x+=p){ drawIdleDot(c,x,y); } } }
   function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr);
     for(const pt of pts) drawBrightDot(c,pt.x,pt.y);
-    const off=document.createElement('canvas'); off.width=W; off.height=H; const o=off.getContext('2d');
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
     for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
     c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore();
     c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore();
@@ -736,22 +762,22 @@ document.addEventListener('touchmove', (e)=&gt;{
   const botOuter   ={x:x_btn, y:yBot, w:Bw, h:Bh, r:rad};
 
   // ====== Chrome layers ======
-  const layerSingle=document.createElement('canvas'); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext('2d');
-  const layerTwo=document.createElement('canvas'); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext('2d');
+  const layerSingle=document.createElement(&#x27;canvas&#x27;); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext(&#x27;2d&#x27;);
+  const layerTwo=document.createElement(&#x27;canvas&#x27;); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext(&#x27;2d&#x27;);
   drawDottedRR(ls, centerOuter, true); const faceBOMB_center = drawInnerBandRR(ls, centerOuter, 3);
   drawDottedRR(lt, topOuter, true);  const faceLASER_final = drawInnerBandRR(lt, topOuter, 3);
   drawDottedRR(lt, botOuter, true);  const faceBOMB_final  = drawInnerBandRR(lt, botOuter, 3);
 
   // ====== Font raster ======
-  const FONT='Press Start 2P'; await document.fonts.load(`32px '${FONT}'`); await document.fonts.ready;
+  const FONT=&#x27;Press Start 2P&#x27;; await document.fonts.load(`32px &#x27;${FONT}&#x27;`); await document.fonts.ready;
   function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px&gt;=minPx; px-=8){ if(px+4&lt;=rect.h) return px; } return minPx; }
-  function measureTextWidth(text,px){ const off=document.createElement('canvas'); const c=off.getContext('2d'); c.font=`${px}px '${FONT}'`; c.textBaseline='top'; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
+  function measureTextWidth(text,px){ const off=document.createElement(&#x27;canvas&#x27;); const c=off.getContext(&#x27;2d&#x27;); c.font=`${px}px &#x27;${FONT}&#x27;`; c.textBaseline=&#x27;top&#x27;; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
   function rasterTextPoints(rect,text){
-    const px=pickFontPx(rect), pad=2; const off=document.createElement('canvas'); const o=off.getContext('2d');
-    o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.imageSmoothingEnabled=false; o.fillStyle='#fff';
+    const px=pickFontPx(rect), pad=2; const off=document.createElement(&#x27;canvas&#x27;); const o=off.getContext(&#x27;2d&#x27;);
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.imageSmoothingEnabled=false; o.fillStyle=&#x27;#fff&#x27;;
     const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0);
     off.width=w+pad*2; off.height=h+pad*2;
-    o.font=`${px}px '${FONT}'`; o.textBaseline='top'; o.fillStyle='#fff'; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.fillStyle=&#x27;#fff&#x27;; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
     const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2);
     const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
     function alpha(ix,iy){ if(ix&lt;0||iy&lt;0||ix&gt;=iw||iy&gt;=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
@@ -786,7 +812,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 
   // ====== State ======
   const state = { 
-    mode: 'single', 
+    mode: &#x27;single&#x27;, 
     active: false, 
     t0: 0,
     activeReverse: false,
@@ -796,15 +822,15 @@ document.addEventListener('touchmove', (e)=&gt;{
     timerPowerup: false,
     bombDeployed: false,
     bombArmed: false,
-    normalBomb: { active:false, phase:'idle', t0:0, bombType:'final', perimPts:[], center:{x:0,y:0},
+    normalBomb: { active:false, phase:&#x27;idle&#x27;, t0:0, bombType:&#x27;final&#x27;, perimPts:[], center:{x:0,y:0},
       implodeMs:3000, explodeMs:500 },
     bombMorph: {
       active: false,
-      phase: 'idle', // 'sucking' | 'exploding'
+      phase: &#x27;idle&#x27;, // &#x27;sucking&#x27; | &#x27;exploding&#x27;
       progress: 0,
       startTime: 0,
       duration: 700, // shorter for performance
-      bombType: 'center',
+      bombType: &#x27;center&#x27;,
       pairs: [],
       extras: [],
       meta: [],      // per-particle timing and jitter
@@ -820,8 +846,8 @@ document.addEventListener('touchmove', (e)=&gt;{
   // ====== Text points ======
   let bombWordDotsFinal, bombWordDotsCenter;
   let laserWordDotsFinal; 
-  function getBombText(){ return 'BOMB X'; }
-  function getLaserText(){ return 'LASER'; }
+  function getBombText(){ return &#x27;BOMB X&#x27;; }
+  function getLaserText(){ return &#x27;LASER&#x27;; }
   function updateButtonText(){
     bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
     bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
@@ -842,7 +868,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 
   // ====== Masks ======
   function buildFaceMask(rect){
-    const pts=[]; const off=document.createElement('canvas'); off.width=W; off.height=H; const oc=off.getContext('2d'); rrPath(oc, rect);
+    const pts=[]; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const oc=off.getContext(&#x27;2d&#x27;); rrPath(oc, rect);
     const isIn=(x,y)=&gt;oc.isPointInPath(x+0.01,y+0.01);
     for(let y=rect.y; y&lt;=rect.y+rect.h; y+=p){ for(let x=rect.x; x&lt;=rect.x+rect.w; x+=p){
       const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0});
@@ -875,7 +901,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
   let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
 
-  const laserLabelPts = rasterTextPoints(faceLASER_final,'LASER');
+  const laserLabelPts = rasterTextPoints(faceLASER_final,&#x27;LASER&#x27;);
   const sectionFlags = new Array(4).fill(0).map(() =&gt; new Uint8Array(laserDots.length));
   for (let section = 0; section &lt; 4; section++) {
     const sectionMask = laserSectionMasks[section];
@@ -908,7 +934,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       }
       if (sect&lt;0) continue;
       if (sect &gt;= (4 - state.laserAmmo)){
-        ctx.save(); ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
       } else {
         drawBrightDot(ctx, pt.x, pt.y, 0.8);
       }
@@ -936,7 +962,7 @@ document.addEventListener('touchmove', (e)=&gt;{
         const x = snap(center.x + rr*Math.cos(ang));
         const y = snap(center.y + rr*Math.sin(ang));
         if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
-          const key=x+','+y;
+          const key=x+&#x27;,&#x27;+y;
           if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
         }
       }
@@ -945,7 +971,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       for(let ang=0; ang&lt;Math.PI*2 &amp;&amp; pts.length&lt;N; ang+=Math.PI/128){
         const x = snap(center.x + maxR*Math.cos(ang));
         const y = snap(center.y + maxR*Math.sin(ang));
-        const key=x+','+y;
+        const key=x+&#x27;,&#x27;+y;
         if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
       }
     }
@@ -961,7 +987,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       const x = snap(center.x + R*Math.cos(ang));
       const y = snap(center.y + R*Math.sin(ang));
       if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
-        const key=x+','+y;
+        const key=x+&#x27;,&#x27;+y;
         if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
       }
     }
@@ -1030,12 +1056,12 @@ document.addEventListener('touchmove', (e)=&gt;{
     const T = state.bombMorphTargets[bombType];
     state.bombMorph.active = true;
     state.bombMorph.autoExplode = !!autoExplode;
-    state.bombMorph.phase = phase;           // 'sucking' or 'exploding'
+    state.bombMorph.phase = phase;           // &#x27;sucking&#x27; or &#x27;exploding&#x27;
     state.bombMorph.progress = 0;
     if (durationOverride!=null) { state.bombMorph.duration = durationOverride; }
     state.bombMorph.startTime = nowS();
     state.bombMorph.bombType = bombType;
-    state.bombMorph.pairs = (phase === 'sucking') ? T.pairs_suck.slice() : T.pairs_explode.slice();
+    state.bombMorph.pairs = (phase === &#x27;sucking&#x27;) ? T.pairs_suck.slice() : T.pairs_explode.slice();
     state.bombMorph.extras = T.extras.slice();
     state.bombMorph.blastSeed = Math.random()*1000;
 
@@ -1065,7 +1091,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   // ====== Normal bomb countdown helpers ======
   function lerp(a,b,t){ return a + (b-a)*t; }
   function prepareNormalBomb(bombType){
-    const face = (bombType==='center') ? faceBOMB_center : faceBOMB_final;
+    const face = (bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
     const center = {
       x: Math.round((face.x + face.w/2)/p)*p,
       y: Math.round((face.y + face.h/2)/p)*p
@@ -1078,7 +1104,7 @@ document.addEventListener('touchmove', (e)=&gt;{
 
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
-    state.normalBomb.phase = 'implode';
+    state.normalBomb.phase = &#x27;implode&#x27;;
     state.normalBomb.t0 = nowS();
     state.normalBomb.bombType = bombType;
     prepareNormalBomb(bombType);
@@ -1087,9 +1113,9 @@ document.addEventListener('touchmove', (e)=&gt;{
   function drawNormalBomb(t){
     if (!state.normalBomb.active) return false;
     const nb = state.normalBomb;
-    const face = (nb.bombType==='center') ? faceBOMB_center : faceBOMB_final;
+    const face = (nb.bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
     const center = nb.center;
-    if (nb.phase==='implode'){
+    if (nb.phase===&#x27;implode&#x27;){
       const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.implodeMs));
       // draw a single ring imploding from the perimeter toward center
       const pts = nb.perimPts;
@@ -1104,9 +1130,9 @@ document.addEventListener('touchmove', (e)=&gt;{
         drawBrightDotFast(ctx, x, y, a);
       }
       // when finished, switch to explode
-      if (u &gt;= 1){ nb.phase='explode'; nb.t0 = t; }
+      if (u &gt;= 1){ nb.phase=&#x27;explode&#x27;; nb.t0 = t; }
       return false;
-    } else if (nb.phase==='explode'){
+    } else if (nb.phase===&#x27;explode&#x27;){
       const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.explodeMs));
       const Rmax = Math.min(face.w, face.h)*0.48;
       // two soft ripples expanding
@@ -1133,8 +1159,8 @@ document.addEventListener('touchmove', (e)=&gt;{
       }
       if (u&gt;=1){
         // signal to game layer if hooked
-        try { window.dispatchEvent(new CustomEvent('normalBombExplode', {detail:{bombType: nb.bombType}})); } catch(e){}
-        nb.active=false; nb.phase='idle';
+        try { window.dispatchEvent(new CustomEvent(&#x27;normalBombExplode&#x27;, {detail:{bombType: nb.bombType}})); } catch(e){}
+        nb.active=false; nb.phase=&#x27;idle&#x27;;
         return true;
       }
       return false;
@@ -1146,7 +1172,7 @@ document.addEventListener('touchmove', (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // 'center' | 'final'
+    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
@@ -1155,8 +1181,8 @@ document.addEventListener('touchmove', (e)=&gt;{
     const u = Math.max(0, Math.min(1, elapsed / state.normalBomb.duration));
     const ease = (x)=&gt; 1 - Math.pow(1-x, 3);
     const bombType = state.normalBomb.bombType;
-    const T = bombType==='center' ? state.bombMorphTargets.center : state.bombMorphTargets.final;
-    const textPts = bombType==='center' ? bombWordDotsCenter : bombWordDotsFinal;
+    const T = bombType===&#x27;center&#x27; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
+    const textPts = bombType===&#x27;center&#x27; ? bombWordDotsCenter : bombWordDotsFinal;
     const center = T.center;
     const spread = Math.min(T.faceRect.w, T.faceRect.h) * 0.10; // small push
     const k = Math.sin(u * Math.PI); // out and back
@@ -1191,7 +1217,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     let toggle = ((t*60)|0) &amp; 1;
     let idx = 0;
     for(const pt of state.bombMorph.extras){
-      if (state.bombMorph.active &amp;&amp; state.bombMorph.phase==='exploding' &amp;&amp; ((idx++ &amp; 1)===toggle)) continue;
+      if (state.bombMorph.active &amp;&amp; state.bombMorph.phase===&#x27;exploding&#x27; &amp;&amp; ((idx++ &amp; 1)===toggle)) continue;
       drawBrightDotFast(ctx, pt.x, pt.y, alpha*0.9);
     }
   }
@@ -1245,7 +1271,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     const xStart=minX + (maxX-minX)*0.7;
     for(const pt of bombTextPts){
       if(pt.x&gt;=xStart){
-        ctx.save(); ctx.fillStyle='#000';
+        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;;
         ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill();
         ctx.restore();
       }
@@ -1263,7 +1289,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     const T = state.bombMorphTargets[state.bombMorph.bombType];
 
     // Removed red center flare and shockwave to cut cost
-    // if (phase==='exploding'){ ... } // deleted
+    // if (phase===&#x27;exploding&#x27;){ ... } // deleted
 
     // Particle motion
     for(let i=0;i&lt;pairs.length;i++){
@@ -1271,11 +1297,11 @@ document.addEventListener('touchmove', (e)=&gt;{
       const m  = meta[i] || {delay:0,jitter:0,sparkLen:4,overshoot:0.10};
 
       // Subsample half the particles per frame during explosion
-      if (phase==='exploding' &amp;&amp; ((i &amp; 1) !== frameParity)) { continue; }
+      if (phase===&#x27;exploding&#x27; &amp;&amp; ((i &amp; 1) !== frameParity)) { continue; }
 
       const local = Math.max(0, Math.min(1, (prog - m.delay) / (1 - m.delay + 1e-6)));
 
-      if (phase==='sucking'){
+      if (phase===&#x27;sucking&#x27;){
         const swirl = m.jitter * (1-local);
         const dir = Math.atan2(pr.dy-pr.sy, pr.dx-pr.sx) + swirl*0.25;
         const len = Math.hypot(pr.dx-pr.sx, pr.dy-pr.sy);
@@ -1350,7 +1376,7 @@ document.addEventListener('touchmove', (e)=&gt;{
     }
 
     // Extras halo, already lightened
-    if (phase==='sucking'){ drawExtrasRing(t, T, Math.min(1, prog*1.0)); }
+    if (phase===&#x27;sucking&#x27;){ drawExtrasRing(t, T, Math.min(1, prog*1.0)); }
     else { drawExtrasRing(t, T, Math.max(0, 1-prog)); }
 
     // flip parity after drawing
@@ -1373,34 +1399,34 @@ document.addEventListener('touchmove', (e)=&gt;{
     return (dx * dx + dy * dy) &lt;= (radius * radius);
   }
 
-  function startTransition() { if (state.mode === 'single' &amp;&amp; !state.active) { state.active = true; state.t0 = nowS(); } }
+  function startTransition() { if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) { state.active = true; state.t0 = nowS(); } }
   window.btn2_startTransition = startTransition;
-  document.addEventListener('keydown', (e) =&gt; { if (e.key === 't') startTransition(); });
+  document.addEventListener(&#x27;keydown&#x27;, (e) =&gt; { if (e.key === &#x27;t&#x27;) startTransition(); });
 
   // ====== CLICK logic ======
-  canvas.addEventListener('click', (e) =&gt; {
+  canvas.addEventListener(&#x27;click&#x27;, (e) =&gt; {
     const r = canvas.getBoundingClientRect(); 
     const cssX = (e.clientX - r.left);
     const cssY = (e.clientY - r.top);
     const px  = cssX * DPR, py = cssY * DPR;
 
-    if (state.mode === 'single' &amp;&amp; !state.active) {
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
       // Normal bomb path when no timer powerup: 3s suck then auto explode
       if (!state.timerPowerup &amp;&amp; ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active){
         state.bombDeployed = true;
-        startBombMorph('sucking', 'center', 3000, true);
+        startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;, 3000, true);
         return;
       }
       if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
         if (isPointInSphere(cssX, cssY, faceBOMB_center) &amp;&amp; !state.bombMorph.active) {
-          startBombMorph('exploding', 'center'); // disk -&gt; &quot;BOMB X&quot;
+          startBombMorph(&#x27;exploding&#x27;, &#x27;center&#x27;); // disk -&gt; &quot;BOMB X&quot;
           return;
         }
       }
       if (ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active) {
         if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
           state.bombDeployed = true;
-          startBombMorph('sucking', 'center');   // &quot;BOMB X&quot; -&gt; disk
+          startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;);   // &quot;BOMB X&quot; -&gt; disk
         }
       }
       return;
@@ -1410,25 +1436,25 @@ document.addEventListener('touchmove', (e)=&gt;{
 
     if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
       if (isPointInSphere(cssX, cssY, faceBOMB_final) &amp;&amp; !state.bombMorph.active) {
-        startBombMorph('exploding', 'final');
+        startBombMorph(&#x27;exploding&#x27;, &#x27;final&#x27;);
         return;
       }
     }
     if (ctx.isPointInPath(pathBOMB_final, px, py) &amp;&amp; !state.bombMorph.active) {
       if (!state.timerPowerup){
         state.bombDeployed = true;
-        startBombMorph('sucking', 'final', 3000, true);
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;, 3000, true);
       } else if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
         state.bombDeployed = true;
-        startBombMorph('sucking', 'final');
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;);
       }
     }
     else if (ctx.isPointInPath(pathLASER, px, py)) {
-      if (state.mode === 'two' &amp;&amp; state.specialActive &amp;&amp; state.laserAmmo &gt; 0) {
+      if (state.mode === &#x27;two&#x27; &amp;&amp; state.specialActive &amp;&amp; state.laserAmmo &gt; 0) {
         state.laserAmmo--;
         if (state.laserAmmo === 0) {
           state.specialActive = false;
-          document.getElementById('btn2_special').classList.remove('active');
+          document.getElementById(&#x27;btn2_special&#x27;).classList.remove(&#x27;active&#x27;);
           state.activeReverse = true;
           state.t0r = nowS();
         }
@@ -1437,29 +1463,29 @@ document.addEventListener('touchmove', (e)=&gt;{
   });
 
   // ====== Press visual ======
-  const press = { laser: { state: 'idle', t: 0 }, bomb: { state: 'idle', t: 0 } };
+  const press = { laser: { state: &#x27;idle&#x27;, t: 0 }, bomb: { state: &#x27;idle&#x27;, t: 0 } };
   const perimLaser = laserDots.filter(pt =&gt; pt.perim);
   const perimBombB = bombDotsB.filter(pt =&gt; pt.perim);
   const perimBombC = bombDotsC.filter(pt =&gt; pt.perim);
   const PRESS_IN_MS = 90, PRESS_OUT_MS = 140;
   function pressK(which, t) {
     const st = press[which];
-    if (st.state === 'down') { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_IN_MS / 1000))); return easeInCubic(u); }
-    if (st.state === 'up') { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_OUT_MS / 1000))); return 1 - easeOutCubic(u); }
+    if (st.state === &#x27;down&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_IN_MS / 1000))); return easeInCubic(u); }
+    if (st.state === &#x27;up&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_OUT_MS / 1000))); return 1 - easeOutCubic(u); }
     return 0;
   }
   function drawPressOverlay(rect, perimPts, k) {
     if (k &lt;= 0) return;
     ctx.save(); rrPath(ctx, rect); ctx.clip();
-    ctx.globalAlpha = 0.08 * k; ctx.fillStyle = '#000'; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.globalAlpha = 0.08 * k; ctx.fillStyle = &#x27;#000&#x27;; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
     ctx.globalAlpha = 0.10 * k; ctx.fillStyle = col.bright; ctx.fillRect(rect.x + p, rect.y + p, rect.w - 2 * p, rect.h - 2 * p);
     ctx.restore();
   }
 
   // ====== PERF: pre-rasterize LASER rows ======
   const laserRowImgs = laserRows.map(row =&gt; {
-    const off = document.createElement('canvas'); off.width = W; off.height = H;
-    const octx = off.getContext('2d');
+    const off = document.createElement(&#x27;canvas&#x27;); off.width = W; off.height = H;
+    const octx = off.getContext(&#x27;2d&#x27;);
     for (const pt of row.pts) drawBrightDotFast(octx, pt.x, pt.y, 0.9);
     return off;
   });
@@ -1520,13 +1546,13 @@ document.addEventListener('touchmove', (e)=&gt;{
     
     ctx.clearRect(0, 0, W, H); ctx.drawImage(bg, 0, 0);
 
-    if (state.mode === 'single' &amp;&amp; !state.active) {
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
       ctx.drawImage(layerSingle, 0, 0);
       
       if (state.bombMorph.active) {
         drawBombMorph(t);
       } else if (state.bombArmed) {
-        drawBombTimerEffect(t, faceBOMB_center, bombWordDotsCenter, 'center');
+        drawBombTimerEffect(t, faceBOMB_center, bombWordDotsCenter, &#x27;center&#x27;);
       } else {
         for (const pt of bombWordDotsCenter) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
       }
@@ -1537,7 +1563,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       const u = Math.max(0, Math.min(1, (nowS() - state.t0) * (1000 / TRANS_MS)));
       drawLaserBuildTopDown_cached(u);
       drawBombMoving(u);
-      if (u &gt;= 1) { state.active = false; state.mode = 'two'; }
+      if (u &gt;= 1) { state.active = false; state.mode = &#x27;two&#x27;; }
     }
     else if (state.activeReverse) {
       const uR = Math.max(0, Math.min(1, (nowS() - state.t0r) * (1000 / TRANS_MS)));
@@ -1546,7 +1572,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       drawBombMoving(uF);
       if (uR &gt;= 1) {
         state.activeReverse = false;
-        state.mode = 'single';
+        state.mode = &#x27;single&#x27;;
         state.bombDeployed = false;
         state.bombArmed = false;
         __prevMode = undefined; __prevActive = undefined;
@@ -1558,7 +1584,7 @@ document.addEventListener('touchmove', (e)=&gt;{
       if (state.bombMorph.active) {
         drawBombMorph(t);
       } else if (state.bombArmed) {
-        drawBombTimerEffect(t, faceBOMB_final, bombWordDotsFinal, 'final');
+        drawBombTimerEffect(t, faceBOMB_final, bombWordDotsFinal, &#x27;final&#x27;);
       } else {
         for (const pt of bombWordDotsFinal) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
       }
@@ -1569,10 +1595,10 @@ document.addEventListener('touchmove', (e)=&gt;{
     if (doneNB){ state.normalBomb.active=false; }
 
     if (done){
-      if (state.bombMorph.phase==='sucking'){
+      if (state.bombMorph.phase===&#x27;sucking&#x27;){
         if (!state.timerPowerup &amp;&amp; state.bombMorph.autoExplode){
           // Immediately explode words back out
-          startBombMorph('exploding', state.bombMorph.bombType, 700, false);
+          startBombMorph(&#x27;exploding&#x27;, state.bombMorph.bombType, 700, false);
         } else {
           state.bombArmed=true; // timer path: hold on sphere
           state.bombMorph.active=false;
@@ -1592,88 +1618,88 @@ document.addEventListener('touchmove', (e)=&gt;{
   // ====== Keyboard proxies ======
   function synthClickAt(clientX, clientY) {
     const r = canvas.getBoundingClientRect();
-    const evt = new MouseEvent('click', { bubbles: true, cancelable: true, clientX: r.left + clientX, clientY: r.top + clientY });
+    const evt = new MouseEvent(&#x27;click&#x27;, { bubbles: true, cancelable: true, clientX: r.left + clientX, clientY: r.top + clientY });
     canvas.dispatchEvent(evt);
   }
-  const kLaser = document.getElementById('btn2_proxy_blast');
-  const kBomb = document.getElementById('btn2_proxy_bomb');
+  const kLaser = document.getElementById(&#x27;btn2_proxy_blast&#x27;);
+  const kBomb = document.getElementById(&#x27;btn2_proxy_bomb&#x27;);
 
   function updateProxyForMode() {
-    if (state.mode === 'single' &amp;&amp; !state.active) {
-      kLaser.style.display = 'none';
-      kBomb.style.top = '4%';
-      kBomb.style.bottom = 'auto';
-      kBomb.style.height = '92%';
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      kLaser.style.display = &#x27;none&#x27;;
+      kBomb.style.top = &#x27;4%&#x27;;
+      kBomb.style.bottom = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;92%&#x27;;
     } else {
-      kLaser.style.display = 'block';
-      kLaser.style.top = '6%';
-      kLaser.style.height = '44%';
-      kBomb.style.display = 'block';
-      kBomb.style.bottom = '6%';
-      kBomb.style.top = 'auto';
-      kBomb.style.height = '44%';
+      kLaser.style.display = &#x27;block&#x27;;
+      kLaser.style.top = &#x27;6%&#x27;;
+      kLaser.style.height = &#x27;44%&#x27;;
+      kBomb.style.display = &#x27;block&#x27;;
+      kBomb.style.bottom = &#x27;6%&#x27;;
+      kBomb.style.top = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;44%&#x27;;
     }
   }
   function setProxiesEnabled(enabled) {
-    const v = enabled ? 'auto' : 'none';
+    const v = enabled ? &#x27;auto&#x27; : &#x27;none&#x27;;
     kLaser.style.pointerEvents = v;
     kBomb.style.pointerEvents = v;
   }
 
-  kLaser.addEventListener('click', () =&gt; { 
+  kLaser.addEventListener(&#x27;click&#x27;, () =&gt; { 
     const cx = faceLASER_final.x + faceLASER_final.w / 2;
     const cy = faceLASER_final.y + faceLASER_final.h / 2;
     synthClickAt(cx, cy); 
-    kLaser.setAttribute('aria-pressed', 'true'); 
-    setTimeout(() =&gt; kLaser.setAttribute('aria-pressed', 'false'), 150); 
+    kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;); 
+    setTimeout(() =&gt; kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150); 
   });
-  kBomb.addEventListener('click', () =&gt; {
-    const rect = (state.mode === 'single' &amp;&amp; !state.active) ? faceBOMB_center : faceBOMB_final;
+  kBomb.addEventListener(&#x27;click&#x27;, () =&gt; {
+    const rect = (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) ? faceBOMB_center : faceBOMB_final;
     const cx = rect.x + rect.w / 2; const cy = rect.y + rect.h / 2;
     synthClickAt(cx, cy);
-    kBomb.setAttribute('aria-pressed', 'true');
-    setTimeout(() =&gt; kBomb.setAttribute('aria-pressed', 'false'), 150);
+    kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;);
+    setTimeout(() =&gt; kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150);
   });
 
   updateProxyForMode();
 
   function keypressHandler(e, which) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (which === 'laser') kLaser.click(); else kBomb.click(); }
+    if (e.key === &#x27;Enter&#x27; || e.key === &#x27; &#x27;) { e.preventDefault(); if (which === &#x27;laser&#x27;) kLaser.click(); else kBomb.click(); }
   }
-  kLaser.addEventListener('keydown', e =&gt; keypressHandler(e, 'laser'));
-  kBomb.addEventListener('keydown', e =&gt; keypressHandler(e, 'bomb'));
+  kLaser.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;laser&#x27;));
+  kBomb.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;bomb&#x27;));
 
   /* TEMP TRIGGER HOOK */
-  document.getElementById('btn2_temp').addEventListener('click', (e) =&gt; {
+  document.getElementById(&#x27;btn2_temp&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
     e.stopPropagation();
     if (window.btn2_startTransition) window.btn2_startTransition();
   });
 
   // ====== Timer Power-up Toggle ======
-  document.getElementById('btn2_timer').addEventListener('click', (e) =&gt; {
+  document.getElementById(&#x27;btn2_timer&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
     e.stopPropagation();
     state.timerPowerup = !state.timerPowerup;
     state.bombDeployed = false;
     state.bombArmed = false;
     
-    const btn = document.getElementById('btn2_timer');
-    if (state.timerPowerup) btn.classList.add('active');
-    else btn.classList.remove('active');
+    const btn = document.getElementById(&#x27;btn2_timer&#x27;);
+    if (state.timerPowerup) btn.classList.add(&#x27;active&#x27;);
+    else btn.classList.remove(&#x27;active&#x27;);
   });
 
   // ====== Special Activation (4 LASER shots) ======
-  document.getElementById('btn2_special').addEventListener('click', (e) =&gt; {
+  document.getElementById(&#x27;btn2_special&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
     e.stopPropagation();
     state.specialActive = !state.specialActive;
     
     if (state.specialActive) {
-      if (state.mode === 'single' &amp;&amp; !state.active) {
+      if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
         startTransition();
       }
       state.laserAmmo = state.maxAmmo;
-      e.currentTarget.classList.add('active');
+      e.currentTarget.classList.add(&#x27;active&#x27;);
     } else {
-      e.currentTarget.classList.remove('active');
+      e.currentTarget.classList.remove(&#x27;active&#x27;);
     }
   });
 
@@ -1692,10 +1718,10 @@ document.addEventListener('touchmove', (e)=&gt;{
     if(!__jpadFpsT || ts - __jpadFpsT &gt;= __fpsUpdateMs){
       __jpadFpsT = ts;
       try{
-        const el = document.getElementById('jpad_status');
+        const el = document.getElementById(&#x27;jpad_status&#x27;);
         if(el){
-          const base = el.textContent.replace(/\s*FPS:.*$/,'').trim();
-          el.textContent = base + '  FPS: ' + Math.round(__jpadFps);
+          const base = el.textContent.replace(/\s*FPS:.*$/,&#x27;&#x27;).trim();
+          el.textContent = base + &#x27;  FPS: &#x27; + Math.round(__jpadFps);
         }
       }catch(e){}
     }
@@ -1870,14 +1896,14 @@ document.addEventListener('touchmove', (e)=&gt;{
 <input id="v_gap_hud2" max="60" min="-40" step="1" type="range" value="-15"/>
 <div class="sv" id="o_gap_hud2">-15</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_gap_bottom">Bottom Height</label>
-<input id="v_gap_bottom" max="240" min="80" step="1" type="range" value="150"/>
-<div class="sv" id="o_gap_bottom">150</div><button class="lock-btn">🔒</button></div>
+<input id="v_gap_bottom" max="240" min="80" step="1" type="range" value="240"/>
+<div class="sv" id="o_gap_bottom">240</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_bot_a">Control Screen Top Padding</label>
-<input id="v_bot_a" max="40" min="0" step="1" type="range" value="14"/>
-<div class="sv" id="o_bot_a">14</div><button class="lock-btn">🔒</button></div>
+<input id="v_bot_a" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_a">0</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_bot_b">Control Screen Bottom Padding</label>
-<input id="v_bot_b" max="40" min="0" step="1" type="range" value="14"/>
-<div class="sv" id="o_bot_b">14</div><button class="lock-btn">🔒</button></div>
+<input id="v_bot_b" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_b">0</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_global_pad_l">Inner Padding Left</label>
 <input id="v_global_pad_l" max="40" min="10" step="1" type="range" value="20"/>
 <div class="sv" id="o_global_pad_l">20</div><button class="lock-btn">🔒</button></div>
@@ -1997,8 +2023,8 @@ document.addEventListener('touchmove', (e)=&gt;{
 <input id="v_ctrl_y" max="120" min="-120" step="1" type="range" value="0"/>
 <div class="sv" id="o_ctrl_y">0</div><button class="lock-btn">🔒</button></div>
 <div class="sr"><label for="v_ctrl_scale">Controls Scale</label>
-<input id="v_ctrl_scale" max="1.6" min="0.6" step="0.01" type="range" value="1"/>
-<div class="sv" id="o_ctrl_scale">1.00</div><button class="lock-btn">🔒</button></div>
+<input id="v_ctrl_scale" max="1.6" min="0.6" step="0.01" type="range" value="1.04"/>
+<div class="sv" id="o_ctrl_scale">1.04</div><button class="lock-btn">🔒</button></div>
 </div>
 </div>
 <div id="sFoot"><button id="sMove" type="button">Move</button><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
@@ -2220,6 +2246,15 @@ document.addEventListener('touchmove', (e)=&gt;{
           }
         }
       });
+    }
+  });
+
+
+  // Apply initial gap and height values on load
+  gapControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    if (input) {
+      input.dispatchEvent(new Event('input'));
     }
   });
 
@@ -2481,7 +2516,16 @@ document.addEventListener('touchmove', (e)=&gt;{
     });
   }
 
-  // Global padding controls
+  
+  // Apply initial control screen padding on load
+  if (botA && controlScreen) {
+    botA.dispatchEvent(new Event('input'));
+  }
+  if (botB && controlScreen) {
+    botB.dispatchEvent(new Event('input'));
+  }
+
+// Global padding controls
   const globalPadL = shadow.getElementById('v_global_pad_l');
   const globalPadR = shadow.getElementById('v_global_pad_r');
   const inner = document.querySelector('.inner');
@@ -2703,9 +2747,9 @@ document.addEventListener('touchmove', (e)=&gt;{
         'v_gap_tabs': -14,
         'v_gap_hud1': -16,
         'v_gap_hud2': -15,
-        'v_gap_bottom': 150,
-        'v_bot_a': 14,
-        'v_bot_b': 14,
+        'v_gap_bottom': 240,
+        'v_bot_a': 0,
+        'v_bot_b': 0,
         'v_global_pad_l': 20,
         'v_global_pad_r': 20,
         'v_mqtsize': 27,
@@ -2737,7 +2781,7 @@ document.addEventListener('touchmove', (e)=&gt;{
         'v_crt_h': 0,
         'v_ctrl_x': 0,
         'v_ctrl_y': 0,
-        'v_ctrl_scale': 1
+        'v_ctrl_scale': 1.04
       };
 
       Object.keys(defaults).forEach(key => {
