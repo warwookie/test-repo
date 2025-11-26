@@ -1261,30 +1261,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
   function drawLaserArmed(t) {
-    for (let section = 0; section &lt; 4; section++) {
-      if (section &gt;= (4 - state.laserAmmo)) {
-        for (let k = 0; k &lt; laserDots.length; k++) {
-          if (sectionFlags[section][k] === 1) {
-            const pt = laserDots[k];
-            let E_bg = HOT_BASE;
-            if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
-            drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
-          }
-        }
-      }
-    }
-    for (const pt of laserLabelPts){
-      let sect=-1;
-      for(let s=0;s&lt;4;s++){
-        if (laserSectionMasks[s].pts.some(q=&gt;Math.abs(q.x-pt.x)&lt;p &amp;&amp; Math.abs(q.y-pt.y)&lt;p)){ sect=s; break; }
-      }
-      if (sect&lt;0) continue;
-      if (sect &gt;= (4 - state.laserAmmo)){
-        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;; ctx.beginPath(); ctx.arc(pt.x,pt.y,d,0,Math.PI*2); ctx.fill(); ctx.restore();
-      } else {
-        drawBrightDot(ctx, pt.x, pt.y, 0.8);
-      }
-    }
+    // LASER segments disabled: no DMD overlay, no static, no ammo arcs
   }
 
   /* ===========================================
