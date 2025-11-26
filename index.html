@@ -1261,7 +1261,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         for (let k = 0; k &lt; laserDots.length; k++) {
           if (sectionFlags[section][k] === 1) {
             const pt = laserDots[k];
-            let E_bg = HOT_BASE + HOT_NOISE * hash3((pt.x/p)|0,(pt.y/p)|0, t * 7);
+            let E_bg = HOT_BASE;
             if (pt.perim) { E_bg = Math.min(1, Math.max(0, E_bg + RIM_INTENSITY)); }
             drawBrightDot(ctx, pt.x, pt.y, qLevel(E_bg));
           }
