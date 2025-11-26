@@ -759,95 +759,115 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const cx = joyCX;
     const cy = joyCY;
 
-    // DR2: Laser Arrow-Pad Mode (Part 2) – crosshair-style, larger joystick arrows
-    const armLen   = joyR * 0.80;
-    const armHalfW = PITCH * 1.8;
-    const headLen  = PITCH * 2.2;
-    const centerSize = PITCH * 2.4;
+    // Radius for the D-pad circle (slightly inside the joystick radius)
+    const R      = joyR * 0.98;
+    const rSteps = Math.max(3, Math.round(R / PITCH)); // radius in grid steps
 
-    function fillRect(list, x0,y0,x1,y1) {
-      for (let y = y0; y &lt;= y1; y += PITCH) {
-        for (let x = x0; x &lt;= x1; x += PITCH) {
-          list.push({ x:snap(x), y:snap(y) });
+    // Helpers
+    function addDot(list, x, y) {
+      list.push({ x: snap(x), y: snap(y) });
+    }
+
+    function addDotSteps(list, gx, gy) {
+      addDot(list, cx + gx * PITCH, cy + gy * PITCH);
+    }
+
+    // ─────────────────────────────────────
+    // 1) Outer dotted circle ring
+    // ─────────────────────────────────────
+    const ringMin2 = (rSteps - 0.5) * (rSteps - 0.5);
+    const ringMax2 = (rSteps + 0.5) * (rSteps + 0.5);
+
+    for (let gy = -rSteps; gy &lt;= rSteps; gy++) {
+      for (let gx = -rSteps; gx &lt;= rSteps; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= ringMin2 &amp;&amp; r2 &lt;= ringMax2) {
+          addDotSteps(arrowGeom.center, gx, gy);
         }
       }
     }
-    function fillRow(list, x0,x1,y) {
-      for (let x = x0; x &lt;= x1; x += PITCH) {
-        list.push({ x:snap(x), y:snap(y) });
+
+    // ─────────────────────────────────────
+    // 2) Chunky center cross (plus shape)
+    // ─────────────────────────────────────
+    const halfThicknessSteps = 1;                         // 3 * PITCH thick
+    const crossLenSteps      = Math.max(2, rSteps - 4);   // bar extent along axis
+
+    // Vertical bar
+    for (let gy = -crossLenSteps; gy &lt;= crossLenSteps; gy++) {
+      for (let gx = -halfThicknessSteps; gx &lt;= halfThicknessSteps; gx++) {
+        addDotSteps(arrowGeom.center, gx, gy);
       }
     }
 
-    const cHalf = centerSize * 0.5;
-    fillRect(arrowGeom.center, cx - cHalf, cy - cHalf, cx + cHalf, cy + cHalf);
-
-    const gapLen        = PITCH * 0.8;
-    const upTrunkTop    = cy - armLen;
-    const upTrunkBottom = cy - cHalf - gapLen;
-    const upTrunkLeft   = cx - armHalfW;
-    const upTrunkRight  = cx + armHalfW;
-    fillRect(arrowGeom.up, upTrunkLeft, upTrunkTop, upTrunkRight, upTrunkBottom);
-
-    const upHeadBaseY = upTrunkTop;
-    const upHeadTipY  = upTrunkTop - headLen;
-    const upSteps = 3;
-    for (let s=0; s&lt;upSteps; s++) {
-      const t = s / (upSteps-1 || 1);
-      const rowY = upHeadBaseY - t * headLen;
-      const half = armHalfW + PITCH * (1 - t);
-      fillRow(arrowGeom.up, cx - half, cx + half, rowY);
-    }
-
-    const dnTrunkBottom = cy + armLen;
-    const dnTrunkTop    = cy + cHalf + gapLen;
-    const dnTrunkLeft   = cx - armHalfW;
-    const dnTrunkRight  = cx + armHalfW;
-    fillRect(arrowGeom.down, dnTrunkLeft, dnTrunkTop, dnTrunkRight, dnTrunkBottom);
-
-    const dnHeadBaseY = dnTrunkBottom;
-    const dnHeadTipY  = dnTrunkBottom + headLen;
-    for (let s=0; s&lt;upSteps; s++) {
-      const t = s / (upSteps-1 || 1);
-      const rowY = dnHeadBaseY + t * headLen;
-      const half = armHalfW + PITCH * (1 - t);
-      fillRow(arrowGeom.down, cx - half, cx + half, rowY);
-    }
-
-    const lfTrunkLeft   = cx - armLen;
-    const lfTrunkRight  = cx - cHalf - gapLen;
-    const lfTrunkTop    = cy - armHalfW;
-    const lfTrunkBottom = cy + armHalfW;
-    fillRect(arrowGeom.left, lfTrunkLeft, lfTrunkTop, lfTrunkRight, lfTrunkBottom);
-
-    const lfHeadBaseX = lfTrunkLeft;
-    const lfHeadTipX  = lfTrunkLeft - headLen;
-    const lfSteps = 3;
-    for (let s=0; s&lt;lfSteps; s++) {
-      const t = s / (lfSteps-1 || 1);
-      const colX = lfHeadBaseX - t * headLen;
-      const half = armHalfW + PITCH * (1 - t);
-      for (let y = cy - half; y &lt;= cy + half; y += PITCH) {
-        arrowGeom.left.push({ x:snap(colX), y:snap(y) });
+    // Horizontal bar
+    for (let gx = -crossLenSteps; gx &lt;= crossLenSteps; gx++) {
+      for (let gy = -halfThicknessSteps; gy &lt;= halfThicknessSteps; gy++) {
+        addDotSteps(arrowGeom.center, gx, gy);
       }
     }
 
-    const rtTrunkRight  = cx + armLen;
-    const rtTrunkLeft   = cx + cHalf + gapLen;
-    const rtTrunkTop    = cy - armHalfW;
-    const rtTrunkBottom = cy + armHalfW;
-    fillRect(arrowGeom.right, rtTrunkLeft, rtTrunkTop, rtTrunkRight, rtTrunkBottom);
+    // ─────────────────────────────────────
+    // 3) Four filled triangular arrowheads
+    //    (up, right, down, left)
+    // ─────────────────────────────────────
+    const triSteps       = Math.max(2, rSteps - crossLenSteps - 1);
+    const baseExtraSteps = 2;                             // wider base than bar
+    const baseHalfSteps  = halfThicknessSteps + baseExtraSteps;
+    const tipHalfSteps   = 0;                             // narrow tip
+    const rSteps2        = rSteps * rSteps;
 
-    const rtHeadBaseX = rtTrunkRight;
-    const rtHeadTipX  = rtTrunkRight + headLen;
-    for (let s=0; s&lt;lfSteps; s++) {
-      const t = s / (lfSteps-1 || 1);
-      const colX = rtHeadBaseX + t * headLen;
-      const half = armHalfW + PITCH * (1 - t);
-      for (let y = cy - half; y &lt;= cy + half; y += PITCH) {
-        arrowGeom.right.push({ x:snap(colX), y:snap(y) });
+    function widthAtStep(step) {
+      if (triSteps &lt;= 1) return baseHalfSteps;
+      const t = step / (triSteps - 1);
+      const v = baseHalfSteps + (tipHalfSteps - baseHalfSteps) * t;
+      return Math.max(0, Math.round(v));
+    }
+
+    // Up triangle (toward negative Y)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gy   = -(crossLenSteps + step);
+      const half = widthAtStep(step);
+      for (let gx = -half; gx &lt;= half; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue; // keep inside circle
+        addDotSteps(arrowGeom.up, gx, gy);
       }
     }
-  }
+
+    // Down triangle (toward positive Y)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gy   =  crossLenSteps + step;
+      const half = widthAtStep(step);
+      for (let gx = -half; gx &lt;= half; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.down, gx, gy);
+      }
+    }
+
+    // Left triangle (toward negative X)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gx   = -(crossLenSteps + step);
+      const half = widthAtStep(step);
+      for (let gy = -half; gy &lt;= half; gy++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.left, gx, gy);
+      }
+    }
+
+    // Right triangle (toward positive X)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gx   =  crossLenSteps + step;
+      const half = widthAtStep(step);
+      for (let gy = -half; gy &lt;= half; gy++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.right, gx, gy);
+      }
+    }
+}
 
   function drawArrowPad() {
     if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
