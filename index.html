@@ -1261,7 +1261,11 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
   function drawLaserArmed(t) {
-    // LASER segments disabled: no DMD overlay, no static, no ammo arcs
+    // Simple static LASER label (no segments, no static TV effect)
+    if (!laserWordDotsFinal) return;
+    for (const pt of laserWordDotsFinal) {
+      drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+    }
   }
 
   /* ===========================================
@@ -1775,6 +1779,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     else if (ctx.isPointInPath(pathLASER, px, py)) {
       if (state.mode === &#x27;two&#x27; &amp;&amp; state.specialActive &amp;&amp; state.laserAmmo &gt; 0) {
         state.laserAmmo--;
+        // Update LASER label to match remaining ammo
+        if (typeof refreshLaserLabelFromAmmo === &#x27;function&#x27;) {
+          refreshLaserLabelFromAmmo();
+        }
         if (state.laserAmmo === 0) {
           state.specialActive = false;
           document.getElementById(&#x27;btn2_special&#x27;).classList.remove(&#x27;active&#x27;);
@@ -2022,34 +2030,25 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   
   // ====== LASER countdown label (DMD text only) ======
-  let laserCountdown = 0;
-  let laserCountdownTimer = null;
-  let laserCountdownRunning = false;
-
-  function startLaserCountdown(){
-    if (laserCountdownRunning) return;
-    laserCountdownRunning = true;
-    laserCountdown = 4;
-    if (typeof setLaserLabelText === &#x27;function&#x27;) {
-      setLaserLabelText(&#x27;LASER 4&#x27;);
+  // LASER label driven directly by ammo/state
+  function refreshLaserLabelFromAmmo(){
+    if (typeof setLaserLabelText !== &#x27;function&#x27;) return;
+    if (!state || !state.specialActive) {
+      // Not in LASER mode: clear label
+      setLaserLabelText(&#x27;&#x27;);
+      return;
     }
-    const stepMs = 1000;
-    laserCountdownTimer = setInterval(() =&gt; {
-      laserCountdown -= 1;
-      if (laserCountdown &gt; 0) {
-        if (typeof setLaserLabelText === &#x27;function&#x27;) {
-          setLaserLabelText(&#x27;LASER &#x27; + laserCountdown);
-        }
-      } else {
-        clearInterval(laserCountdownTimer);
-        laserCountdownTimer = null;
-        laserCountdownRunning = false;
-        if (typeof setLaserLabelText === &#x27;function&#x27;) {
-          setLaserLabelText(&#x27;&#x27;);
-        }
-      }
-    }, stepMs);
+    const n = state.laserAmmo || 0;
+    if (n &gt; 0) {
+      // Tighter gap: no space between word and number, e.g. LASER4
+      setLaserLabelText(&#x27;LASER&#x27; + n);
+    } else {
+      setLaserLabelText(&#x27;&#x27;);
+    }
   }
+
+  // Initialize label based on initial state
+  refreshLaserLabelFromAmmo();
 
 // ====== Special Activation (4 LASER shots) ======
   document.getElementById(&#x27;btn2_special&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
@@ -2060,16 +2059,20 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
         startTransition();
       }
+      // Fill LASER ammo and enter LASER mode
       state.laserAmmo = state.maxAmmo;
       e.currentTarget.classList.add(&#x27;active&#x27;);
-      // Start simple LASER 4→1 countdown on the DMD label
-      if (typeof startLaserCountdown === &#x27;function&#x27;) {
-        startLaserCountdown();
-      }
     } else {
       e.currentTarget.classList.remove(&#x27;active&#x27;);
     }
+
+    // Update label from ammo / mode whenever special toggles
+    if (typeof refreshLaserLabelFromAmmo === &#x27;function&#x27;) {
+      refreshLaserLabelFromAmmo();
+    }
   });
+
+
 
   // ====== Initialize targets ======
   initBombMorphSystem();
