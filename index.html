@@ -893,6 +893,9 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       const level    = (key === activeDir) ? 1 : rawLevel;
       const suck  = 1 - arrowIntro;
 
+      const R        = joyR * 0.98;
+      const ringR    = Math.floor(R / PITCH) * PITCH;
+
       for (const pt of list) {
         const dx = pt.x - joyCX;
         const dy = pt.y - joyCY;
@@ -900,7 +903,16 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const factor = 1 - 0.22 * suck - 0.18 * pressIn;
         const sx = joyCX + dx * factor;
         const sy = joyCY + dy * factor;
-        dotDraw(sx, sy, DOT_R, level);
+
+        let ptLevel = level;
+        if (key === 'center') {
+          const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
+          if (Math.abs(dist0 - ringR) <= PITCH * 0.6) {
+            ptLevel = 1;
+          }
+        }
+
+        dotDraw(sx, sy, DOT_R, ptLevel);
       }
     }
 
