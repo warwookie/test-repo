@@ -887,9 +887,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
 
       let base = isArrow ? 0.55 : 0.45;
-      if (key === activeDir) base = 0.95;
+      if (key === activeDir) base = 1.0;
 
-      const level = Math.min(1, base + pulse * 0.5);
+      const rawLevel = Math.min(1, base + pulse * 0.5);
+      const level    = (key === activeDir) ? 1 : rawLevel;
       const suck  = 1 - arrowIntro;
 
       for (const pt of list) {
