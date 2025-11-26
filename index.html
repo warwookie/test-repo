@@ -759,115 +759,115 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const cx = joyCX;
     const cy = joyCY;
 
-    // D-pad geometry: cross + four arrowheads inside a dotted circle ring
-    const ringSteps = Math.max(4, Math.round((joyR * 0.98) / PITCH));
-    const Rsteps = ringSteps;
+    // Radius for the D-pad circle (slightly inside the joystick radius)
+    const R      = joyR * 0.98;
+    const rSteps = Math.max(3, Math.round(R / PITCH)); // radius in grid steps
 
-    // Cross thickness ~ 3 * PITCH (|step| &lt;= 1 gives 3 rows/cols)
-    const crossHalfThicknessSteps = 1;
-
-    // Cross arm length in grid steps, leaving space for triangles and ring
-    let crossArmSteps = Rsteps - 4;
-    if (crossArmSteps &lt; 3) crossArmSteps = Math.max(2, Math.floor(Rsteps * 0.5));
-
-    const baseRow = crossArmSteps + 1;   // first triangle row/col beyond cross
-    let tipSteps = Rsteps - 1;           // stop just inside the ring
-    if (tipSteps &lt; baseRow) tipSteps = baseRow;
-
-    // Triangle width parameters (in steps)
-    const triBaseExtra = 2;              // wider than cross at base
-    const tipHalfSteps = 0;              // tip collapses to a single col/row
-
-    // Ring thickness in step space
-    const ringThicknessSteps = 0.5;
-
-    function addDot(list, sx, sy) {
-      const dx = snap(sx * PITCH);
-      const dy = snap(sy * PITCH);
-      list.push({ x: cx + dx, y: cy + dy });
+    // Helpers
+    function addDot(list, x, y) {
+      list.push({ x: snap(x), y: snap(y) });
     }
 
-    for (let gy = -Rsteps; gy &lt;= Rsteps; gy++) {
-      for (let gx = -Rsteps; gx &lt;= Rsteps; gx++) {
-        const rSteps = Math.hypot(gx, gy);
+    function addDotSteps(list, gx, gy) {
+      addDot(list, cx + gx * PITCH, cy + gy * PITCH);
+    }
 
-        // Outside circle, skip
-        if (rSteps &gt; Rsteps + 0.5) continue;
+    // ─────────────────────────────────────
+    // 1) Outer dotted circle ring
+    // ─────────────────────────────────────
+    const ringMin2 = (rSteps - 0.5) * (rSteps - 0.5);
+    const ringMax2 = (rSteps + 0.5) * (rSteps + 0.5);
 
-        // Dotted outer ring (shared in center cluster)
-        if (Math.abs(rSteps - Rsteps) &lt;= ringThicknessSteps) {
-          addDot(arrowGeom.center, gx, gy);
-          continue;
-        }
-
-        // Chunky center cross
-        let inCenter = false;
-
-        // Vertical bar
-        if (Math.abs(gx) &lt;= crossHalfThicknessSteps &amp;&amp; Math.abs(gy) &lt;= crossArmSteps) {
-          inCenter = true;
-        }
-
-        // Horizontal bar
-        if (Math.abs(gy) &lt;= crossHalfThicknessSteps &amp;&amp; Math.abs(gx) &lt;= crossArmSteps) {
-          inCenter = true;
-        }
-
-        if (inCenter) {
-          addDot(arrowGeom.center, gx, gy);
-          continue;
-        }
-
-        // Triangular arrowheads
-        const absGy = Math.abs(gy);
-        const absGx = Math.abs(gx);
-
-        // Up triangle (toward negative gy)
-        if (gy &lt;= -baseRow &amp;&amp; absGy &lt;= tipSteps) {
-          const t = (absGy - baseRow) / ((tipSteps - baseRow) || 1);
-          const baseHalf = crossHalfThicknessSteps + triBaseExtra;
-          const halfSteps = Math.round(baseHalf * (1 - t) + tipHalfSteps * t);
-          if (absGx &lt;= halfSteps) {
-            addDot(arrowGeom.up, gx, gy);
-            continue;
-          }
-        }
-
-        // Down triangle
-        if (gy &gt;= baseRow &amp;&amp; absGy &lt;= tipSteps) {
-          const t = (absGy - baseRow) / ((tipSteps - baseRow) || 1);
-          const baseHalf = crossHalfThicknessSteps + triBaseExtra;
-          const halfSteps = Math.round(baseHalf * (1 - t) + tipHalfSteps * t);
-          if (absGx &lt;= halfSteps) {
-            addDot(arrowGeom.down, gx, gy);
-            continue;
-          }
-        }
-
-        // Left triangle
-        if (gx &lt;= -baseRow &amp;&amp; absGx &lt;= tipSteps) {
-          const t = (absGx - baseRow) / ((tipSteps - baseRow) || 1);
-          const baseHalf = crossHalfThicknessSteps + triBaseExtra;
-          const halfSteps = Math.round(baseHalf * (1 - t) + tipHalfSteps * t);
-          if (absGy &lt;= halfSteps) {
-            addDot(arrowGeom.left, gx, gy);
-            continue;
-          }
-        }
-
-        // Right triangle
-        if (gx &gt;= baseRow &amp;&amp; absGx &lt;= tipSteps) {
-          const t = (absGx - baseRow) / ((tipSteps - baseRow) || 1);
-          const baseHalf = crossHalfThicknessSteps + triBaseExtra;
-          const halfSteps = Math.round(baseHalf * (1 - t) + tipHalfSteps * t);
-          if (absGy &lt;= halfSteps) {
-            addDot(arrowGeom.right, gx, gy);
-            continue;
-          }
+    for (let gy = -rSteps; gy &lt;= rSteps; gy++) {
+      for (let gx = -rSteps; gx &lt;= rSteps; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= ringMin2 &amp;&amp; r2 &lt;= ringMax2) {
+          addDotSteps(arrowGeom.center, gx, gy);
         }
       }
     }
-  }
+
+    // ─────────────────────────────────────
+    // 2) Chunky center cross (plus shape)
+    // ─────────────────────────────────────
+    const halfThicknessSteps = 1;                         // 3 * PITCH thick
+    const crossLenSteps      = Math.max(2, rSteps - 4);   // bar extent along axis
+
+    // Vertical bar
+    for (let gy = -crossLenSteps; gy &lt;= crossLenSteps; gy++) {
+      for (let gx = -halfThicknessSteps; gx &lt;= halfThicknessSteps; gx++) {
+        addDotSteps(arrowGeom.center, gx, gy);
+      }
+    }
+
+    // Horizontal bar
+    for (let gx = -crossLenSteps; gx &lt;= crossLenSteps; gx++) {
+      for (let gy = -halfThicknessSteps; gy &lt;= halfThicknessSteps; gy++) {
+        addDotSteps(arrowGeom.center, gx, gy);
+      }
+    }
+
+    // ─────────────────────────────────────
+    // 3) Four filled triangular arrowheads
+    //    (up, right, down, left)
+    // ─────────────────────────────────────
+    const triSteps       = Math.max(2, rSteps - crossLenSteps - 1);
+    const baseExtraSteps = 2;                             // wider base than bar
+    const baseHalfSteps  = halfThicknessSteps + baseExtraSteps;
+    const tipHalfSteps   = 0;                             // narrow tip
+    const rSteps2        = rSteps * rSteps;
+
+    function widthAtStep(step) {
+      if (triSteps &lt;= 1) return baseHalfSteps;
+      const t = step / (triSteps - 1);
+      const v = baseHalfSteps + (tipHalfSteps - baseHalfSteps) * t;
+      return Math.max(0, Math.round(v));
+    }
+
+    // Up triangle (toward negative Y)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gy   = -(crossLenSteps + step);
+      const half = widthAtStep(step);
+      for (let gx = -half; gx &lt;= half; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue; // keep inside circle
+        addDotSteps(arrowGeom.up, gx, gy);
+      }
+    }
+
+    // Down triangle (toward positive Y)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gy   =  crossLenSteps + step;
+      const half = widthAtStep(step);
+      for (let gx = -half; gx &lt;= half; gx++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.down, gx, gy);
+      }
+    }
+
+    // Left triangle (toward negative X)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gx   = -(crossLenSteps + step);
+      const half = widthAtStep(step);
+      for (let gy = -half; gy &lt;= half; gy++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.left, gx, gy);
+      }
+    }
+
+    // Right triangle (toward positive X)
+    for (let step = 0; step &lt; triSteps; step++) {
+      const gx   =  crossLenSteps + step;
+      const half = widthAtStep(step);
+      for (let gy = -half; gy &lt;= half; gy++) {
+        const r2 = gx * gx + gy * gy;
+        if (r2 &gt;= rSteps2) continue;
+        addDotSteps(arrowGeom.right, gx, gy);
+      }
+    }
+}
 
   function drawArrowPad() {
     if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
@@ -1528,7 +1528,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const u = Math.max(0, Math.min(1, elapsed / state.normalBomb.duration));
     const ease = (x)=&gt; 1 - Math.pow(1-x, 3);
     const bombType = state.normalBomb.bombType;
-    const T = bombType===&#x27;center&##x27; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
+    const T = bombType===&#x27;center&#x27; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
     const textPts = bombType===&#x27;center&#x27; ? bombWordDotsCenter : bombWordDotsFinal;
     const center = T.center;
     const spread = Math.min(T.faceRect.w, T.faceRect.h) * 0.10; // small push
