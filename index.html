@@ -712,14 +712,22 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
       const dir = window.laserDirection || &#x27;up&#x27;;
       let vx = 0, vy = 0;
-      if (dir === &#x27;up&#x27;) vy = -1;
-      else if (dir === &#x27;down&#x27;) vy = 1;
-      else if (dir === &#x27;left&#x27;) vx = -1;
-      else if (dir === &#x27;right&#x27;) vx = 1;
+
+      // Movement in arrow mode only while a joy pointer is held down.
+      let anyJoy = false;
+      for (const v of activePointers.values()) {
+        if (v === &#x27;joy&#x27;) { anyJoy = true; break; }
+      }
+      if (anyJoy) {
+        if (dir === &#x27;up&#x27;) vy = -1;
+        else if (dir === &#x27;down&#x27;) vy = 1;
+        else if (dir === &#x27;left&#x27;) vx = -1;
+        else if (dir === &#x27;right&#x27;) vx = 1;
+      }
 
       window.jpad_state.x = vx;
       window.jpad_state.y = vy;
-      window.jpad_state.mag = 1;
+      window.jpad_state.mag = Math.min(1, Math.hypot(vx, vy));
       window.jpad_state.angle = Math.atan2(vy, vx);
     } else {
       outX += (joyTX - outX) * SMOOTH;
@@ -905,9 +913,9 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const sy = joyCY + dy * factor;
 
         let ptLevel = level;
-        if (key === 'center') {
+        if (key === &#x27;center&#x27;) {
           const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
-          if (Math.abs(dist0 - ringR) <= PITCH * 0.6) {
+          if (Math.abs(dist0 - ringR) &lt;= PITCH * 0.6) {
             ptLevel = 1;
           }
         }
@@ -1536,7 +1544,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
+    state.normalBomb.bombType = bombType; // &#x#x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
