@@ -1186,13 +1186,18 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   // ====== Text points ======
   let bombWordDotsFinal, bombWordDotsCenter;
-  let laserWordDotsFinal; 
+  let laserWordDotsFinal;
+  let laserTextLabel = &#x27;LASER&#x27;;
   function getBombText(){ return &#x27;BOMB X&#x27;; }
-  function getLaserText(){ return &#x27;LASER&#x27;; }
+  function getLaserText(){ return laserTextLabel; }
   function updateButtonText(){
     bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
     bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
     laserWordDotsFinal = rasterTextPoints(faceLASER_final, getLaserText());
+  }
+  function setLaserLabelText(txt){
+    laserTextLabel = txt;
+    updateButtonText();
   }
   updateButtonText();
 
@@ -2038,17 +2043,52 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     else btn.classList.remove(&#x27;active&#x27;);
   });
 
-  // ====== Special Activation (4 LASER shots) ======
+  
+  // ====== LASER countdown label (DMD text only) ======
+  let laserCountdown = 0;
+  let laserCountdownTimer = null;
+  let laserCountdownRunning = false;
+
+  function startLaserCountdown(){
+    if (laserCountdownRunning) return;
+    laserCountdownRunning = true;
+    laserCountdown = 4;
+    if (typeof setLaserLabelText === &#x27;function&#x27;) {
+      setLaserLabelText(&#x27;LASER 4&#x27;);
+    }
+    const stepMs = 1000;
+    laserCountdownTimer = setInterval(() =&gt; {
+      laserCountdown -= 1;
+      if (laserCountdown &gt; 0) {
+        if (typeof setLaserLabelText === &#x27;function&#x27;) {
+          setLaserLabelText(&#x27;LASER &#x27; + laserCountdown);
+        }
+      } else {
+        clearInterval(laserCountdownTimer);
+        laserCountdownTimer = null;
+        laserCountdownRunning = false;
+        if (typeof setLaserLabelText === &#x27;function&#x27;) {
+          setLaserLabelText(&#x27;&#x27;);
+        }
+      }
+    }, stepMs);
+  }
+
+// ====== Special Activation (4 LASER shots) ======
   document.getElementById(&#x27;btn2_special&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
     e.stopPropagation();
     state.specialActive = !state.specialActive;
-    
+
     if (state.specialActive) {
       if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
         startTransition();
       }
       state.laserAmmo = state.maxAmmo;
       e.currentTarget.classList.add(&#x27;active&#x27;);
+      // Start simple LASER 4→1 countdown on the DMD label
+      if (typeof startLaserCountdown === &#x27;function&#x27;) {
+        startLaserCountdown();
+      }
     } else {
       e.currentTarget.classList.remove(&#x27;active&#x27;);
     }
@@ -2086,7 +2126,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
 &lt;/body&gt;
 &lt;/html&gt;
-" title="SNEAKERQUEST Controls"></iframe>
+&quot; title=&quot;SNEAKERQUEST Controls"></iframe>
 <div aria-hidden="true" class="matrix">
 </div>
 </div>
