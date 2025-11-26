@@ -961,7 +961,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         if (mag &gt; 0.01) {
           let jb = 0;
           const sd = segDist(joyCX, joyCY, px, py, x, y);
-          const stemPulse = pulse01(sd / (PITCH * 3.2), 0.12) * STEM_GAIN;
+          const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
           jb = Math.max(jb, stemPulse);
           const kd = Math.hypot(x - px, y - py);
           const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
