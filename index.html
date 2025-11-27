@@ -595,7 +595,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     buildArrowPadGeometry();
     buildArrowHitRects();
   }
-
   function ensureJoypadLayout() {
     const rect = cvs.getBoundingClientRect();
     const w = Math.max(1, Math.floor(rect.width));
@@ -607,6 +606,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       updateLayout(w, h);
     }
   }
+
 
   function getPointerLocation(e) {
     const r = cvs.getBoundingClientRect();
@@ -1067,8 +1067,8 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     return Math.hypot(px-sx,py-sy);
   }
 
-    ensureJoypadLayout();
-requestAnimationFrame(loop);
+  ensureJoypadLayout();
+  requestAnimationFrame(loop);
 })()
 ;
 
