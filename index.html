@@ -561,7 +561,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   const ctx = cvs.getContext(&#x27;2d&#x27;);
   const readout = document.getElementById(&#x27;jpad_status&#x27;);
   const rightArea = document.getElementById(&#x27;right-area&#x27;);
-  const rightPad = rightArea ? rightArea.querySelector('.pad') : null;
 
   let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
   let layoutReady = false;
@@ -595,6 +594,17 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     buildArrowPadGeometry();
     buildArrowHitRects();
   }
+
+  function applyJoypadLayoutFromCanvas() {
+    const rect = cvs.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+    updateLayout(w, h);
+  }
+
+  window.addEventListener('resize', () => {
+    applyJoypadLayoutFromCanvas();
+  });
 
   function getPointerLocation(e) {
     const r = cvs.getBoundingClientRect();
@@ -945,7 +955,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
 
     const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
-    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 12;
+    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 6;
 
     for (let j=0; j&lt;ROWS; j++) {
       for (let i=0; i&lt;COLS; i++) {
@@ -1053,14 +1063,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     return Math.hypot(px-sx,py-sy);
   }
 
-  const ro = new ResizeObserver(entries =&gt; {
-    if (!rightPad) return;
-    const rect = rightPad.getBoundingClientRect();
-    const w = Math.max(1, Math.floor(rect.width));
-    const h = Math.max(1, Math.floor(rect.height));
-    updateLayout(w, h);
-  });
-  ro.observe(rightArea);
+  applyJoypadLayoutFromCanvas();
   requestAnimationFrame(loop);
 })()
 ;
