@@ -239,19 +239,6 @@
   border: 0;
 }
 </style>
-
-<style>
-#settingsBtn,
-#settingsPanel,
-#lt2Toggle,
-#lt2CopyJson,
-#unifiedToggle,
-#unified-tuner-root,
-#lt2-root {
-  display: none !important;
-  pointer-events: none !important;
-}
-</style>
 </head>
 <body>
 <div class="fixed-container" id="mainContainer">
@@ -725,22 +712,14 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
       const dir = window.laserDirection || &#x27;up&#x27;;
       let vx = 0, vy = 0;
-
-      // Movement in arrow mode only while a joy pointer is held down.
-      let anyJoy = false;
-      for (const v of activePointers.values()) {
-        if (v === &#x27;joy&#x27;) { anyJoy = true; break; }
-      }
-      if (anyJoy) {
-        if (dir === &#x27;up&#x27;) vy = -1;
-        else if (dir === &#x27;down&#x27;) vy = 1;
-        else if (dir === &#x27;left&#x27;) vx = -1;
-        else if (dir === &#x27;right&#x27;) vx = 1;
-      }
+      if (dir === &#x27;up&#x27;) vy = -1;
+      else if (dir === &#x27;down&#x27;) vy = 1;
+      else if (dir === &#x27;left&#x27;) vx = -1;
+      else if (dir === &#x27;right&#x27;) vx = 1;
 
       window.jpad_state.x = vx;
       window.jpad_state.y = vy;
-      window.jpad_state.mag = Math.min(1, Math.hypot(vx, vy));
+      window.jpad_state.mag = 1;
       window.jpad_state.angle = Math.atan2(vy, vx);
     } else {
       outX += (joyTX - outX) * SMOOTH;
@@ -926,9 +905,9 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const sy = joyCY + dy * factor;
 
         let ptLevel = level;
-        if (key === &#x27;center&#x27;) {
+        if (key === 'center') {
           const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
-          if (Math.abs(dist0 - ringR) &lt;= PITCH * 0.6) {
+          if (Math.abs(dist0 - ringR) <= PITCH * 0.6) {
             ptLevel = 1;
           }
         }
@@ -965,7 +944,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
 
     const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
-    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 6;
+    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 12;
 
     for (let j=0; j&lt;ROWS; j++) {
       for (let i=0; i&lt;COLS; i++) {
@@ -3330,96 +3309,13 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
 
     // === GAME SETUP ===
-    
     function setupSimpleGame() {
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
 
-      // --- Logical maze grid ---
-      const COLS = 17;
-      const ROWS = 11;
-
-      const levelPlan = [
-        "#################",
-        "#S    #       G#",
-        "# ### # ##### ##",
-        "# #   #     #  #",
-        "# # ##### # ####",
-        "# #     # #   ##",
-        "# ##### # ###  #",
-        "#     # #   #  #",
-        "##### # ### ####",
-        "#     #       *#",
-        "#################"
-      ];
-
-      let tileSize = 16;
-      let worldWidth = COLS;
-      let worldHeight = ROWS;
-
-      const walls = [];
-      let startPos = { x: 1.5, y: 1.5 };
-      let goalCell = { c: COLS - 2, r: 1 };
-      let starPos = { x: COLS - 2.5, y: ROWS - 1.5 };
-
-      let player = { x: startPos.x, y: startPos.y, r: 0.35 };
-      let lasers = [];
-      let bombs = [];
-      let hasStar = false;
-      let starActiveUI = false;
-      let reachedGoal = false;
-
-      let lastTime = 0;
-      let gameStarted = true;
-
-      // hooks into bottom controls
-      let controlsFrame = null;
-      let controlsWin = null;
-      let laserQueued = 0;
-      let bombQueued = 0;
-
-      function parseLevel() {
-        walls.length = 0;
-        for (let r = 0; r < ROWS; r++) {
-          walls[r] = [];
-          const row = levelPlan[r] || "";
-          for (let c = 0; c < COLS; c++) {
-            const ch = row[c] || "#";
-            if (ch === "S") {
-              startPos = { x: c + 0.5, y: r + 0.5 };
-              walls[r][c] = false;
-            } else if (ch === "G") {
-              goalCell = { c, r };
-              walls[r][c] = false;
-            } else if (ch === "*") {
-              starPos = { x: c + 0.5, y: r + 0.5 };
-              walls[r][c] = false;
-            } else {
-              walls[r][c] = (ch === "#");
-            }
-          }
-        }
-      }
-
-      function resetGame() {
-        parseLevel();
-        player.x = startPos.x;
-        player.y = startPos.y;
-        player.r = 0.35;
-        lasers = [];
-        bombs = [];
-        hasStar = false;
-        starActiveUI = false;
-        reachedGoal = false;
-        gameStarted = true;
-      }
-
       function resizeCanvas() {
         const crt = document.querySelector('.crt');
-        if (!crt) return;
-
-        const cssW = crt.clientWidth;
-        const cssH = crt.clientHeight;
+        const cssW = crt.clientWidth;  const cssH = crt.clientHeight;
 
         canvas.style.width = cssW + 'px';
         canvas.style.height = cssH + 'px';
@@ -3430,392 +3326,24 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(dpr, dpr);
+        draw();
 
-        // world <-> screen scale
-        tileSize = Math.floor(Math.min(cssW / COLS, cssH / ROWS));
-        worldWidth = COLS;
-        worldHeight = ROWS;
+        // Self-tests
+        console.assert(Math.abs(canvas.width  / (window.devicePixelRatio||1) - cssW) < 1, 'Canvas width backing store mismatch');
+        console.assert(Math.abs(canvas.height / (window.devicePixelRatio||1) - cssH) < 1, 'Canvas height backing store mismatch');
       }
 
-      function worldToScreen(x, y) {
-        const w = canvas.clientWidth || canvas.width;
-        const h = canvas.clientHeight || canvas.height;
-        const offsetX = (w - COLS * tileSize) * 0.5;
-        const offsetY = (h - ROWS * tileSize) * 0.5;
-        return {
-          x: offsetX + x * tileSize,
-          y: offsetY + y * tileSize
-        };
+      function draw() {
+        const w = canvas.clientWidth; const h = canvas.clientHeight;
+        ctx.fillStyle = '#0a241f'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#d6c7a4'; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('SNEAKER BOMBER', w / 2, h / 2 - 20);
+        ctx.fillText('SPACE TO START', w / 2, h / 2 + 20);
       }
 
-      function cellAt(x, y) {
-        const c = Math.floor(x);
-        const r = Math.floor(y);
-        if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return { c, r, wall: true };
-        return { c, r, wall: !!walls[r][c] };
-      }
-
-      function spawnLaser() {
-        if (!hasStar) return;
-        const dir = getShotDirection();
-        const mag = Math.hypot(dir.x, dir.y);
-        if (mag < 0.01) return;
-        const dnx = dir.x / mag;
-        const dny = dir.y / mag;
-        lasers.push({
-          x: player.x,
-          y: player.y,
-          vx: dnx * 14,   // tiles per second
-          vy: dny * 14,
-          life: 1.0
-        });
-      }
-
-      function spawnBomb() {
-        bombs.push({
-          x: player.x,
-          y: player.y,
-          timer: 0.9,
-          exploded: false
-        });
-      }
-
-      function getControlsWindow() {
-        if (!controlsFrame) {
-          controlsFrame = document.getElementById('controlsFrame');
-        }
-        if (!controlsFrame) return null;
-        try {
-          controlsWin = controlsFrame.contentWindow || null;
-        } catch (e) {
-          controlsWin = null;
-        }
-        return controlsWin;
-      }
-
-      function getJoyVector() {
-        const w = getControlsWindow();
-        if (!w || !w.jpad_state) return { x: 0, y: 0 };
-        // jpad_state uses canvas coords (y down); we keep that convention
-        return { x: w.jpad_state.x || 0, y: w.jpad_state.y || 0 };
-      }
-
-      function getShotDirection() {
-        const w = getControlsWindow();
-        if (w && w.laserArrowMode && w.laserDirection) {
-          const d = w.laserDirection;
-          if (d === 'up')    return { x: 0,  y: -1 };
-          if (d === 'down')  return { x: 0,  y: 1 };
-          if (d === 'left')  return { x: -1, y: 0 };
-          if (d === 'right') return { x: 1,  y: 0 };
-        }
-        const v = getJoyVector();
-        const mag = Math.hypot(v.x, v.y);
-        if (mag < 0.2) return { x: 1, y: 0 };
-        return { x: v.x / mag, y: v.y / mag };
-      }
-
-      function hookControls() {
-        controlsFrame = document.getElementById('controlsFrame');
-        if (!controlsFrame) return;
-
-        function tryAttach() {
-          const w = getControlsWindow();
-          if (!w || !w.document) return;
-          const doc = w.document;
-          const blast = doc.getElementById('btn2_proxy_blast');
-          const bomb  = doc.getElementById('btn2_proxy_bomb');
-
-          if (blast && !blast.__sqMazeHook) {
-            blast.__sqMazeHook = true;
-            blast.addEventListener('click', () => { laserQueued++; });
-          }
-          if (bomb && !bomb.__sqMazeHook) {
-            bomb.__sqMazeHook = true;
-            bomb.addEventListener('click', () => { bombQueued++; });
-          }
-        }
-
-        tryAttach();
-        controlsFrame.addEventListener('load', () => { tryAttach(); });
-      }
-
-      function activateLaserSpecialUI() {
-        const w = getControlsWindow();
-        if (!w || starActiveUI) return;
-        starActiveUI = true;
-        try {
-          const doc = w.document;
-          const specialBtn = doc.getElementById('btn2_special');
-          if (specialBtn && !specialBtn.classList.contains('active')) {
-            specialBtn.click();
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      function updatePlayer(dt) {
-        const v = getJoyVector();
-        const speedTilesPerSec = 3.5;
-        const dx = v.x * speedTilesPerSec * dt;
-        const dy = v.y * speedTilesPerSec * dt;
-
-        let nx = player.x + dx;
-        let ny = player.y + dy;
-
-        const test = cellAt(nx, ny);
-        if (test.wall) {
-          // simple axis resolution
-          const testX = cellAt(player.x + dx, player.y);
-          const testY = cellAt(player.x, player.y + dy);
-          if (!testX.wall) nx = player.x + dx; else nx = player.x;
-          if (!testY.wall) ny = player.y + dy; else ny = player.y;
-        }
-
-        player.x = Math.max(0.5, Math.min(COLS - 0.5, nx));
-        player.y = Math.max(0.5, Math.min(ROWS - 0.5, ny));
-      }
-
-      function updateLasers(dt) {
-        const still = [];
-        for (const shot of lasers) {
-          shot.x += shot.vx * dt;
-          shot.y += shot.vy * dt;
-          shot.life -= dt;
-
-          if (shot.x < 0 || shot.x > COLS || shot.y < 0 || shot.y > ROWS) continue;
-          if (shot.life <= 0) continue;
-
-          const c = Math.floor(shot.x);
-          const r = Math.floor(shot.y);
-          if (c >= 0 && c < COLS && r >= 0 && r < ROWS && walls[r][c]) {
-            walls[r][c] = false; // carve passage
-            continue;
-          }
-          still.push(shot);
-        }
-        lasers = still;
-      }
-
-      function updateBombs(dt) {
-        const remaining = [];
-        for (const b of bombs) {
-          b.timer -= dt;
-          if (!b.exploded && b.timer <= 0) {
-            b.exploded = true;
-            const radius = 2.0;
-            for (let r = 0; r < ROWS; r++) {
-              for (let c = 0; c < COLS; c++) {
-                if (!walls[r][c]) continue;
-                const cx = c + 0.5;
-                const cy = r + 0.5;
-                const dist = Math.hypot(cx - b.x, cy - b.y);
-                if (dist <= radius) walls[r][c] = false;
-              }
-            }
-          }
-          if (b.exploded && b.timer <= -0.1) {
-            continue;
-          }
-          remaining.push(b);
-        }
-        bombs = remaining;
-      }
-
-      function checkStarPickup() {
-        if (hasStar) return;
-        const dist = Math.hypot(player.x - starPos.x, player.y - starPos.y);
-        if (dist < 0.6) {
-          hasStar = true;
-          activateLaserSpecialUI();
-        }
-      }
-
-      function checkGoal() {
-        if (reachedGoal) return;
-        const gx = goalCell.c + 0.5;
-        const gy = goalCell.r + 0.5;
-        const dist = Math.hypot(player.x - gx, player.y - gy);
-        if (dist < 0.7) {
-          reachedGoal = true;
-        }
-      }
-
-      function update(dt) {
-        if (!gameStarted) return;
-
-        if (laserQueued > 0) {
-          spawnLaser();
-          laserQueued = 0;
-        }
-        if (bombQueued > 0) {
-          spawnBomb();
-          bombQueued = 0;
-        }
-
-        updatePlayer(dt);
-        updateLasers(dt);
-        updateBombs(dt);
-        checkStarPickup();
-        checkGoal();
-      }
-
-      function drawMaze(ctx2, w, h) {
-        ctx2.fillStyle = '#0a241f';
-        ctx2.fillRect(0, 0, w, h);
-
-        // vignette
-        const grad = ctx2.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.6);
-        grad.addColorStop(0, 'rgba(0,0,0,0)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.55)');
-        ctx2.fillStyle = grad;
-        ctx2.fillRect(0, 0, w, h);
-
-        const offsetX = (w - COLS * tileSize) * 0.5;
-        const offsetY = (h - ROWS * tileSize) * 0.5;
-
-        // walls
-        ctx2.fillStyle = '#163b32';
-        for (let r = 0; r < ROWS; r++) {
-          for (let c = 0; c < COLS; c++) {
-            if (!walls[r][c]) continue;
-            const x = offsetX + c * tileSize;
-            const y = offsetY + r * tileSize;
-            ctx2.fillRect(x, y, tileSize, tileSize);
-          }
-        }
-
-        // goal
-        const gx = goalCell.c + 0.5;
-        const gy = goalCell.r + 0.5;
-        const gPos = worldToScreen(gx, gy);
-        ctx2.strokeStyle = '#ffdf4a';
-        ctx2.lineWidth = 3;
-        ctx2.beginPath();
-        ctx2.arc(gPos.x, gPos.y, tileSize * 0.6, 0, Math.PI * 2);
-        ctx2.stroke();
-
-        // star
-        if (!hasStar) {
-          const sPos = worldToScreen(starPos.x, starPos.y);
-          ctx2.fillStyle = '#ffdf4a';
-          ctx2.beginPath();
-          for (let i = 0; i < 5; i++) {
-            const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
-            const rOuter = tileSize * 0.45;
-            const rInner = tileSize * 0.2;
-            const xOuter = sPos.x + Math.cos(a) * rOuter;
-            const yOuter = sPos.y + Math.sin(a) * rOuter;
-            const a2 = a + Math.PI / 5;
-            const xInner = sPos.x + Math.cos(a2) * rInner;
-            const yInner = sPos.y + Math.sin(a2) * rInner;
-            if (i === 0) ctx2.moveTo(xOuter, yOuter);
-            else ctx2.lineTo(xOuter, yOuter);
-            ctx2.lineTo(xInner, yInner);
-          }
-          ctx2.closePath();
-          ctx2.fill();
-        }
-
-        // bombs
-        for (const b of bombs) {
-          const p = worldToScreen(b.x, b.y);
-          ctx2.fillStyle = '#ff3a2f';
-          ctx2.beginPath();
-          ctx2.arc(p.x, p.y, tileSize * 0.25, 0, Math.PI * 2);
-          ctx2.fill();
-
-          if (b.exploded) {
-            const t = Math.max(0, -b.timer);
-            const r = tileSize * (1.2 + t * 2);
-            ctx2.strokeStyle = 'rgba(255,58,47,0.5)';
-            ctx2.lineWidth = 2;
-            ctx2.beginPath();
-            ctx2.arc(p.x, p.y, r, 0, Math.PI * 2);
-            ctx2.stroke();
-          }
-        }
-
-        // lasers
-        ctx2.strokeStyle = '#ff3a2f';
-        ctx2.lineWidth = 3;
-        ctx2.beginPath();
-        for (const shot of lasers) {
-          const p = worldToScreen(shot.x, shot.y);
-          ctx2.moveTo(p.x, p.y);
-          const tail = worldToScreen(shot.x - shot.vx * 0.05, shot.y - shot.vy * 0.05);
-          ctx2.lineTo(tail.x, tail.y);
-        }
-        ctx2.stroke();
-
-        // player
-        const playerPos = worldToScreen(player.x, player.y);
-        ctx2.fillStyle = '#d6c7a4';
-        ctx2.beginPath();
-        ctx2.arc(playerPos.x, playerPos.y, tileSize * player.r, 0, Math.PI * 2);
-        ctx2.fill();
-        ctx2.strokeStyle = '#ff3a2f';
-        ctx2.lineWidth = 2;
-        ctx2.stroke();
-
-        // HUD text
-        ctx2.fillStyle = '#d6c7a4';
-        ctx2.font = '12px "Press Start 2P"';
-        ctx2.textAlign = 'left';
-        ctx2.textBaseline = 'top';
-        const msg = hasStar ? 'LASER READY – TAP LASER / BOMB' : 'FIND THE STAR TO ARM LASER';
-        ctx2.fillText(msg, offsetX + 4, offsetY + 4);
-
-        if (reachedGoal) {
-          ctx2.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx2.fillRect(0, 0, w, h);
-          ctx2.fillStyle = '#d6c7a4';
-          ctx2.textAlign = 'center';
-          ctx2.textBaseline = 'middle';
-          ctx2.font = '18px "Press Start 2P"';
-          ctx2.fillText('MISSION COMPLETE', w / 2, h / 2 - 14);
-          ctx2.font = '10px "Press Start 2P"';
-          ctx2.fillText('PRESS SPACE TO RESTART', w / 2, h / 2 + 10);
-        }
-      }
-
-      function render() {
-        const w = canvas.clientWidth || canvas.width;
-        const h = canvas.clientHeight || canvas.height;
-        drawMaze(ctx, w, h);
-      }
-
-      function loop(timestamp) {
-        if (!lastTime) lastTime = timestamp;
-        const dt = Math.min(0.05, (timestamp - lastTime) / 1000);
-        lastTime = timestamp;
-
-        update(dt);
-        render();
-
-        requestAnimationFrame(loop);
-      }
-
-      // keyboard fallbacks
-      window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          resetGame();
-        } else if (e.key === 'l' || e.key === 'L') {
-          laserQueued++;
-        } else if (e.key === 'b' || e.key === 'B') {
-          bombQueued++;
-        }
-      });
-
-      resetGame();
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
-      hookControls();
-      requestAnimationFrame(loop);
     }
-
 
     document.addEventListener('DOMContentLoaded', () => {
       MobileSafariLock.initialize();
