@@ -596,7 +596,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     buildArrowHitRects();
   }
 
-    function ensureJoypadLayout() {
+  function ensureJoypadLayout() {
     const rect = cvs.getBoundingClientRect();
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
@@ -608,7 +608,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
   }
 
-function getPointerLocation(e) {
+  function getPointerLocation(e) {
     const r = cvs.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
@@ -701,7 +701,6 @@ function getPointerLocation(e) {
 
   function loop() {
     ensureJoypadLayout();
-
 
     const arrowMode = !!window.laserArrowMode;
 
