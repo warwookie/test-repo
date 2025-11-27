@@ -239,6 +239,19 @@
   border: 0;
 }
 </style>
+
+<style>
+#settingsBtn,
+#settingsPanel,
+#lt2Toggle,
+#lt2CopyJson,
+#unifiedToggle,
+#unified-tuner-root,
+#lt2-root {
+  display: none !important;
+  pointer-events: none !important;
+}
+</style>
 </head>
 <body>
 <div class="fixed-container" id="mainContainer">
@@ -1544,7 +1557,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &#x#x27;center&#x27; | &#x27;final&#x27;
+    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
