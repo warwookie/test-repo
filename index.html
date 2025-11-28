@@ -575,8 +575,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   const ctx = cvs.getContext(&#x27;2d&#x27;);
   const readout = document.getElementById(&#x27;jpad_status&#x27;);
   const rightArea = document.getElementById(&#x27;right-area&#x27;);
-  const debugBox = document.getElementById('jpad_debug');
-
+  const debugBox = document.getElementById(&#x27;jpad_debug&#x27;);
 
   let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
   let lastCanvasW = 0, lastCanvasH = 0;
@@ -619,6 +618,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     buildArrowPadGeometry();
     buildArrowHitRects();
   }
+
   function ensureJoypadLayout() {
     const rect = cvs.getBoundingClientRect();
     const cssW = Math.max(1, Math.floor(rect.width));
@@ -1093,7 +1093,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     return Math.hypot(px-sx,py-sy);
   }
 
-    ensureJoypadLayout();
+  ensureJoypadLayout();
   requestAnimationFrame(loop);
 })()
 ;
@@ -1553,7 +1553,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
           drawBrightDotFast(ctx, x, y, alpha2);
         }
       }
-      if (u&gt;=1){
+      if (u&ggt;=1){
         // signal to game layer if hooked
         try { window.dispatchEvent(new CustomEvent(&#x27;normalBombExplode&#x27;, {detail:{bombType: nb.bombType}})); } catch(e){}
         nb.active=false; nb.phase=&#x27;idle&#x27;;
