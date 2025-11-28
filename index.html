@@ -297,6 +297,19 @@
   #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none ; }
   /* force joystick readout visible */
   #jpad_status { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+  #jpad_debug {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 2px 4px;
+    font: 10px ui-monospace, Consolas, Menlo, monospace;
+    color: #fffc;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
   /* borders for debug */
   #control-ui {
   height: 100%;
@@ -528,6 +541,7 @@ canvas {
       &lt;div class=&quot;pad&quot;&gt;
         &lt;canvas id=&quot;jpad_canvas&quot;&gt;&lt;/canvas&gt;
         &lt;output id=&quot;jpad_status&quot; aria-live=&quot;polite&quot;&gt;x 0.00, y 0.00, |v| 0.00, θ 0.00&lt;/output&gt;
+        &lt;div id=&quot;jpad_debug&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/section&gt;
       &lt;/main&gt;
@@ -561,12 +575,22 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   const ctx = cvs.getContext(&#x27;2d&#x27;);
   const readout = document.getElementById(&#x27;jpad_status&#x27;);
   const rightArea = document.getElementById(&#x27;right-area&#x27;);
+  const debugBox = document.getElementById('jpad_debug');
+
 
   let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
   let lastCanvasW = 0, lastCanvasH = 0;
   let layoutReady = false;
   let outX = 0, outY = 0, joyTX = 0, joyTY = 0;
   const activePointers = new Map();
+
+  function updateJoypadDebug() {
+    if (!debugBox) return;
+    const rect = cvs.getBoundingClientRect();
+    const cssW = Math.round(rect.width);
+    const cssH = Math.round(rect.height);
+    debugBox.textContent = `css ${cssW}×${cssH} | int ${W}×${H}`;
+  }
 
   // DR2: Laser Arrow-Pad Mode (Part 2) – geometry &amp; animation
   let arrowGeom = null;          // { up:[], right:[], down:[], left:[], center:[] }
@@ -597,13 +621,14 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
   function ensureJoypadLayout() {
     const rect = cvs.getBoundingClientRect();
-    const w = Math.max(1, Math.floor(rect.width));
-    const h = Math.max(1, Math.floor(rect.height));
+    const cssW = Math.max(1, Math.floor(rect.width));
+    const cssH = Math.max(1, Math.floor(rect.height));
 
-    if (w !== lastCanvasW || h !== lastCanvasH) {
-      lastCanvasW = w;
-      lastCanvasH = h;
-      updateLayout(w, h);
+    if (cssW !== lastCanvasW || cssH !== lastCanvasH) {
+      lastCanvasW = cssW;
+      lastCanvasH = cssH;
+      updateLayout(cssW, cssH);
+      updateJoypadDebug();
     }
   }
 
@@ -701,6 +726,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   function loop() {
     ensureJoypadLayout();
+    updateJoypadDebug();
 
     const arrowMode = !!window.laserArrowMode;
 
@@ -1068,8 +1094,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
     ensureJoypadLayout();
-
-requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 })()
 ;
 
