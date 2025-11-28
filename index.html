@@ -238,6 +238,20 @@
   height: 100%;
   border: 0;
 }
+
+#bottom_debug {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  padding: 4px 6px;
+  font: 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #f8f8ff;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -461,19 +475,6 @@ canvas {
   filter: contrast(0.9) brightness(0.9);
 }
   #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
-  #jpad_debug {
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    padding: 2px 4px;
-    font: 10px ui-monospace, Consolas, Menlo, monospace;
-    color: #fffc;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 4px;
-    pointer-events: none;
-    z-index: 10;
-    white-space: nowrap;
-  }
 
   * { -webkit-user-select:none; user-select:none; }
 
@@ -541,7 +542,6 @@ canvas {
       &lt;div class=&quot;pad&quot;&gt;
         &lt;canvas id=&quot;jpad_canvas&quot;&gt;&lt;/canvas&gt;
         &lt;output id=&quot;jpad_status&quot; aria-live=&quot;polite&quot;&gt;x 0.00, y 0.00, |v| 0.00, θ 0.00&lt;/output&gt;
-        &lt;div id=&quot;jpad_debug&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/section&gt;
       &lt;/main&gt;
@@ -576,20 +576,8 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   const readout = document.getElementById(&#x27;jpad_status&#x27;);
   const rightArea = document.getElementById(&#x27;right-area&#x27;);
 
-  const debugBox = document.getElementById(&#x27;jpad_debug&#x27;);
-
   let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
-  let lastCanvasW = 0, lastCanvasH = 0;
   let layoutReady = false;
-
-  function updateJoypadDebug() {
-    if (!debugBox) return;
-    const rect = cvs.getBoundingClientRect();
-    const cssW = Math.round(rect.width);
-    const cssH = Math.round(rect.height);
-    debugBox.textContent = `css ${cssW}×${cssH} | int ${W}×${H}`;
-  }
-
   let outX = 0, outY = 0, joyTX = 0, joyTY = 0;
   const activePointers = new Map();
 
@@ -619,23 +607,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
     buildArrowPadGeometry();
     buildArrowHitRects();
-    updateJoypadDebug();
-  }
-
-  function ensureJoypadLayout() {
-    const rect = cvs.getBoundingClientRect();
-    const cssW = Math.max(1, Math.floor(rect.width));
-    const cssH = Math.max(1, Math.floor(rect.height));
-
-    if (cssW !== lastCanvasW || cssH !== lastCanvasH) {
-      lastCanvasW = cssW;
-      lastCanvasH = cssH;
-      updateLayout(cssW, cssH);
-
-      if (typeof updateJoypadDebug === 'function') {
-        updateJoypadDebug();
-      }
-    }
   }
 
   function getPointerLocation(e) {
@@ -730,9 +701,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
 
   function loop() {
-    ensureJoypadLayout();
-    updateJoypadDebug();
-
     const arrowMode = !!window.laserArrowMode;
 
     if (arrowMode !== lastArrowMode) {
@@ -1098,7 +1066,16 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     return Math.hypot(px-sx,py-sy);
   }
 
-  ensureJoypadLayout();
+  const ro = new ResizeObserver(entries =&gt; {
+    if (entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      const p = parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;)) || 16;
+      const w = Math.max(1, Math.floor(width - p*2));
+      const h = Math.max(1, Math.floor(height - p*2));
+      updateLayout(w, h);
+    }
+  });
+  ro.observe(rightArea);
   requestAnimationFrame(loop);
 })()
 ;
@@ -1573,7 +1550,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
+    state.normalBomb.bombType = bombType; // &#x#x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
@@ -3272,6 +3249,32 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const container = document.querySelector('.fixed-container');
         if (!container) return;
 
+        const bottomDebug = document.getElementById('bottom_debug');
+        const mainContainer = document.getElementById('mainContainer');
+        const bottomElement = document.getElementById('element-bottom');
+        const controlsElement = document.getElementById('element-controls');
+
+        function updateBottomDebug() {
+          if (!bottomDebug) return;
+
+          const vw = window.innerWidth || 0;
+          const vh = window.innerHeight || 0;
+
+          const cabRect = mainContainer ? mainContainer.getBoundingClientRect() : { width: 0, height: 0 };
+          const botRect = bottomElement ? bottomElement.getBoundingClientRect() : { width: 0, height: 0 };
+          const ctlRect = controlsElement ? controlsElement.getBoundingClientRect() : { width: 0, height: 0 };
+
+          const cabW = Math.round(cabRect.width);
+          const cabH = Math.round(cabRect.height);
+          const botW = Math.round(botRect.width);
+          const botH = Math.round(botRect.height);
+          const ctlW = Math.round(ctlRect.width);
+          const ctlH = Math.round(ctlRect.height);
+
+          bottomDebug.textContent =
+            `vw ${vw}×${vh} | cab ${cabW}×${cabH} | bottom ${botW}×${botH} | controls ${ctlW}×${ctlH}`;
+        }
+
         const applyMeasuredFit = () => {
           const vv = window.visualViewport;
           const vh = vv ? vv.height : window.innerHeight; // visible height (excludes Safari bars)
@@ -3284,6 +3287,8 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
           const scale = Math.max(0.01, vh / Math.max(1, natH));
           container.style.transform = `translateX(-50%) scale(${scale})`;
+
+          updateBottomDebug();
         };
 
         const schedule = () => requestAnimationFrame(applyMeasuredFit);
@@ -4442,6 +4447,8 @@ bindRange('v_rs', 'o_rs', function(raw) {
 </script>
 <!-- [UNIFIED-TUNER:SCRIPT-END] -->
 <div id="unified-tuner-root"></div>
+<div id="bottom_debug" aria-hidden="true"></div>
+
 
 <script>
 (function () {
