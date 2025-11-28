@@ -1,1 +1,4457 @@
 
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>File_A_SNEAKERQUEST_v4_bottom_controls_refMatch_WITH_iframe_updated_ZAQ11_scaledCabinet.html</title>
+<link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"/>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --primary-color: #ff3a2f;
+      --secondary-color: #d6c7a4;
+      --bg-dark: #0a0a0a;
+      --bg-medium: #1a1510;
+      --bg-light: #2a2119;
+      --wood-light: #b99b66;
+      --wood-medium: #876a46;
+      --wood-dark: #56432e;
+      --screen-bg: #0a241f;
+      --led-glow: rgba(255, 58, 47, 0.45);
+      --center-cell: 90px; /* shared target width for middle HUD cells (hearts & pause) */
+      --cabinet-vmargin: 16px;
+    }
+
+    html, body { display: flex; align-items: flex-start; justify-content: center; overflow: hidden; padding: 0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); background: var(--bg-dark); color: var(--secondary-color); font-family: system-ui, -apple-system, sans-serif; -webkit-user-select: none; user-select: none; min-height: 100dvh; }
+
+    /* bottom-pinned layout (single body rule above) */
+
+    .fixed-container {
+  position: absolute;
+  top: var(--cabinet-vmargin);
+  left: 50%;
+  transform-origin: top center;
+
+  /* fixed design size; scaling happens in JS */
+  width: 430px;
+  height: 900px;
+
+  margin: 0;
+}
+
+    .cabinet { width: 100%; height: 100%; border-radius: 28px; padding: 14px; background:
+      radial-gradient(120% 120% at 50% 0, #000 0%, #000 18%, transparent 18%),
+      linear-gradient(var(--wood-light), #cbb17d 22%, #a98756 22%, #a98756 23%, var(--wood-medium) 23%, var(--wood-medium) 24%, var(--wood-dark) 24%, var(--wood-dark) 25%, #3d3123 25%, #3d3123 100%);
+      box-shadow: inset 0 0 0 2px var(--bg-light), 0 24px 40px rgba(0,0,0,.5), 0 6px 0 var(--bg-dark);
+    }
+
+    .inner { width: 100%; height: 100%; border-radius: 22px; background: linear-gradient(#6c5640, #3c2f23 14%, #2e251d 14%, #2e251d); box-shadow: inset 0 0 0 2px var(--bg-light), inset 0 0 0 6px var(--bg-medium); position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; overflow: hidden; }
+
+    /* Marquee section */
+    .marquee { width: 100%; height: 90px; border-radius: 18px; padding: 12px 14px; background: linear-gradient(#2a2320, #1d1815); box-shadow: inset 0 0 0 2px #120e0c, inset 0 0 0 6px #2f2722, 0 2px 0 #0a0807; display: flex; align-items: center; justify-content: center; }
+
+    .led { width: 100%; height: 100%; border-radius: 12px; background: radial-gradient(circle at 8px 10px, rgba(255,255,255,.1), transparent 28%), repeating-linear-gradient(180deg, rgba(0,0,0,.4) 0 3px, transparent 3px 10px), #120e0c; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; position: relative; overflow: hidden; }
+
+    .mq-wrap { display: grid; justify-items: center; align-content: center; height: 100%; }
+
+    .mq-title { font-size: 27px; text-align: center; user-select: none; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color), 0 0 8px var(--led-glow); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+
+    .mq-sub { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 7px; letter-spacing: .12em; margin-top: 6px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+    .mq-sub .chip { white-space: nowrap; }
+    .mq-sub .chip-box { padding: 4px 3px; border: 2px solid var(--primary-color); border-radius: 4px; color: var(--primary-color); text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; }
+
+    @keyframes led-flicker { 0% { opacity: 0.96; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } 50% { opacity: 1; text-shadow: 0 0 2px var(--primary-color), 0 0 9px rgba(255,58,47,.5), 0 0 16px rgba(255,58,47,.28); } 100% { opacity: 0.97; text-shadow: 0 0 2px var(--primary-color), 0 0 6px rgba(255,58,47,.38), 0 0 12px rgba(255,58,47,.2); } }
+
+    .divider { width: 100%; height: 12px; border-radius: 10px; background: linear-gradient(#3b3026, #2a231e); box-shadow: inset 0 0 0 2px var(--bg-medium); }
+
+    .crt-wrap { width: 100%; height: auto; border-radius: 20px; padding: 10px; background: linear-gradient(#3c2f26, #241e18); box-shadow: inset 0 0 0 2px #1a140f, inset 0 0 0 8px #2a211a; display: flex; align-items: center; justify-content: center; position: relative; }
+
+    .crt { width: 100%; border-radius: 11px; aspect-ratio: 0.94; background: linear-gradient(180deg, rgba(255,255,255,.1), transparent 22%), linear-gradient(var(--screen-bg), #0b2823); box-shadow: inset 0 0 0 2px #0e1412, inset 0 0 30px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+
+    /* Game Canvas */
+    #gameCanvas { width: 100%; height: 100%; display: block; border-radius: 11px; image-rendering: pixelated; }
+
+    .tabs { width: 100%; height: 70px; border-radius: 14px; background: linear-gradient(#3a2f26, #2b231d); box-shadow: inset 0 0 0 2px #1a1410; display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; padding: 10px 8px; text-align: center; font-weight: 800; letter-spacing: 0.08em; margin-top: -14px; }
+
+    .tab { display: flex; align-items: stretch; min-width: 0; }
+
+    .tab .led { height: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; width: 100%; }
+
+    .tab .led .line { font-size: 10px; letter-spacing: .14em; color: var(--primary-color); font-weight: 800; text-shadow: 0 0 2px var(--primary-color); animation: led-flicker 3.6s ease-in-out infinite; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; white-space: nowrap; min-width: 0; }
+
+    .hud { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -16px; }
+    .hud .slot-heart{ height: 41px; }
+    .hud .slot-shoes{ height: 40px; }
+    .hud .slot-dots{ height: 40px; }
+
+    .hud2 { width: 100%; display: grid; grid-template-columns: 1fr minmax(auto, var(--center-cell)) 1fr; gap: 3px; margin-top: -15px; }
+    .hud2 .slot-flames{ height: 40px; }
+
+    /* keep the center HUD cells from stretching; center them */
+    .slot-shoes, .slot-pause { justify-self: center; max-width: var(--center-cell); width: 100%; }
+    .hud2 .slot-bag{ height: 40px; }
+
+    .slot { background: linear-gradient(#3a3227, #2c251e); border-radius: 14px; padding: 5px; box-shadow: inset 0 0 0 2px #1a1511, 0 2px 0 #0b0907; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 100%; width: 100%; }
+    .slot > .led { height: 100%; width: 100%; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; }
+    .slot > .led .line { display: flex; align-items: center; gap: 10px; letter-spacing: .12em; width: 100%; justify-content: center; }
+
+    /* Icon Containers */
+    #ui-sneakers, #ui-hearts, #ui-fires, #ui-powers { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 4px; box-sizing: border-box; }
+
+    /* Tighter middle-slot spacing */
+    .slot-shoes > .led, .slot-pause > .led { padding: 4px 6px; }
+    
+    #ui-hearts .heart-outline, #ui-hearts .heart-fill { font-size: 20px; }
+
+    /* Pause button should not force wide box */
+    .slot-pause .chip-btn { min-width: auto; letter-spacing: .10em; font-size: 11px; }
+
+    /* Icons */
+    #ui-sneakers { gap: 3px; }
+    .sneaker-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .sneaker-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .sneaker-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .sneaker-icon.active .sneaker-fill { opacity: 1; }
+
+    #ui-hearts { gap: 4px; }
+    .heart-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .heart-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .heart-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .heart-icon.active .heart-fill { opacity: 1; }
+
+    #ui-fires { gap: 2px; }
+    .fire-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .fire-outline { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .fire-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .fire-icon.active .fire-fill { opacity: 1; }
+
+    #ui-powers { gap: 7px; }
+    .power { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+    .power .ph-bold { color: var(--primary-color); font-size: 20px; filter: drop-shadow(0 0 2px var(--primary-color)); }
+    .power .ph-fill { position: absolute; top: 0; left: 0; color: var(--secondary-color); font-size: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .power.active .ph-fill { opacity: 1; }
+
+    .chip-btn { background: transparent; border: 0; border-radius: 0; padding: 0; display: grid; place-items: center; color: var(--primary-color); font: inherit; letter-spacing: .12em; cursor: pointer; min-height: 1em; line-height: 1; min-width: 6ch; font-size: 12px; font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif; }
+    .chip-btn:focus-visible { outline: none; text-shadow: 0 0 6px var(--primary-color), 0 0 12px rgba(255,58,47,.4); }
+    .chip-btn .word { grid-area: 1/1; display: block; text-align: center; opacity: 0; transform: translateY(6%); transition: opacity .24s ease, transform .24s ease; }
+    #btn-pause[data-state=playing] .word-pause { opacity: 1; transform: none; }
+    #btn-pause[data-state=paused] .word-play { opacity: 1; transform: none; }
+
+    .counter { display: flex; align-items: center; gap: 10px; color: var(--primary-color); text-shadow: 0 0 6px var(--primary-color), 0 0 18px rgba(255,58,47,.45); font-weight: 900; letter-spacing: .14em; }
+    .seven { font-family: 'Press Start 2P', ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: var(--secondary-color); }
+    .counter .ph-package { font-size: 20px ; color: var(--secondary-color) ; filter: none ; }
+
+    .bottom {
+  width: 100%;
+  height: 240px;
+  margin-top: -13px;
+
+  border-radius: 18px;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at 50% -40%, #2b1a12 0, #050303 55%, #020101 100%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 -2px 4px rgba(0, 0, 0, 0.9),
+    0 8px 18px rgba(0, 0, 0, 0.95);
+}
+
+.control-screen {
+  position: relative;
+  height: 100%;
+  padding: 0 6px;
+
+  border-radius: 16px;
+
+  background:
+    radial-gradient(circle at 20% 0, rgba(40, 0, 0, 0.35) 0, transparent 48%),
+    #050303;
+
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.9),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.85);
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-glass {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+
+  border-radius: 16px;
+
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(120, 16, 12, 0.45) 0,
+      #050101 55%,
+      #020000 100%
+    );
+
+  border: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 58, 47, 0.08),
+    0 0 12px rgba(120, 16, 12, 0.45);
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#controlsFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* .control-glass wrapper is used */
+.control-glass {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 20% 0%, #2a0504, #050101);
+  border: 2px solid #ff3a2f;
+  box-shadow:
+    0 0 8px rgba(255, 58, 47, 0.35),
+    0 0 16px rgba(255, 58, 47, 0.25);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#controlsFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+</style>
+</head>
+<body>
+<div class="fixed-container" id="mainContainer">
+<div class="cabinet">
+<div class="inner">
+<div class="marquee" id="element-marquee">
+<div class="led">
+<div class="mq-wrap">
+<div class="line mq-title" id="titleSQ">SNEAKERQUEST</div>
+<div class="line mq-sub">
+<span class="chip chip-stage chip-box">STAGE – 01</span>
+<span class="chip chip-time chip-box">00:00:0</span>
+<span class="chip chip-score chip-box">SCORE 000000</span>
+</div>
+</div>
+</div>
+</div>
+<div class="divider" id="element-divider"></div>
+<div class="crt-wrap" id="element-crt">
+<div class="crt">
+<canvas id="gameCanvas"></canvas>
+</div>
+</div>
+<div class="tabs" id="element-tabs">
+<div class="tab"><div class="led"><div class="line">SNEAKERS</div></div></div>
+<div class="tab"><div class="led"><div class="line">LIFE</div></div></div>
+<div class="tab"><div class="led"><div class="line">POWER-UPS</div></div></div>
+</div>
+<div class="hud" id="element-hud1">
+<div class="slot slot-heart"><div class="led"><div aria-label="Sneakers" class="line" id="ui-sneakers"></div></div></div>
+<div class="slot slot-shoes"><div class="led"><div aria-label="Hearts" class="line" id="ui-hearts"></div></div></div>
+<div class="slot slot-dots"><div class="led"><div aria-label="Powers" class="line" id="ui-powers"></div></div></div>
+</div>
+<div class="hud2" id="element-hud2">
+<div class="slot slot-flames"><div class="led"><div aria-label="Fire" class="line" id="ui-fires"></div></div></div>
+<div class="slot slot-pause"><div class="led"><div aria-label="Pause / Play" class="line">
+<button aria-label="Pause" aria-pressed="false" class="chip-btn" data-state="playing" id="btn-pause" type="button">
+<span aria-hidden="false" class="word word-pause">PAUSE</span>
+<span aria-hidden="true" class="word word-play">PLAY</span>
+</button>
+</div></div></div>
+<div class="slot slot-bag"><div class="led"><div aria-label="Box count" class="line counter">
+<i aria-hidden="true" class="ph-fill ph-package"></i>
+<span style="opacity:.8;letter-spacing:.12em">x</span>
+<span class="seven" id="counter">000</span>
+</div></div></div>
+</div>
+<div class="bottom" id="element-bottom">
+<div class="control-screen" id="element-controls" style="transform: translate(0px, 0px) scale(1.04);">
+
+<iframe id="controlsFrame" srcdoc="&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;style id=&quot;sq-probe-css&quot;&gt;
+  /* hide demo toggles if present */
+  #btn2_special, #btn2_timer, .btn2_special, .btn2_timer, .btn2_temp { display:none ; }
+  /* force joystick readout visible */
+  #jpad_status { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+  /* borders for debug */
+  #control-ui {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--radius);
+
+  /* dark base plate, dot-matrix texture, no directional glow */
+  background:
+    repeating-radial-gradient(circle at 0 0,
+      #120304 0px,
+      #120304 1px,
+      #080102 1px,
+      #080102 2px
+    ),
+    #050203;
+
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.9);
+}
+
+#left-area,
+#right-area,
+#btn2_panel,
+#jpad_canvas {
+  outline: none;
+  border: none;
+}
+
+canvas {
+  outline: none;
+  border: none;
+}
+&lt;/style&gt;
+
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, user-scalable=no&quot; /&gt;
+&lt;title&gt;Enhanced Controls — Bomb Morph System&lt;/title&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+  :root{
+    --bg:#070708; --pane:#080203; --ring:#1a0000; --radius:20px; --gap:16px;
+  }
+  html, body { height:100%; margin:0; }
+  body { background: transparent; color:#e6e6e6; font:14px ui-monospace,Consolas,Menlo,monospace; }
+
+  /* Frame */
+  #control-ui {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* Square panels */
+  .col-left,
+  .col-right {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--pane);
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 1px var(--ring),
+      0 20px 50px #000c;
+    border-radius: var(--radius);
+    overflow: hidden;
+    touch-action: none;
+  }
+  .pad {
+  position: absolute;
+  inset: var(--gap);
+  border-radius: calc(var(--radius) - 8px);
+  overflow: hidden;
+}
+
+/* Unified DMD dot overlay across buttons + joystick */
+.pad::before {
+  content: &quot;&quot;;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(circle,
+      rgba(255, 90, 70, 0.28) 0,
+      rgba(255, 90, 70, 0.28) 1px,
+      transparent 1px
+    );
+  background-size: 4px 4px;
+  mix-blend-mode: screen;
+  opacity: 0.32;
+}
+
+  /* Buttons overlay */
+  .btn2-overlay{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; z-index:5; }
+  #btn2_panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  /* unify dot-matrix intensity with joystick */
+  image-rendering: pixelated;
+  filter: contrast(0.9) brightness(0.9);
+
+  z-index: 1;
+  pointer-events: none;
+}
+
+  /* Control buttons */
+  .control-buttons {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn2_temp, .btn2_special, .btn2_timer {
+    pointer-events: auto;
+    touch-action: manipulation;
+    background: #101012;
+    color: #eaeaea;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1;
+    z-index: 100;
+    position: relative;
+    font-family: ui-monospace, Consolas, Menlo, monospace;
+    cursor: pointer;
+  }
+  .btn2_temp:focus-visible, .btn2_special:focus-visible, .btn2_timer:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .btn2_special.active { background: #2a1010; border-color: #ff2a2a; }
+  .btn2_timer.active   { background: #102a10; border-color: #2aff2a; }
+
+  /* Keyboard proxies */
+  .btn2_keyproxy{ position:absolute; left:50%; transform:translateX(-50%);
+    width:min(92%, 520px); height:44%; outline:none; border:0; background:transparent; pointer-events:auto; z-index:2; }
+  .btn2_keyproxy:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
+  #btn2_proxy_blast{ top:6%; }
+  #btn2_proxy_bomb{ bottom:6%; }
+
+  /* Joypad */
+  #jpad_canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  /* match button canvas dot-matrix handling */
+  image-rendering: pixelated;
+  filter: contrast(0.9) brightness(0.9);
+}
+  #jpad_status{ position:absolute; left:12px; bottom:12px; font:12px ui-monospace,Consolas,Menlo,monospace; background:#0008; padding:6px 8px; border-radius:8px; }
+
+  * { -webkit-user-select:none; user-select:none; }
+
+  /* SneakerQuest bottom bay – dual rounded inner panels */
+  #left-area,
+  #right-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    border-radius: 18px;
+
+    /* match base plate; no directional red glow */
+    background:
+      repeating-radial-gradient(circle at 0 0,
+        #140305 0px,
+        #140305 1px,
+        #070103 1px,
+        #070103 2px
+      ),
+      #050203;
+
+    border: 1px solid rgba(8, 0, 0, 0.75);
+
+    box-shadow:
+      inset 0 3px 5px rgba(0, 0, 0, 0.95),
+      inset 0 -3px 7px rgba(0, 0, 0, 0.9);
+
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .pad {
+    position: absolute;
+    inset: var(--gap);
+    border-radius: calc(18px - 8px);
+    overflow: hidden;
+  }bsolute;
+    inset: var(--gap);
+    border-radius: calc(18px - 8px);
+    overflow: hidden;
+  }&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main id=&quot;control-ui&quot; aria-label=&quot;Control surface&quot;&gt;
+    &lt;!-- Left: Buttons (Laser/Bomb) --&gt;
+    &lt;section id=&quot;left-area&quot; class=&quot;col-left&quot; aria-label=&quot;Buttons area&quot;&gt;
+      &lt;div class=&quot;pad&quot;&gt;
+        &lt;!-- Control buttons container --&gt;
+        &lt;div class=&quot;control-buttons&quot;&gt;
+          &lt;button id=&quot;btn2_temp&quot; class=&quot;btn2_temp&quot; aria-label=&quot;Start transition&quot;&gt;▶ special&lt;/button&gt;
+          &lt;button id=&quot;btn2_timer&quot; class=&quot;btn2_timer&quot; aria-label=&quot;Toggle timer&quot;&gt;⏰ timer&lt;/button&gt;
+          &lt;button id=&quot;btn2_special&quot; class=&quot;btn2_special&quot; aria-label=&quot;Toggle special&quot;&gt;🔮 special&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;btn2-overlay&quot;&gt;
+          &lt;button id=&quot;btn2_proxy_blast&quot; class=&quot;btn2_keyproxy&quot; role=&quot;button&quot; aria-label=&quot;Laser&quot; aria-pressed=&quot;false&quot; tabindex=&quot;0&quot;&gt;&lt;/button&gt;
+          &lt;button id=&quot;btn2_proxy_bomb&quot;  class=&quot;btn2_keyproxy&quot; role=&quot;button&quot; aria-label=&quot;Bomb&quot;  aria-pressed=&quot;false&quot; tabindex=&quot;0&quot;&gt;&lt;/button&gt;
+          &lt;canvas id=&quot;btn2_panel&quot; width=&quot;560&quot; height=&quot;560&quot;&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Right: Joystick --&gt;
+    &lt;section id=&quot;right-area&quot; class=&quot;col-right&quot; aria-label=&quot;Joypad&quot;&gt;
+      &lt;div class=&quot;pad&quot;&gt;
+        &lt;canvas id=&quot;jpad_canvas&quot;&gt;&lt;/canvas&gt;
+        &lt;output id=&quot;jpad_status&quot; aria-live=&quot;polite&quot;&gt;x 0.00, y 0.00, |v| 0.00, θ 0.00&lt;/output&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+      &lt;/main&gt;
+
+&lt;script&gt;function __jpadNoise(v){ return JPAD_LIGHT_MODE ? 0 : v; }
+// === Joystick Light Mode &amp; FPS ===
+const JPAD_LIGHT_MODE = (typeof window.name === &#x27;string&#x27; &amp;&amp; /(?:^|;)\s*jpadLight=1\b/.test(window.name)) ? true : false;
+let __jpadFpsLast = 0, __jpadFps = 0, __jpadFpsT = 0;
+
+/* Prevent page scrolling during control interactions */
+document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
+  if(e.target.closest(&#x27;#left-area, #right-area&#x27;)) e.preventDefault();
+},{passive:false});
+
+/* =========================
+   JOYPAD (prefixed jpad_)
+========================= */
+(() =&gt; {
+  const DEADZONE = 0.15, RESPONSE = 1.20, SMOOTH = 0.22, AUTO_RETURN = true;
+  let PITCH = 10, DOT_R = 2.6; const LEVELS = [0, 0.35, 0.65, 1];
+  const RED = &#x27;#ff2a2a&#x27;, MID = &#x27;#ff2a2acc&#x27;, DIM = &#x27;#ff2a2a66&#x27;, OFF = &#x27;#210000&#x27;;
+  const DECAY = 0.90; let buf; const KNOB_CORE = 0.10, KNOB_GLOWR = 0.30, STEM_GAIN = 0.80;
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – shared globals
+  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
+  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
+
+  window.jpad_state = { x:0, y:0, mag:0, angle:0, trigger:false, bomb:false };
+
+  const cvs = document.getElementById(&#x27;jpad_canvas&#x27;);
+  const ctx = cvs.getContext(&#x27;2d&#x27;);
+  const readout = document.getElementById(&#x27;jpad_status&#x27;);
+  const rightArea = document.getElementById(&#x27;right-area&#x27;);
+
+  let W = 0, H = 0, COLS = 0, ROWS = 0, OX = 0, OY = 0, joyCX = 0, joyCY = 0, joyR = 0;
+  let layoutReady = false;
+  let outX = 0, outY = 0, joyTX = 0, joyTY = 0;
+  const activePointers = new Map();
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – geometry &amp; animation
+  let arrowGeom = null;          // { up:[], right:[], down:[], left:[], center:[] }
+  let arrowHitRects = null;      // { up:{x,y,w,h}, ... }
+  const arrowPulse = { up:0, right:0, down:0, left:0 };
+  let arrowIntro = 0;            // 0..1 suck-in when arrow mode enters
+  let lastArrowMode = false;
+
+  function updateLayout(newWidth, newHeight) {
+    if (newWidth &lt; 1 || newHeight &lt; 1) return;
+    cvs.width = newWidth; cvs.height = newHeight; W = newWidth; H = newHeight;
+
+    const targetRows = JPAD_LIGHT_MODE ? 18 : 24;
+    PITCH = H / targetRows; DOT_R = PITCH * 0.21;
+
+    COLS = Math.floor(W / PITCH); ROWS = Math.floor(H / PITCH);
+    if (COLS &lt; 1 || ROWS &lt; 1) return;
+    OX = (W - COLS * PITCH) / 2 + PITCH / 2;
+    OY = (H - ROWS * PITCH) / 2 + PITCH / 2;
+
+    joyCX = W * 0.5; joyCY = H * 0.5; joyR = (Math.min(W, H) / 2) - (PITCH * 1.5);
+
+    buf = new Float32Array(COLS * ROWS);
+    layoutReady = true;
+
+    buildArrowPadGeometry();
+    buildArrowHitRects();
+  }
+
+  function getPointerLocation(e) {
+    const r = cvs.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function joyPointerToNorm(x, y) {
+    const dx = x - joyCX, dy = y - joyCY;
+    const dist = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    let rn = Math.min(dist / joyR, 1);
+    if (rn &lt; DEADZONE) rn = 0;
+    else rn = (rn - DEADZONE) / (1 - DEADZONE);
+    rn = Math.pow(rn, RESPONSE);
+    return { nx: Math.cos(ang) * rn, ny: Math.sin(ang) * rn };
+  }
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – rectangular hit areas
+  function buildArrowHitRects() {
+    if (!layoutReady) return;
+    const midY = H * (1 / 3);
+    const midY2 = H * (2 / 3);
+    const midX = W * 0.5;
+    arrowHitRects = {
+      up:    { x:0,     y:0,      w:W,      h:midY        },
+      down:  { x:0,     y:midY2,  w:W,      h:H - midY2   },
+      left:  { x:0,     y:midY,   w:midX,   h:midY2-midY  },
+      right: { x:midX,  y:midY,   w:W-midX, h:midY2-midY  }
+    };
+  }
+
+  function hitTestArrow(x, y) {
+    if (!arrowHitRects || !window.laserArrowMode) return null;
+    for (const dir of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
+      const r = arrowHitRects[dir];
+      if (!r) continue;
+      if (x &gt;= r.x &amp;&amp; x &lt;= r.x + r.w &amp;&amp; y &gt;= r.y &amp;&amp; y &lt;= r.y + r.h) return dir;
+    }
+    return null;
+  }
+
+  cvs.addEventListener(&#x27;pointerdown&#x27;, e =&gt; {
+    e.preventDefault();
+    const { x, y } = getPointerLocation(e);
+    try { cvs.setPointerCapture(e.pointerId); } catch(_){}
+    activePointers.set(e.pointerId, &#x27;joy&#x27;);
+
+    if (window.laserArrowMode) {
+      const dir = hitTestArrow(x, y);
+      if (dir) {
+        window.laserDirection = dir;
+        arrowPulse[dir] = 1.0;
+      }
+    } else {
+      const v = joyPointerToNorm(x, y);
+      joyTX = v.nx; joyTY = v.ny;
+    }
+  });
+
+  cvs.addEventListener(&#x27;pointermove&#x27;, e =&gt; {
+    e.preventDefault();
+    if (activePointers.get(e.pointerId) !== &#x27;joy&#x27;) return;
+    const { x, y } = getPointerLocation(e);
+
+    if (window.laserArrowMode) {
+      const dir = hitTestArrow(x, y);
+      if (dir) {
+        window.laserDirection = dir;
+        arrowPulse[dir] = 1.0;
+      }
+    } else {
+      const v = joyPointerToNorm(x, y);
+      joyTX = v.nx; joyTY = v.ny;
+    }
+  });
+
+  function endPointer(e) {
+    const t = activePointers.get(e.pointerId);
+    activePointers.delete(e.pointerId);
+    if (t === &#x27;joy&#x27;) {
+      if (window.laserArrowMode) {
+        // keep last laserDirection
+      } else if (AUTO_RETURN) {
+        let any = false;
+        for (const v of activePointers.values()) if (v === &#x27;joy&#x27;) { any = true; break; }
+        if (!any) { joyTX = 0; joyTY = 0; }
+      }
+    }
+  }
+  cvs.addEventListener(&#x27;pointerup&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointercancel&#x27;, endPointer);
+  cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
+
+  function loop() {
+    const arrowMode = !!window.laserArrowMode;
+
+    if (arrowMode !== lastArrowMode) {
+      if (arrowMode) {
+        arrowIntro = 0;
+      } else {
+        for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) arrowPulse[k] = 0;
+        joyTX = 0; joyTY = 0;
+      }
+      lastArrowMode = arrowMode;
+    }
+
+    if (arrowMode) {
+      outX += (0 - outX) * SMOOTH;
+      outY += (0 - outY) * SMOOTH;
+
+      arrowIntro = Math.min(1, arrowIntro + 0.10);
+      for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
+        arrowPulse[k] *= 0.86;
+      }
+
+      drawDMD(0, 0);
+
+      const dir = window.laserDirection || &#x27;up&#x27;;
+      let vx = 0, vy = 0;
+      if (dir === &#x27;up&#x27;) vy = -1;
+      else if (dir === &#x27;down&#x27;) vy = 1;
+      else if (dir === &#x27;left&#x27;) vx = -1;
+      else if (dir === &#x27;right&#x27;) vx = 1;
+
+      window.jpad_state.x = vx;
+      window.jpad_state.y = vy;
+      window.jpad_state.mag = 1;
+      window.jpad_state.angle = Math.atan2(vy, vx);
+    } else {
+      outX += (joyTX - outX) * SMOOTH;
+      outY += (joyTY - outY) * SMOOTH;
+
+      drawDMD(outX, outY);
+
+      window.jpad_state.x = outX;
+      window.jpad_state.y = outY;
+      window.jpad_state.mag = Math.min(Math.hypot(outX, outY), 1);
+      window.jpad_state.angle = Math.atan2(outY, outX);
+    }
+
+    if (readout) {
+      readout.value =
+        `x ${window.jpad_state.x.toFixed(2)}, y ${window.jpad_state.y.toFixed(2)}, ` +
+        `|v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – DMD rendering
+  function buildArrowPadGeometry() {
+  if (!layoutReady) return;
+
+  const snap = v =&gt; Math.round(v / PITCH) * PITCH;
+
+  arrowGeom = {
+    up:    [],
+    right: [],
+    down:  [],
+    left:  [],
+    center:[]
+  };
+
+  const cx = joyCX;
+  const cy = joyCY;
+
+  // Radius for outer ring, slightly inside joystick radius to avoid clipping
+  const R        = joyR * 0.98;
+  const maxCells = Math.max(2, Math.floor(R / PITCH));
+  const ringR    = maxCells * PITCH;
+
+  // Cross thickness ≈ 3 * PITCH (3 grid units)
+  const barHalfCells  = 1;              // half thickness in grid cells -&gt; 3 * PITCH total
+  const triDepthCells = 3;              // depth of each arrowhead in grid steps
+  const armCells      = Math.max(2, maxCells - triDepthCells - 1);
+  const circleMargin  = PITCH * 0.8;    // keep arrow tips just inside the ring
+
+  function addDot(list, kx, ky) {
+    const x = cx + snap(kx * PITCH);
+    const y = cy + snap(ky * PITCH);
+    list.push({ x, y });
+  }
+
+  // 1) Outer dotted circle ring (stored in center cluster)
+  for (let ky = -maxCells; ky &lt;= maxCells; ky++) {
+    for (let kx = -maxCells; kx &lt;= maxCells; kx++) {
+      const dx   = kx * PITCH;
+      const dy   = ky * PITCH;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist &gt;= ringR - PITCH * 0.5 &amp;&amp; dist &lt;= ringR + PITCH * 0.5) {
+        addDot(arrowGeom.center, kx, ky);
+      }
+    }
+  }
+
+  // 2) Chunky center cross (vertical + horizontal bars)
+  //    Entire cross goes into the &quot;center&quot; cluster.
+
+  // Vertical bar
+  for (let ky = -armCells; ky &lt;= armCells; ky++) {
+    for (let kx = -barHalfCells; kx &lt;= barHalfCells; kx++) {
+      addDot(arrowGeom.center, kx, ky);
+    }
+  }
+
+  // Horizontal bar
+  for (let kx = -armCells; kx &lt;= armCells; kx++) {
+    for (let ky = -barHalfCells; ky &lt;= barHalfCells; ky++) {
+      addDot(arrowGeom.center, kx, ky);
+    }
+  }
+
+  // 3) Four filled triangular arrowheads (Up, Right, Down, Left)
+
+  // Up arrowhead (negative Y)
+  for (let step = 0; step &lt; triDepthCells; step++) {
+    const ky = -(armCells + step);   // starts at end of vertical bar
+    const halfWidthCells = barHalfCells + (triDepthCells - step); // wide at base, narrow at tip
+
+    for (let kx = -halfWidthCells; kx &lt;= halfWidthCells; kx++) {
+      const dx   = kx * PITCH;
+      const dy   = ky * PITCH;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist &lt;= ringR - circleMargin) {
+        addDot(arrowGeom.up, kx, ky);
+      }
+    }
+  }
+
+  // Down arrowhead (positive Y)
+  for (let step = 0; step &lt; triDepthCells; step++) {
+    const ky = +(armCells + step);
+    const halfWidthCells = barHalfCells + (triDepthCells - step);
+
+    for (let kx = -halfWidthCells; kx &lt;= halfWidthCells; kx++) {
+      const dx   = kx * PITCH;
+      const dy   = ky * PITCH;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist &lt;= ringR - circleMargin) {
+        addDot(arrowGeom.down, kx, ky);
+      }
+    }
+  }
+
+  // Left arrowhead (negative X)
+  for (let step = 0; step &lt; triDepthCells; step++) {
+    const kx = -(armCells + step);
+    const halfHeightCells = barHalfCells + (triDepthCells - step);
+
+    for (let ky = -halfHeightCells; ky &lt;= halfHeightCells; ky++) {
+      const dx   = kx * PITCH;
+      const dy   = ky * PITCH;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist &lt;= ringR - circleMargin) {
+        addDot(arrowGeom.left, kx, ky);
+      }
+    }
+  }
+
+  // Right arrowhead (positive X)
+  for (let step = 0; step &lt; triDepthCells; step++) {
+    const kx = +(armCells + step);
+    const halfHeightCells = barHalfCells + (triDepthCells - step);
+
+    for (let ky = -halfHeightCells; ky &lt;= halfHeightCells; ky++) {
+      const dx   = kx * PITCH;
+      const dy   = ky * PITCH;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist &lt;= ringR - circleMargin) {
+        addDot(arrowGeom.right, kx, ky);
+      }
+    }
+  }
+}
+
+  function drawArrowPad() {
+    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+    if (!arrowGeom) buildArrowPadGeometry();
+
+    ctx.clearRect(0,0,W,H);
+
+    const activeDir = window.laserDirection || &#x27;up&#x27;;
+
+    function drawCluster(list, key) {
+      if (!list || !list.length) return;
+      const isArrow = (key !== &#x27;center&#x27;);
+      const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
+
+      let base = isArrow ? 0.55 : 0.45;
+      if (key === activeDir) base = 1.0;
+
+      const rawLevel = Math.min(1, base + pulse * 0.5);
+      const level    = (key === activeDir) ? 1 : rawLevel;
+      const suck  = 1 - arrowIntro;
+
+      const R        = joyR * 0.98;
+      const ringR    = Math.floor(R / PITCH) * PITCH;
+
+      for (const pt of list) {
+        const dx = pt.x - joyCX;
+        const dy = pt.y - joyCY;
+        const pressIn = isArrow ? (arrowPulse[key] || 0) * 0.25 : 0;
+        const factor = 1 - 0.22 * suck - 0.18 * pressIn;
+        const sx = joyCX + dx * factor;
+        const sy = joyCY + dy * factor;
+
+        let ptLevel = level;
+        if (key === 'center') {
+          const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
+          if (Math.abs(dist0 - ringR) <= PITCH * 0.6) {
+            ptLevel = 1;
+          }
+        }
+
+        dotDraw(sx, sy, DOT_R, ptLevel);
+      }
+    }
+
+    drawCluster(arrowGeom.center, &#x27;center&#x27;);
+    drawCluster(arrowGeom.up,    &#x27;up&#x27;);
+    drawCluster(arrowGeom.right, &#x27;right&#x27;);
+    drawCluster(arrowGeom.down,  &#x27;down&#x27;);
+    drawCluster(arrowGeom.left,  &#x27;left&#x27;);
+  }
+
+  function drawDMD(nx, ny) {
+    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+
+    if (window.laserArrowMode) {
+      drawArrowPad();
+      return;
+    }
+
+    ctx.clearRect(0,0,W,H);
+    const now = performance.now() * 0.001;
+    const px = joyCX + nx * joyR, py = joyCY + ny * joyR, mag = Math.hypot(nx, ny);
+    const knobCoreR = joyR * KNOB_CORE, knobGlowR = joyR * KNOB_GLOWR;
+
+    for (let j=0; j&lt;ROWS; j++) {
+      for (let i=0; i&lt;COLS; i++) {
+        const idx = j * COLS + i;
+        buf[idx] = (buf[idx] || 0) * DECAY;
+      }
+    }
+
+    const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
+    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 6;
+
+    for (let j=0; j&lt;ROWS; j++) {
+      for (let i=0; i&lt;COLS; i++) {
+        const x = OX + i * PITCH, y = OY + j * PITCH;
+        const idx = j * COLS + i;
+
+        const jdx_un = x - joyCX, jdy_un = y - joyCY;
+        let jdx = jdx_un, jdy = jdy_un;
+
+        if (mag &gt; 0.01) {
+          const suck = Math.min(0.8, mag * 1.2);
+          const jdx_wc = x - px, jdy_wc = y - py;
+          const div = (1 - suck);
+          if (div &gt; 0.001) {
+            const vx = jdx_wc / div + px;
+            const vy = jdy_wc / div + py;
+            jdx = vx - joyCX; jdy = vy - joyCY;
+          }
+        }
+
+        const jd = Math.hypot(jdx, jdy), jang = Math.atan2(jdy, jdx);
+        buf[idx] += calcRing(jd, joyR*0.25, ringThick) * 0.22;
+        buf[idx] += calcRing(jd, joyR*0.50, ringThick) * 0.20;
+        buf[idx] += calcRing(jd, joyR*0.75, ringThick) * 0.18;
+        buf[idx] += calcRing(jd, joyR*1.00, ringThick) * 0.16;
+        buf[idx] += calcRing(jd, joyR*DEADZONE, dzRingThick) * 0.12;
+
+        const da = wrap(t - jang);
+        if (jd &lt; joyR*0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
+
+        if (mag &gt; 0.01) {
+          let jb = 0;
+          const sd = segDist(joyCX, joyCY, px, py, x, y);
+          const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
+          jb = Math.max(jb, stemPulse);
+          const kd = Math.hypot(x - px, y - py);
+          const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
+          const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
+          jb = Math.max(jb, core * 1.0 + glow * 0.9);
+          buf[idx] = Math.max(buf[idx], jb);
+        }
+
+        let b = buf[idx] || 0;
+        b *= 1 - smoothStep(0.96, 1.12, Math.hypot(x - W/2, y - H/2) / (Math.min(W, H) / 2));
+        b += (noise2(i, j) - 0.5) * 0.06;
+
+        dotDraw(x, y, DOT_R, quantize(Math.max(0, b)));
+      }
+    }
+  }
+
+  function calcRing(d, r0, thick) {
+    return Math.max(0, 1 - Math.abs(d - r0) / (thick * 0.5));
+  }
+
+  function dotDraw(x, y, r, level) {
+    if (level &lt;= 0) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2*Math.PI);
+      ctx.fillStyle = OFF;
+      ctx.fill();
+      return;
+    }
+    const color = level &gt;= 1 ? RED : (level &gt;= 0.65 ? MID : DIM);
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = (JPAD_LIGHT_MODE ? 0 : 8) * level;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function quantize(v) {
+    let best = 0, bd = 1e9;
+    for (const s of LEVELS) {
+      const d = Math.abs(v - s);
+      if (d &lt; bd) { bd = d; best = s; }
+    }
+    return best;
+  }
+
+  function smoothStep(a, b, x) {
+    const t = Math.min(1, Math.max(0, (x-a)/(b-a)));
+    return t*t*(3 - 2*t);
+  }
+
+  function pulse01(x, w) {
+    return Math.max(0, 1 - smoothStep(0, w, x));
+  }
+
+  function wrap(a) {
+    a %= Math.PI * 2;
+    return a &lt; 0 ? a + Math.PI * 2 : a;
+  }
+
+  function noise2(ix,iy){ return fract(Math.sin((ix*12.9898 + iy*78.233)*43758.5453)); }
+  function fract(x){ return x - Math.floor(x); }
+  function segDist(ax,ay,bx,by,px,py){
+    const vx=bx-ax, vy=by-ay, wx=px-ax, wy=py-ay;
+    const c1 = vx*wx + vy*wy; if (c1 &lt;= 0) return Math.hypot(px-ax,py-ay);
+    const c2 = vx*vx + vy*vy; if (c2 &lt;= c1) return Math.hypot(px-bx,py-by);
+    const t = c1 / c2; const sx = ax + t*vx, sy = ay + t*vy;
+    return Math.hypot(px-sx,py-sy);
+  }
+
+  const ro = new ResizeObserver(entries =&gt; {
+    if (entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      const p = parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;)) || 16;
+      const w = Math.max(1, Math.floor(width - p*2));
+      const h = Math.max(1, Math.floor(height - p*2));
+      updateLayout(w, h);
+    }
+  });
+  ro.observe(rightArea);
+  requestAnimationFrame(loop);
+})()
+;
+
+/* =========================
+   BUTTONS + BOMB MORPH
+========================= */
+(() =&gt; {
+(async function(){
+  // ====== Units &amp; Canvas ======
+  const p=4, d=0.46*p; const W=560, H=560; const clamp=(v,a,b)=&gt;Math.max(a,Math.min(b,v));
+  const canvas=document.getElementById(&#x27;btn2_panel&#x27;); const DPR=clamp(Math.round(devicePixelRatio||1),1,2);
+  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+&#x27;px&#x27;; canvas.style.height=H+&#x27;px&#x27;;
+  const ctx=canvas.getContext(&#x27;2d&#x27;); ctx.scale(DPR,DPR);
+  const nowS=()=&gt;performance.now()/1000; const snap=v=&gt;Math.round(v/p)*p;
+
+  // Easings
+  const easeInOut=t=&gt; (t&lt;0.5? 2*t*t : 1 - Math.pow(-2*t+2,2)/2);
+  const easeOutCubic = t=&gt;1-Math.pow(1-t,3);
+  const easeInCubic  = t=&gt;t*t*t;
+  const easeOutExpo  = t=&gt; (t===1?1:1-Math.pow(2,-10*t));
+  const easeOutBack  = t=&gt;{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
+
+  // ====== Colors ======
+  const RED=[255,58,58]; const col={ bright:&#x27;rgba(255,58,58,1.0)&#x27;, mediumA:0.70, dimFill:&#x27;#1A0E0E&#x27; };
+
+  // ====== Dot painters ======
+  function brightDotGradient(c,x,y){ const r2=2*d; const g=c.createRadialGradient(x,y,0,x,y,r2); const [r,gc,b]=RED; const tp=k=&gt;clamp(k*(d/r2),0,1); g.addColorStop(0,`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.42),`rgba(${r},${gc},${b},1)`); g.addColorStop(tp(0.75),`rgba(${r},${gc},${b},0.60)`); g.addColorStop(tp(1.30),`rgba(${r},${gc},${b},0.18)`); g.addColorStop(1,`rgba(${r},${gc},${b},0)`); return g; }
+  function idleDotGradient(c,x,y){ const r2=1.6*d; const g=c.createRadialGradient(x,y,0,x,y,r2); g.addColorStop(0,col.dimFill); g.addColorStop(0.7,col.dimFill); g.addColorStop(1,&#x27;rgba(42,22,22,0.45)&#x27;); return g; }
+  function drawBrightDot(c,x,y,a=1){ if(a&lt;=0) return; c.save(); c.globalAlpha=a; c.fillStyle=brightDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fill(); c.restore(); }
+  function drawIdleDot(c,x,y){ c.fillStyle=idleDotGradient(c,x,y); c.beginPath(); c.arc(x,y,d*0.5,0,Math.PI*2); c.fill(); }
+
+  // FAST path for explosion frames: flat fill, no gradients, no shadows
+  function drawBrightDotFast(c,x,y,a=1){ if(a&lt;=0) return; c.save(); c.globalAlpha=a; c.beginPath(); c.arc(x,y,d,0,Math.PI*2); c.fillStyle=col.bright; c.fill(); c.restore(); }
+
+  // ====== Geometry ======
+  function rrPath(c,r){ c.beginPath(); c.moveTo(r.x+r.r,r.y); c.lineTo(r.x+r.w-r.r,r.y); c.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); c.lineTo(r.x+r.w,r.y+r.h-r.r); c.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); c.lineTo(r.x+r.r,r.y+r.h); c.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); c.lineTo(r.x,r.y+r.r); c.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); c.closePath(); }
+  function path2DFor(r){ const p2=new Path2D(); p2.moveTo(r.x+r.r,r.y); p2.lineTo(r.x+r.w-r.r,r.y); p2.arcTo(r.x+r.w,r.y,r.x+r.w,r.y+r.r,r.r); p2.lineTo(r.x+r.w,r.y+r.h-r.r); p2.arcTo(r.x+r.w,r.y+r.h,r.x+r.w-r.r,r.y+r.h,r.r); p2.lineTo(r.x+r.r,r.y+r.h); p2.arcTo(r.x,r.y+r.h,r.x,r.y+r.h-r.r,r.r); p2.lineTo(r.x,r.y+r.r); p2.arcTo(r.x,r.y,r.x+r.r,r.y,r.r); p2.closePath(); return p2; }
+  function dedupe(pts,tol){ const out=[]; for(const a of pts){ let ok=true; for(const b of out){ const dx=a.x-b.x,dy=a.y-b.y; if(dx*dx+dy*dy&lt;tol*tol){ ok=false; break; } } if(ok) out.push(a); } return out; }
+  function sampleRoundedRectDots(x,y,w,h,r){ const pts=[]; const step=p; const add=(X,Y)=&gt;pts.push({x:snap(X),y:snap(Y)}); for(let X=x+r; X&lt;=x+w-r; X+=step){ add(X,y); add(X,y+h); } for(let Y=y+r; Y&lt;=y+h-r; Y+=step){ add(x,Y); add(x+w,Y); } const arc=(cx,cy,t0,t1)=&gt;{ const thetaStep=step/r; const inc=t1&gt;=t0?thetaStep:-thetaStep; for(let t=t0; inc&gt;0? t&lt;=t1 : t&gt;=t1; t+=inc){ add(cx+r*Math.cos(t), cy+r*Math.sin(t)); } }; arc(x+r,y+r,Math.PI,1.5*Math.PI); arc(x+w-r,y+r,1.5*Math.PI,2*Math.PI); arc(x+w-r,y+h-r,0,0.5*Math.PI); arc(x+r,y+h-r,0.5*Math.PI,Math.PI); return dedupe(pts,0.35*p); }
+  function drawDottedRR(c, r, glow=true){ const pts=sampleRoundedRectDots(r.x,r.y,r.w,r.h,r.r); for(const pt of pts) drawBrightDot(c,pt.x,pt.y); if(!glow) return; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;); for(const pt of pts) drawBrightDot(o,pt.x,pt.y); c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore(); c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore(); }
+  function drawInnerBandRR(c, r, rows=3){
+    const b_in=2.8*p; const mid=(rows-1)/2; let innerMost=null;
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
+    for(let i=0;i&lt;rows;i++){
+      const oset=b_in+(i-mid)*p; const x=r.x+oset,y=r.y+oset,w=r.w-2*oset,h=r.h-2*oset,rad=r.r-oset;
+      const pts=sampleRoundedRectDots(x,y,w,h,rad);
+      c.save(); c.globalAlpha=col.mediumA; for(const pt of pts) drawBrightDot(c,pt.x,pt.y); c.restore();
+      for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
+      innerMost={x,y,w,h,r:rad};
+    }
+    c.save(); c.globalAlpha=0.25; c.filter=`blur(${2*p}px)`; c.drawImage(off,0,0); c.restore();
+    const pad=1*p; return {x:innerMost.x+pad,y:innerMost.y+pad,w:innerMost.w-2*pad,h:innerMost.h-2*pad,r:innerMost.r-pad};
+  }
+
+  // ====== Background ======
+  const bg=document.createElement(&#x27;canvas&#x27;); bg.width=W; bg.height=H; const bgc=bg.getContext(&#x27;2d&#x27;);
+  function drawIdleGrid(c){ for(let y=0;y&lt;=H;y+=p){ for(let x=0;x&lt;=W;x+=p){ drawIdleDot(c,x,y); } } }
+  function drawPerimeter(c){ const inset=3*p, rr=10*p; const pts=sampleRoundedRectDots(inset,inset,W-2*inset,H-2*inset,rr);
+    for(const pt of pts) drawBrightDot(c,pt.x,pt.y);
+    const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const o=off.getContext(&#x27;2d&#x27;);
+    for(const pt of pts) drawBrightDot(o,pt.x,pt.y);
+    c.save(); c.globalAlpha=0.35; c.filter=`blur(${3*p}px)`; c.drawImage(off,0,0); c.restore();
+    c.save(); c.globalAlpha=0.12; c.filter=`blur(${8*p}px)`; c.drawImage(off,0,0); c.restore();
+  }
+  drawIdleGrid(bgc); drawPerimeter(bgc);
+
+  // ====== Layouts ======
+  const gap=14*p, rad=6*p; const Bw=W-2*gap; const Bh=Math.round((H-3*gap)/2/p)*p; const x_btn=gap; const yTop=gap; const yBot=yTop+Bh+gap;
+  const centerOuter={x:gap, y:snap((H-Bh)/2), w:Bw, h:Bh, r:rad};
+  const topOuter   ={x:x_btn, y:yTop, w:Bw, h:Bh, r:rad};
+  const botOuter   ={x:x_btn, y:yBot, w:Bw, h:Bh, r:rad};
+
+  // ====== Chrome layers ======
+  const layerSingle=document.createElement(&#x27;canvas&#x27;); layerSingle.width=W; layerSingle.height=H; const ls=layerSingle.getContext(&#x27;2d&#x27;);
+  const layerTwo=document.createElement(&#x27;canvas&#x27;); layerTwo.width=W; layerTwo.height=H; const lt=layerTwo.getContext(&#x27;2d&#x27;);
+  drawDottedRR(ls, centerOuter, true); const faceBOMB_center = drawInnerBandRR(ls, centerOuter, 3);
+  drawDottedRR(lt, topOuter, true);  const faceLASER_final = drawInnerBandRR(lt, topOuter, 3);
+  drawDottedRR(lt, botOuter, true);  const faceBOMB_final  = drawInnerBandRR(lt, botOuter, 3);
+
+  // ====== Font raster ======
+  const FONT=&#x27;Press Start 2P&#x27;; await document.fonts.load(`32px &#x27;${FONT}&#x27;`); await document.fonts.ready;
+  function pickFontPx(rect){ const maxPx=64,minPx=16; for(let px=maxPx; px&gt;=minPx; px-=8){ if(px+4&lt;=rect.h) return px; } return minPx; }
+  function measureTextWidth(text,px){ const off=document.createElement(&#x27;canvas&#x27;); const c=off.getContext(&#x27;2d&#x27;); c.font=`${px}px &#x27;${FONT}&#x27;`; c.textBaseline=&#x27;top&#x27;; let w=0; for(const ch of text){ w+=c.measureText(ch).width; } return Math.ceil(w); }
+  function rasterTextPoints(rect,text){
+    const px=pickFontPx(rect), pad=2; const off=document.createElement(&#x27;canvas&#x27;); const o=off.getContext(&#x27;2d&#x27;);
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.imageSmoothingEnabled=false; o.fillStyle=&#x27;#fff&#x27;;
+    const w=Math.ceil(measureTextWidth(text,px)); const h=Math.ceil(px*1.0);
+    off.width=w+pad*2; off.height=h+pad*2;
+    o.font=`${px}px &#x27;${FONT}&#x27;`; o.textBaseline=&#x27;top&#x27;; o.fillStyle=&#x27;#fff&#x27;; o.clearRect(0,0,off.width,off.height); o.fillText(text,pad,pad);
+    const dx=snap(rect.x+(rect.w-off.width)/2), dy=snap(rect.y+(rect.h-off.height)/2);
+    const img=o.getImageData(0,0,off.width,off.height); const iw=off.width, ih=off.height; const thr=4;
+    function alpha(ix,iy){ if(ix&lt;0||iy&lt;0||ix&gt;=iw||iy&gt;=ih) return 0; return img.data[((iy|0)*iw+(ix|0))*4+3]|0; }
+    const pts=[];
+    for(let gy=dy; gy&lt;dy+ih; gy+=p){
+      for(let gx=dx; gx&lt;dx+iw; gx+=p){
+        const ix=gx-dx, iy=gy-dy; let a=0;
+        const offs=[0,p*0.33,p*0.66];
+        for(const oy of offs){ for(const ox of offs){ a=Math.max(a,alpha(ix+ox,iy+oy)); } }
+        if(a&gt;thr){ pts.push({x:gx,y:gy}); }
+      }
+    }
+    return pts;
+  }
+
+  // ====== LASER Ammo System - 4 vertical sections ======
+  function getLaserSectionRects(faceRect) {
+    const sections = 4;
+    const sectionHeight = faceRect.h / sections;
+    const rects = [];
+    for (let i = 0; i &lt; sections; i++) {
+      rects.push({
+        x: faceRect.x,
+        y: faceRect.y + i * sectionHeight,
+        w: faceRect.w,
+        h: sectionHeight,
+        r: faceRect.r
+      });
+    }
+    return rects;
+  }
+
+  // ====== State ======
+
+  // DR2: Laser Arrow-Pad Mode (Part 2) – ensure shared globals exist
+  if (typeof window.laserArrowMode === &#x27;undefined&#x27;) window.laserArrowMode = false;
+  if (typeof window.laserDirection === &#x27;undefined&#x27;) window.laserDirection = &#x27;up&#x27;;
+  const state = { 
+    mode: &#x27;single&#x27;, 
+    active: false, 
+    t0: 0,
+    activeReverse: false,
+    t0r: 0,
+    laserAmmo: 4, maxAmmo: 4,
+    specialActive: false,
+    timerPowerup: false,
+    bombDeployed: false,
+    bombArmed: false,
+    normalBomb: { active:false, phase:&#x27;idle&#x27;, t0:0, bombType:&#x27;final&#x27;, perimPts:[], center:{x:0,y:0},
+      implodeMs:3000, explodeMs:500 },
+    bombMorph: {
+      active: false,
+      phase: &#x27;idle&#x27;, // &#x27;sucking&#x27; | &#x27;exploding&#x27;
+      progress: 0,
+      startTime: 0,
+      duration: 700, // shorter for performance
+      bombType: &#x27;center&#x27;,
+      pairs: [],
+      extras: [],
+      meta: [],      // per-particle timing and jitter
+      blastSeed: 0,
+      autoExplode: false,
+    },
+    bombMorphTargets: {}
+  };
+
+  // track mode once
+  let __prevMode, __prevActive;
+
+  // ====== Text points ======
+  let bombWordDotsFinal, bombWordDotsCenter;
+  let laserWordDotsFinal;
+  let laserTextLabel = &#x27;LASER&#x27;;
+  function getBombText(){ return &#x27;BOMB X&#x27;; }
+  function getLaserText(){ return laserTextLabel; }
+  function updateButtonText(){
+    bombWordDotsFinal  = rasterTextPoints(faceBOMB_final,  getBombText());
+    bombWordDotsCenter = rasterTextPoints(faceBOMB_center, getBombText());
+    laserWordDotsFinal = rasterTextPoints(faceLASER_final, getLaserText());
+  }
+  function setLaserLabelText(txt){
+    laserTextLabel = txt;
+    updateButtonText();
+  }
+  updateButtonText();
+
+  // ====== Group rows for cached build ======
+  function groupRowsTopDown(...lists){
+    const rows=new Map();
+    for(const list of lists){ for(const pt of list){ const y=pt.y; if(!rows.has(y)) rows.set(y,[]); rows.get(y).push(pt); } }
+    const ys=[...rows.keys()].sort((a,b)=&gt;a-b);
+    return ys.map(y=&gt;({ y, pts: rows.get(y).sort((a,b)=&gt;a.x-b.x), n: rows.get(y).length }));
+  }
+  const laserOuterPts = sampleRoundedRectDots(faceLASER_final.x,faceLASER_final.y,faceLASER_final.w,faceLASER_final.h,faceLASER_final.r);
+  const laserInnerBandPts = (function(){ const rows=3, b_in=2.8*p; const mid=(rows-1)/2; const acc=[]; for(let i=0;i&lt;rows;i++){ const o=b_in+(i-mid)*p; const x=faceLASER_final.x+o, y=faceLASER_final.y+o, w=faceLASER_final.w-2*o, h=faceLASER_final.h-2*o, r=faceLASER_final.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) acc.push(pt); } return acc; })();
+  const laserRows = groupRowsTopDown(laserOuterPts, laserInnerBandPts, laserWordDotsFinal);
+
+  // ====== Masks ======
+  function buildFaceMask(rect){
+    const pts=[]; const off=document.createElement(&#x27;canvas&#x27;); off.width=W; off.height=H; const oc=off.getContext(&#x27;2d&#x27;); rrPath(oc, rect);
+    const isIn=(x,y)=&gt;oc.isPointInPath(x+0.01,y+0.01);
+    for(let y=rect.y; y&lt;=rect.y+rect.h; y+=p){ for(let x=rect.x; x&lt;=rect.x+rect.w; x+=p){
+      const X=snap(x), Y=snap(y); if(isIn(X,Y)) pts.push({x:X,y:Y,i:(X/p)|0,j:(Y/p)|0});
+    }}
+    const perim = sampleRoundedRectDots(rect.x,rect.y,rect.w,rect.h,rect.r);
+    function nearPerim(x,y){ for(const q of perim){ const dx=x-q.x, dy=y-q.y; if(dx*dx+dy*dy &lt;= (p*1.5)*(p*1.5)) return true; } return false; }
+    for(const pt of pts){ pt.perim = nearPerim(pt.x, pt.y); }
+    return {pts};
+  }
+
+  const maskLASER = buildFaceMask(faceLASER_final);
+  const maskBOMB_bottom  = buildFaceMask(faceBOMB_final);
+  const maskBOMB_center  = buildFaceMask(faceBOMB_center);
+
+  function withPolar(mask, cx, cy){ return mask.pts.map(pt=&gt;({x:pt.x,y:pt.y, perim:pt.perim, d:Math.hypot(pt.x-cx, pt.y-cy), a:Math.atan2(pt.y-cy, pt.x-cx)})); }
+  const cLaser = {x:snap(faceLASER_final.x+faceLASER_final.w/2), y:snap(faceLASER_final.y+faceLASER_final.h/2)};
+  const cBombB = {x:snap(faceBOMB_final.x+faceBOMB_final.w/2),   y:snap(faceBOMB_final.y+faceBOMB_final.h/2)};
+  const cBombC = {x:snap(faceBOMB_center.x+faceBOMB_center.w/2), y:snap(faceBOMB_center.y+faceBOMB_center.h/2)};
+
+  const laserDots = withPolar(maskLASER, cLaser.x, cLaser.y); 
+  const bombDotsB = withPolar(maskBOMB_bottom, cBombB.x, cBombB.y); 
+  const bombDotsC = withPolar(maskBOMB_center, cBombC.x, cBombC.y); 
+
+  // ====== LASER sections ======
+  const laserSectionRects = getLaserSectionRects(faceLASER_final);
+  const laserSectionMasks = laserSectionRects.map(rect =&gt; buildFaceMask(rect));
+
+  function qLevel(e){ const LEVELS=[0.00,0.18,0.36,0.64,1.00]; e=Math.max(0,Math.min(1,e)); let best=LEVELS[0],bd=1e9; for(const L of LEVELS){ const d=Math.abs(e-L); if(d&lt;bd){ bd=d; best=L; } } return best; }
+  function hash3(i,j,t){ const n = (i*73856093 ^ j*19349663 ^ ((t*1000)|0)*83492791) &gt;&gt;&gt; 0; return ((n % 9973) / 9973); }
+  function rand01(seed){ const s=Math.sin(seed)*10000; return s-Math.floor(s); }
+  let HOT_BASE=0.65, HOT_NOISE=0.20, RIM_INTENSITY=0.28;
+
+  const laserLabelPts = rasterTextPoints(faceLASER_final,&#x27;LASER&#x27;);
+  const sectionFlags = new Array(4).fill(0).map(() =&gt; new Uint8Array(laserDots.length));
+  for (let section = 0; section &lt; 4; section++) {
+    const sectionMask = laserSectionMasks[section];
+    for (let k = 0; k &lt; laserDots.length; k++) {
+      const pt = laserDots[k];
+      const inSection = sectionMask.pts.some(sectionPt =&gt; 
+        Math.abs(sectionPt.x - pt.x) &lt; p &amp;&amp; Math.abs(sectionPt.y - pt.y) &lt; p
+      );
+      sectionFlags[section][k] = inSection ? 1 : 0;
+    }
+  }
+
+  function drawLaserArmed(t) {
+    // Simple static LASER label (no segments, no static TV effect)
+    if (!laserWordDotsFinal) return;
+    for (const pt of laserWordDotsFinal) {
+      drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+    }
+  }
+
+  /* ===========================================
+     FILLED DISK + EXTRAS GENERATORS
+     =========================================== */
+
+  function sortByAngleThenRadius(center, arr){
+    return arr.map(pt=&gt;{
+      const dx=pt.x-center.x, dy=pt.y-center.y;
+      return {pt, a:Math.atan2(dy,dx), r:Math.hypot(dx,dy)};
+    }).sort((u,v)=&gt; u.a===v.a ? u.r-v.r : u.a-v.a).map(o=&gt;o.pt);
+  }
+
+  function buildDiskForCount(center, faceRect, N){
+    const maxR = Math.min(faceRect.w, faceRect.h) * 0.40;
+    const pts=[]; const seen=new Set();
+    const stepR = p*0.9;
+    for(let rr=0; rr&lt;=maxR &amp;&amp; pts.length&lt;N; rr+=stepR){
+      const stepAng = (rr&lt;=p? Math.PI/6 : Math.max(p/(rr||1), 0.05));
+      for(let ang=0; ang&lt;Math.PI*2 &amp;&amp; pts.length&lt;N; ang+=stepAng){
+        const x = snap(center.x + rr*Math.cos(ang));
+        const y = snap(center.y + rr*Math.sin(ang));
+        if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
+          const key=x+&#x27;,&#x27;+y;
+          if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+        }
+      }
+    }
+    if (pts.length&lt;N){
+      for(let ang=0; ang&lt;Math.PI*2 &amp;&amp; pts.length&lt;N; ang+=Math.PI/128){
+        const x = snap(center.x + maxR*Math.cos(ang));
+        const y = snap(center.y + maxR*Math.sin(ang));
+        const key=x+&#x27;,&#x27;+y;
+        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+      }
+    }
+    return sortByAngleThenRadius(center, pts).slice(0,N);
+  }
+
+  function buildInnerRing(center, faceRect, count){
+    if (count&lt;=0) return [];
+    const R = Math.min(faceRect.w, faceRect.h) * 0.22;
+    const pts=[]; const seen=new Set();
+    for(let i=0;i&lt;count;i++){
+      const ang = i*(Math.PI*2/count);
+      const x = snap(center.x + R*Math.cos(ang));
+      const y = snap(center.y + R*Math.sin(ang));
+      if (x&gt;=faceRect.x &amp;&amp; x&lt;=faceRect.x+faceRect.w &amp;&amp; y&gt;=faceRect.y &amp;&amp; y&lt;=faceRect.y+faceRect.h){
+        const key=x+&#x27;,&#x27;+y;
+        if(!seen.has(key)){ seen.add(key); pts.push({x,y}); }
+      }
+    }
+    return sortByAngleThenRadius(center, pts);
+  }
+
+  function buildSolidDisk(center, radius, faceRect, step=p){
+    const pts=[];
+    const y_step = step * 0.86602540378; // hex lattice sqrt(3)/2
+    let y = center.y - radius;
+    let row = 0;
+    while (y &lt;= center.y + radius){
+      const x_offset = (row &amp; 1) * (step * 0.5);
+      let x = center.x - radius + x_offset;
+      while (x &lt;= center.x + radius){
+        const dx = x - center.x;
+        const dy = y - center.y;
+        if (dx*dx + dy*dy &lt;= radius*radius){
+          const xs = Math.round(x/step)*step;
+          const ys = Math.round(y/step)*step;
+          if (xs&gt;=faceRect.x &amp;&amp; xs&lt;=faceRect.x+faceRect.w &amp;&amp; ys&gt;=faceRect.y &amp;&amp; ys&lt;=faceRect.y+faceRect.h){
+            pts.push({x: xs, y: ys});
+          }
+        }
+        x += step;
+      }
+      y += y_step;
+      row += 1;
+    }
+    return dedupe(pts, 0.35*step);
+  }
+
+  function buildPairs(center, sourcePts, destPts){
+    const srcSorted = sortByAngleThenRadius(center, sourcePts);
+    const dstSorted = sortByAngleThenRadius(center, destPts);
+    const n = Math.min(srcSorted.length, dstSorted.length);
+    const pairs=new Array(n);
+    for(let i=0;i&lt;n;i++){
+      const s=srcSorted[i], d=dstSorted[i];
+      pairs[i] = { sx:s.x, sy:s.y, dx:d.x, dy:d.y, cx:center.x, cy:center.y };
+    }
+    return pairs;
+  }
+
+  function makeTargets(faceRect, center, textPts){
+    const disk = buildDiskForCount(center, faceRect, textPts.length);
+    const extrasCount = Math.max(0, Math.floor(textPts.length*0.20)); // fewer extras
+    const extras = buildInnerRing(center, faceRect, extrasCount);
+    const R_outer = Math.min(faceRect.w, faceRect.h) * 0.40;
+    const R_inner = R_outer * 0.62;
+    const diskFillPts = buildSolidDisk(center, R_inner*0.96, faceRect, p);
+    return { center, faceRect, text:textPts.slice(), disk, extras, diskFillPts,
+             pairs_suck:    buildPairs(center, textPts, disk),   // words -&gt; disk
+             pairs_explode: buildPairs(center, disk, textPts) }; // disk -&gt; words
+  }
+
+  function initBombMorphSystem() {
+    const centerC = {x: faceBOMB_center.x + faceBOMB_center.w / 2, y: faceBOMB_center.y + faceBOMB_center.h / 2};
+    const centerF = {x: faceBOMB_final.x  + faceBOMB_final.w  / 2, y: faceBOMB_final.y  + faceBOMB_final.h  / 2};
+    state.bombMorphTargets.center = makeTargets(faceBOMB_center, centerC, bombWordDotsCenter);
+    state.bombMorphTargets.final  = makeTargets(faceBOMB_final,  centerF, bombWordDotsFinal);
+  }
+
+  // ====== Morph control ======
+  function startBombMorph(phase, bombType, durationOverride=null, autoExplode=false){
+    const T = state.bombMorphTargets[bombType];
+    state.bombMorph.active = true;
+    state.bombMorph.autoExplode = !!autoExplode;
+    state.bombMorph.phase = phase;           // &#x27;sucking&#x27; or &#x27;exploding&#x27;
+    state.bombMorph.progress = 0;
+    if (durationOverride!=null) { state.bombMorph.duration = durationOverride; }
+    state.bombMorph.startTime = nowS();
+    state.bombMorph.bombType = bombType;
+    state.bombMorph.pairs = (phase === &#x27;sucking&#x27;) ? T.pairs_suck.slice() : T.pairs_explode.slice();
+    state.bombMorph.extras = T.extras.slice();
+    state.bombMorph.blastSeed = Math.random()*1000;
+
+    // Per-particle meta, lighter trails
+    const pairs = state.bombMorph.pairs;
+    const cx=T.center.x, cy=T.center.y;
+    const staggerMax = 0.24; // smaller
+    state.bombMorph.meta = pairs.map((pr, i)=&gt;{
+      const ang = Math.atan2((pr.sy-cy),(pr.sx-cx));
+      const base = (ang + Math.PI)/(Math.PI*2);        // 0..1 around the circle
+      const r = rand01((i+1)*131.7 + state.bombMorph.blastSeed);
+      const delay = Math.min(staggerMax, 0.10 + 0.16*base + 0.08*(r-0.5));
+      const jitter = (r-0.5)*0.25;                     // smaller
+      const sparkLen = 3 + Math.floor(r*5);            // shorter trails
+      const overshoot = 0.08 + 0.10*r;                 // reduced
+      return {delay, jitter, sparkLen, overshoot};
+    });
+  }
+
+  function updateBombMorph(t){
+    if (!state.bombMorph.active) return false;
+    const elapsed = (t - state.bombMorph.startTime) * 1000;
+    state.bombMorph.progress = Math.min(elapsed / state.bombMorph.duration, 1);
+    return (state.bombMorph.progress &gt;= 1);
+  }
+
+  // ====== Normal bomb countdown helpers ======
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function prepareNormalBomb(bombType){
+    const face = (bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
+    const center = {
+      x: Math.round((face.x + face.w/2)/p)*p,
+      y: Math.round((face.y + face.h/2)/p)*p
+    };
+    // sample perimeter points of the face rect
+    const perim = sampleRoundedRectDots(face.x, face.y, face.w, face.h, face.r);
+    state.normalBomb.perimPts = perim;
+    state.normalBomb.center = center;
+  }
+
+  function startNormalBomb(bombType){
+    state.normalBomb.active = true;
+    state.normalBomb.phase = &#x27;implode&#x27;;
+    state.normalBomb.t0 = nowS();
+    state.normalBomb.bombType = bombType;
+    prepareNormalBomb(bombType);
+  }
+
+  function drawNormalBomb(t){
+    if (!state.normalBomb.active) return false;
+    const nb = state.normalBomb;
+    const face = (nb.bombType===&#x27;center&#x27;) ? faceBOMB_center : faceBOMB_final;
+    const center = nb.center;
+    if (nb.phase===&#x27;implode&#x27;){
+      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.implodeMs));
+      // draw a single ring imploding from the perimeter toward center
+      const pts = nb.perimPts;
+      const skip = ((t*45)|0) &amp; 1; // half-rate to keep light
+      for(let i=0;i&lt;pts.length;i++){
+        if ((i &amp; 1)===skip) continue;
+        const pt = pts[i];
+        const x = lerp(pt.x, center.x, u);
+        const y = lerp(pt.y, center.y, u);
+        // slightly fade as it converges
+        const a = 0.9 * (1 - 0.2*u);
+        drawBrightDotFast(ctx, x, y, a);
+      }
+      // when finished, switch to explode
+      if (u &gt;= 1){ nb.phase=&#x27;explode&#x27;; nb.t0 = t; }
+      return false;
+    } else if (nb.phase===&#x27;explode&#x27;){
+      const u = Math.max(0, Math.min(1, ((t - nb.t0)*1000)/nb.explodeMs));
+      const Rmax = Math.min(face.w, face.h)*0.48;
+      // two soft ripples expanding
+      const base = u;
+      const r1 = Rmax * base;
+      const r2 = Math.max(0, r1 - p*6);
+      const alpha1 = 0.30 * Math.max(0, 1 - base);
+      const alpha2 = 0.18 * Math.max(0, 1 - base*1.2);
+      if (alpha1&gt;0){
+        const stepA = Math.PI/128; // sparse
+        for(let a=0;a&lt;Math.PI*2;a+=stepA){
+          const x = Math.round((center.x + r1*Math.cos(a))/p)*p;
+          const y = Math.round((center.y + r1*Math.sin(a))/p)*p;
+          drawBrightDotFast(ctx, x, y, alpha1);
+        }
+      }
+      if (alpha2&gt;0){
+        const stepB = Math.PI/128;
+        for(let a=0;a&lt;Math.PI*2;a+=stepB){
+          const x = Math.round((center.x + r2*Math.cos(a))/p)*p;
+          const y = Math.round((center.y + r2*Math.sin(a))/p)*p;
+          drawBrightDotFast(ctx, x, y, alpha2);
+        }
+      }
+      if (u&gt;=1){
+        // signal to game layer if hooked
+        try { window.dispatchEvent(new CustomEvent(&#x27;normalBombExplode&#x27;, {detail:{bombType: nb.bombType}})); } catch(e){}
+        nb.active=false; nb.phase=&#x27;idle&#x27;;
+        return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  // ====== Normal bomb (no timer) ======
+  function startNormalBomb(bombType){
+    state.normalBomb.active = true;
+    state.normalBomb.t0 = nowS();
+    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
+  }
+
+  function drawNormalBomb(t){
+    if (!state.normalBomb.active) return false;
+    const elapsed = (t - state.normalBomb.t0) * 1000;
+    const u = Math.max(0, Math.min(1, elapsed / state.normalBomb.duration));
+    const ease = (x)=&gt; 1 - Math.pow(1-x, 3);
+    const bombType = state.normalBomb.bombType;
+    const T = bombType===&#x27;center&#x27; ? state.bombMorphTargets.center : state.bombMorphTargets.final;
+    const textPts = bombType===&#x27;center&#x27; ? bombWordDotsCenter : bombWordDotsFinal;
+    const center = T.center;
+    const spread = Math.min(T.faceRect.w, T.faceRect.h) * 0.10; // small push
+    const k = Math.sin(u * Math.PI); // out and back
+    // outline pulse
+    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
+    const R_inner = R_outer*0.62;
+    const pulseA = 0.20 * k;
+    if (pulseA&gt;0){
+      for(let a=0;a&lt;Math.PI*2; a+=Math.PI/96){
+        const x = snap(center.x + R_outer*Math.cos(a));
+        const y = snap(center.y + R_outer*Math.sin(a));
+        drawBrightDotFast(ctx, x, y, pulseA);
+      }
+    }
+    // letters push outward slightly, then return
+    const skip = ((t*45)|0) &amp; 1; // half rate
+    for(let i=0;i&lt;textPts.length;i++){
+      if ((i &amp; 1)===skip) continue;
+      const pt = textPts[i];
+      const dx = pt.x - center.x, dy = pt.y - center.y;
+      const len = Math.hypot(dx,dy) || 1;
+      const ox = dx/len * spread * k;
+      const oy = dy/len * spread * k;
+      drawBrightDotFast(ctx, pt.x + ox, pt.y + oy, 0.9);
+    }
+    return (u&gt;=1);
+  }
+
+  function drawExtrasRing(t, T, alpha){
+    if (alpha&lt;=0) return;
+    // draw fewer extras by skipping every other point while animating
+    let toggle = ((t*60)|0) &amp; 1;
+    let idx = 0;
+    for(const pt of state.bombMorph.extras){
+      if (state.bombMorph.active &amp;&amp; state.bombMorph.phase===&#x27;exploding&#x27; &amp;&amp; ((idx++ &amp; 1)===toggle)) continue;
+      drawBrightDotFast(ctx, pt.x, pt.y, alpha*0.9);
+    }
+  }
+
+  // Uniform armed sphere visualization
+  function drawUniformRing(center, radius, alpha=0.94){
+    const step = Math.max(Math.PI/128, p/(radius||1));
+    for(let a=0; a&lt;Math.PI*2; a+=step){
+      const x = snap(center.x + radius*Math.cos(a));
+      const y = snap(center.y + radius*Math.sin(a));
+      drawBrightDotFast(ctx, x, y, alpha);
+    }
+  }
+
+  function drawUniformDisk(center, radius, alpha=0.5){
+    if (radius&lt;=0) return;
+    const stepR = Math.max(p*1.2, d*1.4);
+    for(let rr=0; rr&lt;=radius; rr+=stepR){
+      const stepA = Math.max(Math.PI/48, p/Math.max(rr, p));
+      for(let a=0; a&lt;Math.PI*2; a+=stepA){
+        const x = snap(center.x + rr*Math.cos(a));
+        const y = snap(center.y + rr*Math.sin(a));
+        drawBrightDotFast(ctx, x, y, alpha);
+      }
+    }
+  }
+
+  function drawBombTimerEffect(t, bombFace, bombTextPts, targetKey) {
+    const T = state.bombMorphTargets[targetKey];
+    if (!T) return;
+    const center=T.center;
+    const R_outer = Math.min(T.faceRect.w,T.faceRect.h)*0.40;
+    const R_inner = R_outer*0.62;
+
+    // Two clean concentric rings. Keep light.
+    drawUniformRing(center, R_outer, 0.94);
+    drawUniformRing(center, R_inner, 0.70);
+    // Solid fill from cached hex lattice
+    const fill = T.diskFillPts || [];
+    const skip = ((t*30)|0) &amp; 1; // dynamic half-rate dithering
+    for(let i=0;i&lt;fill.length;i++){
+      if ((i &amp; 1)===skip) continue;
+      const pt = fill[i];
+      drawBrightDotFast(ctx, pt.x, pt.y, 0.36);
+    }
+
+    // No heavy shockwave here
+    // Black X overlay on last 30% of the word
+    let minX=Infinity,maxX=-Infinity;
+    for(const pt of bombTextPts){ minX=Math.min(minX,pt.x); maxX=Math.max(maxX,pt.x); }
+    const xStart=minX + (maxX-minX)*0.7;
+    for(const pt of bombTextPts){
+      if(pt.x&gt;=xStart){
+        ctx.save(); ctx.fillStyle=&#x27;#000&#x27;;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, d, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  // Frame parity for particle subsampling
+  let frameParity = 0;
+
+  function drawBombMorph(t){
+    const prog = state.bombMorph.progress;
+    const phase = state.bombMorph.phase;
+    const pairs = state.bombMorph.pairs;
+    const meta  = state.bombMorph.meta;
+    const T = state.bombMorphTargets[state.bombMorph.bombType];
+
+    // Removed red center flare and shockwave to cut cost
+    // if (phase===&#x27;exploding&#x27;){ ... } // deleted
+
+    // Particle motion
+    for(let i=0;i&lt;pairs.length;i++){
+      const pr = pairs[i];
+      const m  = meta[i] || {delay:0,jitter:0,sparkLen:4,overshoot:0.10};
+
+      // Subsample half the particles per frame during explosion
+      if (phase===&#x27;exploding&#x27; &amp;&amp; ((i &amp; 1) !== frameParity)) { continue; }
+
+      const local = Math.max(0, Math.min(1, (prog - m.delay) / (1 - m.delay + 1e-6)));
+
+      if (phase===&#x27;sucking&#x27;){
+        const swirl = m.jitter * (1-local);
+        const dir = Math.atan2(pr.dy-pr.sy, pr.dx-pr.sx) + swirl*0.25;
+        const len = Math.hypot(pr.dx-pr.sx, pr.dy-pr.sy);
+        const x = pr.sx + Math.cos(dir) * len * easeInOut(local);
+        const y = pr.sy + Math.sin(dir) * len * easeInOut(local);
+
+        // lighter trail
+        const trailN = Math.floor(m.sparkLen * (1-local));
+        for(let k=trailN; k&gt;=1; k-=2){
+          const tk = Math.max(0, local - 0.02*k);
+          const xt = pr.sx + (pr.dx-pr.sx)*tk;
+          const yt = pr.sy + (pr.dy-pr.sy)*tk;
+          drawBrightDotFast(ctx, xt, yt, 0.35);
+        }
+
+        drawBrightDotFast(ctx, x, y, 0.9);
+      } else {
+        // Horizontal explosion path
+        const cx = T.center.x;
+        const sign = (pr.dx &gt;= cx) ? 1 : -1;
+        const maxThrow = Math.min(T.faceRect.w*0.38, Math.abs(pr.dx - cx)*1.4 + 18);
+        const split = 0.55;
+
+        let x, y;
+
+        if (local &lt; split){
+          const a = easeOutExpo(local / split);
+          const baseY = pr.sy;
+          const targetX = cx + sign * maxThrow;
+          x = pr.sx + (targetX - pr.sx) * a;
+          y = baseY;
+        } else {
+          const b = easeOutBack((local - split)/(1 - split));
+          const targetX = pr.dx;
+          const targetY = pr.dy;
+          const throwX  = cx + sign * maxThrow;
+          const throwY  = pr.sy;
+          x = throwX + (targetX - throwX) * b;
+          y = throwY + (targetY - throwY) * b;
+        }
+
+        // Lighter trail along the same path
+        const trailN = Math.floor(m.sparkLen);
+        for(let k=trailN; k&gt;=1; k-=2){
+          const back = Math.max(0, local - 0.016*k);
+          let xt, yt;
+          if (back &lt; split){
+            const a = easeOutExpo(back / split);
+            const targetX = cx + sign * maxThrow;
+            const baseY = pr.sy;
+            xt = pr.sx + (targetX - pr.sx) * a;
+            yt = baseY;
+          } else {
+            const b = easeOutBack((back - split)/(1 - split));
+            const targetX = pr.dx;
+            const targetY = pr.dy;
+            const throwX  = cx + sign * maxThrow;
+            const throwY  = pr.sy;
+            xt = throwX + (targetX - throwX) * b;
+            yt = throwY + (targetY - throwY) * b;
+          }
+          drawBrightDotFast(ctx, xt, yt, 0.35);
+        }
+
+        // Head particle
+        drawBrightDotFast(ctx, x, y, 0.9);
+
+        if (local &gt; 0.95){
+          drawBrightDotFast(ctx, pr.dx, pr.dy, 0.9);
+        }
+      }
+    }
+
+    // Extras halo, already lightened
+    if (phase===&#x27;sucking&#x27;){ drawExtrasRing(t, T, Math.min(1, prog*1.0)); }
+    else { drawExtrasRing(t, T, Math.max(0, 1-prog)); }
+
+    // flip parity after drawing
+    frameParity ^= 1;
+  }
+
+  // ====== DPR-safe hit-testing (Path2D expects CSS pixels * DPR) ======
+  const pathLASER = path2DFor(faceLASER_final);
+  const pathBOMB_final = path2DFor(faceBOMB_final);
+  const pathBOMB_center = path2DFor(faceBOMB_center);
+
+  // ====== Sphere hit detection (CSS pixels) ======
+  function isPointInSphere(cssX, cssY, bombFace) {
+    if (!state.bombArmed) return false;
+    const centerX = bombFace.x + bombFace.w / 2;
+    const centerY = bombFace.y + bombFace.h / 2;
+    const radius = Math.min(bombFace.w, bombFace.h) * 0.40;
+    const dx = cssX - centerX;
+    const dy = cssY - centerY;
+    return (dx * dx + dy * dy) &lt;= (radius * radius);
+  }
+
+  function startTransition() { if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) { state.active = true; state.t0 = nowS(); } }
+  window.btn2_startTransition = startTransition;
+  document.addEventListener(&#x27;keydown&#x27;, (e) =&gt; { if (e.key === &#x27;t&#x27;) startTransition(); });
+
+  // ====== CLICK logic ======
+  canvas.addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    const r = canvas.getBoundingClientRect(); 
+    const cssX = (e.clientX - r.left);
+    const cssY = (e.clientY - r.top);
+    const px  = cssX * DPR, py = cssY * DPR;
+
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      // Normal bomb path when no timer powerup: 3s suck then auto explode
+      if (!state.timerPowerup &amp;&amp; ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active){
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;, 3000, true);
+        return;
+      }
+      if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
+        if (isPointInSphere(cssX, cssY, faceBOMB_center) &amp;&amp; !state.bombMorph.active) {
+          startBombMorph(&#x27;exploding&#x27;, &#x27;center&#x27;); // disk -&gt; &quot;BOMB X&quot;
+          return;
+        }
+      }
+      if (ctx.isPointInPath(pathBOMB_center, px, py) &amp;&amp; !state.bombMorph.active) {
+        if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
+          state.bombDeployed = true;
+          startBombMorph(&#x27;sucking&#x27;, &#x27;center&#x27;);   // &quot;BOMB X&quot; -&gt; disk
+        }
+      }
+      return;
+    }
+
+    if (state.active) return;
+
+    if (state.timerPowerup &amp;&amp; state.bombDeployed &amp;&amp; state.bombArmed) {
+      if (isPointInSphere(cssX, cssY, faceBOMB_final) &amp;&amp; !state.bombMorph.active) {
+        startBombMorph(&#x27;exploding&#x27;, &#x27;final&#x27;);
+        return;
+      }
+    }
+    if (ctx.isPointInPath(pathBOMB_final, px, py) &amp;&amp; !state.bombMorph.active) {
+      if (!state.timerPowerup){
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;, 3000, true);
+      } else if (state.timerPowerup &amp;&amp; !state.bombDeployed) {
+        state.bombDeployed = true;
+        startBombMorph(&#x27;sucking&#x27;, &#x27;final&#x27;);
+      }
+    }
+    else if (ctx.isPointInPath(pathLASER, px, py)) {
+      if (state.mode === &#x27;two&#x27; &amp;&amp; state.specialActive &amp;&amp; state.laserAmmo &gt; 0) {
+        state.laserAmmo--;
+        // Update LASER label to match remaining ammo
+        if (typeof refreshLaserLabelFromAmmo === &#x27;function&#x27;) {
+          refreshLaserLabelFromAmmo();
+        }
+        if (state.laserAmmo === 0) {
+          state.specialActive = false;
+          document.getElementById(&#x27;btn2_special&#x27;).classList.remove(&#x27;active&#x27;);
+          state.activeReverse = true;
+          state.t0r = nowS();
+        }
+      }
+    }
+  });
+
+  // ====== Press visual ======
+  const press = { laser: { state: &#x27;idle&#x27;, t: 0 }, bomb: { state: &#x27;idle&#x27;, t: 0 } };
+  const perimLaser = laserDots.filter(pt =&gt; pt.perim);
+  const perimBombB = bombDotsB.filter(pt =&gt; pt.perim);
+  const perimBombC = bombDotsC.filter(pt =&gt; pt.perim);
+  const PRESS_IN_MS = 90, PRESS_OUT_MS = 140;
+  function pressK(which, t) {
+    const st = press[which];
+    if (st.state === &#x27;down&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_IN_MS / 1000))); return easeInCubic(u); }
+    if (st.state === &#x27;up&#x27;) { const u = Math.max(0, Math.min(1, (t - st.t) / (PRESS_OUT_MS / 1000))); return 1 - easeOutCubic(u); }
+    return 0;
+  }
+  function drawPressOverlay(rect, perimPts, k) {
+    if (k &lt;= 0) return;
+    ctx.save(); rrPath(ctx, rect); ctx.clip();
+    ctx.globalAlpha = 0.08 * k; ctx.fillStyle = &#x27;#000&#x27;; ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    ctx.globalAlpha = 0.10 * k; ctx.fillStyle = col.bright; ctx.fillRect(rect.x + p, rect.y + p, rect.w - 2 * p, rect.h - 2 * p);
+    ctx.restore();
+  }
+
+  // ====== PERF: pre-rasterize LASER rows ======
+  const laserRowImgs = laserRows.map(row =&gt; {
+    const off = document.createElement(&#x27;canvas&#x27;); off.width = W; off.height = H;
+    const octx = off.getContext(&#x27;2d&#x27;);
+    for (const pt of row.pts) drawBrightDotFast(octx, pt.x, pt.y, 0.9);
+    return off;
+  });
+
+  // ====== PERF throttle ======
+  let heavy = false;
+  let lastFrame = 0;
+  const FPS_HEAVY = 28, FPS_LIGHT = 60; // slightly lower heavy fps
+
+  // ====== Transition animation ======
+  const TRANS_MS = 900; const DOT_ALPHA = 0.9;
+  function drawLaserBuildTopDown_cached(u) {
+    const total = laserRowImgs.length; const f = u * total; const rFull = Math.floor(f); const frac = f - rFull;
+    for (let r = 0; r &lt; Math.min(rFull, total); r++) ctx.drawImage(laserRowImgs[r], 0, 0);
+    if (rFull &lt; total) {
+      const row = laserRows[rFull]; const m = Math.floor(row.n * easeInOut(frac));
+      for (let i = 0; i &lt; m; i++) { const pt = row.pts[i]; drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA); }
+    }
+  }
+  function drawBombMoving(u) {
+    const stepsTotal = ((faceBOMB_final.y - faceBOMB_center.y) / p) | 0;
+    const frames = Math.max(1, stepsTotal+1);
+    const f=u*(frames-1); const s=Math.floor(f); const frac=easeInOut(f-s);
+    const yA = snap(faceBOMB_center.y + s*p);
+    const yB = snap(faceBOMB_center.y + (Math.min(s+1,frames-1))*p);
+    const yLerp = snap(yA + (yB - yA) * frac);
+    const outer = {x:botOuter.x, y:yLerp-1*p, w:botOuter.w, h:botOuter.h, r:botOuter.r};
+    const face  = {x:outer.x+1*p, y:yLerp, w:outer.w-2*p, h:outer.h-2*p, r:outer.r-1*p};
+
+    const outPts = sampleRoundedRectDots(outer.x,outer.y,outer.w,outer.h,outer.r);
+    const innerPts=(function(){ const d=[]; const b_in=2.8*p; const mid=1; for(let i=0;i&lt;3;i++){ const o=b_in+(i-mid)*p; const x=outer.x+o, y=outer.y+o, w=outer.w-2*o, h=outer.h-2*o, r=outer.r-o; const pts=sampleRoundedRectDots(x,y,w,h,r); for(const pt of pts) d.push(pt); } return d; })();
+    const dy = face.y - faceBOMB_final.y; const textPts = bombWordDotsFinal.map(pt=&gt;({x:pt.x,y:pt.y+dy}));
+    for(const pt of outPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+    for(const pt of innerPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+    for(const pt of textPts) drawBrightDotFast(ctx, pt.x, pt.y, DOT_ALPHA);
+  }
+
+  // ====== Main frame ======
+  function frame(ts) {
+
+    // DR2: Laser Arrow-Pad Mode (Part 2)
+    const prevLaserMode = !!window.laserArrowMode;
+    const wantLaserMode =
+      (state.mode === &#x27;two&#x27;) &amp;&amp; state.specialActive &amp;&amp; (state.laserAmmo &gt; 0);
+
+    window.laserArrowMode = wantLaserMode;
+    if (!wantLaserMode &amp;&amp; prevLaserMode) {
+      window.laserDirection = &#x27;up&#x27;;
+    }
+    if (__prevMode !== state.mode || __prevActive !== state.active) {
+      if (state.active) { setProxiesEnabled(false); }
+      else { setProxiesEnabled(true); updateProxyForMode(); }
+      __prevMode = state.mode; __prevActive = state.active;
+    }
+    
+    heavy = state.active || state.bombMorph.active;
+
+    const targetDelta = 1000 / (heavy ? FPS_HEAVY : FPS_LIGHT);
+    if (ts - lastFrame &lt; targetDelta) { requestAnimationFrame(frame); return; }
+    lastFrame = ts;
+
+    const t = nowS();
+    const done = state.bombMorph.active &amp;&amp; updateBombMorph(t);
+
+    let doneNB = false;
+    if (state.normalBomb.active){ doneNB = drawNormalBomb(t); }
+
+    
+    ctx.clearRect(0, 0, W, H); ctx.drawImage(bg, 0, 0);
+
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      ctx.drawImage(layerSingle, 0, 0);
+      
+      if (state.bombMorph.active) {
+        drawBombMorph(t);
+      } else if (state.bombArmed) {
+        drawBombTimerEffect(t, faceBOMB_center, bombWordDotsCenter, &#x27;center&#x27;);
+      } else {
+        for (const pt of bombWordDotsCenter) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+      }
+      
+      // lighter press overlay already handled
+    }
+    else if (state.active) {
+      const u = Math.max(0, Math.min(1, (nowS() - state.t0) * (1000 / TRANS_MS)));
+      drawLaserBuildTopDown_cached(u);
+      drawBombMoving(u);
+      if (u &gt;= 1) { state.active = false; state.mode = &#x27;two&#x27;; }
+    }
+    else if (state.activeReverse) {
+      const uR = Math.max(0, Math.min(1, (nowS() - state.t0r) * (1000 / TRANS_MS)));
+      const uF = 1 - uR;
+      drawLaserBuildTopDown_cached(uF);
+      drawBombMoving(uF);
+      if (uR &gt;= 1) {
+        state.activeReverse = false;
+        state.mode = &#x27;single&#x27;;
+        state.bombDeployed = false;
+        state.bombArmed = false;
+        __prevMode = undefined; __prevActive = undefined;
+      }
+    }
+    else {
+      ctx.drawImage(layerTwo, 0, 0);
+
+      if (state.bombMorph.active) {
+        drawBombMorph(t);
+      } else if (state.bombArmed) {
+        drawBombTimerEffect(t, faceBOMB_final, bombWordDotsFinal, &#x27;final&#x27;);
+      } else {
+        for (const pt of bombWordDotsFinal) drawBrightDotFast(ctx, pt.x, pt.y, 0.9);
+      }
+
+      drawLaserArmed(t);
+    }
+
+    if (doneNB){ state.normalBomb.active=false; }
+
+    if (done){
+      if (state.bombMorph.phase===&#x27;sucking&#x27;){
+        if (!state.timerPowerup &amp;&amp; state.bombMorph.autoExplode){
+          // Immediately explode words back out
+          startBombMorph(&#x27;exploding&#x27;, state.bombMorph.bombType, 700, false);
+        } else {
+          state.bombArmed=true; // timer path: hold on sphere
+          state.bombMorph.active=false;
+        }
+      } else {
+        // finished exploding
+        state.bombArmed=false;
+        state.bombDeployed=false;
+        state.bombMorph.active=false;
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ====== Keyboard proxies ======
+  function synthClickAt(clientX, clientY) {
+    const r = canvas.getBoundingClientRect();
+    const evt = new MouseEvent(&#x27;click&#x27;, { bubbles: true, cancelable: true, clientX: r.left + clientX, clientY: r.top + clientY });
+    canvas.dispatchEvent(evt);
+  }
+  const kLaser = document.getElementById(&#x27;btn2_proxy_blast&#x27;);
+  const kBomb = document.getElementById(&#x27;btn2_proxy_bomb&#x27;);
+
+  function updateProxyForMode() {
+    if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+      kLaser.style.display = &#x27;none&#x27;;
+      kBomb.style.top = &#x27;4%&#x27;;
+      kBomb.style.bottom = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;92%&#x27;;
+    } else {
+      kLaser.style.display = &#x27;block&#x27;;
+      kLaser.style.top = &#x27;6%&#x27;;
+      kLaser.style.height = &#x27;44%&#x27;;
+      kBomb.style.display = &#x27;block&#x27;;
+      kBomb.style.bottom = &#x27;6%&#x27;;
+      kBomb.style.top = &#x27;auto&#x27;;
+      kBomb.style.height = &#x27;44%&#x27;;
+    }
+  }
+  function setProxiesEnabled(enabled) {
+    const v = enabled ? &#x27;auto&#x27; : &#x27;none&#x27;;
+    kLaser.style.pointerEvents = v;
+    kBomb.style.pointerEvents = v;
+  }
+
+  kLaser.addEventListener(&#x27;click&#x27;, () =&gt; { 
+    const cx = faceLASER_final.x + faceLASER_final.w / 2;
+    const cy = faceLASER_final.y + faceLASER_final.h / 2;
+    synthClickAt(cx, cy); 
+    kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;); 
+    setTimeout(() =&gt; kLaser.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150); 
+  });
+  kBomb.addEventListener(&#x27;click&#x27;, () =&gt; {
+    const rect = (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) ? faceBOMB_center : faceBOMB_final;
+    const cx = rect.x + rect.w / 2; const cy = rect.y + rect.h / 2;
+    synthClickAt(cx, cy);
+    kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;true&#x27;);
+    setTimeout(() =&gt; kBomb.setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;), 150);
+  });
+
+  updateProxyForMode();
+
+  function keypressHandler(e, which) {
+    if (e.key === &#x27;Enter&#x27; || e.key === &#x27; &#x27;) { e.preventDefault(); if (which === &#x27;laser&#x27;) kLaser.click(); else kBomb.click(); }
+  }
+  kLaser.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;laser&#x27;));
+  kBomb.addEventListener(&#x27;keydown&#x27;, e =&gt; keypressHandler(e, &#x27;bomb&#x27;));
+
+  /* TEMP TRIGGER HOOK */
+  document.getElementById(&#x27;btn2_temp&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    if (window.btn2_startTransition) window.btn2_startTransition();
+  });
+
+  // ====== Timer Power-up Toggle ======
+  document.getElementById(&#x27;btn2_timer&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    state.timerPowerup = !state.timerPowerup;
+    state.bombDeployed = false;
+    state.bombArmed = false;
+    
+    const btn = document.getElementById(&#x27;btn2_timer&#x27;);
+    if (state.timerPowerup) btn.classList.add(&#x27;active&#x27;);
+    else btn.classList.remove(&#x27;active&#x27;);
+  });
+
+  
+  // ====== LASER countdown label (DMD text only) ======
+  // LASER label driven directly by ammo/state
+  function refreshLaserLabelFromAmmo(){
+    if (typeof setLaserLabelText !== &#x27;function&#x27;) return;
+    if (!state || !state.specialActive) {
+      // Not in LASER mode: clear label
+      setLaserLabelText(&#x27;&#x27;);
+      return;
+    }
+    const n = state.laserAmmo || 0;
+    if (n &gt; 0) {
+      // Tighter gap: no space between word and number, e.g. LASER4
+      setLaserLabelText(&#x27;LASER&#x27; + n);
+    } else {
+      setLaserLabelText(&#x27;&#x27;);
+    }
+  }
+
+  // Initialize label based on initial state
+  refreshLaserLabelFromAmmo();
+
+// ====== Special Activation (4 LASER shots) ======
+  document.getElementById(&#x27;btn2_special&#x27;).addEventListener(&#x27;click&#x27;, (e) =&gt; {
+    e.stopPropagation();
+    state.specialActive = !state.specialActive;
+
+    if (state.specialActive) {
+      if (state.mode === &#x27;single&#x27; &amp;&amp; !state.active) {
+        startTransition();
+      }
+      // Fill LASER ammo and enter LASER mode
+      state.laserAmmo = state.maxAmmo;
+      e.currentTarget.classList.add(&#x27;active&#x27;);
+    } else {
+      e.currentTarget.classList.remove(&#x27;active&#x27;);
+    }
+
+    // Update label from ammo / mode whenever special toggles
+    if (typeof refreshLaserLabelFromAmmo === &#x27;function&#x27;) {
+      refreshLaserLabelFromAmmo();
+    }
+  });
+
+
+
+  // ====== Initialize targets ======
+  initBombMorphSystem();
+
+})();
+})();
+
+// FPS meter hook
+(function(){
+  const __fpsUpdateMs = 500;
+  function __jpadFpsOnFrame(ts){
+    if(__jpadFpsLast){ const dt = ts - __jpadFpsLast; if (dt&gt;0) __jpadFps = 1000/dt; }
+    __jpadFpsLast = ts;
+    if(!__jpadFpsT || ts - __jpadFpsT &gt;= __fpsUpdateMs){
+      __jpadFpsT = ts;
+      try{
+        const el = document.getElementById(&#x27;jpad_status&#x27;);
+        if(el){
+          const base = el.textContent.replace(/\s*FPS:.*$/,&#x27;&#x27;).trim();
+          el.textContent = base + &#x27;  FPS: &#x27; + Math.round(__jpadFps);
+        }
+      }catch(e){}
+    }
+    requestAnimationFrame(__jpadFpsOnFrame);
+  }
+  requestAnimationFrame(__jpadFpsOnFrame);
+})();
+&lt;/script&gt;
+
+
+
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+<div aria-hidden="true" class="matrix">
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- [SQ-TUNER:TPL-START] -->
+<template id="sq-tuner-tpl">
+<style>
+  /* --- SNEAKERQUEST Tuner Styles (scoped) --- */
+  :root { 
+    --settings-accent:#e6d7b6; 
+    --settings-bg:#211a15; 
+    --settings-surface:#332820; 
+    --settings-border:#3a2f27; 
+    --settings-text:#f0e6cd; 
+  }
+  #settingsBtn { 
+    position: fixed; 
+    right: 20px; 
+    bottom: 20px; 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 12px; 
+    border: none; 
+    cursor: pointer; 
+    background: #1a1410; 
+    color: var(--settings-accent); 
+    box-shadow: inset 0 0 0 2px #2a2119, 0 6px 12px #000; 
+    font-size: 22px; 
+    z-index: 7000; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #settingsPanel { 
+    position: fixed; 
+    right: 20px; 
+    bottom: 80px; 
+    width: min(450px, 90vw); 
+    max-height: min(80vh, 700px); 
+    background: var(--settings-bg); 
+    color: var(--settings-text); 
+    border: 2px solid var(--settings-border); 
+    border-radius: 12px; 
+    display: none; 
+    flex-direction: column; 
+    z-index: 7050; 
+    box-shadow: 0 16px 40px #000c;
+  }
+  #settingsPanel.open { display: flex ; }
+  #sHead { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 12px 16px; 
+    border-bottom: 1px solid var(--settings-border);
+    background: var(--settings-surface);
+  }
+  #sTitle { 
+    font-weight: 700; 
+    letter-spacing: .08em; 
+    font-size: 14px;
+    color: var(--settings-accent);
+  }
+  #sBtns { display: flex; gap: 8px; }
+  #sBtns button { 
+    border: none; border-radius: 6px; padding: 6px 10px; 
+    background: var(--settings-border); color: var(--settings-accent); 
+    cursor: pointer; font-size: 12px; min-width: 30px;
+  }
+  #sBody { overflow: auto; padding: 16px; flex: 1; }
+  .sg { 
+    margin-bottom: 16px; border: 1px solid var(--settings-border); 
+    border-radius: 8px; padding: 12px; background: var(--settings-surface);
+  }
+  .sg h4 { 
+    margin: 0 0 12px 0; font-size: 13px; letter-spacing: .06em; 
+    color: var(--settings-accent); border-bottom: 1px solid var(--settings-border);
+    padding-bottom: 6px;
+  }
+  .sr { 
+    display: grid; grid-template-columns: 1fr 100px 50px 30px; 
+    gap: 8px; align-items: center; margin: 8px 0; font-size: 11px;
+  }
+  .sr label { 
+    font-size: 11px; color: var(--settings-text); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .sr input[type=range], .sr input[type=number], .sr input[type=text] { 
+    width: 100%; background: var(--settings-bg); border: 1px solid var(--settings-border);
+    border-radius: 4px; padding: 4px 6px; color: var(--settings-text); font-size: 11px;
+  }
+  .sr input[type=range] { padding: 0; }
+  .sv { 
+    font: 10px/1 monospace; text-align: center; color: var(--settings-accent);
+    background: var(--settings-bg); padding: 4px; border-radius: 4px; border: 1px solid var(--settings-border);
+    min-width: 40px;
+  }
+  .lock-btn { background: none; border: none; cursor: pointer; color: #888; font-size: 12px; padding: 4px; border-radius: 4px; }
+  .lock-btn:hover { color: var(--settings-accent); }
+  .lock-btn.locked { color: #ff3a2f; }
+  #sFoot { 
+    display: flex; gap: 8px; justify-content: space-between; align-items: center; 
+    padding: 12px 16px; border-top: 1px solid var(--settings-border); background: var(--settings-surface);
+  }
+  #sFoot button { 
+    flex: 1; border: none; background: var(--settings-border); color: var(--settings-accent); 
+    border-radius: 6px; padding: 8px; cursor: pointer; min-width: 70px; font-size: 11px; font-weight: 600;
+  }
+  #copyMsg { font-size: 10px; opacity: 0; transition: opacity .3s ease; margin-left: 10px; white-space: nowrap; color: #ff3a2f; }</style>
+<button aria-label="Open settings" id="settingsBtn" title="Settings">⚙️</button>
+<div aria-label="Settings" aria-modal="false" id="settingsPanel" role="dialog" tabindex="-1">
+<div id="sHead">
+<div id="sTitle">Settings 1</div>
+<div id="sBtns">
+<button id="sMin" title="Minimize" type="button">–</button>
+<button id="sClose" title="Close" type="button">✕</button>
+</div>
+</div>
+<div aria-live="polite" id="sBody">
+<div aria-live="polite" id="sBody">
+<!-- Global -->
+<div class="sg">
+<h4>Global</h4>
+<div class="sr">
+<label for="v_scale">Cabinet Scale</label>
+<input id="v_scale" max="1.5" min="0.5" step="0.01" type="range" value="1"/>
+<div class="sv" id="o_scale">1.00</div>
+<button class="lock-btn" title="Lock">🔒</button>
+</div>
+<div class="sr">
+<label for="v_center_cell">Center Cell Width (px)</label>
+<input id="v_center_cell" max="160" min="60" step="1" type="range" value="90"/>
+<div class="sv" id="o_center_cell">90</div>
+<button class="lock-btn" title="Lock">🔒</button>
+</div>
+</div>
+<!-- Layout Spacing -->
+<div class="sg">
+<h4>Layout Spacing</h4>
+<div class="sr"><label for="v_gap_top">Marquee Top Margin</label>
+<input id="v_gap_top" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_top">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_div">Divider Top Margin</label>
+<input id="v_gap_div" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_div">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_crt">CRT Wrap Top Margin</label>
+<input id="v_gap_crt" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_crt">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_tabs">Tabs Top Margin</label>
+<input id="v_gap_tabs" max="40" min="-40" step="1" type="range" value="-14"/>
+<div class="sv" id="o_gap_tabs">-14</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_hud1">HUD Row 1 Top Margin</label>
+<input id="v_gap_hud1" max="60" min="-40" step="1" type="range" value="-16"/>
+<div class="sv" id="o_gap_hud1">-16</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_hud2">HUD Row 2 Top Margin</label>
+<input id="v_gap_hud2" max="60" min="-40" step="1" type="range" value="-15"/>
+<div class="sv" id="o_gap_hud2">-15</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_bottom">Bottom Height</label>
+<input id="v_gap_bottom" max="240" min="80" step="1" type="range" value="240"/>
+<div class="sv" id="o_gap_bottom">240</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_bot_a">Control Screen Top Padding</label>
+<input id="v_bot_a" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_a">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_bot_b">Control Screen Bottom Padding</label>
+<input id="v_bot_b" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_b">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_global_pad_l">Inner Padding Left</label>
+<input id="v_global_pad_l" max="40" min="10" step="1" type="range" value="20"/>
+<div class="sv" id="o_global_pad_l">20</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_global_pad_r">Inner Padding Right</label>
+<input id="v_global_pad_r" max="40" min="10" step="1" type="range" value="20"/>
+<div class="sv" id="o_global_pad_r">20</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- CRT -->
+<div class="sg">
+<h4>CRT</h4>
+<div class="sr"><label for="v_crt_h">CRT Height (px)</label>
+<input id="v_crt_h" max="1000" min="0" step="1" type="number" value="350"/>
+<div class="sv" id="o_crt_h">350</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- Marquee -->
+<div class="sg">
+<h4>Marquee</h4>
+<div class="sr"><label for="v_mqtsize">Title Font Size</label>
+<input id="v_mqtsize" max="40" min="18" step="1" type="range" value="27"/>
+<div class="sv" id="o_mqtsize">27</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqtx">Title Translate X</label>
+<input id="v_mqtx" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqtx">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqty">Title Translate Y</label>
+<input id="v_mqty" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqty">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqssize">Subtitle Font Size</label>
+<input id="v_mqssize" max="12" min="5" step="1" type="range" value="7"/>
+<div class="sv" id="o_mqssize">7</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqsx">Subtitle Translate X</label>
+<input id="v_mqsx" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqsx">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqsy">Subtitle Translate Y</label>
+<input id="v_mqsy" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqsy">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chipbr">Chip Border Radius</label>
+<input id="v_chipbr" max="10" min="0" step="1" type="range" value="4"/>
+<div class="sv" id="o_chipbr">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chippadx">Chip Padding X</label>
+<input id="v_chippadx" max="10" min="0" step="1" type="range" value="3"/>
+<div class="sv" id="o_chippadx">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chippady">Chip Padding Y</label>
+<input id="v_chippady" max="10" min="0" step="1" type="range" value="4"/>
+<div class="sv" id="o_chippady">4</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Icon Gaps -->
+<div class="sg">
+<h4>HUD Icon Gaps</h4>
+<div class="sr"><label for="v_icon_gap_sneakers">Sneakers Gap</label>
+<input id="v_icon_gap_sneakers" max="20" min="0" step="1" type="range" value="3"/>
+<div class="sv" id="o_icon_gap_sneakers">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_icon_gap_powers">Powers Gap</label>
+<input id="v_icon_gap_powers" max="20" min="0" step="1" type="range" value="7"/>
+<div class="sv" id="o_icon_gap_powers">7</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_icon_gap_fires">Fires Gap</label>
+<input id="v_icon_gap_fires" max="20" min="0" step="1" type="range" value="2"/>
+<div class="sv" id="o_icon_gap_fires">2</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Icon Counts -->
+<div class="sg">
+<h4>HUD Icon Counts</h4>
+<div class="sr"><label for="in_hearts_fill">Hearts Fill</label>
+<input id="in_hearts_fill" max="6" min="0" step="1" type="number" value="1"/>
+<div class="sv" id="o_hearts_fill">1</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_hearts_outline">Hearts Outline</label>
+<input id="in_hearts_outline" max="6" min="0" step="1" type="number" value="3"/>
+<div class="sv" id="o_hearts_outline">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_shoes_fill">Sneakers Fill</label>
+<input id="in_shoes_fill" max="6" min="0" step="1" type="number" value="3"/>
+<div class="sv" id="o_shoes_fill">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_shoes_outline">Snearkers Outline</label>
+<input id="in_shoes_outline" max="6" min="0" step="1" type="number" value="5"/>
+<div class="sv" id="o_shoes_outline">5</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_powers_fill">Powers Fill</label>
+<input id="in_powers_fill" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_powers_fill">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_powers_total">Powers Total</label>
+<input id="in_powers_total" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_powers_total">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_fires_fill">Fires Fill</label>
+<input id="in_fires_fill" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_fires_fill">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_fires_outline">Fires Outline</label>
+<input id="in_fires_outline" max="8" min="0" step="1" type="number" value="5"/>
+<div class="sv" id="o_fires_outline">5</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Slot Heights -->
+<div class="sg">
+<h4>HUD Slot Heights</h4>
+<div class="sr"><label for="v_slotsneakers">Slot Sneakers Height</label>
+<input id="v_slotsneakers" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotsneakers">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotshoes">Slot Shoes Height</label>
+<input id="v_slotshoes" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotshoes">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotdots">Slot Dots Height</label>
+<input id="v_slotdots" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotdots">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotflames">Slot Flames Height</label>
+<input id="v_slotflames" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotflames">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotpause">Slot Pause Height</label>
+<input id="v_slotpause" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotpause">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotbag">Slot Bag Height</label>
+<input id="v_slotbag" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotbag">33</div><button class="lock-btn">🔒</button></div>
+</div>
+</div>
+<!-- Controls Panel Transform -->
+<div class="sg">
+<h4>Controls Panel Transform</h4>
+<div class="sr"><label for="v_ctrl_x">Controls X</label>
+<input id="v_ctrl_x" max="120" min="-120" step="1" type="range" value="0"/>
+<div class="sv" id="o_ctrl_x">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_ctrl_y">Controls Y</label>
+<input id="v_ctrl_y" max="120" min="-120" step="1" type="range" value="0"/>
+<div class="sv" id="o_ctrl_y">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_ctrl_scale">Controls Scale</label>
+<input id="v_ctrl_scale" max="1.6" min="0.6" step="0.01" type="range" value="1.04"/>
+<div class="sv" id="o_ctrl_scale">1.04</div><button class="lock-btn">🔒</button></div>
+</div>
+</div>
+<div id="sFoot"><button id="sMove" type="button">Move</button><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
+</div>
+</template>
+<!-- [SQ-TUNER:TPL-END] -->
+<!-- [SQ-TUNER:SCRIPT] -->
+<script>
+(function(){
+  // Create tuner root container
+  const tunerRoot = document.createElement('div');
+  tunerRoot.id = 'sq-tuner-root';
+  tunerRoot.style.cssText = 'position:fixed; right:12px; bottom:12px; z-index:99999;';
+  document.body.appendChild(tunerRoot);
+
+  // Attach Shadow DOM
+  const shadow = tunerRoot.attachShadow({mode: 'open'});
+  
+  // Clone template content into shadow DOM
+  const template = document.getElementById('sq-tuner-tpl');
+  if (template) {
+    shadow.appendChild(template.content.cloneNode(true));
+  }
+
+  // Get elements from shadow DOM
+  const settingsBtn = shadow.getElementById('settingsBtn');
+  const settingsPanel = shadow.getElementById('settingsPanel');
+  const sClose = shadow.getElementById('sClose');
+  const sMin = shadow.getElementById('sMin');
+  const sReset = shadow.getElementById('sReset');
+  const btnCopyJSON = shadow.getElementById('btnCopyJSON');
+  const sMove = shadow.getElementById('sMove');
+
+  // Toggle button for panel
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'sq-tuner-toggle';
+  toggleBtn.innerHTML = '⚙️';
+  toggleBtn.style.cssText = `
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #1a1410;
+    color: #e6d7b6;
+    cursor: pointer;
+    z-index: 100000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  document.body.appendChild(toggleBtn);
+
+  // Panel state
+  let isPanelOpen = false;
+
+  // Toggle panel function
+  function togglePanel() {
+    isPanelOpen = !isPanelOpen;
+    if (settingsPanel) {
+      if (isPanelOpen) {
+        settingsPanel.classList.add('open');
+        settingsPanel.style.display = 'flex';
+      } else {
+        settingsPanel.classList.remove('open');
+        settingsPanel.style.display = 'none';
+      }
+    }
+
+  }
+
+  // Event listeners
+  if (toggleBtn) toggleBtn.addEventListener('click', togglePanel);
+  if (settingsBtn) settingsBtn.addEventListener('click', togglePanel);
+  if (sClose) sClose.addEventListener('click', () => {
+    isPanelOpen = false;
+    if (settingsPanel) {
+      settingsPanel.classList.remove('open');
+      settingsPanel.style.display = 'none';
+    }
+  });
+  if (sMin) sMin.addEventListener('click', togglePanel);
+
+  
+  // Simple move drag for Settings 1 panel
+  if (sMove && settingsPanel) {
+    let isDraggingPanel = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    sMove.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const rect = settingsPanel.getBoundingClientRect();
+      dragOffsetX = ev.clientX - rect.left;
+      dragOffsetY = ev.clientY - rect.top;
+      isDraggingPanel = true;
+      window.addEventListener('pointermove', onPanelDrag);
+      window.addEventListener('pointerup', onPanelDragEnd);
+    });
+
+    function onPanelDrag(ev) {
+      if (!isDraggingPanel) return;
+      settingsPanel.style.position = 'fixed';
+      settingsPanel.style.left = (ev.clientX - dragOffsetX) + 'px';
+      settingsPanel.style.top = (ev.clientY - dragOffsetY) + 'px';
+      settingsPanel.style.right = 'auto';
+      settingsPanel.style.bottom = 'auto';
+    }
+
+    function onPanelDragEnd() {
+      if (!isDraggingPanel) return;
+      isDraggingPanel = false;
+      window.removeEventListener('pointermove', onPanelDrag);
+      window.removeEventListener('pointerup', onPanelDragEnd);
+    }
+  }
+
+
+// Scale guard implementation
+  const vScale = shadow.getElementById('v_scale');
+  const oScale = shadow.getElementById('o_scale');
+  const mainContainer = document.getElementById('mainContainer');
+  
+  // Detect current scale
+  function detectCurrentScale() {
+    if (!mainContainer) return 1;
+    const transform = getComputedStyle(mainContainer).transform;
+    const matrix = transform.match(/matrix\(([^)]+)\)/);
+    if (matrix) {
+      const values = matrix[1].split(',').map(parseFloat);
+      if (values.length === 6) {
+        return Math.sqrt(values[0] * values[0] + values[1] * values[1]);
+      }
+    }
+    return 1;
+  }
+
+  // Update scale display
+  function updateScaleDisplay() {
+    const currentScale = detectCurrentScale();
+    if (oScale) {
+      oScale.textContent = currentScale.toFixed(2);
+    }
+  }
+
+  // Apply scale with guard
+  function applyScale() {
+    if (!mainContainer || !vScale) return;
+    const scaleValue = parseFloat(vScale.value) || 1;
+    
+    // Preserve existing transform structure
+    const currentTransform = getComputedStyle(mainContainer).transform;
+    let newTransform = '';
+    
+    if (currentTransform.includes('translateX(-50%)')) {
+      newTransform = `translateX(-50%) scale(${scaleValue.toFixed(2)})`;
+    } else {
+      newTransform = `scale(${scaleValue.toFixed(2)})`;
+    }
+    
+    mainContainer.style.transform = newTransform;
+    if (oScale) {
+      oScale.textContent = scaleValue.toFixed(2);
+    }
+  }
+
+  if (vScale) {
+    vScale.addEventListener('input', applyScale);
+  }
+
+  // Center HUD width control
+  const vCenterCell = shadow.getElementById('v_center_cell');
+  const oCenterCell = shadow.getElementById('o_center_cell');
+  
+  function applyCenterCell() {
+    if (!vCenterCell) return;
+    const value = parseInt(vCenterCell.value) || 90;
+    document.documentElement.style.setProperty('--center-cell', value + 'px');
+    if (oCenterCell) {
+      oCenterCell.textContent = value;
+    }
+  }
+
+  if (vCenterCell) {
+    vCenterCell.addEventListener('input', applyCenterCell);
+  }
+
+  // Gap and height controls
+  const gapControls = [
+    { id: 'v_gap_top', target: 'element-marquee', prop: 'marginTop' },
+    { id: 'v_gap_div', target: 'element-divider', prop: 'marginTop' },
+    { id: 'v_gap_crt', target: 'element-crt', prop: 'marginTop' },
+    { id: 'v_gap_tabs', target: 'element-tabs', prop: 'marginTop' },
+    { id: 'v_gap_hud1', target: 'element-hud1', prop: 'marginTop' },
+    { id: 'v_gap_hud2', target: 'element-hud2', prop: 'marginTop' },
+    { id: 'v_gap_bottom', target: 'element-bottom', prop: 'height' }
+  ];
+
+  gapControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    const output = shadow.getElementById('o_' + control.id);
+    
+    if (input) {
+      input.addEventListener('input', function() {
+        const targetElement = document.getElementById(control.target);
+        if (targetElement) {
+          const value = parseInt(this.value) || 0;
+          if (control.prop === 'height') {
+            targetElement.style.height = value + 'px';
+          } else {
+            targetElement.style[control.prop] = value + 'px';
+          }
+          if (output) {
+            output.textContent = value;
+          }
+        }
+      });
+    }
+  });
+
+
+  // Apply initial gap and height values on load
+  gapControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    if (input) {
+      input.dispatchEvent(new Event('input'));
+    }
+  });
+
+  // Marquee controls
+  const mqTitle = document.querySelector('.mq-title');
+  const mqSub = document.querySelector('.mq-sub');
+  const chipBoxes = document.querySelectorAll('.chip-box');
+  
+  // Marquee title controls
+  const mqTitleSize = shadow.getElementById('v_mqtsize');
+  const mqTitleX = shadow.getElementById('v_mqtx');
+  const mqTitleY = shadow.getElementById('v_mqty');
+  
+  if (mqTitleSize && mqTitle) {
+    mqTitleSize.addEventListener('input', function() {
+      mqTitle.style.fontSize = this.value + 'px';
+      shadow.getElementById('o_mqtsize').textContent = this.value;
+    });
+  }
+  
+  if (mqTitleX && mqTitle) {
+    mqTitleX.addEventListener('input', function() {
+      const y = parseInt(mqTitleY?.value || 0);
+      mqTitle.style.transform = `translate(${this.value}px, ${y}px)`;
+      shadow.getElementById('o_mqtx').textContent = this.value;
+    });
+  }
+  
+  if (mqTitleY && mqTitle) {
+    mqTitleY.addEventListener('input', function() {
+      const x = parseInt(mqTitleX?.value || 0);
+      mqTitle.style.transform = `translate(${x}px, ${this.value}px)`;
+      shadow.getElementById('o_mqty').textContent = this.value;
+    });
+  }
+
+  // Marquee subtitle controls
+  const mqSubSize = shadow.getElementById('v_mqssize');
+  const mqSubX = shadow.getElementById('v_mqsx');
+  const mqSubY = shadow.getElementById('v_mqsy');
+  
+  if (mqSubSize && mqSub) {
+    mqSubSize.addEventListener('input', function() {
+      mqSub.style.fontSize = this.value + 'px';
+      shadow.getElementById('o_mqssize').textContent = this.value;
+    });
+  }
+  
+  if (mqSubX && mqSub) {
+    mqSubX.addEventListener('input', function() {
+      const y = parseInt(mqSubY?.value || 0);
+      mqSub.style.transform = `translate(${this.value}px, ${y}px)`;
+      shadow.getElementById('o_mqsx').textContent = this.value;
+    });
+  }
+  
+  if (mqSubY && mqSub) {
+    mqSubY.addEventListener('input', function() {
+      const x = parseInt(mqSubX?.value || 0);
+      mqSub.style.transform = `translate(${x}px, ${this.value}px)`;
+      shadow.getElementById('o_mqsy').textContent = this.value;
+    });
+  }
+
+  // Chip controls
+  const chipBr = shadow.getElementById('v_chipbr');
+  const chipPadX = shadow.getElementById('v_chippadx');
+  const chipPadY = shadow.getElementById('v_chippady');
+  
+  if (chipBr && chipBoxes.length > 0) {
+    chipBr.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.borderRadius = this.value + 'px';
+      });
+      shadow.getElementById('o_chipbr').textContent = this.value;
+    });
+  }
+  
+  if (chipPadX && chipBoxes.length > 0) {
+    chipPadX.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.paddingLeft = this.value + 'px';
+        chip.style.paddingRight = this.value + 'px';
+      });
+      shadow.getElementById('o_chippadx').textContent = this.value;
+    });
+  }
+  
+  if (chipPadY && chipBoxes.length > 0) {
+    chipPadY.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.paddingTop = this.value + 'px';
+        chip.style.paddingBottom = this.value + 'px';
+      });
+      shadow.getElementById('o_chippady').textContent = this.value;
+    });
+  }
+
+  // Icon gap controls
+  const iconGapSneakers = shadow.getElementById('v_icon_gap_sneakers');
+  const iconGapPowers = shadow.getElementById('v_icon_gap_powers');
+  const iconGapFires = shadow.getElementById('v_icon_gap_fires');
+  
+  if (iconGapSneakers) {
+    iconGapSneakers.addEventListener('input', function() {
+      const sneakers = document.getElementById('ui-sneakers');
+      if (sneakers) {
+        sneakers.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_sneakers').textContent = this.value;
+    });
+  }
+  
+  if (iconGapPowers) {
+    iconGapPowers.addEventListener('input', function() {
+      const powers = document.getElementById('ui-powers');
+      if (powers) {
+        powers.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_powers').textContent = this.value;
+    });
+  }
+  
+  if (iconGapFires) {
+    iconGapFires.addEventListener('input', function() {
+      const fires = document.getElementById('ui-fires');
+      if (fires) {
+        fires.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_fires').textContent = this.value;
+    });
+  }
+
+  // Icon count controls
+  const heartsFill = shadow.getElementById('in_hearts_fill');
+  const heartsOutline = shadow.getElementById('in_hearts_outline');
+  const shoesFill = shadow.getElementById('in_shoes_fill');
+  const shoesOutline = shadow.getElementById('in_shoes_outline');
+  const powersFill = shadow.getElementById('in_powers_fill');
+  const powersTotal = shadow.getElementById('in_powers_total');
+  const firesFill = shadow.getElementById('in_fires_fill');
+  const firesOutline = shadow.getElementById('in_fires_outline');
+
+  function updateIconCounts() {
+    // Update hearts
+    if (heartsFill && heartsOutline) {
+      const fill = parseInt(heartsFill.value) || 0;
+      const outline = parseInt(heartsOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderHearts(fill, outline);
+      }
+      shadow.getElementById('o_hearts_fill').textContent = fill;
+      shadow.getElementById('o_hearts_outline').textContent = outline;
+    }
+
+    // Update sneakers
+    if (shoesFill && shoesOutline) {
+      const fill = parseInt(shoesFill.value) || 0;
+      const outline = parseInt(shoesOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderSneakers(fill, outline);
+      }
+      shadow.getElementById('o_shoes_fill').textContent = fill;
+      shadow.getElementById('o_shoes_outline').textContent = outline;
+    }
+
+    // Update powers
+    if (powersFill && powersTotal) {
+      const fill = parseInt(powersFill.value) || 0;
+      const total = parseInt(powersTotal.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderPowers(total, fill);
+      }
+      shadow.getElementById('o_powers_fill').textContent = fill;
+      shadow.getElementById('o_powers_total').textContent = total;
+    }
+
+    // Update fires
+    if (firesFill && firesOutline) {
+      const fill = parseInt(firesFill.value) || 0;
+      const outline = parseInt(firesOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderFires(fill, outline);
+      }
+      shadow.getElementById('o_fires_fill').textContent = fill;
+      shadow.getElementById('o_fires_outline').textContent = outline;
+    }
+  }
+
+  // Add event listeners for icon counts
+  [heartsFill, heartsOutline, shoesFill, shoesOutline, powersFill, powersTotal, firesFill, firesOutline].forEach(input => {
+    if (input) {
+      input.addEventListener('input', updateIconCounts);
+    }
+  });
+
+  // Slot height controls
+  const slotControls = [
+    { id: 'v_slotsneakers', selector: '.hud .slot-heart' },
+    { id: 'v_slotshoes', selector: '.hud .slot-shoes' },
+    { id: 'v_slotdots', selector: '.hud .slot-dots' },
+    { id: 'v_slotflames', selector: '.hud2 .slot-flames' },
+    { id: 'v_slotpause', selector: '.hud2 .slot-pause' },
+    { id: 'v_slotbag', selector: '.hud2 .slot-bag' }
+  ];
+
+  slotControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    const output = shadow.getElementById('o_' + control.id);
+    
+    if (input) {
+      input.addEventListener('input', function() {
+        const elements = document.querySelectorAll(control.selector);
+        elements.forEach(el => {
+          el.style.height = this.value + 'px';
+        });
+        if (output) {
+          output.textContent = this.value;
+        }
+      });
+    }
+  });
+
+  // CRT height control
+  const crtHeight = shadow.getElementById('v_crt_h');
+  const crt = document.querySelector('.crt');
+  
+  if (crtHeight && crt) {
+    crtHeight.addEventListener('input', function() {
+      const value = parseInt(this.value) || 0;
+      if (value > 0) {
+        crt.style.height = value + 'px';
+        crt.style.aspectRatio = '';
+      } else {
+        crt.style.height = '';
+        crt.style.aspectRatio = '';
+      }
+      shadow.getElementById('o_crt_h').textContent = value;
+      window.dispatchEvent(new Event('resize'));
+    });
+  }
+
+  // Control screen padding
+  const botA = shadow.getElementById('v_bot_a');
+  const botB = shadow.getElementById('v_bot_b');
+  const controlScreen = document.querySelector('.control-screen');
+  
+  if (botA && controlScreen) {
+    botA.addEventListener('input', function() {
+      controlScreen.style.paddingTop = this.value + 'px';
+      shadow.getElementById('o_bot_a').textContent = this.value;
+    });
+  }
+  
+  if (botB && controlScreen) {
+    botB.addEventListener('input', function() {
+      controlScreen.style.paddingBottom = this.value + 'px';
+      shadow.getElementById('o_bot_b').textContent = this.value;
+    });
+  }
+
+  
+  // Apply initial control screen padding on load
+  if (botA && controlScreen) {
+    botA.dispatchEvent(new Event('input'));
+  }
+  if (botB && controlScreen) {
+    botB.dispatchEvent(new Event('input'));
+  }
+
+// Global padding controls
+  const globalPadL = shadow.getElementById('v_global_pad_l');
+  const globalPadR = shadow.getElementById('v_global_pad_r');
+  const inner = document.querySelector('.inner');
+  
+  if (globalPadL && inner) {
+    globalPadL.addEventListener('input', function() {
+      inner.style.paddingLeft = this.value + 'px';
+      shadow.getElementById('o_global_pad_l').textContent = this.value;
+    });
+  }
+  
+  if (globalPadR && inner) {
+    globalPadR.addEventListener('input', function() {
+      inner.style.paddingRight = this.value + 'px';
+      shadow.getElementById('o_global_pad_r').textContent = this.value;
+    });
+  }
+
+  // Controls panel transform
+  const ctrlX = shadow.getElementById('v_ctrl_x');
+  const ctrlY = shadow.getElementById('v_ctrl_y');
+  const ctrlScale = shadow.getElementById('v_ctrl_scale');
+  const elementControls = document.getElementById('element-controls');
+  
+  if (ctrlX && elementControls) {
+    ctrlX.addEventListener('input', function() {
+      const y = parseInt(ctrlY?.value || 0);
+      const scale = parseFloat(ctrlScale?.value || 1);
+      elementControls.style.transform = `translate(${this.value}px, ${y}px) scale(${scale})`;
+      shadow.getElementById('o_ctrl_x').textContent = this.value;
+    });
+  }
+  
+  if (ctrlY && elementControls) {
+    ctrlY.addEventListener('input', function() {
+      const x = parseInt(ctrlX?.value || 0);
+      const scale = parseFloat(ctrlScale?.value || 1);
+      elementControls.style.transform = `translate(${x}px, ${this.value}px) scale(${scale})`;
+      shadow.getElementById('o_ctrl_y').textContent = this.value;
+    });
+  }
+  
+  if (ctrlScale && elementControls) {
+    ctrlScale.addEventListener('input', function() {
+      const x = parseInt(ctrlX?.value || 0);
+      const y = parseInt(ctrlY?.value || 0);
+      elementControls.style.transform = `translate(${x}px, ${y}px) scale(${this.value})`;
+      shadow.getElementById('o_ctrl_scale').textContent = parseFloat(this.value).toFixed(2);
+    });
+  }
+
+  // JSON Export
+  function collectLayoutData() {
+    const data = {};
+    
+    // CSS variables
+    const rootStyles = getComputedStyle(document.documentElement);
+    data['--center-cell'] = rootStyles.getPropertyValue('--center-cell').trim();
+    
+    // Element styles
+    const elements = [
+      'element-marquee', 'element-divider', 'element-crt', 
+      'element-tabs', 'element-hud1', 'element-hud2', 'element-bottom'
+    ];
+    
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        data[id] = {
+          marginTop: el.style.marginTop || '',
+          height: el.style.height || ''
+        };
+      }
+    });
+    
+    // Marquee styles
+    if (mqTitle) {
+      data.marqueeTitle = {
+        fontSize: mqTitle.style.fontSize || '',
+        transform: mqTitle.style.transform || ''
+      };
+    }
+    
+    if (mqSub) {
+      data.marqueeSub = {
+        fontSize: mqSub.style.fontSize || '',
+        transform: mqSub.style.transform || ''
+      };
+    }
+    
+    // Chip styles
+    if (chipBoxes.length > 0) {
+      const chip = chipBoxes[0];
+      data.chip = {
+        borderRadius: chip.style.borderRadius || '',
+        padding: `${chip.style.paddingTop || ''} ${chip.style.paddingRight || ''}`
+      };
+    }
+    
+    // Icon gaps
+    const sneakers = document.getElementById('ui-sneakers');
+    const powers = document.getElementById('ui-powers');
+    const fires = document.getElementById('ui-fires');
+    
+    if (sneakers) data.sneakersGap = sneakers.style.gap || '';
+    if (powers) data.powersGap = powers.style.gap || '';
+    if (fires) data.firesGap = fires.style.gap || '';
+    
+    // Slot heights
+    slotControls.forEach(control => {
+      const elements = document.querySelectorAll(control.selector);
+      if (elements.length > 0) {
+        data[control.id] = elements[0].style.height || '';
+      }
+    });
+    
+    // CRT height
+    if (crt) {
+      data.crtHeight = crt.style.height || '';
+    }
+    
+    // Control screen
+    if (controlScreen) {
+      data.controlScreen = {
+        paddingTop: controlScreen.style.paddingTop || '',
+        paddingBottom: controlScreen.style.paddingBottom || ''
+      };
+    }
+    
+    // Inner padding
+    if (inner) {
+      data.inner = {
+        paddingLeft: inner.style.paddingLeft || '',
+        paddingRight: inner.style.paddingRight || ''
+      };
+    }
+    
+    // Controls transform
+    if (elementControls) {
+      data.controlsTransform = elementControls.style.transform || '';
+    }
+    
+    // Scale
+    data.scale = detectCurrentScale();
+    
+    // Icon counts
+    data.iconCounts = {
+      heartsFill: heartsFill?.value || '',
+      heartsOutline: heartsOutline?.value || '',
+      shoesFill: shoesFill?.value || '',
+      shoesOutline: shoesOutline?.value || '',
+      powersFill: powersFill?.value || '',
+      powersTotal: powersTotal?.value || '',
+      firesFill: firesFill?.value || '',
+      firesOutline: firesOutline?.value || ''
+    };
+    
+    return data;
+  }
+
+  if (btnCopyJSON) {
+    btnCopyJSON.addEventListener('click', function() {
+      const data = collectLayoutData();
+      data.prompt = 'Here is a COPY JSON snapshot from the Settings 1 layout tuner panel. Task: apply these values as the new default Settings 1 configuration without changing layout, theming, or behavior.';
+      const json = JSON.stringify(data, null, 2);
+      
+      // Update preview
+      const jsonPreview = shadow.getElementById('jsonPreview');
+      if (jsonPreview) {
+        jsonPreview.value = json;
+      }
+      
+      // Copy to clipboard instead of downloading
+      function showMsg(msg) {
+        const copyMsg = shadow.getElementById('copyMsg');
+        if (copyMsg) {
+          copyMsg.textContent = 'Copied!';
+          copyMsg.style.opacity = '1';
+          setTimeout(() => {
+            copyMsg.style.opacity = '0';
+          }, 2000);
+        }
+      }
+
+      function fallbackCopy() {
+        const ta = document.createElement('textarea');
+        ta.value = json;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        showMsg('Copied!');
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(() => {
+          showMsg('Copied!');
+        }).catch(() => {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
+      }
+    });
+  
+  }
+
+  // Reset functionality
+  if (sReset) {
+    sReset.addEventListener('click', function() {
+      const defaults = {
+        'v_scale': 1,
+        'v_center_cell': 90,
+        'v_gap_top': 0,
+        'v_gap_div': 0,
+        'v_gap_crt': 0,
+        'v_gap_tabs': -14,
+        'v_gap_hud1': -16,
+        'v_gap_hud2': -15,
+        'v_gap_bottom': 240,
+        'v_bot_a': 0,
+        'v_bot_b': 0,
+        'v_global_pad_l': 20,
+        'v_global_pad_r': 20,
+        'v_mqtsize': 27,
+        'v_mqtx': 0,
+        'v_mqty': 0,
+        'v_mqssize': 7,
+        'v_mqsx': 0,
+        'v_mqsy': 0,
+        'v_chipbr': 4,
+        'v_chippadx': 3,
+        'v_chippady': 4,
+        'v_icon_gap_sneakers': 3,
+        'v_icon_gap_powers': 7,
+        'v_icon_gap_fires': 2,
+        'in_hearts_fill': 1,
+        'in_hearts_outline': 3,
+        'in_shoes_fill': 3,
+        'in_shoes_outline': 5,
+        'in_powers_fill': 4,
+        'in_powers_total': 4,
+        'in_fires_fill': 4,
+        'in_fires_outline': 5,
+        'v_slotsneakers': 41,
+        'v_slotshoes': 40,
+        'v_slotdots': 40,
+        'v_slotflames': 40,
+        'v_slotpause': 40,
+        'v_slotbag': 40,
+        'v_crt_h': 0,
+        'v_ctrl_x': 0,
+        'v_ctrl_y': 0,
+        'v_ctrl_scale': 1.04
+      };
+
+      Object.keys(defaults).forEach(key => {
+        const input = shadow.getElementById(key);
+        if (input) {
+          input.value = defaults[key];
+          input.dispatchEvent(new Event('input'));
+        }
+      });
+    });
+  }
+
+  // ESC key handler to close panel
+  function handleKeydown(e) {
+    if (e.key === 'Escape' && isPanelOpen) {
+      togglePanel();
+    }
+  }
+
+  document.addEventListener('keydown', handleKeydown);
+
+  // Initialize displays and apply defaults
+  updateScaleDisplay();
+  applyCenterCell();
+  updateIconCounts();
+
+  // Cleanup on disconnect
+  tunerRoot.addEventListener('disconnected', () => {
+    document.removeEventListener('keydown', handleKeydown);
+  });
+
+})();
+</script>
+<!-- [SQ-TUNER:SCRIPT] -->
+<script>
+    // === MOBILE SAFARI LAYOUT/SCALING ===
+    class MobileSafariLock {
+      static initialize() {
+        MobileSafariLock.initializeAggressiveScaling();
+      }
+
+      static initializeAggressiveScaling() {
+        const container = document.querySelector('.fixed-container');
+        if (!container) return;
+
+        // Cabinet is fixed-size now; lock transform once.
+        container.style.transform = 'translateX(-50%) scale(1)';
+      }
+
+    }
+
+    // === ICON MANAGER ===
+    class IconManager {
+      static updateAllIcons() {
+        IconManager.renderSneakers(3, 5);
+        IconManager.renderHearts(1, 3);
+        IconManager.renderPowers(4, 4);
+        IconManager.renderFires(4, 5);
+      }
+      static renderSneakers(fill, outline) {
+        const c = document.getElementById('ui-sneakers'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="sneaker-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-sneaker sneaker-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-sneaker sneaker-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderHearts(fill, outline) {
+        const c = document.getElementById('ui-hearts'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="heart-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-heart heart-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-heart heart-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderFires(fill, outline) {
+        const c = document.getElementById('ui-fires'); if (!c) return; c.innerHTML = '';
+        for (let i = 0; i < outline; i++) c.innerHTML += `
+          <div class="fire-icon ${i < fill ? 'active' : ''}">
+            <i class="ph-bold ph-fire fire-outline" aria-hidden="true"></i>
+            <i class="ph-fill ph-fire fire-fill" aria-hidden="true"></i>
+          </div>`;
+      }
+      static renderPowers(total, fill) {
+        const c = document.getElementById('ui-powers'); if (!c) return; c.innerHTML = '';
+        const types = [ { b:'ph-timer', f:'ph-timer' }, { b:'ph-shield', f:'ph-shield' }, { b:'ph-magnet', f:'ph-magnet' }, { b:'ph-crosshair-simple', f:'ph-crosshair-simple' } ];
+        for (let i = 0; i < total; i++) {
+          const t = types[i % types.length];
+          c.innerHTML += `
+            <div class="power ${i < fill ? 'active' : ''}">
+              <i class="ph-bold ${t.b}" aria-hidden="true"></i>
+              <i class="ph-fill ${t.f}" aria-hidden="true"></i>
+            </div>`;
+        }
+      }
+    }
+
+    // === GAME SETUP ===
+    function setupSimpleGame() {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        const crt = document.querySelector('.crt');
+        const cssW = crt.clientWidth;  const cssH = crt.clientHeight;
+
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        draw();
+
+        // Self-tests
+        console.assert(Math.abs(canvas.width  / (window.devicePixelRatio||1) - cssW) < 1, 'Canvas width backing store mismatch');
+        console.assert(Math.abs(canvas.height / (window.devicePixelRatio||1) - cssH) < 1, 'Canvas height backing store mismatch');
+      }
+
+      function draw() {
+        const w = canvas.clientWidth; const h = canvas.clientHeight;
+        ctx.fillStyle = '#0a241f'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#d6c7a4'; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('SNEAKER BOMBER', w / 2, h / 2 - 20);
+        ctx.fillText('SPACE TO START', w / 2, h / 2 + 20);
+      }
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MobileSafariLock.initialize();
+      IconManager.updateAllIcons();
+      setupSimpleGame();
+      const pauseBtn = document.getElementById('btn-pause');
+      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
+      setTimeout(() => { window.scrollTo(0, 0); }, 120);
+    });
+
+    // Simple UI API
+    window.SneakerQuestUI = {
+      IconManager,
+      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
+      setHearts:   (f, t) => IconManager.renderHearts(f, t),
+      setPowers:   (f, t) => IconManager.renderPowers(t, f),
+      setFires:    (f, t) => IconManager.renderFires(f, t),
+      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
+      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
+      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
+      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
+    };
+      // === HARD LOCK: disable zooming (pinch, double-tap, ctrl+wheel) ===
+    (function lockPageZoom(){
+        const opts = { passive: false };
+        ['gesturestart','gesturechange','gestureend'].forEach(type=>
+            document.addEventListener(type, e=>e.preventDefault(), opts)
+        );
+        // Block double‑tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', e=>{
+            const now = Date.now();
+            if (now - lastTouchEnd <= 350) e.preventDefault();
+            lastTouchEnd = now;
+        }, opts);
+        // Block ctrl+wheel zoom (desktop)
+        document.addEventListener('wheel', e=>{ if (e.ctrlKey) e.preventDefault(); }, opts);
+        // iOS focus zoom workaround not needed (no inputs <16px)
+    })();
+</script>
+<script>
+(function(){
+  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready
+</script><script>
+(function(){
+  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  onReady(function(){
+    var iframe = document.getElementById('controlsFrame');
+    var lifeTab = document.querySelector('#element-tabs > div:nth-child(2)');
+    if(!lifeTab) return;
+    lifeTab.classList.add('tab-life');
+    lifeTab.setAttribute('role','button');
+    lifeTab.setAttribute('tabindex','0');
+    lifeTab.setAttribute('aria-pressed','false');
+
+    function setLifeActive(on){
+      lifeTab.classList.toggle('active', !!on);
+      lifeTab.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    function clickInControls(){
+      try{
+        if(!iframe || !iframe.contentWindow) return;
+        var d = iframe.contentDocument || iframe.contentWindow.document;
+        var btn = d && d.getElementById('btn2_special');
+        if(btn){ btn.click(); }
+        setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700);
+      }catch(_){/* no-op */}
+    }
+    lifeTab.addEventListener('click', clickInControls);
+    lifeTab.addEventListener('keydown', function(e){
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); clickInControls(); }
+    });
+
+    // Reflect iframe clicks back to the LIFE tab (visual pulse only)
+    function attachIframeListeners(){
+      try{
+        var d = iframe && (iframe.contentDocument || iframe.contentWindow && iframe.contentWindow.document);
+        if(!d) return;
+        var btn = d.getElementById('btn2_special');
+        if(btn){
+          btn.addEventListener('click', function(){ setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700); });
+        }
+      }catch(_){}
+    }
+    if(iframe){
+      iframe.addEventListener('load', attachIframeListeners, { once:false });
+      // if already loaded
+      try{
+        if((iframe.contentDocument||iframe.contentWindow.document).readyState==='complete'){ attachIframeListeners(); }
+      }catch(_){}
+    }
+  });
+})();
+</script>
+<script>
+(function(){
+  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function(){
+    var iframe = document.getElementById('controlsFrame');
+    var tabsRoot = document.querySelector('#element-tabs');
+    if(!tabsRoot) return;
+
+    var boundEl = null;
+
+    function findPowerUpsEl(){
+      // 1) Try the exact selector first
+      var el = document.querySelector('#element-tabs > div:nth-child(3) > div > div');
+      if(el) return el;
+
+      // 2) Fallback: search descendants for text "power-ups" (case-insensitive, trim spaces)
+      var walker = document.createTreeWalker(tabsRoot, NodeFilter.SHOW_ELEMENT, null);
+      var candidate = null;
+      while(walker.nextNode()){
+        var n = walker.currentNode;
+        var txt = (n.textContent || '').trim().toLowerCase();
+        if(txt === 'power-ups' || txt === 'power ups' || txt.includes('power-ups')){
+          candidate = n;
+          break;
+        }
+      }
+      return candidate;
+    }
+
+    function syncFromIframe(target){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc || !target) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){
+          var on = timerBtn.classList.contains('active');
+          target.classList.toggle('active', on);
+          target.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+      }catch(_){}
+    }
+
+    function toggleTimer(target){
+      try{
+        var doc = iframe && iframe.contentWindow && iframe.contentWindow.document;
+        if(!doc) return;
+        var timerBtn = doc.getElementById('btn2_timer');
+        if(timerBtn){ timerBtn.click(); }
+        setTimeout(function(){ syncFromIframe(target); }, 60);
+        if(target){
+          target.classList.add('pulse');
+          setTimeout(function(){ target.classList.remove('pulse'); }, 220);
+        }
+      }catch(_){}
+    }
+
+    function bind(){
+      var el = findPowerUpsEl();
+      if(!el || el === boundEl) return;
+      // Remove previous listeners by cloning if we had one
+      if(boundEl && boundEl.parentNode){
+        var clone = boundEl.cloneNode(true);
+        boundEl.parentNode.replaceChild(clone, boundEl);
+      }
+      boundEl = el;
+      // Semantics
+      boundEl.setAttribute('role','button');
+      boundEl.setAttribute('tabindex','0');
+      if(!boundEl.hasAttribute('aria-pressed')) boundEl.setAttribute('aria-pressed','false');
+      boundEl.classList.add('powerups-activator');
+
+      boundEl.addEventListener('click', function(e){
+        e.preventDefault();
+        toggleTimer(boundEl);
+      });
+      boundEl.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggleTimer(boundEl);
+        }
+      });
+
+      // Initial sync
+      syncFromIframe(boundEl);
+    }
+
+    bind();
+
+    // Re-bind if the tabs re-render
+    var mo = new MutationObserver(function(){ bind(); });
+    mo.observe(tabsRoot, { childList: true, subtree: true });
+
+    if(iframe){
+      iframe.addEventListener('load', function(){ syncFromIframe(boundEl); });
+      if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete'){
+        syncFromIframe(boundEl);
+      }
+    }
+  });
+})();
+</script>
+<!-- [SQ-BASE-OVERRIDES] -->
+<style id="sq-base-overrides">
+:root { --center-cell: 90px ; }
+
+/* Section offsets and sizes */
+#element-marquee { margin-top: -10px ; }
+#element-divider { margin-top: -13px ; }
+#element-crt     { margin-top: -12px ; }
+#element-tabs    { margin-top: -12px ; }
+#element-hud1    { margin-top: -16px ; }
+#element-hud2    { margin-top: -16px ; }
+#element-bottom  { height: 240px ; }
+
+/* CRT default height from Settings 1 snapshot */
+#element-crt .crt { height: 350px ; aspect-ratio: auto ; }
+
+/* Marquee typography */
+.mq-title { font-size: 27px ; transform: translate(0px, 0px) ; }
+.mq-sub   { font-size: 7px ;  transform: translate(0px, 0px) ; }
+.mq-sub .chip-box { border-radius: 4px ; padding: 4px 3px ; }
+
+/* Gaps */
+#ui-sneakers { gap: 3px ; }
+#ui-powers   { gap: 7px ; }
+#ui-fires    { gap: 2px ; }
+
+/* Slot heights */
+.hud .slot-heart   { height: 33px ; }
+.hud .slot-shoes   { height: 33px ; }
+.hud .slot-dots    { height: 33px ; }
+.hud2 .slot-flames { height: 33px ; }
+.hud2 .slot-pause  { height: 33px ; }
+.hud2 .slot-bag    { height: 33px ; }
+
+/* Control screen paddings */
+.control-screen { padding-top: 13px ; padding-bottom: 14px ; }
+
+/* Inner side paddings */
+.inner { padding-left: 10px ; padding-right: 10px ; }
+
+/* Controls transform and constraints */
+#element-controls { transform: translate(0px, 0px) scale(1) ; min-height: 0 ; }
+#controlsFrame { border: 0 ; outline: 0 ; }
+
+/* Main container scale */
+#mainContainer { transform-origin: top center; }</style>
+<!-- [FLOAT-TUNER:TPL-START] -->
+<template id="float-tuner-tpl">
+<style>
+    .wrap{ position:fixed; right:12px; bottom:12px; width:300px; max-height:70vh; overflow:auto;
+           background:#111; color:#eee; font:12px/1.4 ui-sans-serif,system-ui; border-radius:12px;
+           box-shadow:0 10px 30px rgba(0,0,0,.6); border:1px solid #333; padding:10px; }
+    h3{ margin:0 0 8px 0; font-size:13px; }
+    .row{ display:grid; grid-template-columns: 1fr 50px; gap:8px; align-items:center; margin:6px 0; }
+    label{ font-size:12px; }
+    input[type=range]{ width:100%; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .hint{ font-size:11px; opacity:.7; }
+    button.small{ padding:6px 10px; border:0; background:#222; color:#ddd; border-radius:8px; cursor:pointer; }
+  </style>
+<div class="panel wrap" id="ftPanel">
+<h3>Layout Tuner — Floating Controls</h3>
+<div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label>
+<input id="v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
+<div class="grid2">
+<div>
+<h3>Buttons (Left)</h3>
+<div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" max="120" min="-120" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale <output id="o_ls">1.35</output></label><input id="v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1.35"/></div>
+</div>
+<div>
+<h3>Joystick (Right)</h3>
+<div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="120" min="-120" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale <output id="o_rs">1.24</output></label><input id="v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1.24"/></div>
+</div>
+</div>
+<div class="hint">Buttons are on the left; Joystick is on the right. Background of the bay is transparent.</div>
+<div style="margin-top:8px"><button class="small" id="ftClose">Close</button></div>
+</div>
+</template>
+<!-- [FLOAT-TUNER:TPL-END] -->
+<!-- [FLOAT-TUNER:SCRIPT] -->
+<script>(function(){
+  function setup(){
+    var lt2root = document.getElementById('lt2-root');
+    if(!lt2root || !lt2root.shadowRoot) return false;
+    var shadow = lt2root.shadowRoot;
+    var iframe = document.getElementById('controlsFrame');
+
+    function getDoc(){
+      if(!iframe) return null;
+      try { return iframe.contentDocument || iframe.contentWindow.document; }
+      catch(e){ return null; }
+    }
+
+    function setTransform(el, x, y, s){
+      if(!el) return;
+      el.style.transform = 'translate(' + (x||0) + 'px,' + (y||0) + 'px) scale(' + (s||1) + ')';
+      el.style.transformOrigin = 'center center';
+    }
+
+    function bind(id, outId, cb){
+      var el = shadow.getElementById(id), out = shadow.getElementById(outId);
+      if(!el) return;
+      function up(){
+        if(out) out.textContent = el.value;
+        cb && cb(parseFloat(el.value));
+      }
+      el.addEventListener('input', up);
+      up();
+    }
+
+    var bottom = document.getElementById('element-bottom');
+    bind('ft_v_bh','ft_o_bh', function(v){
+      if(bottom){ bottom.style.height = v + 'px'; }
+    });
+
+    var targets = { left: null, right: null };
+    function refreshTargets(){
+      var d = getDoc();
+      if(!d) return;
+      targets.left  = d.getElementById('left-area');
+      targets.right = d.getElementById('right-area');
+    }
+    if(iframe){ iframe.addEventListener('load', refreshTargets); }
+    refreshTargets();
+
+    var L = { x:0, y:0, s:1 }, R = { x:0, y:0, s:1 };
+
+    bind('ft_v_lx','ft_o_lx', function(v){
+      L.x = parseFloat(v)||0;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+    bind('ft_v_ly','ft_o_ly', function(v){
+      L.y = parseFloat(v)||0;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+    bind('ft_v_ls','ft_o_ls', function(v){
+      L.s = parseFloat(v)||1;
+      setTransform(targets.left,  L.x, L.y, L.s);
+    });
+
+    bind('ft_v_rx','ft_o_rx', function(v){
+      R.x = parseFloat(v)||0;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+    bind('ft_v_ry','ft_o_ry', function(v){
+      R.y = parseFloat(v)||0;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+    bind('ft_v_rs','ft_o_rs', function(v){
+      R.s = parseFloat(v)||1;
+      setTransform(targets.right, R.x, R.y, R.s);
+    });
+
+    return true;
+  }
+
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
+  }
+})();</script>
+<!-- [LT2:TPL-START] -->
+<template id="lt2-tuner-tpl">
+<style>
+    :host{ all:initial; }
+    .wrap{ position:fixed; right:64px; bottom:12px; width:320px; max-height:72vh; overflow:auto;
+      background:#0f0f10; color:#e7e7e7; font:12px/1.4 ui-sans-serif,system-ui; border-radius:14px;
+      box-shadow:0 12px 28px rgba(0,0,0,.65); border:1px solid #2c2c2e; padding:12px; }
+    h3{ margin:0 0 8px 0; font-size:13px; letter-spacing:.02em; }
+    .row{ display:grid; grid-template-columns: 1fr 64px; gap:8px; align-items:center; margin:6px 0; }
+    label{ font-size:12px; }
+    input[type=range]{ width:100%; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .hint{ font-size:11px; opacity:.7; margin-top:6px; }
+    button.small{ padding:6px 10px; border:0; background:#222; color:#ddd; border-radius:8px; cursor:pointer; }
+  </style>
+<div class="wrap" id="lt2Panel" tabindex="-1">
+<div id="outer-controls-section">
+<h3>Container layout (outer)</h3>
+<h3>Layout Tuner — Floating Controls</h3>
+<div class="row"><label>Bottom Height <output id="ft_o_bh">240</output>px</label>
+<input id="ft_v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
+<div class="grid2">
+<div>
+<h3>Buttons (Left)</h3>
+<div class="row"><label>X <output id="ft_o_lx">0</output>px</label><input id="ft_v_lx" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="ft_o_ly">0</output>px</label><input id="ft_v_ly" max="120" min="-120" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale <output id="ft_o_ls">1</output></label><input id="ft_v_ls" max="1.6" min="0.6" step="0.01" type="range" value="1"/></div>
+</div>
+<div>
+<h3>Joystick (Right)</h3>
+<div class="row"><label>X <output id="ft_o_rx">0</output>px</label><input id="ft_v_rx" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="ft_o_ry">0</output>px</label><input id="ft_v_ry" max="120" min="-120" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale <output id="ft_o_rs">1</output></label><input id="ft_v_rs" max="1.6" min="0.6" step="0.01" type="range" value="1"/></div>
+</div>
+</div>
+<div class="hint">Buttons are on the left; Joystick is on the right. Background of the bay is transparent.</div>
+<div style="margin-top:8px"></div>
+</div>
+<h3>LT2 • Floating Controls</h3>
+<div class="row"><label>Bottom Height <output id="o_bh">240</output>px</label><input id="v_bh" max="360" min="80" step="1" type="range" value="240"/></div>
+<div class="grid2">
+<div>
+<h3>Buttons (Left)</h3>
+<div class="row"><label>X <output id="o_lx">0</output>px</label><input id="v_lx" max="240" min="-240" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="o_ly">0</output>px</label><input id="v_ly" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale Content <output id="o_ls">1.35</output></label><input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1.35"/></div>
+</div>
+<div>
+<h3>Joystick (Right)</h3>
+<div class="row"><label>X <output id="o_rx">0</output>px</label><input id="v_rx" max="240" min="-240" step="1" type="range" value="0"/></div>
+<div class="row"><label>Y <output id="o_ry">0</output>px</label><input id="v_ry" max="200" min="-200" step="1" type="range" value="0"/></div>
+<div class="row"><label>Scale Content <output id="o_rs">1.24</output></label><input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/></div>
+</div>
+</div>
+<div class="hint">Wrappers translate only. Content scales inside panels.</div>
+<div style="margin-top:8px"> <button class="small" id="lt2FloatToggle" type="button">Float</button><button class="small" id="lt2Close">Close</button></div>
+</div>
+</template>
+<!-- [LT2:TPL-END] -->
+<!-- [UNIFIED-TUNER-SCHEMA]
+  See external file: unified-tuner-schema.json
+  Strategy: LT2-first, legacy float tuner documented in `legacy` blocks.
+  Wiring will be implemented in Tasks 13C–13D.
+[UNIFIED-TUNER-SCHEMA-END] -->
+<!-- [UNIFIED-TUNER:TPL-START] -->
+<template id="unified-tuner-tpl">
+<style>
+    /* Base styling: reuse LT2 look and feel */
+    .wrap {
+      position: fixed;
+      right: 1rem;
+      bottom: 5rem;
+      width: 320px;
+      max-width: 100vw;
+      padding: 0.75rem 0.75rem 0.9rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      background: rgba(10,10,14,0.95);
+      color: #f7f7ff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      z-index: 9999;
+    }
+
+    h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .hint {
+      margin: 0 0 0.5rem;
+      font-size: 0.78rem;
+      opacity: 0.8;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tab {
+      flex: 1 1 0;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04);
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: rgba(127, 199, 255, 0.25);
+      border-color: rgba(127, 199, 255, 0.7);
+    }
+
+    .tab-panel {
+      display: none;
+      margin-top: 0.25rem;
+    }
+
+    .tab-panel[data-active="true"] {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 0.5rem;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.78rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .field output {
+      font-variant-numeric: tabular-nums;
+      opacity: 0.85;
+    }
+
+    .field input[type="range"] {
+      width: 100%;
+    }
+
+    .row-header {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      margin: 0.25rem 0 0.25rem;
+    }
+
+    .row-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+    }
+
+    button.close {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.04);
+      color: inherit;
+      cursor: pointer;
+    }
+  </style>
+<div class="wrap" hidden="" id="unifiedPanel" tabindex="-1">
+<h3>Unified Tuner (LT2)</h3>
+<p class="hint">Tabs group bottom, left, and right controls. Behavior wiring is added in a later task.</p>
+<div aria-label="Unified tuner groups" class="tabs" role="tablist">
+<button aria-controls="panel-bottom" aria-selected="true" class="tab" data-tab="bottom" id="tab-bottom" role="tab">Bottom</button>
+<button aria-controls="panel-left" aria-selected="false" class="tab" data-tab="left" id="tab-left" role="tab">Left</button>
+<button aria-controls="panel-right" aria-selected="false" class="tab" data-tab="right" id="tab-right" role="tab">Right</button>
+</div>
+<!-- Bottom height panel -->
+<section aria-labelledby="tab-bottom" class="tab-panel" data-active="true" data-panel="bottom" id="panel-bottom" role="tabpanel">
+<div class="field">
+<label for="v_bh">
+<span>Bottom height</span>
+<output id="o_bh">240</output>
+</label>
+<input id="v_bh" max="360" min="80" step="1" type="range" value="240"/>
+</div>
+</section>
+<!-- Left controls panel -->
+<section aria-labelledby="tab-left" class="tab-panel" data-panel="left" id="panel-left" role="tabpanel">
+<p class="row-header">Left controls (buttons)</p>
+<div class="field">
+<label for="v_lx">
+<span>Offset X</span>
+<output id="o_lx">0</output>
+</label>
+<input id="v_lx" max="240" min="-240" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ly">
+<span>Offset Y</span>
+<output id="o_ly">0</output>
+</label>
+<input id="v_ly" max="200" min="-200" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ls">
+<span>Scale</span>
+<output id="o_ls">1.35</output>
+</label>
+<input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1.35"/>
+</div>
+</section>
+<!-- Right controls panel -->
+<section aria-labelledby="tab-right" class="tab-panel" data-panel="right" id="panel-right" role="tabpanel">
+<p class="row-header">Right controls (joystick)</p>
+<div class="field">
+<label for="v_rx">
+<span>Offset X</span>
+<output id="o_rx">0</output>
+</label>
+<input id="v_rx" max="240" min="-240" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ry">
+<span>Offset Y</span>
+<output id="o_ry">0</output>
+</label>
+<input id="v_ry" max="200" min="-200" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_rs">
+<span>Scale</span>
+<output id="o_rs">1.24</output>
+</label>
+<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/>
+</div>
+</section>
+<button class="close" id="unifiedClose" type="button">Close</button>
+</div>
+</template>
+<!-- [UNIFIED-TUNER:TPL-END] -->
+<!-- [LT2:SCRIPT] -->
+<script>
+(function(){
+  var root = document.createElement('div');
+  root.id = 'lt2-root';
+  root.style.position='fixed'; root.style.right='12px'; root.style.bottom='12px'; root.style.zIndex='100010';
+  document.body.appendChild(root);
+  var sh = root.attachShadow({mode:'open'});
+  var tpl = document.getElementById('lt2-tuner-tpl'); if(tpl) sh.appendChild(tpl.content.cloneNode(true));
+
+  var tgl = document.createElement('button');
+  Object.assign(tgl.style,{position:'fixed', right:'60px', bottom:'12px', width:'40px', height:'40px', borderRadius:'50%', border:'0', background:'#1a1410', color:'#e6d7b6', boxShadow:'0 6px 16px rgba(0,0,0,.6)', cursor:'pointer', zIndex:'100011', fontSize:'18px'});
+  tgl.id='lt2Toggle'; tgl.textContent='LT2'; document.body.appendChild(tgl);
+  var panel = sh.getElementById('lt2Panel'); panel.style.display='none';
+  tgl.addEventListener('click', function(){ panel.style.display = panel.style.display==='none' ? 'block':'none'; });
+  sh.getElementById('lt2Close').addEventListener('click', function(){ panel.style.display='none'; });
+
+  function bind(id, outId, cb){ var el=sh.getElementById(id), out=sh.getElementById(outId); if(!el) return;
+    function up(){ out && (out.textContent=el.value); cb && cb(parseFloat(el.value)); }
+    el.addEventListener('input', up); up(); }
+
+  var bottom = document.getElementById('element-bottom');
+  bind('v_bh','o_bh', function(v){ if(bottom){ bottom.style.height = v + 'px'; }});
+
+  var iframe = document.getElementById('controlsFrame');
+  function doc(){ try{ return iframe && (iframe.contentDocument || iframe.contentWindow.document); }catch(e){ return null; } }
+
+  function ensureStyle(){
+    var d = doc(); if(!d) return false;
+    if(d.getElementById('lt2-style')) return true;
+    var css = d.createElement('style'); css.id='lt2-style';
+    css.textContent = [
+      '.col-left .pad{ transform: translate(var(--lt2-lx,0px), var(--lt2-ly,0px)) scale(var(--lt2-left,1)); transform-origin:center center; overflow:hidden; }',
+      '.col-right .pad{ transform: translate(var(--lt2-rx,0px), var(--lt2-ry,0px)) scale(var(--lt2-right,1)); transform-origin:center center; overflow:hidden; }',
+      /* Force canvases to match the pad viewport so overlays line up */
+      '#btn2_panel{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
+      '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }'
+    ].join('\n');
+    d.head.appendChild(css);
+    return true;
+  }
+
+  function setVar(k,v){ var d=doc(); if(!d) return; d.documentElement.style.setProperty(k, v); }
+  // Defaults
+  setVar('--lt2-left','1');
+  setVar('--lt2-right','1');
+  setVar('--lt2-lx','0px');
+  setVar('--lt2-ly','0px');
+  setVar('--lt2-rx','0px');
+  setVar('--lt2-ry','0px');
+
+  // Bind sliders to CSS vars inside iframe
+  bind('v_lx','o_lx', function(v){ ensureStyle(); setVar('--lt2-lx', v+'px'); });
+  bind('v_ly','o_ly', function(v){ ensureStyle(); setVar('--lt2-ly', v+'px'); });
+  bind('v_rx','o_rx', function(v){ ensureStyle(); setVar('--lt2-rx', v+'px'); });
+  bind('v_ry','o_ry', function(v){ ensureStyle(); setVar('--lt2-ry', v+'px'); });
+  bind('v_ls','o_ls', function(v){ ensureStyle(); setVar('--lt2-left', String(v)); });
+  bind('v_rs','o_rs', function(v){ ensureStyle(); setVar('--lt2-right', String(v)); });
+
+  // Init when iframe loads and via short polling
+  function init(){ ensureStyle(); var cs = document.querySelector('#element-bottom .control-screen'); if(cs){ cs.style.background='transparent'; } }
+  if(iframe){ iframe.addEventListener('load', init); }
+  init();
+  var n=0, timer=setInterval(function(){ init(); if(++n>30) clearInterval(timer); }, 200);
+
+  // Escape closes panel
+  function onKey(e){ if(e.key==='Escape'){ panel.style.display='none'; } }
+  document.addEventListener('keydown', onKey);
+})();
+</script><script>(function(){
+  function setup(){
+    var root = document.getElementById('lt2-root');
+    if(!root || !root.shadowRoot) return false;
+    var sh = root.shadowRoot;
+    var panel = sh.getElementById('lt2Panel');
+    var floatBtn = sh.getElementById('lt2FloatToggle');
+    var wrap = sh.querySelector('.wrap');
+    if(!panel || !floatBtn || !wrap) return false;
+
+    var floating = false;
+    var dragging = false;
+    var offsetX = 0, offsetY = 0;
+
+    function applyDocked(){
+      wrap.style.left = '';
+      wrap.style.top = '';
+      wrap.style.right = '64px';
+      wrap.style.bottom = '12px';
+    }
+
+    function applyFloating(x, y){
+      wrap.style.right = 'auto';
+      wrap.style.bottom = 'auto';
+      wrap.style.left = x + 'px';
+      wrap.style.top = y + 'px';
+    }
+
+    function startDrag(ev){
+      if(!floating) return;
+      var t = ev.target;
+      var tag = t && t.tagName ? t.tagName.toLowerCase() : '';
+      if(tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea' || tag === 'label')
+        return;
+      dragging = true;
+      var r = wrap.getBoundingClientRect();
+      offsetX = ev.clientX - r.left;
+      offsetY = ev.clientY - r.top;
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      ev.preventDefault();
+    }
+
+    function onMove(ev){
+      if(!dragging) return;
+      applyFloating(ev.clientX - offsetX, ev.clientY - offsetY);
+    }
+
+    function onUp(){
+      dragging = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    }
+
+    floatBtn.addEventListener('click', function(){
+      floating = !floating;
+      floatBtn.setAttribute('aria-pressed', floating ? 'true' : 'false');
+      floatBtn.textContent = floating ? 'Dock' : 'Float';
+      if(!floating){
+        applyDocked();
+      } else {
+        var r = wrap.getBoundingClientRect();
+        applyFloating(r.left, r.top);
+      }
+    });
+
+    panel.addEventListener('pointerdown', startDrag);
+    applyDocked();
+    return true;
+  }
+
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
+  }
+})();</script><script>(function(){
+  function setup(){
+    var root = document.getElementById('lt2-root');
+    if(!root || !root.shadowRoot) return false;
+    var sh = root.shadowRoot;
+
+    // Create floating COPY button near LT2 toggle
+    var btn = document.createElement('button');
+    Object.assign(btn.style,{
+      position:'fixed',
+      right:'60px',
+      bottom:'64px',
+      padding:'6px 10px',
+      borderRadius:'12px',
+      border:'0',
+      background:'#222',
+      color:'#eee',
+      font:'11px system-ui, -apple-system, BlinkMacSystemFont',
+      cursor:'pointer',
+      zIndex:'100012',
+      boxShadow:'0 4px 12px rgba(0,0,0,.6)'
+    });
+    btn.textContent = 'COPY JSON';
+    btn.id = 'lt2CopyJson';
+    document.body.appendChild(btn);
+
+    function getVal(id){
+      var el = sh.getElementById(id);
+      return el ? parseFloat(el.value) : null;
+    }
+
+    function buildPayload(){
+      return {
+        prompt: "Here is a COPY JSON snapshot from the unified LT2 tuner. Task: apply these values as the new default tuner state (outer + inner) without changing layout, theming, or behavior.",
+        outer:{
+          bottomHeight: getVal('ft_v_bh'),
+          left:{ x:getVal('ft_v_lx'), y:getVal('ft_v_ly'), scale:getVal('ft_v_ls') },
+          right:{ x:getVal('ft_v_rx'), y:getVal('ft_v_ry'), scale:getVal('ft_v_rs') }
+        },
+        inner:{
+          bottomHeight: getVal('v_bh'),
+          left:{ x:getVal('v_lx'), y:getVal('v_ly'), scale:getVal('v_ls') },
+          right:{ x:getVal('v_rx'), y:getVal('v_ry'), scale:getVal('v_rs') }
+        }
+      };
+    }
+
+    function doCopy(){
+      var json = JSON.stringify(buildPayload(), null, 2);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(json).then(function(){
+          btn.textContent = 'COPIED';
+          setTimeout(function(){ btn.textContent = 'COPY JSON'; }, 800);
+        }).catch(function(){
+          fallback();
+        });
+      } else {
+        fallback();
+      }
+
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = json;
+        ta.style.position='fixed';
+        ta.style.opacity='0';
+        document.body.appendChild(ta);
+        ta.select();
+        try{ document.execCommand('copy'); }catch(e){}
+        document.body.removeChild(ta);
+        btn.textContent = 'COPIED';
+        setTimeout(function(){ btn.textContent = 'COPY JSON'; }, 800);
+      }
+    }
+
+    btn.addEventListener('click', doCopy);
+    return true;
+  }
+
+  if(!setup()){
+    var tries = 0;
+    var timer = setInterval(function(){
+      if(setup() || ++tries > 40) clearInterval(timer);
+    }, 200);
+  }
+})();</script>
+<!-- [UNIFIED-TUNER:SCRIPT] -->
+<script>
+(function(){
+  var host = document.getElementById('unified-tuner-root') || (function(){
+    var r = document.createElement('div');
+    r.id = 'unified-tuner-root';
+    document.body.appendChild(r);
+    return r;
+  })();
+  var tpl = document.getElementById('unified-tuner-tpl');
+  if (!host || !tpl) return;
+
+  var shadow = host.attachShadow({ mode: 'open' });
+  shadow.appendChild(tpl.content.cloneNode(true));
+
+  var panel = shadow.getElementById('unifiedPanel');
+  var closeBtn = shadow.getElementById('unifiedClose');
+
+  // Create floating toggle button (additive, does not replace existing buttons)
+  var btn = document.createElement('button');
+  btn.id = 'unifiedToggle';
+  btn.type = 'button';
+  btn.textContent = 'UNI';
+  btn.style.position = 'fixed';
+  btn.style.right = '1rem';
+  btn.style.bottom = '8.5rem';
+  btn.style.width = '40px';
+  btn.style.height = '40px';
+  btn.style.borderRadius = '999px';
+  btn.style.border = 'none';
+  btn.style.boxShadow = '0 3px 8px rgba(0,0,0,0.4)';
+  btn.style.background = '#1d2330';
+  btn.style.color = '#f7f7ff';
+  btn.style.fontSize = '0.7rem';
+  btn.style.cursor = 'pointer';
+  btn.style.zIndex = 9999;
+  btn.title = 'Unified tuner (LT2)';
+
+  function togglePanel(show) {
+    var isVisible = !panel.hasAttribute('hidden');
+    var next = (typeof show === 'boolean') ? show : !isVisible;
+    if (next) {
+      panel.removeAttribute('hidden');
+      if (panel.focus) {
+        try { panel.focus({ preventScroll: true }); } catch (e) { panel.focus(); }
+      }
+    } else {
+      panel.setAttribute('hidden', '');
+    }
+  }
+
+  btn.addEventListener('click', function(){
+    togglePanel();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(){
+      togglePanel(false);
+    });
+  }
+
+  document.body.appendChild(btn);
+
+  // Basic tab switching (UI only, no behavior wiring)
+  var tabs = Array.prototype.slice.call(shadow.querySelectorAll('.tab'));
+  var panels = Array.prototype.slice.call(shadow.querySelectorAll('.tab-panel'));
+
+  function setActiveTab(tabId) {
+    var i;
+    var tab = null;
+    for (i = 0; i < tabs.length; i++) {
+      if (tabs[i].getAttribute('data-tab') === tabId) {
+        tab = tabs[i];
+        break;
+      }
+    }
+    if (!tab) return;
+
+    for (i = 0; i < tabs.length; i++) {
+      var selected = (tabs[i] === tab);
+      tabs[i].setAttribute('aria-selected', selected ? 'true' : 'false');
+    }
+
+    for (i = 0; i < panels.length; i++) {
+      var isMatch = (panels[i].getAttribute('data-panel') === tabId);
+      panels[i].setAttribute('data-active', isMatch ? 'true' : 'false');
+    }
+  }
+
+  for (var ti = 0; ti < tabs.length; ti++) {
+    (function(t){
+      t.addEventListener('click', function(){
+        var tabId = t.getAttribute('data-tab');
+        if (tabId) setActiveTab(tabId);
+      });
+    })(tabs[ti]);
+  }
+
+  // Initial active tab
+  setActiveTab('bottom');
+// Unified tuner wiring (Task 13D)
+function bindRange(id, outId, cb) {
+  var el = shadow.getElementById(id);
+  var out = shadow.getElementById(outId);
+  if (!el) return;
+
+  function sync() {
+    if (out) out.textContent = el.value;
+    if (cb) cb(el.value);
+  }
+
+  el.addEventListener('input', sync);
+  // Apply default on bind
+  sync();
+}
+
+var bottom = document.getElementById('element-bottom');
+var iframe = document.getElementById('controlsFrame');
+
+function doc() {
+  try {
+    return iframe && (iframe.contentDocument || iframe.contentWindow.document);
+  } catch (e) {
+    return null;
+  }
+}
+
+function ensureStyle() {
+  var d = doc();
+  if (!d) return false;
+  if (d.getElementById('lt2-style')) return true;
+
+  var css = d.createElement('style');
+  css.id = 'lt2-style';
+  css.textContent = [
+    '.col-left .pad{ transform: translate(var(--lt2-lx,0px), var(--lt2-ly,0px)) scale(var(--lt2-left,1)); transform-origin:center center; overflow:hidden; }',
+    '.col-right .pad{ transform: translate(var(--lt2-rx,0px), var(--lt2-ry,0px)) scale(var(--lt2-right,1)); transform-origin:center center; overflow:hidden; }',
+    '#btn2_panel{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
+    '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }'
+  ].join('\n');
+  d.head.appendChild(css);
+  return true;
+}
+
+function setVar(key, value) {
+  var d = doc();
+  if (!d) return;
+  d.documentElement.style.setProperty(key, value);
+}
+
+// Mirror LT2 defaults
+setVar('--lt2-left', '1');
+setVar('--lt2-right', '1');
+setVar('--lt2-lx', '0px');
+setVar('--lt2-ly', '0px');
+setVar('--lt2-rx', '0px');
+setVar('--lt2-ry', '0px');
+
+// Make bay background transparent (aligned with LT2)
+var cs = document.querySelector('#element-bottom .control-screen');
+if (cs) {
+  cs.style.background = 'transparent';
+}
+
+// Bottom height
+bindRange('v_bh', 'o_bh', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  if (bottom) {
+    bottom.style.height = v + 'px';
+  }
+});
+
+// Left controls (buttons)
+bindRange('v_lx', 'o_lx', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-lx', v + 'px');
+});
+
+bindRange('v_ly', 'o_ly', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-ly', v + 'px');
+});
+
+bindRange('v_ls', 'o_ls', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 1;
+  ensureStyle();
+  setVar('--lt2-left', String(v));
+});
+
+// Right controls (joystick)
+bindRange('v_rx', 'o_rx', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-rx', v + 'px');
+});
+
+bindRange('v_ry', 'o_ry', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-ry', v + 'px');
+});
+
+bindRange('v_rs', 'o_rs', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 1;
+  ensureStyle();
+  setVar('--lt2-right', String(v));
+});
+
+})();
+</script>
+<!-- [UNIFIED-TUNER:SCRIPT-END] -->
+<div id="unified-tuner-root"></div>
+
+<script>
+(function () {
+  var BASE_TRANSLATE = 'translateX(-50%)';
+  var BASE_SCALE = 1.33222;
+  var container = document.getElementById('mainContainer');
+  if (!container) return;
+
+  function applyCabinetScale() {
+
+    var rect = container.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+
+    if (!rect.width || !rect.height || !vw || !vh) return;
+
+    var scaleX = vw / rect.width;
+    var scaleY = vh / rect.height;
+
+    var fitFactor = Math.min(1, scaleX, scaleY);
+    var finalScale = BASE_SCALE * fitFactor;
+
+  }
+
+  window.addEventListener('load', applyCabinetScale);
+  window.addEventListener('resize', applyCabinetScale);
+  window.addEventListener('orientationchange', applyCabinetScale);
+})();
+</script>
+
+<script>
+(function () {
+  const CABINET_W = 430;
+  const CABINET_H = 900;
+  const root = document.documentElement;
+  const container = document.getElementById('mainContainer');
+  if (!container) return;
+
+  function layoutCabinet() {
+    // Read CSS margin variable; default to 16px
+    const margin = parseFloat(
+      getComputedStyle(root).getPropertyValue('--cabinet-vmargin')
+    ) || 16;
+
+    const vw = window.innerWidth || root.clientWidth;
+    const vh = window.innerHeight || root.clientHeight;
+
+    // Height we can actually use after top + bottom margins
+    const availableHeight = Math.max(0, vh - margin * 2);
+
+    // Scale factors to fit width and height
+    const scaleX = vw / CABINET_W;
+    const scaleY = availableHeight / CABINET_H;
+
+    // Final uniform scale: fit both constraints, never upscale above 1
+    const scale = Math.min(1, scaleX, scaleY);
+
+    // Position and scale:
+    // - top margin
+    // - horizontally centered
+    container.style.top = margin + 'px';
+  }
+
+  window.addEventListener('resize', layoutCabinet);
+  window.addEventListener('orientationchange', layoutCabinet);
+  window.addEventListener('load', layoutCabinet);
+  layoutCabinet();
+})();
+</script>
+</body>
+</html>
