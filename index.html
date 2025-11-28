@@ -238,21 +238,6 @@
   height: 100%;
   border: 0;
 }
-
-#bottom_debug {
-  position: fixed;
-  left: 8px;
-  bottom: 8px;
-  padding: 4px 6px;
-  font: 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color: #f8f8ff;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 4px;
-  z-index: 9999;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
 </style>
 </head>
 <body>
@@ -609,6 +594,18 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     buildArrowPadGeometry();
     buildArrowHitRects();
   }
+  function layoutJoypadOnce() {
+    const rect = cvs.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+    updateLayout(w, h);
+  }
+
+  window.addEventListener('load', layoutJoypadOnce);
+  window.addEventListener('resize', layoutJoypadOnce);
+  window.addEventListener('orientationchange', layoutJoypadOnce);
+
+
 
   function getPointerLocation(e) {
     const r = cvs.getBoundingClientRect();
@@ -1067,16 +1064,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     return Math.hypot(px-sx,py-sy);
   }
 
-  const ro = new ResizeObserver(entries =&gt; {
-    if (entries[0]) {
-      const { width, height } = entries[0].contentRect;
-      const p = parseFloat(getComputedStyle(rightArea).getPropertyValue(&#x27;--gap&#x27;)) || 16;
-      const w = Math.max(1, Math.floor(width - p*2));
-      const h = Math.max(1, Math.floor(height - p*2));
-      updateLayout(w, h);
-    }
-  });
-  ro.observe(rightArea);
+    layoutJoypadOnce();
   requestAnimationFrame(loop);
 })()
 ;
@@ -1551,7 +1539,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &##x27;center&#x27; | &#x27;final&#x27;
+    state.normalBomb.bombType = bombType; // &#x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
@@ -3250,32 +3238,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         const container = document.querySelector('.fixed-container');
         if (!container) return;
 
-        const bottomDebug = document.getElementById('bottom_debug');
-        const mainContainer = document.getElementById('mainContainer');
-        const bottomElement = document.getElementById('element-bottom');
-        const controlsElement = document.getElementById('element-controls');
-
-        function updateBottomDebug() {
-          if (!bottomDebug) return;
-
-          const vw = window.innerWidth || 0;
-          const vh = window.innerHeight || 0;
-
-          const cabRect = mainContainer ? mainContainer.getBoundingClientRect() : { width: 0, height: 0 };
-          const botRect = bottomElement ? bottomElement.getBoundingClientRect() : { width: 0, height: 0 };
-          const ctlRect = controlsElement ? controlsElement.getBoundingClientRect() : { width: 0, height: 0 };
-
-          const cabW = Math.round(cabRect.width);
-          const cabH = Math.round(cabRect.height);
-          const botW = Math.round(botRect.width);
-          const botH = Math.round(botRect.height);
-          const ctlW = Math.round(ctlRect.width);
-          const ctlH = Math.round(ctlRect.height);
-
-          bottomDebug.textContent =
-            `vw ${vw}×${vh} | cab ${cabW}×${cabH} | bottom ${botW}×${botH} | controls ${ctlW}×${ctlH}`;
-        }
-
         const applyMeasuredFit = () => {
           const vv = window.visualViewport;
           const vh = vv ? vv.height : window.innerHeight; // visible height (excludes Safari bars)
@@ -3288,8 +3250,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
           const scale = Math.max(0.01, vh / Math.max(1, natH));
           container.style.transform = `translateX(-50%) scale(${scale})`;
-
-          updateBottomDebug();
         };
 
         const schedule = () => requestAnimationFrame(applyMeasuredFit);
@@ -4520,8 +4480,5 @@ bindRange('v_rs', 'o_rs', function(raw) {
   layoutCabinet();
 })();
 </script>
-
-<div id="bottom_debug" aria-hidden="true"></div>
-
 </body>
 </html>
