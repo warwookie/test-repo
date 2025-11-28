@@ -32,13 +32,7 @@
 
     /* bottom-pinned layout (single body rule above) */
 
-    .cabinet-viewport {
-  position: fixed;
-  inset: 0;
-  transform-origin: top center;
-}
-
-.fixed-container {
+    .fixed-container {
   position: absolute;
   top: var(--cabinet-vmargin);
   left: 50%;
@@ -248,7 +242,6 @@
 </style>
 </head>
 <body>
-<div class="cabinet-viewport" id="cabinetViewport">
 <div class="fixed-container" id="mainContainer">
 <div class="cabinet">
 <div class="inner">
@@ -2448,7 +2441,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 </template>
 <!-- [SQ-TUNER:TPL-END] -->
 <!-- [SQ-TUNER:SCRIPT] -->
-</div>
 <script>
 (function(){
   // Create tuner root container
@@ -2585,19 +2577,28 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   // Update scale display
   function updateScaleDisplay() {
-    if (!vScale || !oScale) return;
-    const value = parseFloat(vScale.value) || 1;
-    oScale.textContent = value.toFixed(2);
+    const currentScale = detectCurrentScale();
+    if (oScale) {
+      oScale.textContent = currentScale.toFixed(2);
+    }
   }
 
   // Apply scale with guard
   function applyScale() {
     if (!mainContainer || !vScale) return;
     const scaleValue = parseFloat(vScale.value) || 1;
-
-    // Tuner now owns cabinet scaling: always use a stable transform
-    mainContainer.style.transform = `translateX(-50%) scale(${scaleValue})`;
-
+    
+    // Preserve existing transform structure
+    const currentTransform = getComputedStyle(mainContainer).transform;
+    let newTransform = '';
+    
+    if (currentTransform.includes('translateX(-50%)')) {
+      newTransform = `translateX(-50%) scale(${scaleValue.toFixed(2)})`;
+    } else {
+      newTransform = `scale(${scaleValue.toFixed(2)})`;
+    }
+    
+    mainContainer.style.transform = newTransform;
     if (oScale) {
       oScale.textContent = scaleValue.toFixed(2);
     }
@@ -2637,7 +2638,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   gapControls.forEach(control => {
     const input = shadow.getElementById(control.id);
-    const output = shadow.getElementById('o_' + control.id.replace(/^v_/, ''));
+    const output = shadow.getElementById('o_' + control.id);
     
     if (input) {
       input.addEventListener('input', function() {
@@ -2871,7 +2872,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   slotControls.forEach(control => {
     const input = shadow.getElementById(control.id);
-    const output = shadow.getElementById('o_' + control.id.replace(/^v_/, ''));
+    const output = shadow.getElementById('o_' + control.id);
     
     if (input) {
       input.addEventListener('input', function() {
@@ -3077,8 +3078,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
     
     // Scale
-    const sliderScale = vScale ? (parseFloat(vScale.value) || 1) : detectCurrentScale();
-    data.scale = sliderScale;
+    data.scale = detectCurrentScale();
     
     // Icon counts
     data.iconCounts = {
@@ -3145,72 +3145,65 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   }
 
   // Reset functionality
-  const defaults = {
-          'v_scale': 0.85,
-          'v_center_cell': 90,
-          'v_gap_top': -8,
-          'v_gap_div': -12,
-          'v_gap_crt': -11,
-          'v_gap_tabs': -13,
-          'v_gap_hud1': -15,
-          'v_gap_hud2': -13,
-          'v_gap_bottom': 240,
-          'v_bot_a': 0,
-          'v_bot_b': 0,
-          'v_global_pad_l': 10,
-          'v_global_pad_r': 10,
-          'v_mqtsize': 29,
-          'v_mqtx': -3,
-          'v_mqty': 3,
-          'v_mqssize': 7,
-          'v_mqsx': 0,
-          'v_mqsy': 4,
-          'v_chipbr': 6,
-          'v_chippadx': 6,
-          'v_chippady': 3,
-          'v_icon_gap_sneakers': 3,
-          'v_icon_gap_powers': 7,
-          'v_icon_gap_fires': 3,
-          'in_hearts_fill': 1,
-          'in_hearts_outline': 3,
-          'in_shoes_fill': 3,
-          'in_shoes_outline': 5,
-          'in_powers_fill': 4,
-          'in_powers_total': 4,
-          'in_fires_fill': 4,
-          'in_fires_outline': 5,
-          'v_slotsneakers': 37,
-          'v_slotshoes': 37,
-          'v_slotdots': 37,
-          'v_slotflames': 37,
-          'v_slotpause': 37,
-          'v_slotbag': 37,
-          'v_crt_h': 0,
-          'v_ctrl_x': 0,
-          'v_ctrl_y': 0,
-          'v_ctrl_scale': 1.04
-        };
-
-  function applyDefaults() {
-    Object.keys(defaults).forEach(key => {
-      const input = shadow.getElementById(key);
-      if (input) {
-        input.value = defaults[key];
-        input.dispatchEvent(new Event('input'));
-      }
-    });
-  }
-
   if (sReset) {
     sReset.addEventListener('click', function() {
-      applyDefaults();
+      const defaults = {
+        'v_scale': 0.85,
+        'v_center_cell': 90,
+        'v_gap_top': -8,
+        'v_gap_div': -12,
+        'v_gap_crt': -11,
+        'v_gap_tabs': -13,
+        'v_gap_hud1': -15,
+        'v_gap_hud2': -13,
+        'v_gap_bottom': 240,
+        'v_bot_a': 0,
+        'v_bot_b': 0,
+        'v_global_pad_l': 10,
+        'v_global_pad_r': 10,
+        'v_mqtsize': 29,
+        'v_mqtx': -3,
+        'v_mqty': 3,
+        'v_mqssize': 7,
+        'v_mqsx': 0,
+        'v_mqsy': 4,
+        'v_chipbr': 6,
+        'v_chippadx': 6,
+        'v_chippady': 3,
+        'v_icon_gap_sneakers': 3,
+        'v_icon_gap_powers': 7,
+        'v_icon_gap_fires': 3,
+        'in_hearts_fill': 1,
+        'in_hearts_outline': 3,
+        'in_shoes_fill': 3,
+        'in_shoes_outline': 5,
+        'in_powers_fill': 4,
+        'in_powers_total': 4,
+        'in_fires_fill': 4,
+        'in_fires_outline': 5,
+        'v_slotsneakers': 37,
+        'v_slotshoes': 37,
+        'v_slotdots': 37,
+        'v_slotflames': 37,
+        'v_slotpause': 37,
+        'v_slotbag': 37,
+        'v_crt_h': 0,
+        'v_ctrl_x': 0,
+        'v_ctrl_y': 0,
+        'v_ctrl_scale': 1.04
+      };
+
+      Object.keys(defaults).forEach(key => {
+        const input = shadow.getElementById(key);
+        if (input) {
+          input.value = defaults[key];
+          input.dispatchEvent(new Event('input'));
+        }
+      });
     });
   }
 
-  // Apply defaults on initial open
-  applyDefaults();
-
-// ESC key handler to close panel
+  // ESC key handler to close panel
   function handleKeydown(e) {
     if (e.key === 'Escape' && isPanelOpen) {
       togglePanel();
@@ -3240,8 +3233,33 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       }
 
       static initializeAggressiveScaling() {
-        // Cabinet scaling is now fully controlled by the Settings 1 tuner (v_scale/applyScale).
-        // Auto-fit scaling is intentionally disabled here to avoid competing transforms.
+        const container = document.querySelector('.fixed-container');
+        if (!container) return;
+
+        const applyMeasuredFit = () => {
+          const vv = window.visualViewport;
+          const vh = vv ? vv.height : window.innerHeight; // visible height (excludes Safari bars)
+
+          // Measure natural height with no transform
+          const prev = container.style.transform;
+          container.style.transform = 'none';
+          const natH = Math.ceil(container.offsetHeight);
+          container.style.transform = prev;
+
+          const scale = Math.max(0.01, vh / Math.max(1, natH));
+          container.style.transform = `translateX(-50%) scale(${scale})`;
+        };
+
+        const schedule = () => requestAnimationFrame(applyMeasuredFit);
+        schedule();
+        let t;
+        window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(schedule, 80); });
+        window.addEventListener('orientationchange', () => setTimeout(schedule, 250));
+        window.addEventListener('pageshow', (e) => { if (e.persisted) schedule(); });
+        if (window.visualViewport) {
+          visualViewport.addEventListener('resize', schedule);
+          visualViewport.addEventListener('scroll', schedule);
+        }
       }
     }
 
@@ -4417,14 +4435,25 @@ bindRange('v_rs', 'o_rs', function(raw) {
 (function () {
   var BASE_TRANSLATE = 'translateX(-50%)';
   var BASE_SCALE = 1.33222;
-  var container = document.getElementById('cabinetViewport');
+  var container = document.getElementById('mainContainer');
   if (!container) return;
 
-  // Historic hook kept for compatibility; actual viewport-fit scaling
-  // is handled by layoutCabinet() below, which scales the outer wrapper
-  // instead of the tuner-owned inner container.
   function applyCabinetScale() {
-    // No-op by design.
+    container.style.transform = BASE_TRANSLATE + ' scale(' + BASE_SCALE + ')';
+
+    var rect = container.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+
+    if (!rect.width || !rect.height || !vw || !vh) return;
+
+    var scaleX = vw / rect.width;
+    var scaleY = vh / rect.height;
+
+    var fitFactor = Math.min(1, scaleX, scaleY);
+    var finalScale = BASE_SCALE * fitFactor;
+
+    container.style.transform = BASE_TRANSLATE + ' scale(' + finalScale + ')';
   }
 
   window.addEventListener('load', applyCabinetScale);
@@ -4433,15 +4462,13 @@ bindRange('v_rs', 'o_rs', function(raw) {
 })();
 </script>
 
-
 <script>
 (function () {
   const CABINET_W = 430;
   const CABINET_H = 900;
   const root = document.documentElement;
-  const wrapper = document.getElementById('cabinetViewport');
-  const inner = document.getElementById('mainContainer');
-  if (!wrapper || !inner) return;
+  const container = document.getElementById('mainContainer');
+  if (!container) return;
 
   function layoutCabinet() {
     // Read CSS margin variable; default to 16px
@@ -4452,26 +4479,21 @@ bindRange('v_rs', 'o_rs', function(raw) {
     const vw = window.innerWidth || root.clientWidth;
     const vh = window.innerHeight || root.clientHeight;
 
-    // Temporarily clear wrapper transform so we can measure the inner cabinet
-    const previousTransform = wrapper.style.transform || '';
-    wrapper.style.transform = 'none';
-
-    const rect = inner.getBoundingClientRect();
-    const cabinetWidth = rect.width || CABINET_W;
-    const cabinetHeight = rect.height || CABINET_H;
-
     // Height we can actually use after top + bottom margins
     const availableHeight = Math.max(0, vh - margin * 2);
 
     // Scale factors to fit width and height
-    const scaleX = vw / cabinetWidth;
-    const scaleY = availableHeight / cabinetHeight;
+    const scaleX = vw / CABINET_W;
+    const scaleY = availableHeight / CABINET_H;
 
     // Final uniform scale: fit both constraints, never upscale above 1
     const scale = Math.min(1, scaleX, scaleY);
 
-    // Restore and apply final transform: outer wrapper only
-    wrapper.style.transform = 'scale(' + scale + ')';
+    // Position and scale:
+    // - top margin
+    // - horizontally centered
+    container.style.top = margin + 'px';
+    container.style.transform = 'translateX(-50%) scale(' + scale + ')';
   }
 
   window.addEventListener('resize', layoutCabinet);
@@ -4480,6 +4502,5 @@ bindRange('v_rs', 'o_rs', function(raw) {
   layoutCabinet();
 })();
 </script>
-
 </body>
 </html>
