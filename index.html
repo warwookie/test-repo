@@ -252,6 +252,7 @@
   pointer-events: none;
   white-space: nowrap;
 }
+
 </style>
 </head>
 <body>
@@ -1550,7 +1551,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   function startNormalBomb(bombType){
     state.normalBomb.active = true;
     state.normalBomb.t0 = nowS();
-    state.normalBomb.bombType = bombType; // &#x#x27;center&#x27; | &#x27;final&#x27;
+    state.normalBomb.bombType = bombType; // &##x27;center&#x27; | &#x27;final&#x27;
   }
 
   function drawNormalBomb(t){
@@ -4447,8 +4448,6 @@ bindRange('v_rs', 'o_rs', function(raw) {
 </script>
 <!-- [UNIFIED-TUNER:SCRIPT-END] -->
 <div id="unified-tuner-root"></div>
-<div id="bottom_debug" aria-hidden="true"></div>
-
 
 <script>
 (function () {
@@ -4521,5 +4520,8 @@ bindRange('v_rs', 'o_rs', function(raw) {
   layoutCabinet();
 })();
 </script>
+
+<div id="bottom_debug" aria-hidden="true"></div>
+
 </body>
 </html>
