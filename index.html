@@ -739,9 +739,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       arrowPulse[k] *= 0.86;
     }
 
-    // drawDMD will internally decide whether to show radar collapse
-    // or arrow build based purely on arrowIntro (t).
+    // Radar side draws first (collapse/expand based on arrowIntro)
     drawDMD(0, 0);
+    // Arrow-pad grows/collapses on top using the same arrowIntro
+    drawArrowPad();
 
     const dir = window.laserDirection || &#x27;up&#x27;;
     let vx = 0, vy = 0;
@@ -759,8 +760,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     outX += (joyTX - outX) * SMOOTH;
     outY += (joyTY - outY) * SMOOTH;
 
-    // drawDMD handles the radar-side collapse/expand based on arrowIntro.
+    // Radar-side collapse/expand based on arrowIntro.
     drawDMD(outX, outY);
+    // Arrow-pad may still be partially visible while arrowIntro &gt; 0.
+    drawArrowPad();
 
     window.jpad_state.x = outX;
     window.jpad_state.y = outY;
@@ -913,14 +916,18 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   if (!arrowGeom) buildArrowPadGeometry();
 
   const t = arrowIntro || 0;
-  // Arrow-pad only draws in the build phase t &gt;= 0.5
-  if (t &lt; 0.5) {
+  // Arrow-pad grows over a wider band, with easing, so it overlaps radar more smoothly
+  const buildStart = 0.20;
+  const buildEnd   = 0.90;
+  const buildSpan  = Math.max(0.001, buildEnd - buildStart);
+  const buildNorm  = Math.max(0, Math.min(1, (t - buildStart) / buildSpan)); // 0..1 over [start,end]
+  if (buildNorm &lt;= 0) {
     return;
   }
-  const buildPhase = Math.max(0, Math.min(1, (t - 0.5) / 0.5)); // 0..1 over [0.5,1]
+  const buildPhase = buildNorm * buildNorm * (3 - 2 * buildNorm); // smoothstep easing
   const centerR = joyR * 0.10; // matches radar collapse destination radius
 
-  ctx.clearRect(0,0,W,H);
+  // Do not clear here; we layer arrow-pad on top of radar DMD
 
   const activeDir = window.laserDirection || &#x27;up&#x27;;
 
@@ -985,14 +992,6 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   const t = arrowIntro || 0;
 
-  // Phase split:
-  //  - t &lt; 0.5 : radar-only, collapsing to center
-  //  - t &gt;= 0.5: arrow-pad-only (build phase handled in drawArrowPad)
-  if (t &gt;= 0.5) {
-    drawArrowPad();
-    return;
-  }
-
   ctx.clearRect(0,0,W,H);
   const now = performance.now() * 0.001;
   const px  = joyCX + nx * joyR;
@@ -1011,7 +1010,13 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 
   const ringThick    = PITCH * 0.75;
   const dzRingThick  = PITCH * 0.5;
-  const collapsePhase = Math.max(0, Math.min(1, t / 0.5));  // 0..1 over [0,0.5]
+  const collapseNorm  = Math.max(0, Math.min(1, t / 0.6));   // 0..1 over [0,0.6]
+  const collapsePhase = collapseNorm * collapseNorm * (3 - 2 * collapseNorm); // smoothstep
+  const fadeStart     = 0.30;
+  const fadeEnd       = 1.00;
+  const fadeSpan      = Math.max(0.001, fadeEnd - fadeStart);
+  const fadeNorm      = Math.max(0, Math.min(1, (t - fadeStart) / fadeSpan));
+  const radarWeight   = 1 - (fadeNorm * fadeNorm * (3 - 2 * fadeNorm)); // smooth fade-out 0.3-&gt;1.0
   const centerR       = joyR * 0.10;
   const sweepT        = wrap(now * 1.6);
   const sweepArcLength = Math.PI / 6;
@@ -1046,26 +1051,26 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       const jd         = jdOriginal * (1 - collapsePhase) + centerR * collapsePhase;
       const jang       = Math.atan2(jdy, jdx);
 
-      // Rings + deadzone ring
-      buf[idx] += calcRing(jd, joyR * 0.25,     ringThick)   * 0.22;
-      buf[idx] += calcRing(jd, joyR * 0.50,     ringThick)   * 0.20;
-      buf[idx] += calcRing(jd, joyR * 0.75,     ringThick)   * 0.18;
-      buf[idx] += calcRing(jd, joyR * 1.00,     ringThick)   * 0.16;
-      buf[idx] += calcRing(jd, joyR * DEADZONE, dzRingThick) * 0.12;
+      // Rings + deadzone ring (fade out as radarWeight -&gt; 0)
+      buf[idx] += calcRing(jd, joyR * 0.25,     ringThick)   * 0.22 * radarWeight;
+      buf[idx] += calcRing(jd, joyR * 0.50,     ringThick)   * 0.20 * radarWeight;
+      buf[idx] += calcRing(jd, joyR * 0.75,     ringThick)   * 0.18 * radarWeight;
+      buf[idx] += calcRing(jd, joyR * 1.00,     ringThick)   * 0.16 * radarWeight;
+      buf[idx] += calcRing(jd, joyR * DEADZONE, dzRingThick) * 0.12 * radarWeight;
 
-      // Sweep arc
+      // Sweep arc (also faded by radarWeight)
       const da = wrap(sweepT - jang);
-      if (jd &lt; joyR * 0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
+      if (jd &lt; joyR * 0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9 * radarWeight;
 
-      // Knob stem + glow remain unchanged
-      if (mag &gt; 0.01) {
+      // Knob stem + glow fade out with radarWeight
+      if (mag &gt; 0.01 &amp;&amp; radarWeight &gt; 0) {
         let jb = 0;
         const sd = segDist(joyCX, joyCY, px, py, x, y);
-        const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
+        const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN * radarWeight;
         jb = Math.max(jb, stemPulse);
         const kd   = Math.hypot(x - px, y - py);
-        const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
-        const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
+        const core = Math.exp(-Math.pow(kd / knobCoreR, 2)) * radarWeight;
+        const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2)) * radarWeight;
         jb = Math.max(jb, core * 1.0 + glow * 0.9);
         buf[idx] = Math.max(buf[idx], jb);
       }
