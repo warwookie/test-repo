@@ -649,8 +649,15 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     activePointers.set(e.pointerId, &#x27;joy&#x27;);
 
     if (window.laserArrowMode) {
-      const dir = hitTestArrow(x, y);
-      if (dir) {
+      const v = joyPointerToNorm(x, y);
+      const nx = v.nx, ny = v.ny;
+      if (nx !== 0 || ny !== 0) {
+        let dir;
+        if (Math.abs(nx) &gt;= Math.abs(ny)) {
+          dir = nx &gt; 0 ? &#x27;right&#x27; : &#x27;left&#x27;;
+        } else {
+          dir = ny &gt; 0 ? &#x27;down&#x27; : &#x27;up&#x27;;
+        }
         window.laserDirection = dir;
         arrowPulse[dir] = 1.0;
       }
@@ -666,8 +673,15 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const { x, y } = getPointerLocation(e);
 
     if (window.laserArrowMode) {
-      const dir = hitTestArrow(x, y);
-      if (dir) {
+      const v = joyPointerToNorm(x, y);
+      const nx = v.nx, ny = v.ny;
+      if (nx !== 0 || ny !== 0) {
+        let dir;
+        if (Math.abs(nx) &gt;= Math.abs(ny)) {
+          dir = nx &gt; 0 ? &#x27;right&#x27; : &#x27;left&#x27;;
+        } else {
+          dir = ny &gt; 0 ? &#x27;down&#x27; : &#x27;up&#x27;;
+        }
         window.laserDirection = dir;
         arrowPulse[dir] = 1.0;
       }
@@ -695,60 +709,73 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   cvs.addEventListener(&#x27;pointerleave&#x27;, endPointer);
 
   function loop() {
-    const arrowMode = !!window.laserArrowMode;
+  const arrowMode = !!window.laserArrowMode;
 
-    if (arrowMode !== lastArrowMode) {
-      if (arrowMode) {
-        arrowIntro = 0;
-      } else {
-        for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) arrowPulse[k] = 0;
-        joyTX = 0; joyTY = 0;
-      }
-      lastArrowMode = arrowMode;
-    }
-
+  if (arrowMode !== lastArrowMode) {
     if (arrowMode) {
-      outX += (0 - outX) * SMOOTH;
-      outY += (0 - outY) * SMOOTH;
-
-      arrowIntro = Math.min(1, arrowIntro + 0.10);
-      for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
-        arrowPulse[k] *= 0.86;
-      }
-
-      drawDMD(0, 0);
-
-      const dir = window.laserDirection || &#x27;up&#x27;;
-      let vx = 0, vy = 0;
-      if (dir === &#x27;up&#x27;) vy = -1;
-      else if (dir === &#x27;down&#x27;) vy = 1;
-      else if (dir === &#x27;left&#x27;) vx = -1;
-      else if (dir === &#x27;right&#x27;) vx = 1;
-
-      window.jpad_state.x = vx;
-      window.jpad_state.y = vy;
-      window.jpad_state.mag = 1;
-      window.jpad_state.angle = Math.atan2(vy, vx);
+      arrowIntro = 0;
     } else {
-      outX += (joyTX - outX) * SMOOTH;
-      outY += (joyTY - outY) * SMOOTH;
-
-      drawDMD(outX, outY);
-
-      window.jpad_state.x = outX;
-      window.jpad_state.y = outY;
-      window.jpad_state.mag = Math.min(Math.hypot(outX, outY), 1);
-      window.jpad_state.angle = Math.atan2(outY, outX);
+      for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) arrowPulse[k] = 0;
+      joyTX = 0;
+      joyTY = 0;
     }
-
-    if (readout) {
-      readout.value =
-        `x ${window.jpad_state.x.toFixed(2)}, y ${window.jpad_state.y.toFixed(2)}, ` +
-        `|v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
-    }
-
-    requestAnimationFrame(loop);
+    lastArrowMode = arrowMode;
   }
+
+  // Center-suck morph driver: arrowIntro always 0..1
+  if (arrowMode) {
+    arrowIntro = Math.min(1, arrowIntro + 0.025);
+  } else {
+    arrowIntro = Math.max(0, arrowIntro - 0.025);
+  }
+
+  if (arrowMode) {
+    // In arrow mode, joystick vector is forced to arrow directions, but
+    // outX/outY still ease to 0 so the radar side stays stable.
+    outX += (0 - outX) * SMOOTH;
+    outY += (0 - outY) * SMOOTH;
+
+    for (const k of [&#x27;up&#x27;,&#x27;right&#x27;,&#x27;down&#x27;,&#x27;left&#x27;]) {
+      arrowPulse[k] *= 0.86;
+    }
+
+    // drawDMD will internally decide whether to show radar collapse
+    // or arrow build based purely on arrowIntro (t).
+    drawDMD(0, 0);
+
+    const dir = window.laserDirection || &#x27;up&#x27;;
+    let vx = 0, vy = 0;
+    if (dir === &#x27;up&#x27;) vy = -1;
+    else if (dir === &#x27;down&#x27;) vy = 1;
+    else if (dir === &#x27;left&#x27;) vx = -1;
+    else if (dir === &#x27;right&#x27;) vx = 1;
+
+    window.jpad_state.x = vx;
+    window.jpad_state.y = vy;
+    window.jpad_state.mag = 1;
+    window.jpad_state.angle = Math.atan2(vy, vx);
+  } else {
+    // Normal analog joystick mode
+    outX += (joyTX - outX) * SMOOTH;
+    outY += (joyTY - outY) * SMOOTH;
+
+    // drawDMD handles the radar-side collapse/expand based on arrowIntro.
+    drawDMD(outX, outY);
+
+    window.jpad_state.x = outX;
+    window.jpad_state.y = outY;
+    window.jpad_state.mag = Math.min(Math.hypot(outX, outY), 1);
+    window.jpad_state.angle = Math.atan2(outY, outX);
+  }
+
+  if (readout) {
+    readout.value =
+      `x ${window.jpad_state.x.toFixed(2)}, y ${window.jpad_state.y.toFixed(2)}, ` +
+      `|v| ${window.jpad_state.mag.toFixed(2)}, θ ${window.jpad_state.angle.toFixed(2)}`;
+  }
+
+  requestAnimationFrame(loop);
+}
 
   // DR2: Laser Arrow-Pad Mode (Part 2) – DMD rendering
   function buildArrowPadGeometry() {
@@ -882,127 +909,179 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 }
 
   function drawArrowPad() {
-    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
-    if (!arrowGeom) buildArrowPadGeometry();
+  if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+  if (!arrowGeom) buildArrowPadGeometry();
 
-    ctx.clearRect(0,0,W,H);
-
-    const activeDir = window.laserDirection || &#x27;up&#x27;;
-
-    function drawCluster(list, key) {
-      if (!list || !list.length) return;
-      const isArrow = (key !== &#x27;center&#x27;);
-      const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
-
-      let base = isArrow ? 0.55 : 0.45;
-      if (key === activeDir) base = 1.0;
-
-      const rawLevel = Math.min(1, base + pulse * 0.5);
-      const level    = (key === activeDir) ? 1 : rawLevel;
-      const suck  = 1 - arrowIntro;
-
-      const R        = joyR * 0.98;
-      const ringR    = Math.floor(R / PITCH) * PITCH;
-
-      for (const pt of list) {
-        const dx = pt.x - joyCX;
-        const dy = pt.y - joyCY;
-        const pressIn = isArrow ? (arrowPulse[key] || 0) * 0.25 : 0;
-        const factor = 1 - 0.22 * suck - 0.18 * pressIn;
-        const sx = joyCX + dx * factor;
-        const sy = joyCY + dy * factor;
-
-        let ptLevel = level;
-        if (key === 'center') {
-          const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
-          if (Math.abs(dist0 - ringR) <= PITCH * 0.6) {
-            ptLevel = 1;
-          }
-        }
-
-        dotDraw(sx, sy, DOT_R, ptLevel);
-      }
-    }
-
-    drawCluster(arrowGeom.center, &#x27;center&#x27;);
-    drawCluster(arrowGeom.up,    &#x27;up&#x27;);
-    drawCluster(arrowGeom.right, &#x27;right&#x27;);
-    drawCluster(arrowGeom.down,  &#x27;down&#x27;);
-    drawCluster(arrowGeom.left,  &#x27;left&#x27;);
+  const t = arrowIntro || 0;
+  // Arrow-pad only draws in the build phase t &gt;= 0.5
+  if (t &lt; 0.5) {
+    return;
   }
+  const buildPhase = Math.max(0, Math.min(1, (t - 0.5) / 0.5)); // 0..1 over [0.5,1]
+  const centerR = joyR * 0.10; // matches radar collapse destination radius
+
+  ctx.clearRect(0,0,W,H);
+
+  const activeDir = window.laserDirection || &#x27;up&#x27;;
+
+  function drawCluster(list, key) {
+    if (!list || !list.length) return;
+    const isArrow = (key !== &#x27;center&#x27;);
+    const pulse   = isArrow ? (arrowPulse[key] || 0) : 0;
+
+    let base = isArrow ? 0.55 : 0.45;
+    if (key === activeDir) base = 1.0;
+
+    const rawLevel = Math.min(1, base + pulse * 0.5);
+    const level    = (key === activeDir) ? 1 : rawLevel;
+
+    const R     = joyR * 0.98;
+    const ringR = Math.floor(R / PITCH) * PITCH;
+
+    for (const pt of list) {
+      const dx0 = pt.x - joyCX;
+      const dy0 = pt.y - joyCY;
+      const r0  = Math.hypot(dx0, dy0);
+      const ang = Math.atan2(dy0, dx0);
+
+      const pressIn = isArrow ? (arrowPulse[key] || 0) * 0.25 : 0;
+
+      // 0: all points collapsed near centerR
+      // 1: points at their original radius
+      let grow = buildPhase;
+      if (r0 &gt; 0) {
+        const minFactor = centerR / r0;
+        // Interpolate factors so radius goes centerR -&gt; r0 as buildPhase 0-&gt;1
+        grow = minFactor * (1 - buildPhase) + buildPhase;
+      }
+      // Press-in effect shrinks slightly along the same radial path
+      grow *= (1 - 0.18 * pressIn);
+
+      const rEff = r0 * grow;
+      const sx   = joyCX + Math.cos(ang) * rEff;
+      const sy   = joyCY + Math.sin(ang) * rEff;
+
+      let ptLevel = level;
+      if (key === &#x27;center&#x27;) {
+        const dist0 = Math.hypot(pt.x - joyCX, pt.y - joyCY);
+        if (Math.abs(dist0 - ringR) &lt;= PITCH * 0.6) {
+          ptLevel = 1;
+        }
+      }
+
+      dotDraw(sx, sy, DOT_R, ptLevel);
+    }
+  }
+
+  drawCluster(arrowGeom.center, &#x27;center&#x27;);
+  drawCluster(arrowGeom.up,    &#x27;up&#x27;);
+  drawCluster(arrowGeom.right, &#x27;right&#x27;);
+  drawCluster(arrowGeom.down,  &#x27;down&#x27;);
+  drawCluster(arrowGeom.left,  &#x27;left&#x27;);
+}
 
   function drawDMD(nx, ny) {
-    if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
+  if (!layoutReady) { ctx.clearRect(0,0,W,H); return; }
 
-    if (window.laserArrowMode) {
-      drawArrowPad();
-      return;
-    }
+  const t = arrowIntro || 0;
 
-    ctx.clearRect(0,0,W,H);
-    const now = performance.now() * 0.001;
-    const px = joyCX + nx * joyR, py = joyCY + ny * joyR, mag = Math.hypot(nx, ny);
-    const knobCoreR = joyR * KNOB_CORE, knobGlowR = joyR * KNOB_GLOWR;
+  // Phase split:
+  //  - t &lt; 0.5 : radar-only, collapsing to center
+  //  - t &gt;= 0.5: arrow-pad-only (build phase handled in drawArrowPad)
+  if (t &gt;= 0.5) {
+    drawArrowPad();
+    return;
+  }
 
-    for (let j=0; j&lt;ROWS; j++) {
-      for (let i=0; i&lt;COLS; i++) {
-        const idx = j * COLS + i;
-        buf[idx] = (buf[idx] || 0) * DECAY;
-      }
-    }
+  ctx.clearRect(0,0,W,H);
+  const now = performance.now() * 0.001;
+  const px  = joyCX + nx * joyR;
+  const py  = joyCY + ny * joyR;
+  const mag = Math.hypot(nx, ny);
+  const knobCoreR = joyR * KNOB_CORE;
+  const knobGlowR = joyR * KNOB_GLOWR;
 
-    const ringThick = PITCH * 0.75, dzRingThick = PITCH * 0.5;
-    const t = wrap(now * 1.6), sweepArcLength = Math.PI / 6;
-
-    for (let j=0; j&lt;ROWS; j++) {
-      for (let i=0; i&lt;COLS; i++) {
-        const x = OX + i * PITCH, y = OY + j * PITCH;
-        const idx = j * COLS + i;
-
-        const jdx_un = x - joyCX, jdy_un = y - joyCY;
-        let jdx = jdx_un, jdy = jdy_un;
-
-        if (mag &gt; 0.01) {
-          const suck = Math.min(0.8, mag * 1.2);
-          const jdx_wc = x - px, jdy_wc = y - py;
-          const div = (1 - suck);
-          if (div &gt; 0.001) {
-            const vx = jdx_wc / div + px;
-            const vy = jdy_wc / div + py;
-            jdx = vx - joyCX; jdy = vy - joyCY;
-          }
-        }
-
-        const jd = Math.hypot(jdx, jdy), jang = Math.atan2(jdy, jdx);
-        buf[idx] += calcRing(jd, joyR*0.25, ringThick) * 0.22;
-        buf[idx] += calcRing(jd, joyR*0.50, ringThick) * 0.20;
-        buf[idx] += calcRing(jd, joyR*0.75, ringThick) * 0.18;
-        buf[idx] += calcRing(jd, joyR*1.00, ringThick) * 0.16;
-        buf[idx] += calcRing(jd, joyR*DEADZONE, dzRingThick) * 0.12;
-
-        const da = wrap(t - jang);
-        if (jd &lt; joyR*0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
-
-        if (mag &gt; 0.01) {
-          let jb = 0;
-          const sd = segDist(joyCX, joyCY, px, py, x, y);
-          const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
-          jb = Math.max(jb, stemPulse);
-          const kd = Math.hypot(x - px, y - py);
-          const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
-          const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
-          jb = Math.max(jb, core * 1.0 + glow * 0.9);
-          buf[idx] = Math.max(buf[idx], jb);
-        }
-
-        let b = buf[idx] || 0;
-        b *= 1 - smoothStep(0.96, 1.12, Math.hypot(x - W/2, y - H/2) / (Math.min(W, H) / 2));
-        b += (noise2(i, j) - 0.5) * 0.06;
-
-        dotDraw(x, y, DOT_R, quantize(Math.max(0, b)));
-      }
+  // Decay previous frame’s buffer
+  for (let j = 0; j &lt; ROWS; j++) {
+    for (let i = 0; i &lt; COLS; i++) {
+      const idx = j * COLS + i;
+      buf[idx] = (buf[idx] || 0) * DECAY;
     }
   }
+
+  const ringThick    = PITCH * 0.75;
+  const dzRingThick  = PITCH * 0.5;
+  const collapsePhase = Math.max(0, Math.min(1, t / 0.5));  // 0..1 over [0,0.5]
+  const centerR       = joyR * 0.10;
+  const sweepT        = wrap(now * 1.6);
+  const sweepArcLength = Math.PI / 6;
+
+  for (let j = 0; j &lt; ROWS; j++) {
+    for (let i = 0; i &lt; COLS; i++) {
+      const x   = OX + i * PITCH;
+      const y   = OY + j * PITCH;
+      const idx = j * COLS + i;
+
+      const jdx_un = x - joyCX;
+      const jdy_un = y - joyCY;
+      let   jdx    = jdx_un;
+      let   jdy    = jdy_un;
+
+      // Existing pointer &quot;suck&quot; warp stays exactly as before
+      if (mag &gt; 0.01) {
+        const suck   = Math.min(0.8, mag * 1.2);
+        const jdx_wc = x - px;
+        const jdy_wc = y - py;
+        const div    = (1 - suck);
+        if (div &gt; 0.001) {
+          const vx = jdx_wc / div + px;
+          const vy = jdy_wc / div + py;
+          jdx = vx - joyCX;
+          jdy = vy - joyCY;
+        }
+      }
+
+      // Center-collapse: all radar logic uses jd (collapsed radius)
+      const jdOriginal = Math.hypot(jdx, jdy);
+      const jd         = jdOriginal * (1 - collapsePhase) + centerR * collapsePhase;
+      const jang       = Math.atan2(jdy, jdx);
+
+      // Rings + deadzone ring
+      buf[idx] += calcRing(jd, joyR * 0.25,     ringThick)   * 0.22;
+      buf[idx] += calcRing(jd, joyR * 0.50,     ringThick)   * 0.20;
+      buf[idx] += calcRing(jd, joyR * 0.75,     ringThick)   * 0.18;
+      buf[idx] += calcRing(jd, joyR * 1.00,     ringThick)   * 0.16;
+      buf[idx] += calcRing(jd, joyR * DEADZONE, dzRingThick) * 0.12;
+
+      // Sweep arc
+      const da = wrap(sweepT - jang);
+      if (jd &lt; joyR * 0.98 &amp;&amp; da &gt; 0 &amp;&amp; da &lt; sweepArcLength) buf[idx] += 0.9;
+
+      // Knob stem + glow remain unchanged
+      if (mag &gt; 0.01) {
+        let jb = 0;
+        const sd = segDist(joyCX, joyCY, px, py, x, y);
+        const stemPulse = pulse01(sd / (PITCH * 2.4), 0.16) * STEM_GAIN;
+        jb = Math.max(jb, stemPulse);
+        const kd   = Math.hypot(x - px, y - py);
+        const core = Math.exp(-Math.pow(kd / knobCoreR, 2));
+        const glow = Math.exp(-Math.pow(Math.max(0, kd - knobCoreR) / knobGlowR, 2));
+        jb = Math.max(jb, core * 1.0 + glow * 0.9);
+        buf[idx] = Math.max(buf[idx], jb);
+      }
+
+      // Edge vignette + noise + final dot draw
+      let b = buf[idx] || 0;
+      b *= 1 - smoothStep(
+        0.96, 1.12,
+        Math.hypot(x - W / 2, y - H / 2) / (Math.min(W, H) / 2)
+      );
+      b += (noise2(i, j) - 0.5) * 0.06;
+
+      dotDraw(x, y, DOT_R, quantize(Math.max(0, b)));
+    }
+  }
+}
 
   function calcRing(d, r0, thick) {
     return Math.max(0, 1 - Math.abs(d - r0) / (thick * 0.5));
@@ -2158,7 +2237,1079 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 </div>
 </div>
 </div>
+<!-- [SQ-TUNER:TPL-START] -->
+<template id="sq-tuner-tpl">
+<style>
+  /* --- SNEAKERQUEST Tuner Styles (scoped) --- */
+  :root { 
+    --settings-accent:#e6d7b6; 
+    --settings-bg:#211a15; 
+    --settings-surface:#332820; 
+    --settings-border:#3a2f27; 
+    --settings-text:#f0e6cd; 
+  }
+  #settingsBtn { 
+    position: fixed; 
+    right: 20px; 
+    bottom: 20px; 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 12px; 
+    border: none; 
+    cursor: pointer; 
+    background: #1a1410; 
+    color: var(--settings-accent); 
+    box-shadow: inset 0 0 0 2px #2a2119, 0 6px 12px #000; 
+    font-size: 22px; 
+    z-index: 7000; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #settingsPanel { 
+    position: fixed; 
+    right: 20px; 
+    bottom: 80px; 
+    width: min(450px, 90vw); 
+    max-height: min(80vh, 700px); 
+    background: var(--settings-bg); 
+    color: var(--settings-text); 
+    border: 2px solid var(--settings-border); 
+    border-radius: 12px; 
+    display: none; 
+    flex-direction: column; 
+    z-index: 7050; 
+    box-shadow: 0 16px 40px #000c;
+  }
+  #settingsPanel.open { display: flex ; }
+  #sHead { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 12px 16px; 
+    border-bottom: 1px solid var(--settings-border);
+    background: var(--settings-surface);
+  }
+  #sTitle { 
+    font-weight: 700; 
+    letter-spacing: .08em; 
+    font-size: 14px;
+    color: var(--settings-accent);
+  }
+  #sBtns { display: flex; gap: 8px; }
+  #sBtns button { 
+    border: none; border-radius: 6px; padding: 6px 10px; 
+    background: var(--settings-border); color: var(--settings-accent); 
+    cursor: pointer; font-size: 12px; min-width: 30px;
+  }
+  #sBody { overflow: auto; padding: 16px; flex: 1; }
+  .sg { 
+    margin-bottom: 16px; border: 1px solid var(--settings-border); 
+    border-radius: 8px; padding: 12px; background: var(--settings-surface);
+  }
+  .sg h4 { 
+    margin: 0 0 12px 0; font-size: 13px; letter-spacing: .06em; 
+    color: var(--settings-accent); border-bottom: 1px solid var(--settings-border);
+    padding-bottom: 6px;
+  }
+  .sr { 
+    display: grid; grid-template-columns: 1fr 100px 50px 30px; 
+    gap: 8px; align-items: center; margin: 8px 0; font-size: 11px;
+  }
+  .sr label { 
+    font-size: 11px; color: var(--settings-text); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .sr input[type=range], .sr input[type=number], .sr input[type=text] { 
+    width: 100%; background: var(--settings-bg); border: 1px solid var(--settings-border);
+    border-radius: 4px; padding: 4px 6px; color: var(--settings-text); font-size: 11px;
+  }
+  .sr input[type=range] { padding: 0; }
+  .sv { 
+    font: 10px/1 monospace; text-align: center; color: var(--settings-accent);
+    background: var(--settings-bg); padding: 4px; border-radius: 4px; border: 1px solid var(--settings-border);
+    min-width: 40px;
+  }
+  .lock-btn { background: none; border: none; cursor: pointer; color: #888; font-size: 12px; padding: 4px; border-radius: 4px; }
+  .lock-btn:hover { color: var(--settings-accent); }
+  .lock-btn.locked { color: #ff3a2f; }
+  #sFoot { 
+    display: flex; gap: 8px; justify-content: space-between; align-items: center; 
+    padding: 12px 16px; border-top: 1px solid var(--settings-border); background: var(--settings-surface);
+  }
+  #sFoot button { 
+    flex: 1; border: none; background: var(--settings-border); color: var(--settings-accent); 
+    border-radius: 6px; padding: 8px; cursor: pointer; min-width: 70px; font-size: 11px; font-weight: 600;
+  }
+  #copyMsg { font-size: 10px; opacity: 0; transition: opacity .3s ease; margin-left: 10px; white-space: nowrap; color: #ff3a2f; }</style>
+<button aria-label="Open settings" id="settingsBtn" title="Settings">⚙️</button>
+<div aria-label="Settings" aria-modal="false" id="settingsPanel" role="dialog" tabindex="-1">
+<div id="sHead">
+<div id="sTitle">Settings 1</div>
+<div id="sBtns">
+<button id="sMin" title="Minimize" type="button">–</button>
+<button id="sClose" title="Close" type="button">✕</button>
 </div>
+</div>
+<div aria-live="polite" id="sBody">
+<div aria-live="polite" id="sBody">
+<!-- Global -->
+<div class="sg">
+<h4>Global</h4>
+<div class="sr">
+<label for="v_scale">Cabinet Scale</label>
+<input id="v_scale" max="1.5" min="0.5" step="0.01" type="range" value="1"/>
+<div class="sv" id="o_scale">1.00</div>
+<button class="lock-btn" title="Lock">🔒</button>
+</div>
+<div class="sr">
+<label for="v_center_cell">Center Cell Width (px)</label>
+<input id="v_center_cell" max="160" min="60" step="1" type="range" value="90"/>
+<div class="sv" id="o_center_cell">90</div>
+<button class="lock-btn" title="Lock">🔒</button>
+</div>
+</div>
+<!-- Layout Spacing -->
+<div class="sg">
+<h4>Layout Spacing</h4>
+<div class="sr"><label for="v_gap_top">Marquee Top Margin</label>
+<input id="v_gap_top" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_top">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_div">Divider Top Margin</label>
+<input id="v_gap_div" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_div">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_crt">CRT Wrap Top Margin</label>
+<input id="v_gap_crt" max="60" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_gap_crt">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_tabs">Tabs Top Margin</label>
+<input id="v_gap_tabs" max="40" min="-40" step="1" type="range" value="-14"/>
+<div class="sv" id="o_gap_tabs">-14</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_hud1">HUD Row 1 Top Margin</label>
+<input id="v_gap_hud1" max="60" min="-40" step="1" type="range" value="-16"/>
+<div class="sv" id="o_gap_hud1">-16</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_hud2">HUD Row 2 Top Margin</label>
+<input id="v_gap_hud2" max="60" min="-40" step="1" type="range" value="-15"/>
+<div class="sv" id="o_gap_hud2">-15</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_gap_bottom">Bottom Height</label>
+<input id="v_gap_bottom" max="240" min="80" step="1" type="range" value="197"/>
+<div class="sv" id="o_gap_bottom">197</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_bot_a">Control Screen Top Padding</label>
+<input id="v_bot_a" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_a">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_bot_b">Control Screen Bottom Padding</label>
+<input id="v_bot_b" max="40" min="0" step="1" type="range" value="0"/>
+<div class="sv" id="o_bot_b">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_global_pad_l">Inner Padding Left</label>
+<input id="v_global_pad_l" max="40" min="10" step="1" type="range" value="20"/>
+<div class="sv" id="o_global_pad_l">20</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_global_pad_r">Inner Padding Right</label>
+<input id="v_global_pad_r" max="40" min="10" step="1" type="range" value="20"/>
+<div class="sv" id="o_global_pad_r">20</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- CRT -->
+<div class="sg">
+<h4>CRT</h4>
+<div class="sr"><label for="v_crt_h">CRT Height (px)</label>
+<input id="v_crt_h" max="1000" min="0" step="1" type="number" value="350"/>
+<div class="sv" id="o_crt_h">350</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- Marquee -->
+<div class="sg">
+<h4>Marquee</h4>
+<div class="sr"><label for="v_mqtsize">Title Font Size</label>
+<input id="v_mqtsize" max="40" min="18" step="1" type="range" value="27"/>
+<div class="sv" id="o_mqtsize">27</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqtx">Title Translate X</label>
+<input id="v_mqtx" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqtx">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqty">Title Translate Y</label>
+<input id="v_mqty" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqty">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqssize">Subtitle Font Size</label>
+<input id="v_mqssize" max="12" min="5" step="1" type="range" value="7"/>
+<div class="sv" id="o_mqssize">7</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqsx">Subtitle Translate X</label>
+<input id="v_mqsx" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqsx">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_mqsy">Subtitle Translate Y</label>
+<input id="v_mqsy" max="40" min="-40" step="1" type="range" value="0"/>
+<div class="sv" id="o_mqsy">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chipbr">Chip Border Radius</label>
+<input id="v_chipbr" max="10" min="0" step="1" type="range" value="4"/>
+<div class="sv" id="o_chipbr">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chippadx">Chip Padding X</label>
+<input id="v_chippadx" max="10" min="0" step="1" type="range" value="3"/>
+<div class="sv" id="o_chippadx">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_chippady">Chip Padding Y</label>
+<input id="v_chippady" max="10" min="0" step="1" type="range" value="4"/>
+<div class="sv" id="o_chippady">4</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Icon Gaps -->
+<div class="sg">
+<h4>HUD Icon Gaps</h4>
+<div class="sr"><label for="v_icon_gap_sneakers">Sneakers Gap</label>
+<input id="v_icon_gap_sneakers" max="20" min="0" step="1" type="range" value="3"/>
+<div class="sv" id="o_icon_gap_sneakers">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_icon_gap_powers">Powers Gap</label>
+<input id="v_icon_gap_powers" max="20" min="0" step="1" type="range" value="7"/>
+<div class="sv" id="o_icon_gap_powers">7</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_icon_gap_fires">Fires Gap</label>
+<input id="v_icon_gap_fires" max="20" min="0" step="1" type="range" value="2"/>
+<div class="sv" id="o_icon_gap_fires">2</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Icon Counts -->
+<div class="sg">
+<h4>HUD Icon Counts</h4>
+<div class="sr"><label for="in_hearts_fill">Hearts Fill</label>
+<input id="in_hearts_fill" max="6" min="0" step="1" type="number" value="1"/>
+<div class="sv" id="o_hearts_fill">1</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_hearts_outline">Hearts Outline</label>
+<input id="in_hearts_outline" max="6" min="0" step="1" type="number" value="3"/>
+<div class="sv" id="o_hearts_outline">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_shoes_fill">Sneakers Fill</label>
+<input id="in_shoes_fill" max="6" min="0" step="1" type="number" value="3"/>
+<div class="sv" id="o_shoes_fill">3</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_shoes_outline">Snearkers Outline</label>
+<input id="in_shoes_outline" max="6" min="0" step="1" type="number" value="5"/>
+<div class="sv" id="o_shoes_outline">5</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_powers_fill">Powers Fill</label>
+<input id="in_powers_fill" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_powers_fill">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_powers_total">Powers Total</label>
+<input id="in_powers_total" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_powers_total">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_fires_fill">Fires Fill</label>
+<input id="in_fires_fill" max="8" min="0" step="1" type="number" value="4"/>
+<div class="sv" id="o_fires_fill">4</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="in_fires_outline">Fires Outline</label>
+<input id="in_fires_outline" max="8" min="0" step="1" type="number" value="5"/>
+<div class="sv" id="o_fires_outline">5</div><button class="lock-btn">🔒</button></div>
+</div>
+<!-- HUD Slot Heights -->
+<div class="sg">
+<h4>HUD Slot Heights</h4>
+<div class="sr"><label for="v_slotsneakers">Slot Sneakers Height</label>
+<input id="v_slotsneakers" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotsneakers">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotshoes">Slot Shoes Height</label>
+<input id="v_slotshoes" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotshoes">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotdots">Slot Dots Height</label>
+<input id="v_slotdots" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotdots">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotflames">Slot Flames Height</label>
+<input id="v_slotflames" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotflames">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotpause">Slot Pause Height</label>
+<input id="v_slotpause" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotpause">33</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_slotbag">Slot Bag Height</label>
+<input id="v_slotbag" max="60" min="30" step="1" type="range" value="33"/>
+<div class="sv" id="o_slotbag">33</div><button class="lock-btn">🔒</button></div>
+</div>
+</div>
+<!-- Controls Panel Transform -->
+<div class="sg">
+<h4>Controls Panel Transform</h4>
+<div class="sr"><label for="v_ctrl_x">Controls X</label>
+<input id="v_ctrl_x" max="120" min="-120" step="1" type="range" value="0"/>
+<div class="sv" id="o_ctrl_x">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_ctrl_y">Controls Y</label>
+<input id="v_ctrl_y" max="120" min="-120" step="1" type="range" value="0"/>
+<div class="sv" id="o_ctrl_y">0</div><button class="lock-btn">🔒</button></div>
+<div class="sr"><label for="v_ctrl_scale">Controls Scale</label>
+<input id="v_ctrl_scale" max="1.6" min="0.6" step="0.01" type="range" value="1.04"/>
+<div class="sv" id="o_ctrl_scale">1.04</div><button class="lock-btn">🔒</button></div>
+</div>
+</div>
+<div id="sFoot"><button id="sMove" type="button">Move</button><button id="sReset" type="button">Reset</button><button id="btnCopyJSON" type="button">Copy JSON</button><span id="copyMsg"></span></div><div style="padding:8px 16px;"><textarea id="jsonPreview" readonly="" style="width:100%;height:120px;background:#211a15;color:#e6d7b6;border:1px solid #3a2f27;border-radius:8px;font:11px/1.3 ui-monospace, Menlo, Consolas, monospace;"></textarea></div>
+</div>
+</template>
+<!-- [SQ-TUNER:TPL-END] -->
+<!-- [SQ-TUNER:SCRIPT] -->
+</div>
+<script>
+(function(){
+  // Create tuner root container
+  const tunerRoot = document.createElement('div');
+  tunerRoot.id = 'sq-tuner-root';
+  tunerRoot.style.cssText = 'position:fixed; right:12px; bottom:12px; z-index:99999;';
+  document.body.appendChild(tunerRoot);
+
+  // Attach Shadow DOM
+  const shadow = tunerRoot.attachShadow({mode: 'open'});
+  
+  // Clone template content into shadow DOM
+  const template = document.getElementById('sq-tuner-tpl');
+  if (template) {
+    shadow.appendChild(template.content.cloneNode(true));
+  }
+
+  // Get elements from shadow DOM
+  const settingsBtn = shadow.getElementById('settingsBtn');
+  const settingsPanel = shadow.getElementById('settingsPanel');
+  const sClose = shadow.getElementById('sClose');
+  const sMin = shadow.getElementById('sMin');
+  const sReset = shadow.getElementById('sReset');
+  const btnCopyJSON = shadow.getElementById('btnCopyJSON');
+  const sMove = shadow.getElementById('sMove');
+
+  // Toggle button for panel
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'sq-tuner-toggle';
+  toggleBtn.innerHTML = '⚙️';
+  toggleBtn.style.cssText = `
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #1a1410;
+    color: #e6d7b6;
+    cursor: pointer;
+    z-index: 100000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  document.body.appendChild(toggleBtn);
+
+  // Panel state
+  let isPanelOpen = false;
+
+  // Toggle panel function
+  function togglePanel() {
+    isPanelOpen = !isPanelOpen;
+    if (settingsPanel) {
+      if (isPanelOpen) {
+        settingsPanel.classList.add('open');
+        settingsPanel.style.display = 'flex';
+      } else {
+        settingsPanel.classList.remove('open');
+        settingsPanel.style.display = 'none';
+      }
+    }
+
+  }
+
+  // Event listeners
+  if (toggleBtn) toggleBtn.addEventListener('click', togglePanel);
+  if (settingsBtn) settingsBtn.addEventListener('click', togglePanel);
+  if (sClose) sClose.addEventListener('click', () => {
+    isPanelOpen = false;
+    if (settingsPanel) {
+      settingsPanel.classList.remove('open');
+      settingsPanel.style.display = 'none';
+    }
+  });
+  if (sMin) sMin.addEventListener('click', togglePanel);
+
+  
+  // Simple move drag for Settings 1 panel
+  if (sMove && settingsPanel) {
+    let isDraggingPanel = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    sMove.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const rect = settingsPanel.getBoundingClientRect();
+      dragOffsetX = ev.clientX - rect.left;
+      dragOffsetY = ev.clientY - rect.top;
+      isDraggingPanel = true;
+      window.addEventListener('pointermove', onPanelDrag);
+      window.addEventListener('pointerup', onPanelDragEnd);
+    });
+
+    function onPanelDrag(ev) {
+      if (!isDraggingPanel) return;
+      settingsPanel.style.position = 'fixed';
+      settingsPanel.style.left = (ev.clientX - dragOffsetX) + 'px';
+      settingsPanel.style.top = (ev.clientY - dragOffsetY) + 'px';
+      settingsPanel.style.right = 'auto';
+      settingsPanel.style.bottom = 'auto';
+    }
+
+    function onPanelDragEnd() {
+      if (!isDraggingPanel) return;
+      isDraggingPanel = false;
+      window.removeEventListener('pointermove', onPanelDrag);
+      window.removeEventListener('pointerup', onPanelDragEnd);
+    }
+  }
+
+
+// Scale guard implementation
+  const vScale = shadow.getElementById('v_scale');
+  const oScale = shadow.getElementById('o_scale');
+  const mainContainer = document.getElementById('mainContainer');
+  
+  // Detect current scale
+  function detectCurrentScale() {
+    if (!mainContainer) return 1;
+    const transform = getComputedStyle(mainContainer).transform;
+    const matrix = transform.match(/matrix\(([^)]+)\)/);
+    if (matrix) {
+      const values = matrix[1].split(',').map(parseFloat);
+      if (values.length === 6) {
+        return Math.sqrt(values[0] * values[0] + values[1] * values[1]);
+      }
+    }
+    return 1;
+  }
+
+  // Update scale display
+  function updateScaleDisplay() {
+    if (!vScale || !oScale) return;
+    const value = parseFloat(vScale.value) || 1;
+    oScale.textContent = value.toFixed(2);
+  }
+
+  // Apply scale with guard
+  function applyScale() {
+    if (!mainContainer || !vScale) return;
+    const scaleValue = parseFloat(vScale.value) || 1;
+
+    // Tuner now owns cabinet scaling: always use a stable transform
+    mainContainer.style.transform = `translateX(-50%) scale(${scaleValue})`;
+
+    if (oScale) {
+      oScale.textContent = scaleValue.toFixed(2);
+    }
+  }
+
+  if (vScale) {
+    vScale.addEventListener('input', applyScale);
+  }
+
+  // Center HUD width control
+  const vCenterCell = shadow.getElementById('v_center_cell');
+  const oCenterCell = shadow.getElementById('o_center_cell');
+  
+  function applyCenterCell() {
+    if (!vCenterCell) return;
+    const value = parseInt(vCenterCell.value) || 90;
+    document.documentElement.style.setProperty('--center-cell', value + 'px');
+    if (oCenterCell) {
+      oCenterCell.textContent = value;
+    }
+  }
+
+  if (vCenterCell) {
+    vCenterCell.addEventListener('input', applyCenterCell);
+  }
+
+  // Gap and height controls
+  const gapControls = [
+    { id: 'v_gap_top', target: 'element-marquee', prop: 'marginTop' },
+    { id: 'v_gap_div', target: 'element-divider', prop: 'marginTop' },
+    { id: 'v_gap_crt', target: 'element-crt', prop: 'marginTop' },
+    { id: 'v_gap_tabs', target: 'element-tabs', prop: 'marginTop' },
+    { id: 'v_gap_hud1', target: 'element-hud1', prop: 'marginTop' },
+    { id: 'v_gap_hud2', target: 'element-hud2', prop: 'marginTop' },
+    { id: 'v_gap_bottom', target: 'element-bottom', prop: 'height' }
+  ];
+
+  gapControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    const output = shadow.getElementById('o_' + control.id.replace(/^v_/, ''));
+    
+    if (input) {
+      input.addEventListener('input', function() {
+        const targetElement = document.getElementById(control.target);
+        if (targetElement) {
+          const value = parseInt(this.value) || 0;
+          if (control.prop === 'height') {
+            targetElement.style.height = value + 'px';
+          } else {
+            targetElement.style[control.prop] = value + 'px';
+          }
+          if (output) {
+            output.textContent = value;
+          }
+        }
+      });
+    }
+  });
+
+
+  // Apply initial gap and height values on load
+  gapControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    if (input) {
+      input.dispatchEvent(new Event('input'));
+    }
+  });
+
+  // Marquee controls
+  const mqTitle = document.querySelector('.mq-title');
+  const mqSub = document.querySelector('.mq-sub');
+  const chipBoxes = document.querySelectorAll('.chip-box');
+  
+  // Marquee title controls
+  const mqTitleSize = shadow.getElementById('v_mqtsize');
+  const mqTitleX = shadow.getElementById('v_mqtx');
+  const mqTitleY = shadow.getElementById('v_mqty');
+  
+  if (mqTitleSize && mqTitle) {
+    mqTitleSize.addEventListener('input', function() {
+      mqTitle.style.fontSize = this.value + 'px';
+      shadow.getElementById('o_mqtsize').textContent = this.value;
+    });
+  }
+  
+  if (mqTitleX && mqTitle) {
+    mqTitleX.addEventListener('input', function() {
+      const y = parseInt(mqTitleY?.value || 0);
+      mqTitle.style.transform = `translate(${this.value}px, ${y}px)`;
+      shadow.getElementById('o_mqtx').textContent = this.value;
+    });
+  }
+  
+  if (mqTitleY && mqTitle) {
+    mqTitleY.addEventListener('input', function() {
+      const x = parseInt(mqTitleX?.value || 0);
+      mqTitle.style.transform = `translate(${x}px, ${this.value}px)`;
+      shadow.getElementById('o_mqty').textContent = this.value;
+    });
+  }
+
+  // Marquee subtitle controls
+  const mqSubSize = shadow.getElementById('v_mqssize');
+  const mqSubX = shadow.getElementById('v_mqsx');
+  const mqSubY = shadow.getElementById('v_mqsy');
+  
+  if (mqSubSize && mqSub) {
+    mqSubSize.addEventListener('input', function() {
+      mqSub.style.fontSize = this.value + 'px';
+      shadow.getElementById('o_mqssize').textContent = this.value;
+    });
+  }
+  
+  if (mqSubX && mqSub) {
+    mqSubX.addEventListener('input', function() {
+      const y = parseInt(mqSubY?.value || 0);
+      mqSub.style.transform = `translate(${this.value}px, ${y}px)`;
+      shadow.getElementById('o_mqsx').textContent = this.value;
+    });
+  }
+  
+  if (mqSubY && mqSub) {
+    mqSubY.addEventListener('input', function() {
+      const x = parseInt(mqSubX?.value || 0);
+      mqSub.style.transform = `translate(${x}px, ${this.value}px)`;
+      shadow.getElementById('o_mqsy').textContent = this.value;
+    });
+  }
+
+  // Chip controls
+  const chipBr = shadow.getElementById('v_chipbr');
+  const chipPadX = shadow.getElementById('v_chippadx');
+  const chipPadY = shadow.getElementById('v_chippady');
+  
+  if (chipBr && chipBoxes.length > 0) {
+    chipBr.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.borderRadius = this.value + 'px';
+      });
+      shadow.getElementById('o_chipbr').textContent = this.value;
+    });
+  }
+  
+  if (chipPadX && chipBoxes.length > 0) {
+    chipPadX.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.paddingLeft = this.value + 'px';
+        chip.style.paddingRight = this.value + 'px';
+      });
+      shadow.getElementById('o_chippadx').textContent = this.value;
+    });
+  }
+  
+  if (chipPadY && chipBoxes.length > 0) {
+    chipPadY.addEventListener('input', function() {
+      chipBoxes.forEach(chip => {
+        chip.style.paddingTop = this.value + 'px';
+        chip.style.paddingBottom = this.value + 'px';
+      });
+      shadow.getElementById('o_chippady').textContent = this.value;
+    });
+  }
+
+  // Icon gap controls
+  const iconGapSneakers = shadow.getElementById('v_icon_gap_sneakers');
+  const iconGapPowers = shadow.getElementById('v_icon_gap_powers');
+  const iconGapFires = shadow.getElementById('v_icon_gap_fires');
+  
+  if (iconGapSneakers) {
+    iconGapSneakers.addEventListener('input', function() {
+      const sneakers = document.getElementById('ui-sneakers');
+      if (sneakers) {
+        sneakers.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_sneakers').textContent = this.value;
+    });
+  }
+  
+  if (iconGapPowers) {
+    iconGapPowers.addEventListener('input', function() {
+      const powers = document.getElementById('ui-powers');
+      if (powers) {
+        powers.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_powers').textContent = this.value;
+    });
+  }
+  
+  if (iconGapFires) {
+    iconGapFires.addEventListener('input', function() {
+      const fires = document.getElementById('ui-fires');
+      if (fires) {
+        fires.style.gap = this.value + 'px';
+      }
+      shadow.getElementById('o_icon_gap_fires').textContent = this.value;
+    });
+  }
+
+  // Icon count controls
+  const heartsFill = shadow.getElementById('in_hearts_fill');
+  const heartsOutline = shadow.getElementById('in_hearts_outline');
+  const shoesFill = shadow.getElementById('in_shoes_fill');
+  const shoesOutline = shadow.getElementById('in_shoes_outline');
+  const powersFill = shadow.getElementById('in_powers_fill');
+  const powersTotal = shadow.getElementById('in_powers_total');
+  const firesFill = shadow.getElementById('in_fires_fill');
+  const firesOutline = shadow.getElementById('in_fires_outline');
+
+  function updateIconCounts() {
+    // Update hearts
+    if (heartsFill && heartsOutline) {
+      const fill = parseInt(heartsFill.value) || 0;
+      const outline = parseInt(heartsOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderHearts(fill, outline);
+      }
+      shadow.getElementById('o_hearts_fill').textContent = fill;
+      shadow.getElementById('o_hearts_outline').textContent = outline;
+    }
+
+    // Update sneakers
+    if (shoesFill && shoesOutline) {
+      const fill = parseInt(shoesFill.value) || 0;
+      const outline = parseInt(shoesOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderSneakers(fill, outline);
+      }
+      shadow.getElementById('o_shoes_fill').textContent = fill;
+      shadow.getElementById('o_shoes_outline').textContent = outline;
+    }
+
+    // Update powers
+    if (powersFill && powersTotal) {
+      const fill = parseInt(powersFill.value) || 0;
+      const total = parseInt(powersTotal.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderPowers(total, fill);
+      }
+      shadow.getElementById('o_powers_fill').textContent = fill;
+      shadow.getElementById('o_powers_total').textContent = total;
+    }
+
+    // Update fires
+    if (firesFill && firesOutline) {
+      const fill = parseInt(firesFill.value) || 0;
+      const outline = parseInt(firesOutline.value) || 0;
+      if (window.SneakerQuestUI && window.SneakerQuestUI.IconManager) {
+        window.SneakerQuestUI.IconManager.renderFires(fill, outline);
+      }
+      shadow.getElementById('o_fires_fill').textContent = fill;
+      shadow.getElementById('o_fires_outline').textContent = outline;
+    }
+  }
+
+  // Add event listeners for icon counts
+  [heartsFill, heartsOutline, shoesFill, shoesOutline, powersFill, powersTotal, firesFill, firesOutline].forEach(input => {
+    if (input) {
+      input.addEventListener('input', updateIconCounts);
+    }
+  });
+
+  // Slot height controls
+  const slotControls = [
+    { id: 'v_slotsneakers', selector: '.hud .slot-heart' },
+    { id: 'v_slotshoes', selector: '.hud .slot-shoes' },
+    { id: 'v_slotdots', selector: '.hud .slot-dots' },
+    { id: 'v_slotflames', selector: '.hud2 .slot-flames' },
+    { id: 'v_slotpause', selector: '.hud2 .slot-pause' },
+    { id: 'v_slotbag', selector: '.hud2 .slot-bag' }
+  ];
+
+  slotControls.forEach(control => {
+    const input = shadow.getElementById(control.id);
+    const output = shadow.getElementById('o_' + control.id.replace(/^v_/, ''));
+    
+    if (input) {
+      input.addEventListener('input', function() {
+        const elements = document.querySelectorAll(control.selector);
+        elements.forEach(el => {
+          el.style.height = this.value + 'px';
+        });
+        if (output) {
+          output.textContent = this.value;
+        }
+      });
+    }
+  });
+
+  // CRT height control
+  const crtHeight = shadow.getElementById('v_crt_h');
+  const crt = document.querySelector('.crt');
+  
+  if (crtHeight && crt) {
+    crtHeight.addEventListener('input', function() {
+      const value = parseInt(this.value) || 0;
+      if (value > 0) {
+        crt.style.height = value + 'px';
+        crt.style.aspectRatio = '';
+      } else {
+        crt.style.height = '';
+        crt.style.aspectRatio = '';
+      }
+      shadow.getElementById('o_crt_h').textContent = value;
+      window.dispatchEvent(new Event('resize'));
+    });
+  }
+
+  // Control screen padding
+  const botA = shadow.getElementById('v_bot_a');
+  const botB = shadow.getElementById('v_bot_b');
+  const controlScreen = document.querySelector('.control-screen');
+  
+  if (botA && controlScreen) {
+    botA.addEventListener('input', function() {
+      controlScreen.style.paddingTop = this.value + 'px';
+      shadow.getElementById('o_bot_a').textContent = this.value;
+    });
+  }
+  
+  if (botB && controlScreen) {
+    botB.addEventListener('input', function() {
+      controlScreen.style.paddingBottom = this.value + 'px';
+      shadow.getElementById('o_bot_b').textContent = this.value;
+    });
+  }
+
+  
+  // Apply initial control screen padding on load
+  if (botA && controlScreen) {
+    botA.dispatchEvent(new Event('input'));
+  }
+  if (botB && controlScreen) {
+    botB.dispatchEvent(new Event('input'));
+  }
+
+// Global padding controls
+  const globalPadL = shadow.getElementById('v_global_pad_l');
+  const globalPadR = shadow.getElementById('v_global_pad_r');
+  const inner = document.querySelector('.inner');
+  
+  if (globalPadL && inner) {
+    globalPadL.addEventListener('input', function() {
+      inner.style.paddingLeft = this.value + 'px';
+      shadow.getElementById('o_global_pad_l').textContent = this.value;
+    });
+  }
+  
+  if (globalPadR && inner) {
+    globalPadR.addEventListener('input', function() {
+      inner.style.paddingRight = this.value + 'px';
+      shadow.getElementById('o_global_pad_r').textContent = this.value;
+    });
+  }
+
+  // Controls panel transform
+  const ctrlX = shadow.getElementById('v_ctrl_x');
+  const ctrlY = shadow.getElementById('v_ctrl_y');
+  const ctrlScale = shadow.getElementById('v_ctrl_scale');
+  const elementControls = document.getElementById('element-controls');
+  
+  if (ctrlX && elementControls) {
+    ctrlX.addEventListener('input', function() {
+      const y = parseInt(ctrlY?.value || 0);
+      const scale = parseFloat(ctrlScale?.value || 1);
+      elementControls.style.transform = `translate(${this.value}px, ${y}px) scale(${scale})`;
+      shadow.getElementById('o_ctrl_x').textContent = this.value;
+    });
+  }
+  
+  if (ctrlY && elementControls) {
+    ctrlY.addEventListener('input', function() {
+      const x = parseInt(ctrlX?.value || 0);
+      const scale = parseFloat(ctrlScale?.value || 1);
+      elementControls.style.transform = `translate(${x}px, ${this.value}px) scale(${scale})`;
+      shadow.getElementById('o_ctrl_y').textContent = this.value;
+    });
+  }
+  
+  if (ctrlScale && elementControls) {
+    ctrlScale.addEventListener('input', function() {
+      const x = parseInt(ctrlX?.value || 0);
+      const y = parseInt(ctrlY?.value || 0);
+      elementControls.style.transform = `translate(${x}px, ${y}px) scale(${this.value})`;
+      shadow.getElementById('o_ctrl_scale').textContent = parseFloat(this.value).toFixed(2);
+    });
+  }
+
+  // JSON Export
+  function collectLayoutData() {
+    const data = {};
+    
+    // CSS variables
+    const rootStyles = getComputedStyle(document.documentElement);
+    data['--center-cell'] = rootStyles.getPropertyValue('--center-cell').trim();
+    
+    // Element styles
+    const elements = [
+      'element-marquee', 'element-divider', 'element-crt', 
+      'element-tabs', 'element-hud1', 'element-hud2', 'element-bottom'
+    ];
+    
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        data[id] = {
+          marginTop: el.style.marginTop || '',
+          height: el.style.height || ''
+        };
+      }
+    });
+    
+    // Marquee styles
+    if (mqTitle) {
+      data.marqueeTitle = {
+        fontSize: mqTitle.style.fontSize || '',
+        transform: mqTitle.style.transform || ''
+      };
+    }
+    
+    if (mqSub) {
+      data.marqueeSub = {
+        fontSize: mqSub.style.fontSize || '',
+        transform: mqSub.style.transform || ''
+      };
+    }
+    
+    // Chip styles
+    if (chipBoxes.length > 0) {
+      const chip = chipBoxes[0];
+      data.chip = {
+        borderRadius: chip.style.borderRadius || '',
+        padding: `${chip.style.paddingTop || ''} ${chip.style.paddingRight || ''}`
+      };
+    }
+    
+    // Icon gaps
+    const sneakers = document.getElementById('ui-sneakers');
+    const powers = document.getElementById('ui-powers');
+    const fires = document.getElementById('ui-fires');
+    
+    if (sneakers) data.sneakersGap = sneakers.style.gap || '';
+    if (powers) data.powersGap = powers.style.gap || '';
+    if (fires) data.firesGap = fires.style.gap || '';
+    
+    // Slot heights
+    slotControls.forEach(control => {
+      const elements = document.querySelectorAll(control.selector);
+      if (elements.length > 0) {
+        data[control.id] = elements[0].style.height || '';
+      }
+    });
+    
+    // CRT height
+    if (crt) {
+      data.crtHeight = crt.style.height || '';
+    }
+    
+    // Control screen
+    if (controlScreen) {
+      data.controlScreen = {
+        paddingTop: controlScreen.style.paddingTop || '',
+        paddingBottom: controlScreen.style.paddingBottom || ''
+      };
+    }
+    
+    // Inner padding
+    if (inner) {
+      data.inner = {
+        paddingLeft: inner.style.paddingLeft || '',
+        paddingRight: inner.style.paddingRight || ''
+      };
+    }
+    
+    // Controls transform
+    if (elementControls) {
+      data.controlsTransform = elementControls.style.transform || '';
+    }
+    
+    // Scale
+    const sliderScale = vScale ? (parseFloat(vScale.value) || 1) : detectCurrentScale();
+    data.scale = sliderScale;
+    
+    // Icon counts
+    data.iconCounts = {
+      heartsFill: heartsFill?.value || '',
+      heartsOutline: heartsOutline?.value || '',
+      shoesFill: shoesFill?.value || '',
+      shoesOutline: shoesOutline?.value || '',
+      powersFill: powersFill?.value || '',
+      powersTotal: powersTotal?.value || '',
+      firesFill: firesFill?.value || '',
+      firesOutline: firesOutline?.value || ''
+    };
+    
+    return data;
+  }
+
+  if (btnCopyJSON) {
+    btnCopyJSON.addEventListener('click', function() {
+      const data = collectLayoutData();
+      data.prompt = 'Here is a COPY JSON snapshot from the Settings 1 layout tuner panel. Task: apply these values as the new default Settings 1 configuration without changing layout, theming, or behavior.';
+      const json = JSON.stringify(data, null, 2);
+      
+      // Update preview
+      const jsonPreview = shadow.getElementById('jsonPreview');
+      if (jsonPreview) {
+        jsonPreview.value = json;
+      }
+      
+      // Copy to clipboard instead of downloading
+      function showMsg(msg) {
+        const copyMsg = shadow.getElementById('copyMsg');
+        if (copyMsg) {
+          copyMsg.textContent = 'Copied!';
+          copyMsg.style.opacity = '1';
+          setTimeout(() => {
+            copyMsg.style.opacity = '0';
+          }, 2000);
+        }
+      }
+
+      function fallbackCopy() {
+        const ta = document.createElement('textarea');
+        ta.value = json;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        showMsg('Copied!');
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(() => {
+          showMsg('Copied!');
+        }).catch(() => {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
+      }
+    });
+  
+  }
+
+  // Reset functionality
+  const defaults = {
+          'v_scale': 0.852222,
+          'v_center_cell': 90,
+          'v_gap_top': -8,
+          'v_gap_div': -12,
+          'v_gap_crt': -11,
+          'v_gap_tabs': -13,
+          'v_gap_hud1': -15,
+          'v_gap_hud2': -13,
+          'v_gap_bottom': 197,
+          'v_bot_a': 0,
+          'v_bot_b': 0,
+          'v_global_pad_l': 10,
+          'v_global_pad_r': 10,
+          'v_mqtsize': 29,
+          'v_mqtx': -3,
+          'v_mqty': 3,
+          'v_mqssize': 7,
+          'v_mqsx': 0,
+          'v_mqsy': 4,
+          'v_chipbr': 6,
+          'v_chippadx': 6,
+          'v_chippady': 3,
+          'v_icon_gap_sneakers': 3,
+          'v_icon_gap_powers': 7,
+          'v_icon_gap_fires': 3,
+          'in_hearts_fill': 1,
+          'in_hearts_outline': 3,
+          'in_shoes_fill': 3,
+          'in_shoes_outline': 5,
+          'in_powers_fill': 4,
+          'in_powers_total': 4,
+          'in_fires_fill': 4,
+          'in_fires_outline': 5,
+          'v_slotsneakers': 37,
+          'v_slotshoes': 37,
+          'v_slotdots': 37,
+          'v_slotflames': 37,
+          'v_slotpause': 37,
+          'v_slotbag': 37,
+          'v_crt_h': 0,
+          'v_ctrl_x': 0,
+          'v_ctrl_y': 0,
+          'v_ctrl_scale': 1.04
+        };
+
+  function applyDefaults() {
+    Object.keys(defaults).forEach(key => {
+      const input = shadow.getElementById(key);
+      if (input) {
+        input.value = defaults[key];
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+  }
+
+  if (sReset) {
+    sReset.addEventListener('click', function() {
+      applyDefaults();
+    });
+  }
+
+  // Apply defaults on initial open
+  applyDefaults();
+
+// ESC key handler to close panel
+  function handleKeydown(e) {
+    if (e.key === 'Escape' && isPanelOpen) {
+      togglePanel();
+    }
+  }
+
+  document.addEventListener('keydown', handleKeydown);
+
+  // Initialize displays and apply defaults
+  updateScaleDisplay();
+  applyCenterCell();
+  updateIconCounts();
+
+  // Cleanup on disconnect
+  tunerRoot.addEventListener('disconnected', () => {
+    document.removeEventListener('keydown', handleKeydown);
+  });
+
+})();
+</script>
 <!-- [SQ-TUNER:SCRIPT] -->
 <script>
     // === MOBILE SAFARI LAYOUT/SCALING ===
@@ -2168,7 +3319,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       }
 
       static initializeAggressiveScaling() {
-        // Cabinet scaling is now fully controlled by the tuner (v_scale/applyScale).
+        // Cabinet scaling is now fully controlled by the Settings 1 tuner (v_scale/applyScale).
         // Auto-fit scaling is intentionally disabled here to avoid competing transforms.
       }
     }
@@ -2464,7 +3615,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 #element-hud2    { margin-top: -16px ; }
 #element-bottom  { height: 240px ; }
 
-/* CRT default height from tuner snapshot */
+/* CRT default height from Settings 1 snapshot */
 #element-crt .crt { height: 350px ; aspect-ratio: auto ; }
 
 /* Marquee typography */
@@ -2677,6 +3828,193 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 </div>
 </template>
 <!-- [LT2:TPL-END] -->
+<!-- [UNIFIED-TUNER-SCHEMA]
+  See external file: unified-tuner-schema.json
+  Strategy: LT2-first, legacy float tuner documented in `legacy` blocks.
+  Wiring will be implemented in Tasks 13C–13D.
+[UNIFIED-TUNER-SCHEMA-END] -->
+<!-- [UNIFIED-TUNER:TPL-START] -->
+<template id="unified-tuner-tpl">
+<style>
+    /* Base styling: reuse LT2 look and feel */
+    .wrap {
+      position: fixed;
+      right: 1rem;
+      bottom: 5rem;
+      width: 320px;
+      max-width: 100vw;
+      padding: 0.75rem 0.75rem 0.9rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      background: rgba(10,10,14,0.95);
+      color: #f7f7ff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      z-index: 9999;
+    }
+
+    h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .hint {
+      margin: 0 0 0.5rem;
+      font-size: 0.78rem;
+      opacity: 0.8;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tab {
+      flex: 1 1 0;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04);
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: rgba(127, 199, 255, 0.25);
+      border-color: rgba(127, 199, 255, 0.7);
+    }
+
+    .tab-panel {
+      display: none;
+      margin-top: 0.25rem;
+    }
+
+    .tab-panel[data-active="true"] {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 0.5rem;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.78rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .field output {
+      font-variant-numeric: tabular-nums;
+      opacity: 0.85;
+    }
+
+    .field input[type="range"] {
+      width: 100%;
+    }
+
+    .row-header {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.85;
+      margin: 0.25rem 0 0.25rem;
+    }
+
+    .row-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+    }
+
+    button.close {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.04);
+      color: inherit;
+      cursor: pointer;
+    }
+  </style>
+<div class="wrap" hidden="" id="unifiedPanel" tabindex="-1">
+<h3>Unified Tuner (LT2)</h3>
+<p class="hint">Tabs group bottom, left, and right controls. Behavior wiring is added in a later task.</p>
+<div aria-label="Unified tuner groups" class="tabs" role="tablist">
+<button aria-controls="panel-bottom" aria-selected="true" class="tab" data-tab="bottom" id="tab-bottom" role="tab">Bottom</button>
+<button aria-controls="panel-left" aria-selected="false" class="tab" data-tab="left" id="tab-left" role="tab">Left</button>
+<button aria-controls="panel-right" aria-selected="false" class="tab" data-tab="right" id="tab-right" role="tab">Right</button>
+</div>
+<!-- Bottom height panel -->
+<section aria-labelledby="tab-bottom" class="tab-panel" data-active="true" data-panel="bottom" id="panel-bottom" role="tabpanel">
+<div class="field">
+<label for="v_bh">
+<span>Bottom height</span>
+<output id="o_bh">240</output>
+</label>
+<input id="v_bh" max="360" min="80" step="1" type="range" value="240"/>
+</div>
+</section>
+<!-- Left controls panel -->
+<section aria-labelledby="tab-left" class="tab-panel" data-panel="left" id="panel-left" role="tabpanel">
+<p class="row-header">Left controls (buttons)</p>
+<div class="field">
+<label for="v_lx">
+<span>Offset X</span>
+<output id="o_lx">0</output>
+</label>
+<input id="v_lx" max="240" min="-240" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ly">
+<span>Offset Y</span>
+<output id="o_ly">0</output>
+</label>
+<input id="v_ly" max="200" min="-200" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ls">
+<span>Scale</span>
+<output id="o_ls">1.35</output>
+</label>
+<input id="v_ls" max="1.8" min="0.6" step="0.01" type="range" value="1.35"/>
+</div>
+</section>
+<!-- Right controls panel -->
+<section aria-labelledby="tab-right" class="tab-panel" data-panel="right" id="panel-right" role="tabpanel">
+<p class="row-header">Right controls (joystick)</p>
+<div class="field">
+<label for="v_rx">
+<span>Offset X</span>
+<output id="o_rx">0</output>
+</label>
+<input id="v_rx" max="240" min="-240" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_ry">
+<span>Offset Y</span>
+<output id="o_ry">0</output>
+</label>
+<input id="v_ry" max="200" min="-200" step="1" type="range" value="0"/>
+</div>
+<div class="field">
+<label for="v_rs">
+<span>Scale</span>
+<output id="o_rs">1.24</output>
+</label>
+<input id="v_rs" max="1.8" min="0.6" step="0.01" type="range" value="1.24"/>
+</div>
+</section>
+<button class="close" id="unifiedClose" type="button">Close</button>
+</div>
+</template>
+<!-- [UNIFIED-TUNER:TPL-END] -->
 <!-- [LT2:SCRIPT] -->
 <script>
 (function(){
@@ -2932,7 +4270,227 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }, 200);
   }
 })();</script>
+<!-- [UNIFIED-TUNER:SCRIPT] -->
+<script>
+(function(){
+  var host = document.getElementById('unified-tuner-root') || (function(){
+    var r = document.createElement('div');
+    r.id = 'unified-tuner-root';
+    document.body.appendChild(r);
+    return r;
+  })();
+  var tpl = document.getElementById('unified-tuner-tpl');
+  if (!host || !tpl) return;
 
+  var shadow = host.attachShadow({ mode: 'open' });
+  shadow.appendChild(tpl.content.cloneNode(true));
+
+  var panel = shadow.getElementById('unifiedPanel');
+  var closeBtn = shadow.getElementById('unifiedClose');
+
+  // Create floating toggle button (additive, does not replace existing buttons)
+  var btn = document.createElement('button');
+  btn.id = 'unifiedToggle';
+  btn.type = 'button';
+  btn.textContent = 'UNI';
+  btn.style.position = 'fixed';
+  btn.style.right = '1rem';
+  btn.style.bottom = '8.5rem';
+  btn.style.width = '40px';
+  btn.style.height = '40px';
+  btn.style.borderRadius = '999px';
+  btn.style.border = 'none';
+  btn.style.boxShadow = '0 3px 8px rgba(0,0,0,0.4)';
+  btn.style.background = '#1d2330';
+  btn.style.color = '#f7f7ff';
+  btn.style.fontSize = '0.7rem';
+  btn.style.cursor = 'pointer';
+  btn.style.zIndex = 9999;
+  btn.title = 'Unified tuner (LT2)';
+
+  function togglePanel(show) {
+    var isVisible = !panel.hasAttribute('hidden');
+    var next = (typeof show === 'boolean') ? show : !isVisible;
+    if (next) {
+      panel.removeAttribute('hidden');
+      if (panel.focus) {
+        try { panel.focus({ preventScroll: true }); } catch (e) { panel.focus(); }
+      }
+    } else {
+      panel.setAttribute('hidden', '');
+    }
+  }
+
+  btn.addEventListener('click', function(){
+    togglePanel();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(){
+      togglePanel(false);
+    });
+  }
+
+  document.body.appendChild(btn);
+
+  // Basic tab switching (UI only, no behavior wiring)
+  var tabs = Array.prototype.slice.call(shadow.querySelectorAll('.tab'));
+  var panels = Array.prototype.slice.call(shadow.querySelectorAll('.tab-panel'));
+
+  function setActiveTab(tabId) {
+    var i;
+    var tab = null;
+    for (i = 0; i < tabs.length; i++) {
+      if (tabs[i].getAttribute('data-tab') === tabId) {
+        tab = tabs[i];
+        break;
+      }
+    }
+    if (!tab) return;
+
+    for (i = 0; i < tabs.length; i++) {
+      var selected = (tabs[i] === tab);
+      tabs[i].setAttribute('aria-selected', selected ? 'true' : 'false');
+    }
+
+    for (i = 0; i < panels.length; i++) {
+      var isMatch = (panels[i].getAttribute('data-panel') === tabId);
+      panels[i].setAttribute('data-active', isMatch ? 'true' : 'false');
+    }
+  }
+
+  for (var ti = 0; ti < tabs.length; ti++) {
+    (function(t){
+      t.addEventListener('click', function(){
+        var tabId = t.getAttribute('data-tab');
+        if (tabId) setActiveTab(tabId);
+      });
+    })(tabs[ti]);
+  }
+
+  // Initial active tab
+  setActiveTab('bottom');
+// Unified tuner wiring (Task 13D)
+function bindRange(id, outId, cb) {
+  var el = shadow.getElementById(id);
+  var out = shadow.getElementById(outId);
+  if (!el) return;
+
+  function sync() {
+    if (out) out.textContent = el.value;
+    if (cb) cb(el.value);
+  }
+
+  el.addEventListener('input', sync);
+  // Apply default on bind
+  sync();
+}
+
+var bottom = document.getElementById('element-bottom');
+var iframe = document.getElementById('controlsFrame');
+
+function doc() {
+  try {
+    return iframe && (iframe.contentDocument || iframe.contentWindow.document);
+  } catch (e) {
+    return null;
+  }
+}
+
+function ensureStyle() {
+  var d = doc();
+  if (!d) return false;
+  if (d.getElementById('lt2-style')) return true;
+
+  var css = d.createElement('style');
+  css.id = 'lt2-style';
+  css.textContent = [
+    '.col-left .pad{ transform: translate(var(--lt2-lx,0px), var(--lt2-ly,0px)) scale(var(--lt2-left,1)); transform-origin:center center; overflow:hidden; }',
+    '.col-right .pad{ transform: translate(var(--lt2-rx,0px), var(--lt2-ry,0px)) scale(var(--lt2-right,1)); transform-origin:center center; overflow:hidden; }',
+    '#btn2_panel{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }',
+    '#jpad_canvas{ width:100% !important; height:100% !important; display:block; image-rendering: pixelated; }'
+  ].join('\n');
+  d.head.appendChild(css);
+  return true;
+}
+
+function setVar(key, value) {
+  var d = doc();
+  if (!d) return;
+  d.documentElement.style.setProperty(key, value);
+}
+
+// Mirror LT2 defaults
+setVar('--lt2-left', '1');
+setVar('--lt2-right', '1');
+setVar('--lt2-lx', '0px');
+setVar('--lt2-ly', '0px');
+setVar('--lt2-rx', '0px');
+setVar('--lt2-ry', '0px');
+
+// Make bay background transparent (aligned with LT2)
+var cs = document.querySelector('#element-bottom .control-screen');
+if (cs) {
+  cs.style.background = 'transparent';
+}
+
+// Bottom height
+bindRange('v_bh', 'o_bh', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  if (bottom) {
+    bottom.style.height = v + 'px';
+  }
+});
+
+// Left controls (buttons)
+bindRange('v_lx', 'o_lx', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-lx', v + 'px');
+});
+
+bindRange('v_ly', 'o_ly', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-ly', v + 'px');
+});
+
+bindRange('v_ls', 'o_ls', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 1;
+  ensureStyle();
+  setVar('--lt2-left', String(v));
+});
+
+// Right controls (joystick)
+bindRange('v_rx', 'o_rx', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-rx', v + 'px');
+});
+
+bindRange('v_ry', 'o_ry', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 0;
+  ensureStyle();
+  setVar('--lt2-ry', v + 'px');
+});
+
+bindRange('v_rs', 'o_rs', function(raw) {
+  var v = parseFloat(raw);
+  if (!isFinite(v)) v = 1;
+  ensureStyle();
+  setVar('--lt2-right', String(v));
+});
+
+})();
+</script>
+<!-- [UNIFIED-TUNER:SCRIPT-END] -->
+<div id="unified-tuner-root"></div>
 
 <script>
 (function () {
