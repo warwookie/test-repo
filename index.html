@@ -252,6 +252,18 @@
 #unified-tuner-root {
   display: none !important;
 }
+
+  /* Export build: hide remaining tuner pills (UNI / COPY JSON / LT2) */
+  #unifiedToggle,
+  .uni-pill,
+  #copyJson,
+  #copyJsonBtn,
+  .copy-json-pill,
+  #lt2Toggle,
+  .lt2-pill {
+    display: none !important;
+    pointer-events: none !important;
+  }
 </style>
 </head>
 <body>
@@ -3660,7 +3672,17 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 #controlsFrame { border: 0 ; outline: 0 ; }
 
 /* Main container scale */
-#mainContainer { transform-origin: top center; transform: translateX(-50%) scale(1); }</style>
+#mainContainer { transform-origin: top center; transform: translateX(-50%) scale(1); }
+  /* Export build: hide tuner UI (panels and toggle buttons) */
+  #settingsBtn,
+  #settingsPanel,
+  #unified-tuner-root,
+  #lt2-root,
+  #sq-tuner-toggle {
+    display: none !important;
+    pointer-events: none !important;
+  }
+</style>
 <!-- [FLOAT-TUNER:TPL-START] -->
 <template id="float-tuner-tpl">
 <style>
