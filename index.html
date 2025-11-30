@@ -295,7 +295,7 @@
 </div></div></div>
 </div>
 <div class="bottom" id="element-bottom">
-<div class="control-screen" id="element-controls" style="transform: translate(0px, 0px) scale(1.04);">
+<div class="control-screen" id="element-controls">
 
 <iframe id="controlsFrame" srcdoc="&lt;!doctype html&gt;
 &lt;html lang=&quot;en&quot;&gt;
@@ -2688,8 +2688,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     const scaleValue = parseFloat(vScale.value) || 1;
 
     // Tuner now owns cabinet scaling: always use a stable transform
-    // mainContainer.style.transform assignment disabled; transform now fixed in CSS.
-    // mainContainer.style.transform = `translateX(-50%) scale(${scaleValue})`;
+    mainContainer.style.transform = `translateX(-50%) scale(${scaleValue})`;
 
     if (oScale) {
       oScale.textContent = scaleValue.toFixed(2);
@@ -2965,13 +2964,10 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   slotControls.forEach(control => {
     const input = shadow.getElementById(control.id);
     const output = shadow.getElementById('o_' + control.id.replace(/^v_/, ''));
-    
+
     if (input) {
       input.addEventListener('input', function() {
-        const elements = document.querySelectorAll(control.selector);
-        elements.forEach(el => {
-          el.style.height = this.value + 'px';
-        });
+        // Layout mutation disabled: slot heights are now fixed by CSS overrides.
         if (output) {
           output.textContent = this.value;
         }
@@ -2982,34 +2978,28 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
   // CRT height control
   const crtHeight = shadow.getElementById('v_crt_h');
   const crt = document.querySelector('.crt');
-  
+
   if (crtHeight && crt) {
     crtHeight.addEventListener('input', function() {
       const value = parseInt(this.value) || 0;
-      if (value > 0) {
-        crt.style.height = value + 'px';
-        crt.style.aspectRatio = '';
-      } else {
-        crt.style.height = '';
-        crt.style.aspectRatio = '';
-      }
+      // Layout mutation disabled: CRT geometry is now fixed by CSS overrides.
       shadow.getElementById('o_crt_h').textContent = value;
-      window.dispatchEvent(new Event('resize'));
     });
   }
 
-  // Control screen padding
+
+// Control screen padding
   const botA = shadow.getElementById('v_bot_a');
   const botB = shadow.getElementById('v_bot_b');
   const controlScreen = document.querySelector('.control-screen');
-  
+
   if (botA && controlScreen) {
     botA.addEventListener('input', function() {
       controlScreen.style.paddingTop = this.value + 'px';
       shadow.getElementById('o_bot_a').textContent = this.value;
     });
   }
-  
+
   if (botB && controlScreen) {
     botB.addEventListener('input', function() {
       controlScreen.style.paddingBottom = this.value + 'px';
@@ -3017,7 +3007,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     });
   }
 
-  
+
   // Apply initial control screen padding on load
   if (botA && controlScreen) {
     botA.dispatchEvent(new Event('input'));
@@ -3026,26 +3016,28 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     botB.dispatchEvent(new Event('input'));
   }
 
+
 // Global padding controls
   const globalPadL = shadow.getElementById('v_global_pad_l');
   const globalPadR = shadow.getElementById('v_global_pad_r');
   const inner = document.querySelector('.inner');
-  
+
   if (globalPadL && inner) {
     globalPadL.addEventListener('input', function() {
-      inner.style.paddingLeft = this.value + 'px';
+      // Layout mutation disabled: inner left padding is now fixed by CSS overrides.
       shadow.getElementById('o_global_pad_l').textContent = this.value;
     });
   }
-  
+
   if (globalPadR && inner) {
     globalPadR.addEventListener('input', function() {
-      inner.style.paddingRight = this.value + 'px';
+      // Layout mutation disabled: inner right padding is now fixed by CSS overrides.
       shadow.getElementById('o_global_pad_r').textContent = this.value;
     });
   }
 
-  // Controls panel transform
+
+// Controls panel transform
   const ctrlX = shadow.getElementById('v_ctrl_x');
   const ctrlY = shadow.getElementById('v_ctrl_y');
   const ctrlScale = shadow.getElementById('v_ctrl_scale');
@@ -3055,7 +3047,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     ctrlX.addEventListener('input', function() {
       const y = parseInt(ctrlY?.value || 0);
       const scale = parseFloat(ctrlScale?.value || 1);
-      elementControls.style.transform = `translate(${this.value}px, ${y}px) scale(${scale})`;
+      // elementControls.style.transform = `translate(${this.value}px, ${y}px) scale(${scale})`;
       shadow.getElementById('o_ctrl_x').textContent = this.value;
     });
   }
@@ -3064,7 +3056,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     ctrlY.addEventListener('input', function() {
       const x = parseInt(ctrlX?.value || 0);
       const scale = parseFloat(ctrlScale?.value || 1);
-      elementControls.style.transform = `translate(${x}px, ${this.value}px) scale(${scale})`;
+      // elementControls.style.transform = `translate(${x}px, ${this.value}px) scale(${scale})`;
       shadow.getElementById('o_ctrl_y').textContent = this.value;
     });
   }
@@ -3073,7 +3065,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     ctrlScale.addEventListener('input', function() {
       const x = parseInt(ctrlX?.value || 0);
       const y = parseInt(ctrlY?.value || 0);
-      elementControls.style.transform = `translate(${x}px, ${y}px) scale(${this.value})`;
+      // elementControls.style.transform = `translate(${x}px, ${y}px) scale(${this.value})`;
       shadow.getElementById('o_ctrl_scale').textContent = parseFloat(this.value).toFixed(2);
     });
   }
@@ -3657,7 +3649,7 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
 .inner { padding-left: 10px ; padding-right: 10px ; }
 
 /* Controls transform and constraints */
-#element-controls { transform: translate(0px, 0px) scale(1) ; min-height: 0 ; }
+#element-controls { transform: translate(0px, 0px) scale(1.04) ; min-height: 0 ; }
 #controlsFrame { border: 0 ; outline: 0 ; }
 
 /* Main container scale */
