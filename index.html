@@ -265,17 +265,6 @@
     display: none !important;
     pointer-events: none !important;
   }
-
-
-/* Export build: hide final COPY JSON pill */
-.copy-json-pill,
-#copyJson,
-#copyJsonBtn {
-  display: none !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-}
-
 </style>
 </head>
 <body>
@@ -3407,137 +3396,1173 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
       }
     }
 
-    // === GAME SETUP ===
-    function setupSimpleGame() {
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
-
-      function resizeCanvas() {
-        const crt = document.querySelector('.crt');
-        const cssW = crt.clientWidth;  const cssH = crt.clientHeight;
-
-        canvas.style.width = cssW + 'px';
-        canvas.style.height = cssH + 'px';
-
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width  = Math.round(cssW * dpr);
-        canvas.height = Math.round(cssH * dpr);
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(dpr, dpr);
-        draw();
-
-        // Self-tests
-        console.assert(Math.abs(canvas.width  / (window.devicePixelRatio||1) - cssW) < 1, 'Canvas width backing store mismatch');
-        console.assert(Math.abs(canvas.height / (window.devicePixelRatio||1) - cssH) < 1, 'Canvas height backing store mismatch');
-      }
-
-      function draw() {
-        const w = canvas.clientWidth; const h = canvas.clientHeight;
-        ctx.fillStyle = '#0a241f'; ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#d6c7a4'; ctx.font = '20px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('SNEAKER BOMBER', w / 2, h / 2 - 20);
-        ctx.fillText('SPACE TO START', w / 2, h / 2 + 20);
-      }
-
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      MobileSafariLock.initialize();
-      IconManager.updateAllIcons();
-      setupSimpleGame();
-      const pauseBtn = document.getElementById('btn-pause');
-      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
-      setTimeout(() => { window.scrollTo(0, 0); }, 120);
-    });
-
-    // Simple UI API
-    window.SneakerQuestUI = {
-      IconManager,
-      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
-      setHearts:   (f, t) => IconManager.renderHearts(f, t),
-      setPowers:   (f, t) => IconManager.renderPowers(t, f),
-      setFires:    (f, t) => IconManager.renderFires(f, t),
-      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
-      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
-      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
-      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
-    };
-      // === HARD LOCK: disable zooming (pinch, double-tap, ctrl+wheel) ===
-    (function lockPageZoom(){
-        const opts = { passive: false };
-        ['gesturestart','gesturechange','gestureend'].forEach(type=>
-            document.addEventListener(type, e=>e.preventDefault(), opts)
-        );
-        // Block double‑tap zoom
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', e=>{
-            const now = Date.now();
-            if (now - lastTouchEnd <= 350) e.preventDefault();
-            lastTouchEnd = now;
-        }, opts);
-        // Block ctrl+wheel zoom (desktop)
-        document.addEventListener('wheel', e=>{ if (e.ctrlKey) e.preventDefault(); }, opts);
-        // iOS focus zoom workaround not needed (no inputs <16px)
-    })();
+    
+    // [Sneaker Bomber game code moved to separate script]
+;
 </script>
 <script>
 (function(){
-  function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready
-</script><script>
-(function(){
-  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  onReady(function(){
-    var iframe = document.getElementById('controlsFrame');
-    var lifeTab = document.querySelector('#element-tabs > div:nth-child(2)');
-    if(!lifeTab) return;
-    lifeTab.classList.add('tab-life');
-    lifeTab.setAttribute('role','button');
-    lifeTab.setAttribute('tabindex','0');
-    lifeTab.setAttribute('aria-pressed','false');
+  // Ensure HUD API exists (fallback implementation) without changing its shape
+  if (!window.SneakerQuestUI) {
+    const IconMgr = window.IconManager || null;
+    window.SneakerQuestUI = {
+      IconManager: IconMgr,
+      setSneakers(fill, total) {
+        if (IconMgr) IconMgr.renderSneakers(fill, total);
+      },
+      setHearts(fill, total) {
+        if (IconMgr) IconMgr.renderHearts(fill, total);
+      },
+      setPowers(fill, total) {
+        if (IconMgr) IconMgr.renderPowers(fill, total);
+      },
+      setFires(fill, total) {
+        if (IconMgr) IconMgr.renderFires(fill, total);
+      },
+      setCounter(value) {
+        const el = document.getElementById('counter');
+        if (!el) return;
+        const v = Math.max(0, value | 0);
+        el.textContent = String(v).padStart(3, '0');
+      },
+      setStage(stage) {
+        const el = document.querySelector('.chip-stage');
+        if (!el) return;
+        const n = Math.max(1, stage | 0);
+        const s = String(n).padStart(2, '0');
+        el.textContent = 'STAGE – ' + s;
+      },
+      setScore(score) {
+        const el = document.querySelector('.chip-score');
+        if (!el) return;
+        const v = Math.max(0, score | 0);
+        el.textContent = 'SCORE ' + String(v).padStart(6, '0');
+      },
+      setTime(label) {
+        const el = document.querySelector('.chip-time');
+        if (!el) return;
+        el.textContent = label;
+      }
+    };
+  }
 
-    function setLifeActive(on){
-      lifeTab.classList.toggle('active', !!on);
-      lifeTab.setAttribute('aria-pressed', on ? 'true' : 'false');
-    }
-    function clickInControls(){
-      try{
-        if(!iframe || !iframe.contentWindow) return;
-        var d = iframe.contentDocument || iframe.contentWindow.document;
-        var btn = d && d.getElementById('btn2_special');
-        if(btn){ btn.click(); }
-        setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700);
-      }catch(_){/* no-op */}
-    }
-    lifeTab.addEventListener('click', clickInControls);
-    lifeTab.addEventListener('keydown', function(e){
-      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); clickInControls(); }
-    });
+function setupSimpleGame() {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
 
-    // Reflect iframe clicks back to the LIFE tab (visual pulse only)
-    function attachIframeListeners(){
-      try{
-        var d = iframe && (iframe.contentDocument || iframe.contentWindow && iframe.contentWindow.document);
-        if(!d) return;
-        var btn = d.getElementById('btn2_special');
-        if(btn){
-          btn.addEventListener('click', function(){ setLifeActive(true); setTimeout(function(){ setLifeActive(false); }, 700); });
-        }
-      }catch(_){}
-    }
-    if(iframe){
-      iframe.addEventListener('load', attachIframeListeners, { once:false });
-      // if already loaded
-      try{
-        if((iframe.contentDocument||iframe.contentWindow.document).readyState==='complete'){ attachIframeListeners(); }
-      }catch(_){}
-    }
+  // Tap anywhere on the CRT canvas to start / restart
+  let tapStartRequested = false;
+  const tapEvents = ['pointerdown', 'touchstart', 'mousedown'];
+  tapEvents.forEach((type) => {
+    canvas.addEventListener(
+      type,
+      () => {
+        tapStartRequested = true;
+      },
+      { passive: true }
+    );
   });
+
+
+  // === GRID & GAME CONFIG ===
+  const GRID_COLS = 13;
+  const GRID_ROWS = 11;
+
+  const MAX_SNEAKERS = 5;
+  const MAX_HEARTS = 3;
+  const MAX_FIRES = 5;
+
+  const PLAYER_MOVE_SPEED = 4;      // tiles per second
+  const PLAYER_INVULN_TIME = 1.0;   // seconds
+  const BOMB_FUSE = 2.4;            // seconds
+  const BOMB_RADIUS = 2;            // tiles
+  const BOX_FIRE_TIME = 10.0;       // seconds after a monster ignites it
+  const EXPLOSION_DURATION = 0.35;  // seconds
+
+  const STATE_TITLE = 'TITLE';
+  const STATE_PLAYING = 'PLAYING';
+  const STATE_GAME_OVER = 'GAME_OVER';
+
+  let gameState = STATE_TITLE;
+
+  // Canvas sizing
+  let viewW = 0;
+  let viewH = 0;
+  let tileSize = 0;
+  let worldOffsetX = 0;
+  let worldOffsetY = 0;
+
+  // === INPUT (JOYSTICK + BUTTONS PRIMARY, KEYBOARD SECONDARY) ===
+  const input = {
+    jx: 0,
+    jy: 0,
+    bombButton: false,
+    laserButton: false,
+    prevBombDown: false,
+    prevLaserDown: false,
+    bombPressed: false,
+    laserPressed: false,
+    keys: Object.create(null),
+  };
+
+  // Optional public hook if you ever want to push input from outside
+  if (!window.SneakerBomberInput) {
+    window.SneakerBomberInput = {
+      setJoystick: (jx, jy) => {
+        input.jx = Math.max(-1, Math.min(1, jx || 0));
+        input.jy = Math.max(-1, Math.min(1, jy || 0));
+      },
+      setBombDown: (down) => {
+        input.bombButton = !!down;
+      },
+      setLaserDown: (down) => {
+        input.laserButton = !!down;
+      },
+    };
+  }
+
+  // === GAME STATE STRUCTURES ===
+
+  // Level grid
+  let grid = []; // grid[y][x] = { wall: bool, box: Box|null }
+
+  // Boxes (shoebox stacks in the mall)
+  let boxes = []; // { x, y, hasSneaker, onFire, fireTimer, destroyed, exploded, sneakerCollected }
+
+  // Player avatar (black hoodie dude)
+  const player = {
+    tx: 1, ty: 1,
+    fromTx: 1, fromTy: 1,
+    toTx: 1, toTy: 1,
+    moveProgress: 0,
+    moving: false,
+    hearts: MAX_HEARTS,
+    invuln: 0,
+    score: 0,
+    sneakersCollected: 0,
+    maxBombs: 1,
+    bombRadius: BOMB_RADIUS,
+    hasRemote: true, // laser = remote detonate
+  };
+
+  // Fire monsters
+  let monsters = []; // { tx, ty, fromTx, fromTy, toTx, toTy, moving, moveProgress, dirX, dirY, speed }
+
+  // Bombs and explosions
+  let bombs = [];      // { tx, ty, fuse, radius }
+  let explosions = []; // { tx, ty, timeLeft }
+
+  // Stage / timing
+  let stageIndex = 1;
+  let elapsedTime = 0;
+  let lastTimestamp = 0;
+
+  // === UTILS ===
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  function formatTime(tSec) {
+    const t = Math.max(0, tSec);
+    const minutes = Math.floor(t / 60);
+    const seconds = Math.floor(t % 60);
+    const tenths = Math.floor((t - Math.floor(t)) * 10);
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+    return `${mm}:${ss}:${tenths}`;
+  }
+
+  function isPaused() {
+    const btn = document.getElementById('btn-pause');
+    return btn && btn.dataset.state === 'paused';
+  }
+
+  // === GRID / LEVEL GENERATION ===
+
+  function createEmptyGrid() {
+    grid = [];
+    for (let y = 0; y < GRID_ROWS; y++) {
+      const row = [];
+      for (let x = 0; x < GRID_COLS; x++) {
+        row.push({ wall: false, box: null });
+      }
+      grid.push(row);
+    }
+  }
+
+  function isInside(x, y) {
+    return x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS;
+  }
+
+  function cellAt(x, y) {
+    if (!isInside(x, y)) return null;
+    return grid[y][x];
+  }
+
+  function isBlockedForPlayer(x, y) {
+    const cell = cellAt(x, y);
+    if (!cell) return true;
+    if (cell.wall) return true;
+    if (cell.box && !cell.box.destroyed) return true;
+    // bombs block movement (classic Bomberman feel)
+    for (const b of bombs) {
+      if (b.tx === x && b.ty === y) return true;
+    }
+    return false;
+  }
+
+  function createLevel() {
+    createEmptyGrid();
+    boxes = [];
+    bombs = [];
+    explosions = [];
+    monsters = [];
+
+    // Outer walls
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
+        const cell = cellAt(x, y);
+        if (!cell) continue;
+        if (x === 0 || y === 0 || x === GRID_COLS - 1 || y === GRID_ROWS - 1) {
+          cell.wall = true;
+        }
+      }
+    }
+
+    // Permanent pillars (every second tile)
+    for (let y = 2; y < GRID_ROWS - 1; y += 2) {
+      for (let x = 2; x < GRID_COLS - 1; x += 2) {
+        const cell = cellAt(x, y);
+        if (cell) cell.wall = true;
+      }
+    }
+
+    // Clear space around player spawn
+    const safeTiles = [
+      [1, 1],
+      [1, 2],
+      [2, 1],
+    ];
+    for (const [sx, sy] of safeTiles) {
+      const c = cellAt(sx, sy);
+      if (c) c.wall = false;
+    }
+
+    // Place boxes
+    for (let y = 1; y < GRID_ROWS - 1; y++) {
+      for (let x = 1; x < GRID_COLS - 1; x++) {
+        const c = cellAt(x, y);
+        if (!c || c.wall) continue;
+        const inSafe = safeTiles.some(([sx, sy]) => sx === x && sy === y);
+        if (inSafe) continue;
+        if (Math.random() < 0.55) {
+          const box = {
+            x, y,
+            hasSneaker: false,
+            onFire: false,
+            fireTimer: 0,
+            destroyed: false,
+            exploded: false,
+            sneakerCollected: false,
+          };
+          boxes.push(box);
+          c.box = box;
+        }
+      }
+    }
+
+    // Assign sneaker boxes
+    const sneakerPool = boxes.slice();
+    shuffle(sneakerPool);
+    const sneakersToAssign = Math.min(MAX_SNEAKERS, sneakerPool.length);
+    for (let i = 0; i < sneakersToAssign; i++) {
+      sneakerPool[i].hasSneaker = true;
+    }
+
+    // Reset player
+    player.tx = 1;
+    player.ty = 1;
+    player.fromTx = 1;
+    player.fromTy = 1;
+    player.toTx = 1;
+    player.toTy = 1;
+    player.moveProgress = 0;
+    player.moving = false;
+    player.hearts = MAX_HEARTS;
+    player.invuln = 0;
+    player.score = 0;
+    player.sneakersCollected = 0;
+
+    // Monsters near far corners
+    const monsterSpawns = [
+      { x: GRID_COLS - 2, y: GRID_ROWS - 2 },
+      { x: GRID_COLS - 2, y: 1 },
+    ];
+    for (const m of monsterSpawns) {
+      const c = cellAt(m.x, m.y);
+      if (!c || c.wall) continue;
+      monsters.push({
+        tx: m.x,
+        ty: m.y,
+        fromTx: m.x,
+        fromTy: m.y,
+        toTx: m.x,
+        toTy: m.y,
+        moveProgress: 0,
+        moving: false,
+        dirX: 0,
+        dirY: 0,
+        speed: 2.5,
+      });
+    }
+
+    elapsedTime = 0;
+    stageIndex = 1;
+    updateHUD();
+  }
+
+  // === INPUT: KEYBOARD + IFRAMED CONTROLS ===
+
+  function hookKeyboard() {
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        input.keys[e.key] = true;
+        if (
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowDown' ||
+          e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
+          e.key === ' ' ||
+          e.key === 'Spacebar'
+        ) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+    window.addEventListener('keyup', (e) => {
+      input.keys[e.key] = false;
+    });
+  }
+
+  function hookControlButtonsIframe() {
+    const iframe = document.getElementById('controlsFrame');
+    if (!iframe) return;
+
+    function bindButtons() {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+        const blast = doc.getElementById('btn2_proxy_blast');
+        const bomb = doc.getElementById('btn2_proxy_bomb');
+
+        const downEvents = ['pointerdown', 'touchstart', 'mousedown'];
+        const upEvents = ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'mouseup', 'mouseleave'];
+
+        if (blast) {
+          downEvents.forEach((t) =>
+            blast.addEventListener(t, () => { input.laserButton = true; })
+          );
+          upEvents.forEach((t) =>
+            blast.addEventListener(t, () => { input.laserButton = false; })
+          );
+        }
+        if (bomb) {
+          downEvents.forEach((t) =>
+            bomb.addEventListener(t, () => { input.bombButton = true; })
+          );
+          upEvents.forEach((t) =>
+            bomb.addEventListener(t, () => { input.bombButton = false; })
+          );
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    if (
+      iframe.contentWindow &&
+      (iframe.contentDocument || iframe.contentWindow.document).readyState !== 'loading'
+    ) {
+      bindButtons();
+    }
+    iframe.addEventListener('load', bindButtons);
+  }
+
+  function readJoystickFromIframe() {
+    const iframe = document.getElementById('controlsFrame');
+    if (!iframe) return;
+    try {
+      const win = iframe.contentWindow;
+      if (win && win.jpad_state) {
+        const s = win.jpad_state;
+        input.jx = typeof s.x === 'number' ? clamp(s.x, -1, 1) : 0;
+        input.jy = typeof s.y === 'number' ? clamp(s.y, -1, 1) : 0;
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  function updateActionEdges() {
+    // Keyboard bombs: Space / Shift / Ctrl
+    const kbBombDown =
+      !!input.keys[' '] ||
+      !!input.keys['Spacebar'] ||
+      !!input.keys['Shift'] ||
+      !!input.keys['ShiftLeft'] ||
+      !!input.keys['ShiftRight'] ||
+      !!input.keys['Control'] ||
+      !!input.keys['ControlLeft'] ||
+      !!input.keys['ControlRight'];
+
+    // Keyboard laser: J / K
+    const kbLaserDown = !!input.keys['j'] || !!input.keys['J'] || !!input.keys['k'] || !!input.keys['K'];
+
+    const bombDown = !!(input.bombButton || kbBombDown);
+    const laserDown = !!(input.laserButton || kbLaserDown);
+
+    input.bombPressed = bombDown && !input.prevBombDown;
+    input.laserPressed = laserDown && !input.prevLaserDown;
+
+    input.prevBombDown = bombDown;
+    input.prevLaserDown = laserDown;
+  }
+
+  function getMoveDirection() {
+    // Keyboard movement
+    let kdx = 0, kdy = 0;
+    if (input.keys['ArrowLeft'] || input.keys['a'] || input.keys['A']) kdx -= 1;
+    if (input.keys['ArrowRight'] || input.keys['d'] || input.keys['D']) kdx += 1;
+    if (input.keys['ArrowUp'] || input.keys['w'] || input.keys['W']) kdy -= 1;
+    if (input.keys['ArrowDown'] || input.keys['s'] || input.keys['S']) kdy += 1;
+
+    // Joystick (primary)
+    let jdx = 0, jdy = 0;
+    const ax = input.jx;
+    const ay = input.jy;
+    const DEAD = 0.3;
+
+    if (Math.abs(ax) > Math.abs(ay)) {
+      if (Math.abs(ax) > DEAD) jdx = ax > 0 ? 1 : -1;
+    } else {
+      if (Math.abs(ay) > DEAD) jdy = ay > 0 ? 1 : -1;
+    }
+
+    let dx = 0, dy = 0;
+    if (jdx || jdy) {
+      dx = jdx;
+      dy = jdy;
+    } else {
+      dx = clamp(kdx, -1, 1);
+      dy = clamp(kdy, -1, 1);
+    }
+
+    // No diagonals
+    if (dx && dy) {
+      if (Math.abs(ax) >= Math.abs(ay)) {
+        dy = 0;
+      } else {
+        dx = 0;
+      }
+    }
+
+    return { dx, dy };
+  }
+
+  // === HUD ===
+
+  function updateHUD() {
+    const totalSneakers = MAX_SNEAKERS;
+    const burningBoxes = boxes.filter(
+      (b) => b.onFire && !b.destroyed && !b.exploded
+    ).length;
+    const remainingBoxes = boxes.filter((b) => !b.destroyed).length;
+
+    if (window.SneakerQuestUI) {
+      window.SneakerQuestUI.setSneakers(player.sneakersCollected, totalSneakers);
+      window.SneakerQuestUI.setHearts(player.hearts, MAX_HEARTS);
+      window.SneakerQuestUI.setFires(clamp(burningBoxes, 0, MAX_FIRES), MAX_FIRES);
+
+      // Simple power display:
+      // 2 lights if remote detonation, 4 lights if radius upgraded.
+      let powerFill = 0;
+      if (player.hasRemote) powerFill += 2;
+      if (player.bombRadius > BOMB_RADIUS) powerFill = 4;
+      window.SneakerQuestUI.setPowers(powerFill, 4);
+
+      window.SneakerQuestUI.setCounter(remainingBoxes);
+      window.SneakerQuestUI.setStage(stageIndex);
+      window.SneakerQuestUI.setScore(player.score);
+      window.SneakerQuestUI.setTime(formatTime(elapsedTime));
+    }
+  }
+
+  // === BOMB & EXPLOSION LOGIC ===
+
+  function addExplosionTile(tx, ty) {
+    for (const e of explosions) {
+      if (e.tx === tx && e.ty === ty) return;
+    }
+    explosions.push({ tx, ty, timeLeft: EXPLOSION_DURATION });
+  }
+
+  function igniteBox(box) {
+    if (!box || box.destroyed || box.onFire) return;
+    box.onFire = true;
+    box.fireTimer = 0;
+  }
+
+  function explodeBox(box) {
+    if (box.destroyed) return;
+    box.destroyed = true;
+    box.exploded = true;
+    box.onFire = false;
+    box.fireTimer = 0;
+    const c = cellAt(box.x, box.y);
+    if (c) c.box = null;
+
+    // Box becomes a bomb (same radius as player bombs)
+    createExplosionAt(box.x, box.y, player.bombRadius);
+  }
+
+  function createExplosionAt(tx, ty, radius) {
+    const maxR = 1; // explode in a small square around the bomb (3x3 tiles)
+    for (let dy = -maxR; dy <= maxR; dy++) {
+      for (let dx = -maxR; dx <= maxR; dx++) {
+        const nx = tx + dx;
+        const ny = ty + dy;
+        if (!isInside(nx, ny)) continue;
+        const cell = cellAt(nx, ny);
+        if (!cell) continue;
+        if (cell.wall) continue; // walls block, but are not destroyed
+        addExplosionTile(nx, ny);
+        if (cell.box && !cell.box.destroyed) {
+          explodeBox(cell.box); // chain reaction: box becomes a bomb with same small square blast
+        }
+      }
+    }
+  }
+
+  function placeBomb() {
+    if (bombs.length >= player.maxBombs) return;
+    for (const b of bombs) {
+      if (b.tx === player.tx && b.ty === player.ty) return;
+    }
+    bombs.push({ tx: player.tx, ty: player.ty, fuse: BOMB_FUSE, radius: player.bombRadius });
+  }
+
+  function detonateAllBombs() {
+    for (const b of bombs) {
+      if (b.fuse > 0) {
+        b.fuse = 0.01; // explode next update
+      }
+    }
+  }
+
+  // === PLAYER & MONSTERS ===
+
+  function updatePlayerMovement(dt) {
+    if (!player.moving) {
+      const { dx, dy } = getMoveDirection();
+      if (dx || dy) {
+        const nx = player.tx + dx;
+        const ny = player.ty + dy;
+        if (!isBlockedForPlayer(nx, ny)) {
+          player.moving = true;
+          player.fromTx = player.tx;
+          player.fromTy = player.ty;
+          player.toTx = nx;
+          player.toTy = ny;
+          player.moveProgress = 0;
+        }
+      }
+    }
+
+    if (player.moving) {
+      player.moveProgress += PLAYER_MOVE_SPEED * dt;
+      if (player.moveProgress >= 1) {
+        player.tx = player.toTx;
+        player.ty = player.toTy;
+        player.fromTx = player.tx;
+        player.fromTy = player.ty;
+        player.moveProgress = 0;
+        player.moving = false;
+      }
+    }
+  }
+
+  function updatePlayerCollisions(dt) {
+    if (player.invuln > 0) {
+      player.invuln -= dt;
+    }
+
+    // Collect sneakers from blown boxes
+    for (const box of boxes) {
+      if (
+        box.hasSneaker &&
+        (box.destroyed || box.exploded) &&
+        !box.sneakerCollected &&
+        player.tx === box.x &&
+        player.ty === box.y
+      ) {
+        box.sneakerCollected = true;
+        player.sneakersCollected++;
+        player.score += 250;
+      }
+    }
+
+    // Monsters touching player
+    for (const m of monsters) {
+      if (m.tx === player.tx && m.ty === player.ty && player.invuln <= 0) {
+        player.hearts = Math.max(0, player.hearts - 1);
+        player.invuln = PLAYER_INVULN_TIME;
+        player.score = Math.max(0, player.score - 100);
+      }
+    }
+
+    // Explosions hitting player
+    if (player.invuln <= 0) {
+      for (const e of explosions) {
+        if (e.tx === player.tx && e.ty === player.ty) {
+          player.hearts = Math.max(0, player.hearts - 1);
+          player.invuln = PLAYER_INVULN_TIME;
+          player.score = Math.max(0, player.score - 100);
+          break;
+        }
+      }
+    }
+  }
+
+  function updateMonsters(dt) {
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
+    for (const m of monsters) {
+      if (!m.moving) {
+        const options = [];
+        for (const d of dirs) {
+          const nx = m.tx + d.dx;
+          const ny = m.ty + d.dy;
+          const cell = cellAt(nx, ny);
+          if (!cell || cell.wall) continue;
+          if (cell.box && !cell.box.destroyed) continue;
+          options.push(d);
+        }
+        if (options.length > 0) {
+          const d = options[Math.floor(Math.random() * options.length)];
+          m.dirX = d.dx;
+          m.dirY = d.dy;
+          m.moving = true;
+          m.fromTx = m.tx;
+          m.fromTy = m.ty;
+          m.toTx = m.tx + d.dx;
+          m.toTy = m.ty + d.dy;
+          m.moveProgress = 0;
+        }
+      }
+
+      if (m.moving) {
+        m.moveProgress += m.speed * dt;
+        if (m.moveProgress >= 1) {
+          m.tx = m.toTx;
+          m.ty = m.toTy;
+          m.fromTx = m.tx;
+          m.fromTy = m.ty;
+          m.moving = false;
+          m.moveProgress = 0;
+        }
+      }
+
+      // Ignite boxes at or around monster
+      const adj = [
+        [m.tx, m.ty],
+        [m.tx + 1, m.ty],
+        [m.tx - 1, m.ty],
+        [m.tx, m.ty + 1],
+        [m.tx, m.ty - 1],
+      ];
+      for (const [ax, ay] of adj) {
+        const cell = cellAt(ax, ay);
+        if (cell && cell.box && !cell.box.destroyed && !cell.box.onFire) {
+          igniteBox(cell.box);
+        }
+      }
+    }
+
+    // Monsters hit by explosions
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      const m = monsters[i];
+      let hit = false;
+      for (const e of explosions) {
+        if (e.tx === m.tx && e.ty === m.ty) {
+          hit = true;
+          break;
+        }
+      }
+      if (hit) {
+        monsters.splice(i, 1);
+        player.score += 200;
+      }
+    }
+  }
+
+  // === UPDATE LOOP ===
+
+  function updateBombsAndExplosions(dt) {
+    // Bomb fuses
+    for (let i = bombs.length - 1; i >= 0; i--) {
+      const b = bombs[i];
+      b.fuse -= dt;
+      if (b.fuse <= 0) {
+        createExplosionAt(b.tx, b.ty, b.radius);
+        bombs.splice(i, 1);
+      }
+    }
+
+    // Burning boxes
+    for (const box of boxes) {
+      if (box.onFire && !box.destroyed && !box.exploded) {
+        box.fireTimer += dt;
+        if (box.fireTimer >= BOX_FIRE_TIME) {
+          explodeBox(box); // 10s later → box explodes
+        }
+      }
+    }
+
+    // Explosion lifetimes
+    for (let i = explosions.length - 1; i >= 0; i--) {
+      const e = explosions[i];
+      e.timeLeft -= dt;
+      if (e.timeLeft <= 0) {
+        explosions.splice(i, 1);
+      }
+    }
+  }
+
+  function anyInputToStart() {
+    if (tapStartRequested) {
+      tapStartRequested = false;
+      return true;
+    }
+    if (input.bombPressed || input.laserPressed) return true;
+    if (input.keys['Enter']) return true;
+    if (input.keys[' '] || input.keys['Spacebar']) return true;
+    const { dx, dy } = getMoveDirection();
+    return !!(dx || dy);
+  }
+
+  function updateTitle(dt) {
+    if (anyInputToStart()) {
+      startNewGame();
+    }
+  }
+
+  function startNewGame() {
+    gameState = STATE_PLAYING;
+    createLevel();
+  }
+
+  function updatePlaying(dt) {
+    elapsedTime += dt;
+
+    if (input.bombPressed) {
+      placeBomb();
+    }
+    if (input.laserPressed && player.hasRemote) {
+      detonateAllBombs();
+    }
+
+    updatePlayerMovement(dt);
+    updateMonsters(dt);
+    updateBombsAndExplosions(dt);
+    updatePlayerCollisions(dt);
+
+    if (player.hearts <= 0) {
+      gameState = STATE_GAME_OVER;
+    }
+
+    updateHUD();
+  }
+
+  function updateGameOver(dt) {
+    if (anyInputToStart()) {
+      startNewGame();
+    }
+  }
+
+  function update(dt) {
+    readJoystickFromIframe();
+    updateActionEdges();
+
+    if (isPaused()) {
+      // no simulation while paused
+      return;
+    }
+
+    if (gameState === STATE_TITLE) {
+      updateTitle(dt);
+    } else if (gameState === STATE_PLAYING) {
+      updatePlaying(dt);
+    } else if (gameState === STATE_GAME_OVER) {
+      updateGameOver(dt);
+    }
+  }
+
+  // === RENDERING ===
+
+  function tileToScreen(tx, ty) {
+    const cx = worldOffsetX + tx * tileSize;
+    const cy = worldOffsetY + ty * tileSize;
+    return { x: cx, y: cy };
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = '#041015';
+    ctx.fillRect(0, 0, viewW, viewH);
+  }
+
+  function drawGridFloor() {
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
+        const { x: sx, y: sy } = tileToScreen(x, y);
+        const even = (x + y) % 2 === 0;
+        ctx.fillStyle = even ? '#08252b' : '#0a3035';
+        ctx.fillRect(sx, sy, tileSize, tileSize);
+      }
+    }
+  }
+
+  function drawWallsAndBoxes() {
+    for (let y = 0; y < GRID_ROWS; y++) {
+      for (let x = 0; x < GRID_COLS; x++) {
+        const cell = cellAt(x, y);
+        if (!cell) continue;
+        const { x: sx, y: sy } = tileToScreen(x, y);
+
+        if (cell.wall) {
+          ctx.fillStyle = '#143438';
+          ctx.fillRect(sx, sy, tileSize, tileSize);
+          ctx.fillStyle = '#20575f';
+          ctx.fillRect(sx + 2, sy + 2, tileSize - 4, tileSize - 4);
+        }
+
+        if (cell.box && !cell.box.destroyed) {
+          const box = cell.box;
+          ctx.fillStyle = '#412718';
+          ctx.fillRect(sx + 2, sy + 2, tileSize - 4, tileSize - 4);
+          ctx.strokeStyle = '#704129';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx + 3, sy + 3, tileSize - 6, tileSize - 6);
+
+          if (box.hasSneaker) {
+            ctx.fillStyle = '#ff3a2f';
+            ctx.fillRect(sx + tileSize / 2 - 3, sy + 3, 6, 3);
+          }
+          if (box.onFire) {
+            const t = performance.now() / 100;
+            const flicker = (Math.sin(t + x * 3 + y * 5) + 1) * 0.5;
+            const flameH = tileSize * (0.25 + 0.15 * flicker);
+            ctx.fillStyle = '#ffb347';
+            ctx.beginPath();
+            ctx.moveTo(sx + tileSize / 2, sy - flameH * 0.1);
+            ctx.lineTo(sx + tileSize / 2 - 3, sy + 2);
+            ctx.lineTo(sx + tileSize / 2 + 3, sy + 2);
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+      }
+    }
+
+    // Sneakers on floor (from blown boxes)
+    for (const box of boxes) {
+      if (box.hasSneaker && (box.destroyed || box.exploded) && !box.sneakerCollected) {
+        const { x: sx, y: sy } = tileToScreen(box.x, box.y);
+        ctx.fillStyle = '#0a1618';
+        ctx.fillRect(sx + 2, sy + 2, tileSize - 4, tileSize - 4);
+        ctx.fillStyle = '#ff3a2f';
+        const w = Math.max(4, tileSize * 0.6);
+        const h = Math.max(3, tileSize * 0.35);
+        ctx.fillRect(sx + tileSize * 0.2, sy + tileSize * 0.5, w, h);
+        ctx.fillStyle = '#d6c7a4';
+        ctx.fillRect(sx + tileSize * 0.25, sy + tileSize * 0.45, w * 0.6, h * 0.4);
+      }
+    }
+  }
+
+  function drawBombs() {
+    for (const b of bombs) {
+      const { x: sx, y: sy } = tileToScreen(b.tx, b.ty);
+      ctx.fillStyle = '#0d1015';
+      ctx.fillRect(sx + 3, sy + 3, tileSize - 6, tileSize - 6);
+      ctx.beginPath();
+      ctx.fillStyle = '#202738';
+      ctx.arc(sx + tileSize / 2, sy + tileSize / 2, tileSize * 0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffb347';
+      ctx.beginPath();
+      ctx.moveTo(
+        sx + tileSize / 2 + tileSize * 0.18,
+        sy + tileSize / 2 - tileSize * 0.18
+      );
+      ctx.lineTo(
+        sx + tileSize / 2 + tileSize * 0.28,
+        sy + tileSize / 2 - tileSize * 0.32
+      );
+      ctx.stroke();
+    }
+  }
+
+  function drawExplosions() {
+    for (const e of explosions) {
+      const { x: sx, y: sy } = tileToScreen(e.tx, e.ty);
+      const alpha = clamp(e.timeLeft / EXPLOSION_DURATION, 0, 1);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#ffb347';
+      ctx.fillRect(sx + 1, sy + 1, tileSize - 2, tileSize - 2);
+      ctx.fillStyle = '#ff3a2f';
+      ctx.fillRect(sx + 3, sy + 3, tileSize - 6, tileSize - 6);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawMonsters() {
+    const t = performance.now() / 200;
+    for (const m of monsters) {
+      const progress = m.moving ? clamp(m.moveProgress, 0, 1) : 0;
+      const tx = m.moving ? m.fromTx + (m.toTx - m.fromTx) * progress : m.tx;
+      const ty = m.moving ? m.fromTy + (m.toTy - m.fromTy) * progress : m.ty;
+      const { x: sx, y: sy } = tileToScreen(tx, ty);
+
+      const wobble = Math.sin(t + tx + ty) * tileSize * 0.04;
+
+      ctx.fillStyle = '#381818';
+      ctx.fillRect(sx + 2, sy + 2 + wobble, tileSize - 4, tileSize - 4);
+      ctx.fillStyle = '#ff743a';
+      ctx.fillRect(sx + 3, sy + 3 + wobble, tileSize - 6, tileSize - 6);
+      ctx.fillStyle = '#0a1011';
+      ctx.fillRect(sx + tileSize * 0.3, sy + tileSize * 0.35 + wobble, 2, 2);
+      ctx.fillRect(sx + tileSize * 0.6, sy + tileSize * 0.35 + wobble, 2, 2);
+    }
+  }
+
+  function drawPlayer() {
+    const moveT = player.moving ? clamp(player.moveProgress, 0, 1) : 0;
+    const tx = player.moving ? player.fromTx + (player.toTx - player.fromTx) * moveT : player.tx;
+    const ty = player.moving ? player.fromTy + (player.toTy - player.fromTy) * moveT : player.ty;
+    const { x: sx, y: sy } = tileToScreen(tx, ty);
+
+    const stepPhase = (performance.now() / 120) % 2;
+    const bob = player.moving ? (stepPhase < 1 ? 1 : -1) : 0;
+
+    const a = player.invuln > 0 ? 0.4 + 0.6 * Math.sin(performance.now() / 60) : 1;
+    ctx.globalAlpha = clamp(a, 0.2, 1);
+
+    // Hoodie body
+    ctx.fillStyle = '#05060a';
+    ctx.fillRect(
+      sx + tileSize * 0.25,
+      sy + tileSize * 0.18 + bob,
+      tileSize * 0.5,
+      tileSize * 0.55
+    );
+
+    // Hood
+    ctx.fillStyle = '#111318';
+    ctx.fillRect(
+      sx + tileSize * 0.28,
+      sy + tileSize * 0.12 + bob,
+      tileSize * 0.44,
+      tileSize * 0.28
+    );
+
+    // Face
+    ctx.fillStyle = '#d6c7a4';
+    ctx.fillRect(
+      sx + tileSize * 0.32,
+      sy + tileSize * 0.18 + bob,
+      tileSize * 0.32,
+      tileSize * 0.18
+    );
+
+    // Sneakers (white + red stripe)
+    ctx.fillStyle = '#f1f1f1';
+    ctx.fillRect(
+      sx + tileSize * 0.23,
+      sy + tileSize * 0.72 + bob,
+      tileSize * 0.54,
+      tileSize * 0.12
+    );
+    ctx.fillStyle = '#ff3a2f';
+    ctx.fillRect(
+      sx + tileSize * 0.23,
+      sy + tileSize * 0.82 + bob,
+      tileSize * 0.54,
+      tileSize * 0.04
+    );
+
+    ctx.globalAlpha = 1;
+  }
+
+  function drawTitleScreen() {
+    ctx.fillStyle = '#0a241f';
+    ctx.fillRect(0, 0, viewW, viewH);
+
+    ctx.fillStyle = '#d6c7a4';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const titleFontSize = Math.max(16, Math.floor(viewW / 22));
+    const hintFontSize = Math.max(10, Math.floor(viewW / 36));
+
+    ctx.font = `${titleFontSize}px "Press Start 2P"`;
+    ctx.fillText('SNEAKER BOMBER', viewW / 2, viewH / 2 - 30);
+
+    ctx.font = `${hintFontSize}px "Press Start 2P"`;
+    ctx.fillText('BOMB / SPACE TO START', viewW / 2, viewH / 2 + 10);
+  }
+
+  function drawGameOverScreen() {
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, viewW, viewH);
+
+    ctx.fillStyle = '#ff3a2f';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const titleFontSize = Math.max(16, Math.floor(viewW / 24));
+    const hintFontSize = Math.max(10, Math.floor(viewW / 40));
+
+    ctx.font = `${titleFontSize}px "Press Start 2P"`;
+    ctx.fillText('GAME OVER', viewW / 2, viewH / 2 - 20);
+
+    ctx.font = `${hintFontSize}px "Press Start 2P"`;
+    ctx.fillText('BOMB / SPACE TO RESTART', viewW / 2, viewH / 2 + 20);
+  }
+
+  function drawCRTEffect() {
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = '#000';
+    const lineH = 2;
+    for (let y = 0; y < viewH; y += lineH * 2) {
+      ctx.fillRect(0, y, viewW, lineH);
+    }
+    ctx.restore();
+  }
+
+  function render() {
+    viewW = canvas.clientWidth;
+    viewH = canvas.clientHeight;
+
+    drawBackground();
+
+    if (gameState === STATE_TITLE) {
+      drawTitleScreen();
+    } else {
+      drawGridFloor();
+      drawWallsAndBoxes();
+      drawBombs();
+      drawExplosions();
+      drawMonsters();
+      drawPlayer();
+
+      if (gameState === STATE_GAME_OVER) {
+        drawGameOverScreen();
+      }
+    }
+
+    drawCRTEffect();
+  }
+
+  // === RESIZE (integrates with existing CRT layout) ===
+  function resizeCanvas() {
+    const crt = document.querySelector('.crt');
+    const cssW = crt.clientWidth;
+    const cssH = crt.clientHeight;
+
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    viewW = cssW;
+    viewH = cssH;
+
+    const maxTileW = Math.floor(viewW / GRID_COLS);
+    const maxTileH = Math.floor(viewH / GRID_ROWS);
+    tileSize = Math.max(8, Math.min(maxTileW, maxTileH));
+
+    const worldW = tileSize * GRID_COLS;
+    const worldH = tileSize * GRID_ROWS;
+    worldOffsetX = Math.floor((viewW - worldW) / 2);
+    worldOffsetY = Math.floor((viewH - worldH) / 2);
+
+    console.assert(
+      Math.abs(canvas.width / (window.devicePixelRatio || 1) - cssW) < 2,
+      'Canvas width backing store mismatch'
+    );
+    console.assert(
+      Math.abs(canvas.height / (window.devicePixelRatio || 1) - cssH) < 2,
+      'Canvas height backing store mismatch'
+    );
+  }
+
+  // === MAIN LOOP ===
+  function gameLoop(ts) {
+    if (!lastTimestamp) lastTimestamp = ts;
+    const dt = Math.min((ts - lastTimestamp) / 1000, 0.1);
+    lastTimestamp = ts;
+
+    update(dt);
+    render();
+
+    window.requestAnimationFrame(gameLoop);
+  }
+
+  // === INIT ===
+  hookKeyboard();
+  hookControlButtonsIframe();
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // Initial HUD (title baseline)
+  updateHUD();
+
+  window.requestAnimationFrame(gameLoop);
+}
+
+  function boot() {
+    if (typeof setupSimpleGame === 'function') {
+      setupSimpleGame();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 })();
 </script>
+
 <script>
 (function(){
   function ready(fn){ if(document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
