@@ -3397,1058 +3397,932 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     }
 
     // === GAME SETUP ===
+    function setupSimpleGame() {
+      const canvas = document.getElementById('gameCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
 
-function setupSimpleGame() {
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
+      // --------- GLOBAL STATE ---------
+      const MODES = {
+        MENU: 'menu',
+        METRO: 'metro_run',
+        BOX: 'box_break',
+        LASER: 'night_laser'
+      };
 
-  // --- GRID SETUP ---
-  const GRID_W = 15;
-  const GRID_H = 11;
-  const TILE = { EMPTY: 0, WALL: 1, BOX: 2 };
+      const GAME_LIST = [
+        { id: MODES.METRO, label: 'METRO SNEAKER RUN' },
+        { id: MODES.BOX,   label: 'BOX BREAK BATTLES' },
+        { id: MODES.LASER, label: 'NIGHT LASER PATROL' }
+      ];
 
-  let grid = [];
-  let tileSize = 24;
-  let originX = 0;
-  let originY = 0;
+      let currentMode = MODES.MENU;
+      let selectedIndex = 0;
+      let hardcore = false;
+      let paused = false;
 
-  // --- PLAYER (GRID-STEP MOVEMENT) ---
-  const player = {
-    tx: 1, ty: 1,          // tile coords
-    px: 1.5, py: 1.5,      // world coords (tile center)
-    moving: false,
-    targetTx: 1, targetTy: 1,
-    moveT: 0,
-    moveSpeed: 6,          // tiles per second
-    facing: 'right',
-    lives: 3,
-    shieldCharges: 0,
-    alive: true
-  };
+      // Shared meta
+      let stage = 1;
+      let score = 0;
+      let timeLeft = 0;
+      let frameTime = 0;
 
-  // --- ENTITIES ---
-  let fires = [];         // enemies
-  let bombs = [];         // planted bombs
-  let burningBoxes = [];  // {tx,ty,timer}
-  let items = [];         // {x,y,type,hidden,onFire}
-  let explosions = [];    // for short visual blast rings
+      // Core player + world state
+      const TILE_SIZE = 16;
+      const GRID_W = 15;
+      const GRID_H = 11;
 
-  // --- GAME STATE ---
-  let totalSneakers = 5;
-  let collectedSneakers = 0;
-  const maxFires = 4;
-  let boxesDestroyed = 0;
-  let score = 0;
-  let timeAccum = 0;
-  let gameState = 'title'; // 'title' | 'playing' | 'dead' | 'win'
+      const TILE = {
+        EMPTY: 0,
+        WALL: 1,
+        CRATE: 2,
+        SNEAKER: 3,
+        EXIT: 4
+      };
 
-  const powers = {
-    stopwatch: false,
-    shield: false,
-    magnet: false,
-    crosshair: false
-  };
-  const powerOrder = ['stopwatch', 'shield', 'magnet', 'crosshair'];
+      let grid = [];
+      let player = null;
+      let enemies = [];
+      let bombs = [];
+      let explosions = [];
+      let sneakersTotal = 0;
+      let sneakersCollected = 0;
+      let flamesTotal = 0;
+      let boxCount = 0;
 
-  // --- INPUT (JOYPAD + BUTTONS) ---
-  const input = {
-    dirX: 0,
-    dirY: 0,
-    bombClick: false,
-    triggerClick: false,
-    laserClick: false
-  };
-  let controlsWin = null;
+      // Power-up state
+      let powerStopwatch = false;
+      let powerShield = false;
+      let powerMagnet = false;
+      let powerCrosshair = false;
+      let triggerMode = false;
+      let starMode = false;
+      let starTimer = 0;
 
-  function setupControlBridge() {
-    const iframe = document.getElementById('controlsFrame');
-    if (!iframe) return;
+      // Input state from iframe + keyboard
+      const input = {
+        moveX: 0,
+        moveY: 0,
+        bombDown: false,
+        laserDown: false,
+        timerPressed: false,
+        specialPressed: false
+      };
 
-    function bind() {
-      try {
-        controlsWin = iframe.contentWindow;
-        if (!controlsWin || !controlsWin.document) return;
-        const doc = controlsWin.document;
+      // To detect edge-triggered presses
+      const lastButtons = {
+        bomb: false,
+        laser: false,
+        timer: false,
+        special: false
+      };
 
-        const bombBtn   = doc.getElementById('btn2_proxy_bomb');
-        const laserBtn  = doc.getElementById('btn2_proxy_blast');
-        const timerBtn  = doc.getElementById('btn2_timer');
-
-        if (bombBtn) {
-          bombBtn.addEventListener('click', () => { input.bombClick = true; });
-        }
-        if (laserBtn) {
-          laserBtn.addEventListener('click', () => { input.laserClick = true; });
-        }
-        if (timerBtn) {
-          timerBtn.addEventListener('click', () => { input.triggerClick = true; });
-        }
-      } catch (e) {
-        console.warn('Control bridge error', e);
+      function clamp(v, min, max) {
+        return v < min ? min : (v > max ? max : v);
       }
-    }
 
-    if (iframe.contentWindow && iframe.contentWindow.document.readyState === 'complete') {
-      bind();
-    } else {
-      iframe.addEventListener('load', bind, { once: true });
-    }
-  }
+      // ---------- SPRITES (8x8 pixel art patterns) ----------
+      // Each sprite is 8 strings of 8 chars: '.' = transparent, other = colored.
+      const SPRITES = {
+        player: [
+          '........',
+          '..XX..X.',
+          '.XXXXXX.',
+          '.X.XX.X.',
+          '.XXXXXX.',
+          '..X..X..',
+          '.X....X.',
+          '........'
+        ],
+        enemy: [
+          '........',
+          '.XXXXXX.',
+          'X.XX.XX.',
+          'XXXXXXX.',
+          'X.XXXX.X',
+          'X.X..X.X',
+          '.X.XX.X.',
+          '........'
+        ],
+        crate: [
+          'XXXXXXXX',
+          'X......X',
+          'X.XXXX.X',
+          'X.X..X.X',
+          'X.XXXX.X',
+          'X......X',
+          'XXXXXXXX',
+          'XXXXXXXX'
+        ],
+        sneaker: [
+          '........',
+          '.....XX.',
+          '....XXX.',
+          '..XXXXX.',
+          '.XXXXXX.',
+          '.XX.XX..',
+          '...XX...',
+          '........'
+        ],
+        bomb: [
+          '........',
+          '........',
+          '..XXXX..',
+          '.XXXXXX.',
+          '.XXXXXX.',
+          '.XXXXXX.',
+          '..XXXX..',
+          '........'
+        ],
+        explosion: [
+          '..X..X..',
+          '.XXXXXX.',
+          'XXXXXXXX',
+          'XXXXXXXX',
+          'XXXXXXXX',
+          'XXXXXXXX',
+          '.XXXXXX.',
+          '..X..X..'
+        ],
+        exit: [
+          'XXXXXXXX',
+          'X......X',
+          'X.XXXX.X',
+          'X.X..X.X',
+          'X.XX.X.X',
+          'X......X',
+          'X DOOR X',
+          'XXXXXXXX'
+        ]
+      };
 
-  // Keyboard backup (optional)
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'a') input.dirX = -1;
-    if (e.key === 'ArrowRight' || e.key === 'd') input.dirX = 1;
-    if (e.key === 'ArrowUp' || e.key === 'w') input.dirY = -1;
-    if (e.key === 'ArrowDown' || e.key === 's') input.dirY = 1;
-    if (e.key === ' ') input.bombClick = true;
-    if (e.key === 'k') input.laserClick = true;
-    if (e.key === 'l') input.triggerClick = true;
-  });
-  window.addEventListener('keyup', (e) => {
-    if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) input.dirX = 0;
-    if (['ArrowUp', 'ArrowDown', 'w', 's'].includes(e.key)) input.dirY = 0;
-  });
-
-  function pollJoypad() {
-    if (!controlsWin || !controlsWin.jpad_state) return;
-    const js = controlsWin.jpad_state;
-    const TH = 0.25;
-
-    // If arrow-pad laser mode is active, do not auto-move the player.
-    const arrowMode = !!controlsWin.laserArrowMode;
-    if (arrowMode) {
-      input.dirX = 0;
-      input.dirY = 0;
-      return;
-    }
-
-    let dx = 0, dy = 0;
-    if (Math.abs(js.x) > Math.abs(js.y)) {
-      if (js.x > TH) dx = 1;
-      else if (js.x < -TH) dx = -1;
-    } else {
-      if (js.y > TH) dy = 1;
-      else if (js.y < -TH) dy = -1;
-    }
-    input.dirX = dx;
-    input.dirY = dy;
-  }
-
-  // --- MAP / GRID BUILD ---
-  function buildEmptyGrid() {
-    grid = [];
-    for (let y = 0; y < GRID_H; y++) {
-      const row = [];
-      for (let x = 0; x < GRID_W; x++) {
-        if (y === 0 || y === GRID_H - 1 || x === 0 || x === GRID_W - 1) {
-          row.push(TILE.WALL);
-        } else if (x % 2 === 0 && y % 2 === 0) {
-          row.push(TILE.WALL);
-        } else {
-          row.push(TILE.BOX);
+      function drawSprite(sprite, x, y, size, fg, bg) {
+        const px = size / 8;
+        for (let j = 0; j < 8; j++) {
+          const row = sprite[j];
+          for (let i = 0; i < 8; i++) {
+            const ch = row[i];
+            if (ch === ' ') continue;
+            if (ch === '.' || ch === undefined) continue;
+            ctx.fillStyle = ch === 'X' ? fg : bg;
+            ctx.fillRect(Math.floor(x + i * px), Math.floor(y + j * px), Math.ceil(px), Math.ceil(px));
+          }
         }
       }
-      grid.push(row);
-    }
 
-    // Player spawn clear zone
-    const clear = [[1,1],[2,1],[1,2]];
-    for (const [cx, cy] of clear) {
-      if (grid[cy] && grid[cy][cx] === TILE.BOX) grid[cy][cx] = TILE.EMPTY;
-    }
-  }
+      // ---------- HUD HELPERS ----------
+      function updateHUD() {
+        if (!window.SneakerQuestUI) return;
+        window.SneakerQuestUI.setHearts(player ? player.hp : 0, 3);
+        window.SneakerQuestUI.setSneakers(sneakersCollected, 5);
+        window.SneakerQuestUI.setFires(flamesTotal, 5);
 
-  function placeFires() {
-    fires = [];
-    let placed = 0;
-    while (placed < maxFires) {
-      const x = 2 + Math.floor(Math.random() * (GRID_W - 4));
-      const y = 2 + Math.floor(Math.random() * (GRID_H - 4));
-      if (grid[y][x] === TILE.WALL) continue;
-      fires.push({
-        tx: x,
-        ty: y,
-        px: x + 0.5,
-        py: y + 0.5,
-        dirX: 0,
-        dirY: 1,
-        changeTimer: Math.random() * 1.5,
-        alive: true,
-        carryItem: null
+        let powersActive = 0;
+        if (powerStopwatch) powersActive++;
+        if (powerShield) powersActive++;
+        if (powerMagnet) powersActive++;
+        if (powerCrosshair) powersActive++;
+        window.SneakerQuestUI.setPowers(4, powersActive);
+
+        window.SneakerQuestUI.setCounter(boxCount);
+        window.SneakerQuestUI.setScore(score);
+        window.SneakerQuestUI.setStage(stage);
+
+        const t = Math.max(0, Math.floor(timeLeft));
+        const seconds = String(t % 60).padStart(2, '0');
+        const minutes = String(Math.floor(t / 60)).padStart(2, '0');
+        window.SneakerQuestUI.setTime(minutes + ':' + seconds);
+      }
+
+      // ---------- WORLD GENERATION ----------
+      function makeEmptyGrid() {
+        grid = new Array(GRID_H);
+        for (let y = 0; y < GRID_H; y++) {
+          grid[y] = new Array(GRID_W).fill(TILE.EMPTY);
+        }
+      }
+
+      function placeBorders() {
+        for (let x = 0; x < GRID_W; x++) {
+          grid[0][x] = TILE.WALL;
+          grid[GRID_H - 1][x] = TILE.WALL;
+        }
+        for (let y = 0; y < GRID_H; y++) {
+          grid[y][0] = TILE.WALL;
+          grid[y][GRID_W - 1] = TILE.WALL;
+        }
+      }
+
+      function clearGameState() {
+        player = null;
+        enemies = [];
+        bombs = [];
+        explosions = [];
+        sneakersTotal = 0;
+        sneakersCollected = 0;
+        flamesTotal = 0;
+        boxCount = 0;
+        powerStopwatch = false;
+        powerShield = false;
+        powerMagnet = false;
+        powerCrosshair = false;
+        triggerMode = false;
+        starMode = false;
+        starTimer = 0;
+      }
+
+      function spawnPlayer(x, y) {
+        player = {
+          x,
+          y,
+          hp: 3,
+          invuln: 0,
+          facing: { x: 0, y: 1 },
+          mode: currentMode
+        };
+      }
+
+      function spawnEnemy(x, y) {
+        enemies.push({
+          x,
+          y,
+          dir: { x: 0, y: 1 },
+          cooldown: 0
+        });
+      }
+
+      function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function buildMetroSneakerRun() {
+        clearGameState();
+        makeEmptyGrid();
+        placeBorders();
+
+        // Random crates and sneakers
+        for (let y = 1; y < GRID_H - 1; y++) {
+          for (let x = 1; x < GRID_W - 1; x++) {
+            if (x === 1 && y === 1) continue;
+            if (Math.random() < 0.2) {
+              grid[y][x] = TILE.WALL;
+            } else if (Math.random() < 0.28) {
+              grid[y][x] = TILE.CRATE;
+            }
+          }
+        }
+
+        // Place sneakers in random crates or tiles
+        let placedSneakers = 0;
+        while (placedSneakers < 5) {
+          const x = randomInt(1, GRID_W - 2);
+          const y = randomInt(1, GRID_H - 2);
+          if (grid[y][x] === TILE.EMPTY || grid[y][x] === TILE.CRATE) {
+            grid[y][x] = TILE.SNEAKER;
+            placedSneakers++;
+          }
+        }
+        sneakersTotal = 5;
+
+        // Place exit
+        let ex = GRID_W - 2;
+        let ey = GRID_H - 2;
+        grid[ey][ex] = TILE.EXIT;
+
+        // Spawn player and enemies
+        spawnPlayer(1, 1);
+        const enemyCount = hardcore ? 5 : 3;
+        for (let i = 0; i < enemyCount; i++) {
+          const exx = randomInt(2, GRID_W - 3);
+          const eyy = randomInt(2, GRID_H - 3);
+          enemies.push({ x: exx, y: eyy, dir: { x: 0, y: 1 }, cooldown: 0 });
+        }
+        flamesTotal = enemies.length;
+        timeLeft = hardcore ? 90 : 120;
+      }
+
+      function buildBoxBreakBattles() {
+        clearGameState();
+        makeEmptyGrid();
+        placeBorders();
+
+        for (let y = 1; y < GRID_H - 1; y++) {
+          for (let x = 1; x < GRID_W - 1; x++) {
+            if (Math.random() < 0.65) {
+              grid[y][x] = TILE.CRATE;
+            } else {
+              grid[y][x] = TILE.EMPTY;
+            }
+          }
+        }
+
+        // A few sneakers hidden in crates
+        let placedSneakers = 0;
+        while (placedSneakers < 3) {
+          const x = randomInt(1, GRID_W - 2);
+          const y = randomInt(1, GRID_H - 2);
+          if (grid[y][x] === TILE.CRATE) {
+            grid[y][x] = TILE.SNEAKER;
+            placedSneakers++;
+          }
+        }
+        sneakersTotal = 3;
+
+        spawnPlayer(1, 1);
+
+        if (hardcore) {
+          for (let i = 0; i < 3; i++) {
+            const exx = randomInt(2, GRID_W - 3);
+            const eyy = randomInt(2, GRID_H - 3);
+            spawnEnemy(exx, eyy);
+          }
+        }
+        flamesTotal = enemies.length;
+        timeLeft = hardcore ? 60 : 90;
+      }
+
+      function buildNightLaserPatrol() {
+        clearGameState();
+        makeEmptyGrid();
+        placeBorders();
+
+        // A few crate clusters as cover
+        for (let y = 2; y < GRID_H - 2; y++) {
+          for (let x = 2; x < GRID_W - 2; x++) {
+            if (Math.random() < 0.25) {
+              grid[y][x] = TILE.CRATE;
+            }
+          }
+        }
+        spawnPlayer(Math.floor(GRID_W / 2), Math.floor(GRID_H / 2));
+        timeLeft = hardcore ? 75 : 90;
+
+        const enemyCount = hardcore ? 7 : 5;
+        for (let i = 0; i < enemyCount; i++) {
+          const side = randomInt(0, 3);
+          let ex = 1, ey = 1;
+          if (side === 0) { ex = randomInt(1, GRID_W - 2); ey = 1; }
+          if (side === 1) { ex = randomInt(1, GRID_W - 2); ey = GRID_H - 2; }
+          if (side === 2) { ex = 1; ey = randomInt(1, GRID_H - 2); }
+          if (side === 3) { ex = GRID_W - 2; ey = randomInt(1, GRID_H - 2); }
+          spawnEnemy(ex, ey);
+        }
+        flamesTotal = enemies.length;
+      }
+
+      function buildGame(mode) {
+        currentMode = mode;
+        stage = 1;
+        score = 0;
+        if (mode === MODES.METRO) buildMetroSneakerRun();
+        else if (mode === MODES.BOX) buildBoxBreakBattles();
+        else if (mode === MODES.LASER) buildNightLaserPatrol();
+        updateHUD();
+      }
+
+      // ---------- INPUT FROM CONTROLS FRAME ----------
+      const controlsFrame = document.getElementById('controlsFrame');
+
+      function pollControls() {
+        input.moveX = 0;
+        input.moveY = 0;
+
+        if (controlsFrame && controlsFrame.contentWindow && controlsFrame.contentWindow.jpad_state) {
+          const js = controlsFrame.contentWindow.jpad_state;
+          if (js.mag > 0.2) {
+            const ax = js.x;
+            const ay = js.y;
+            if (Math.abs(ax) > Math.abs(ay)) {
+              input.moveX = ax > 0 ? 1 : -1;
+              input.moveY = 0;
+            } else {
+              input.moveY = ay > 0 ? 1 : -1;
+              input.moveX = 0;
+            }
+          }
+        }
+      }
+
+      // Keyboard fallback for dev
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') input.moveY = -1;
+        if (e.key === 'ArrowDown') input.moveY = 1;
+        if (e.key === 'ArrowLeft') input.moveX = -1;
+        if (e.key === 'ArrowRight') input.moveX = 1;
+        if (e.key === ' ') input.bombDown = true;
       });
-      placed++;
-    }
-  }
-
-  function placeItems() {
-    items = [];
-    const pool = [];
-    for (let i = 0; i < totalSneakers; i++) pool.push({ type: 'sneaker' });
-    for (const p of powerOrder) pool.push({ type: p });
-
-    const candidates = [];
-    for (let y = 1; y < GRID_H - 1; y++) {
-      for (let x = 1; x < GRID_W - 1; x++) {
-        if (grid[y][x] === TILE.BOX) candidates.push({ x, y });
-      }
-    }
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = (Math.random() * (i + 1)) | 0;
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-    }
-
-    for (let i = 0; i < pool.length && i < candidates.length; i++) {
-      const c = candidates[i];
-      items.push({
-        x: c.x + 0.5,
-        y: c.y + 0.5,
-        type: pool[i].type,
-        hidden: true,
-        onFire: false
+      window.addEventListener('keyup', (e) => {
+        if (['ArrowUp','ArrowDown'].includes(e.key)) input.moveY = 0;
+        if (['ArrowLeft','ArrowRight'].includes(e.key)) input.moveX = 0;
+        if (e.key === ' ') input.bombDown = false;
       });
-    }
-  }
 
-  function resetState() {
-    buildEmptyGrid();
-    placeFires();
-    placeItems();
-    burningBoxes = [];
-    bombs = [];
-    explosions = [];
-    player.tx = 1; player.ty = 1;
-    player.px = 1.5; player.py = 1.5;
-    player.moving = false;
-    player.moveT = 0;
-    player.targetTx = 1; player.targetTy = 1;
-    player.facing = 'right';
-    player.lives = 3;
-    player.shieldCharges = 0;
-    player.alive = true;
-    boxesDestroyed = 0;
-    score = 0;
-    timeAccum = 0;
-    collectedSneakers = 0;
-    for (const k of powerOrder) powers[k] = false;
-    updateHUD();
-    gameState = 'title';
-  }
+      // Buttons inside iframe
+      function wireButtons() {
+        if (!controlsFrame || !controlsFrame.contentWindow || !controlsFrame.contentWindow.document) return;
+        const d = controlsFrame.contentWindow.document;
+        const btnBomb = d.getElementById('btn2_proxy_bomb');
+        const btnLaser = d.getElementById('btn2_proxy_blast');
+        const btnTimer = d.getElementById('btn2_timer');
+        const btnSpecial = d.getElementById('btn2_special');
 
-  // --- HUD ---
-  function powerCount() {
-    return powerOrder.reduce((n,k)=>n + (powers[k] ? 1 : 0), 0);
-  }
-  function updateHUD() {
-    if (!window.SneakerQuestUI) return;
-    SneakerQuestUI.setSneakers(collectedSneakers, totalSneakers);
-    SneakerQuestUI.setHearts(player.lives, 3);
-    SneakerQuestUI.setFires(fires.filter(f=>f.alive).length, maxFires);
-    SneakerQuestUI.setPowers(powerCount(), 4);
-    SneakerQuestUI.setCounter(boxesDestroyed);
-    SneakerQuestUI.setScore(score);
-    SneakerQuestUI.setStage(1);
-  }
-
-  // --- UTILS ---
-  function worldToTile(x, y) { return { tx: Math.floor(x), ty: Math.floor(y) }; }
-  function isSolidTile(tx, ty) {
-    if (ty < 0 || ty >= GRID_H || tx < 0 || tx >= GRID_W) return true;
-    const t = grid[ty][tx];
-    return t === TILE.WALL || t === TILE.BOX;
-  }
-
-  // --- BOMBS / EXPLOSIONS ---
-  function plantBomb() {
-    const { tx, ty } = { tx: player.tx, ty: player.ty };
-    if (bombs.some(b => b.tx === tx && b.ty === ty && !b.exploded)) return;
-    bombs.push({
-      tx, ty,
-      timer: 3.0,
-      exploded: false
-    });
-  }
-
-  function triggerRemoteBombs() {
-    // Trigger all planted bombs immediately
-    for (const b of bombs) {
-      if (!b.exploded) b.timer = 0;
-    }
-  }
-
-  function damagePlayer() {
-    if (!player.alive) return;
-    if (player.shieldCharges > 0) {
-      player.shieldCharges--;
-      if (player.shieldCharges === 0) powers.shield = false;
-      updateHUD();
-      return;
-    }
-    player.lives--;
-    if (player.lives <= 0) {
-      player.alive = false;
-      gameState = 'dead';
-    } else {
-      player.tx = 1; player.ty = 1;
-      player.px = 1.5; player.py = 1.5;
-      player.moving = false;
-      player.moveT = 0;
-    }
-    updateHUD();
-  }
-
-  function explodeBomb(bomb) {
-    bomb.exploded = true;
-
-    function affectTile(tx, ty) {
-      if (ty < 0 || ty >= GRID_H || tx < 0 || tx >= GRID_W) return { stop:false };
-      const t = grid[ty][tx];
-
-      if (t === TILE.WALL) return { stop:true };
-      if (t === TILE.BOX) {
-        grid[ty][tx] = TILE.EMPTY;
-        boxesDestroyed++;
-        score += 50;
-        for (const it of items) {
-          if (Math.floor(it.x) === tx && Math.floor(it.y) === ty && it.hidden) {
-            it.hidden = false;
-          }
+        function hookButton(btn, key) {
+          if (!btn) return;
+          btn.addEventListener('pointerdown', () => { input[key] = true; });
+          btn.addEventListener('pointerup',   () => { input[key] = false; });
+          btn.addEventListener('pointerleave',() => { input[key] = false; });
         }
-        return { stop:true };
-      }
 
-      // fires
-      for (const f of fires) {
-        if (!f.alive) continue;
-        if (f.tx === tx && f.ty === ty) {
-          f.alive = false;
-          score += 200;
-          if (f.carryItem) {
-            items.push({
-              x: f.px,
-              y: f.py,
-              type: f.carryItem,
-              hidden: false,
-              onFire: false
-            });
-            f.carryItem = null;
-          }
+        hookButton(btnBomb, 'bombDown');
+        hookButton(btnLaser, 'laserDown');
+
+        if (btnTimer) {
+          btnTimer.addEventListener('click', () => {
+            input.timerPressed = true;
+          });
+        }
+        if (btnSpecial) {
+          btnSpecial.addEventListener('click', () => {
+            input.specialPressed = true;
+          });
         }
       }
 
-      // player
-      if (player.tx === tx && player.ty === ty) {
-        damagePlayer();
-      }
-
-      return { stop:false };
-    }
-
-    // center
-    affectTile(bomb.tx, bomb.ty);
-    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-    for (const [dx, dy] of dirs) {
-      for (let i = 1; i <= 3; i++) {
-        const tx = bomb.tx + dx * i;
-        const ty = bomb.ty + dy * i;
-        const res = affectTile(tx, ty);
-        if (res.stop) break;
-      }
-    }
-
-    // store an explosion visual
-    explosions.push({
-      tx: bomb.tx,
-      ty: bomb.ty,
-      t: 0
-    });
-
-    updateHUD();
-  }
-
-  // --- BURNING BOXES (FIRES IGNITE) ---
-  function igniteBox(tx, ty) {
-    if (ty < 0 || ty >= GRID_H || tx < 0 || tx >= GRID_W) return;
-    if (grid[ty][tx] !== TILE.BOX) return;
-    if (burningBoxes.some(b => b.tx === tx && b.ty === ty)) return;
-    burningBoxes.push({ tx, ty, timer: 10.0 });
-    for (const it of items) {
-      if (Math.floor(it.x) === tx && Math.floor(it.y) === ty && it.hidden) {
-        it.onFire = true;
-      }
-    }
-  }
-
-  function updateBurningBoxes(dt) {
-    for (const b of burningBoxes) {
-      b.timer -= dt;
-      if (b.timer <= 0 && grid[b.ty][b.tx] === TILE.BOX) {
-        grid[b.ty][b.tx] = TILE.EMPTY;
-        boxesDestroyed++;
-        score += 30;
-        for (const it of items) {
-          if (Math.floor(it.x) === b.tx && Math.floor(it.y) === b.ty && it.hidden) {
-            it.hidden = false;
-            it.onFire = true;
-          }
-        }
-        b.timer = 0;
-      }
-    }
-    burningBoxes = burningBoxes.filter(b => b.timer > 0);
-  }
-
-  // --- ITEMS / POWERUPS ---
-  function applyItem(it) {
-    if (it.type === 'sneaker') {
-      collectedSneakers++;
-      score += 100;
-      if (collectedSneakers >= totalSneakers) {
-        gameState = 'win';
-      }
-    } else if (it.type === 'stopwatch') {
-      powers.stopwatch = true;
-    } else if (it.type === 'shield') {
-      powers.shield = true;
-      player.shieldCharges = 1;
-    } else if (it.type === 'magnet') {
-      powers.magnet = true;
-    } else if (it.type === 'crosshair') {
-      powers.crosshair = true;
-    }
-    updateHUD();
-  }
-
-  function updateMagnet(dt) {
-    if (!powers.magnet) return;
-    const radius = 3.5;
-    for (const it of items) {
-      if (it.hidden) continue;
-      if (it.type !== 'sneaker') continue;
-      const dx = player.px - it.x;
-      const dy = player.py - it.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 0.1 && dist < radius) {
-        const pull = 3.0 * dt;
-        it.x += (dx / dist) * pull;
-        it.y += (dy / dist) * pull;
-      }
-    }
-  }
-
-  function firesPickupItems() {
-    for (const f of fires) {
-      if (!f.alive) continue;
-      for (const it of items) {
-        if (it.hidden) continue;
-        if (it.type === 'sneaker' || powerOrder.includes(it.type)) {
-          if (Math.floor(it.x) === f.tx && Math.floor(it.y) === f.ty) {
-            f.carryItem = it.type;
-            it.hidden = true;
-          }
+      if (controlsFrame) {
+        controlsFrame.addEventListener('load', wireButtons);
+        if (controlsFrame.contentWindow && controlsFrame.contentWindow.document && controlsFrame.contentWindow.document.readyState === 'complete') {
+          wireButtons();
         }
       }
-    }
-  }
 
-  // --- PLAYER MOVEMENT (GRID STEP) ---
-  function updatePlayer(dt) {
-    // choose direction once per step
-    if (!player.moving) {
-      let dx = input.dirX;
-      let dy = input.dirY;
-      if (Math.abs(dx) > Math.abs(dy)) dy = 0;
-      else dx = 0;
+      // ---------- GAME LOGIC ----------
+      let moveCooldown = 0;
 
-      let dirX = 0, dirY = 0;
-      if (dx > 0) dirX = 1;
-      else if (dx < 0) dirX = -1;
-      else if (dy > 0) dirY = 1;
-      else if (dy < 0) dirY = -1;
-
-      if (dirX || dirY) {
-        const nt = { tx: player.tx + dirX, ty: player.ty + dirY };
-        if (!isSolidTile(nt.tx, nt.ty)) {
-          player.moving = true;
-          player.moveT = 0;
-          player.targetTx = nt.tx;
-          player.targetTy = nt.ty;
-          if (dirX > 0) player.facing = 'right';
-          else if (dirX < 0) player.facing = 'left';
-          else if (dirY > 0) player.facing = 'down';
-          else if (dirY < 0) player.facing = 'up';
-        }
-      }
-    }
-
-    if (player.moving) {
-      const duration = 1 / player.moveSpeed;
-      player.moveT += dt;
-      const t = Math.min(1, player.moveT / duration);
-      const sx = (player.tx + 0.5);
-      const sy = (player.ty + 0.5);
-      const ex = (player.targetTx + 0.5);
-      const ey = (player.targetTy + 0.5);
-      player.px = sx + (ex - sx) * t;
-      player.py = sy + (ey - sy) * t;
-      if (t >= 1) {
-        player.tx = player.targetTx;
-        player.ty = player.targetTy;
-        player.px = ex;
-        player.py = ey;
-        player.moving = false;
-        player.moveT = 0;
-      }
-    }
-
-    // collect items
-    for (const it of items) {
-      if (it.hidden) continue;
-      const dx = it.x - player.px;
-      const dy = it.y - player.py;
-      if (Math.hypot(dx, dy) < 0.35) {
-        applyItem(it);
-        it.hidden = true;
-      }
-    }
-
-    // collide with fires
-    for (const f of fires) {
-      if (!f.alive) continue;
-      const dx = f.px - player.px;
-      const dy = f.py - player.py;
-      if (Math.hypot(dx, dy) < 0.45) {
-        damagePlayer();
-      }
-    }
-  }
-
-  // --- FIRES ---
-  function updateFires(dt) {
-    const baseSpeed = 2.2;
-    const slow = powers.stopwatch ? 0.5 : 1.0;
-
-    for (const f of fires) {
-      if (!f.alive) continue;
-      f.changeTimer -= dt * slow;
-      if (f.changeTimer <= 0) {
-        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-        const d = dirs[(Math.random() * dirs.length) | 0];
-        f.dirX = d[0];
-        f.dirY = d[1];
-        f.changeTimer = 0.6 + Math.random() * 1.2;
-      }
-
-      const step = baseSpeed * slow * dt;
-      const targetTx = f.tx + f.dirX;
-      const targetTy = f.ty + f.dirY;
-      if (!isSolidTile(targetTx, targetTy)) {
-        f.tx = targetTx;
-        f.ty = targetTy;
-        f.px = f.tx + 0.5;
-        f.py = f.ty + 0.5;
-      } else {
-        f.dirX = -f.dirX;
-        f.dirY = -f.dirY;
-      }
-
-      // ignite box
-      if (grid[f.ty][f.tx] === TILE.BOX) {
-        igniteBox(f.tx, f.ty);
-      }
-    }
-  }
-
-  // --- LASER (NEON BEAM) ---
-  function fireLaser() {
-    const { tx, ty } = { tx: player.tx, ty: player.ty };
-    let dx = 0, dy = 0;
-    if (player.facing === 'right') dx = 1;
-    else if (player.facing === 'left') dx = -1;
-    else if (player.facing === 'down') dy = 1;
-    else if (player.facing === 'up') dy = -1;
-    if (!dx && !dy) return;
-
-    for (let i = 1; i <= 3; i++) {
-      const cx = tx + dx * i;
-      const cy = ty + dy * i;
-      if (cy < 0 || cy >= GRID_H || cx < 0 || cx >= GRID_W) break;
-      const t = grid[cy][cx];
-      if (t === TILE.WALL) break;
-      if (t === TILE.BOX) {
-        grid[cy][cx] = TILE.EMPTY;
-        boxesDestroyed++;
-        score += 40;
-        for (const it of items) {
-          if (Math.floor(it.x) === cx && Math.floor(it.y) === cy && it.hidden) {
-            it.hidden = false;
-          }
-        }
-        break;
-      }
-      for (const f of fires) {
-        if (!f.alive) continue;
-        if (f.tx === cx && f.ty === cy) {
-          f.alive = false;
-          score += 200;
-          if (f.carryItem) {
-            items.push({
-              x: f.px,
-              y: f.py,
-              type: f.carryItem,
-              hidden: false,
-              onFire: false
-            });
-            f.carryItem = null;
-          }
-        }
-      }
-    }
-    updateHUD();
-  }
-
-  // --- LAYOUT / VISIBILITY ---
-  function updateLayout() {
-    const crt = document.querySelector('.crt');
-    const cssW = crt.clientWidth;
-    const cssH = crt.clientHeight;
-
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-
-    const w = cssW;
-    const h = cssH;
-    tileSize = Math.floor(Math.min(w / GRID_W, h / GRID_H));
-    originX = (w - GRID_W * tileSize) / 2;
-    originY = (h - GRID_H * tileSize) / 2;
-  }
-
-  function buildVisibility() {
-    const vis = [];
-    for (let y = 0; y < GRID_H; y++) {
-      const row = [];
-      for (let x = 0; x < GRID_W; x++) row.push(0);
-      vis.push(row);
-    }
-
-    function light(cx, cy, r, level) {
-      const R = r | 0;
-      for (let dy = -R; dy <= R; dy++) {
-        for (let dx = -R; dx <= R; dx++) {
-          const tx = cx + dx, ty = cy + dy;
-          if (ty < 0 || ty >= GRID_H || tx < 0 || tx >= GRID_W) continue;
-          if (Math.max(Math.abs(dx), Math.abs(dy)) <= R) {
-            vis[ty][tx] = Math.max(vis[ty][tx], level);
-          }
-        }
-      }
-    }
-
-    // Player: 3x3 fully lit
-    light(player.tx, player.ty, 1, 2);
-
-    // Fires and burning boxes: 3x3 dim
-    for (const f of fires) {
-      if (!f.alive) continue;
-      light(f.tx, f.ty, 1, 1);
-    }
-    for (const b of burningBoxes) {
-      light(b.tx, b.ty, 1, 1);
-    }
-
-    return vis;
-  }
-
-  function drawTileRect(tx, ty, fill, stroke, alpha) {
-    const x = originX + tx * tileSize;
-    const y = originY + ty * tileSize;
-    const pad = 2;
-    ctx.save();
-    if (alpha !== undefined) ctx.globalAlpha = alpha;
-    ctx.fillStyle = fill;
-    ctx.fillRect(x + pad, y + pad, tileSize - pad * 2, tileSize - pad * 2);
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + pad + 1, y + pad + 1, tileSize - (pad + 1) * 2, tileSize - (pad + 1) * 2);
-    }
-    ctx.restore();
-  }
-
-  function render() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    if (!w || !h) return;
-
-    ctx.fillStyle = '#020306';
-    ctx.fillRect(0, 0, w, h);
-
-    const vis = buildVisibility();
-
-    // floor
-    for (let y = 0; y < GRID_H; y++) {
-      for (let x = 0; x < GRID_W; x++) {
-        const level = vis[y][x]; // 0 none, 1 dim, 2 full
-        if (level === 0) continue;
-        const base = (x + y) % 2 === 0 ? '#050707' : '#06080b';
-        const bright = level === 2 ? '#10161f' : '#080b11';
-        drawTileRect(x, y, bright, null, level === 2 ? 1.0 : 0.6);
-      }
-    }
-
-    // walls & boxes (only where visible)
-    for (let y = 0; y < GRID_H; y++) {
-      for (let x = 0; x < GRID_W; x++) {
-        const level = vis[y][x];
-        if (level === 0) continue;
+      function isWalkable(x, y) {
+        if (x < 0 || y < 0 || x >= GRID_W || y >= GRID_H) return false;
         const t = grid[y][x];
-        if (t === TILE.WALL) {
-          drawTileRect(x, y, '#21222c', '#4a5068', level === 2 ? 0.95 : 0.6);
-        } else if (t === TILE.BOX) {
-          const burning = burningBoxes.some(b => b.tx === x && b.ty === y);
-          const lidColor = burning ? '#8b2b10' : '#cc4a2a';
-          const bodyColor = burning ? '#3e1308' : '#772417';
-          const x0 = originX + x * tileSize;
-          const y0 = originY + y * tileSize;
-          const alpha = level === 2 ? 1.0 : 0.7;
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          // box body
-          ctx.fillStyle = bodyColor;
-          ctx.fillRect(x0 + 3, y0 + tileSize * 0.3, tileSize - 6, tileSize * 0.65);
-          // lid
-          ctx.fillStyle = lidColor;
-          ctx.fillRect(x0 + 3, y0 + 3, tileSize - 6, tileSize * 0.3);
-          // label stripe
-          ctx.fillStyle = '#f2f2f2';
-          ctx.fillRect(x0 + tileSize * 0.2, y0 + tileSize * 0.38, tileSize * 0.6, 3);
-          // brand bar
-          ctx.fillStyle = '#14151a';
-          ctx.fillRect(x0 + tileSize * 0.25, y0 + tileSize * 0.45, tileSize * 0.5, 3);
-          ctx.restore();
+        return t === TILE.EMPTY || t === TILE.SNEAKER || t === TILE.EXIT;
+      }
+
+      function damagePlayer() {
+        if (!player || player.invuln > 0) return;
+        if (powerShield) {
+          powerShield = false;
+          player.invuln = 1;
+          return;
+        }
+        player.hp--;
+        player.invuln = 1.2;
+        if (player.hp <= 0) {
+          currentMode = MODES.MENU;
         }
       }
-    }
 
-    // burning box glow
-    for (const b of burningBoxes) {
-      const level = vis[b.ty] && vis[b.ty][b.tx] || 0;
-      if (!level) continue;
-      const x0 = originX + b.tx * tileSize;
-      const y0 = originY + b.ty * tileSize;
-      const cx = x0 + tileSize / 2;
-      const cy = y0 + tileSize / 2;
-      const r = tileSize * 0.6;
-      const flicker = 0.4 + 0.3 * Math.sin(timeAccum * 12 + b.tx * 3);
-      const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
-      grad.addColorStop(0, `rgba(255,230,160,${flicker})`);
-      grad.addColorStop(0.5, `rgba(255,150,60,${flicker * 0.8})`);
-      grad.addColorStop(1, 'rgba(40,10,0,0)');
-      ctx.save();
-      ctx.globalAlpha = level === 2 ? 1.0 : 0.7;
-      ctx.fillStyle = grad;
-      ctx.fillRect(x0, y0, tileSize, tileSize);
-      ctx.restore();
-    }
+      function updatePlayer(dt) {
+        if (!player) return;
+        moveCooldown -= dt;
+        if (moveCooldown < 0) moveCooldown = 0;
 
-    // items
-    for (const it of items) {
-      if (it.hidden) continue;
-      const { tx, ty } = worldToTile(it.x, it.y);
-      const level = vis[ty] && vis[ty][tx] || 0;
-      if (!level) continue;
-      const cx = originX + it.x * tileSize;
-      const cy = originY + it.y * tileSize;
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.globalAlpha = level === 2 ? 1.0 : 0.8;
-      if (it.type === 'sneaker') {
-        ctx.fillStyle = '#f4f4f4';
-        ctx.strokeStyle = '#ff5533';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(-tileSize * 0.3, -tileSize * 0.1);
-        ctx.lineTo(tileSize * 0.26, -tileSize * 0.12);
-        ctx.lineTo(tileSize * 0.18, tileSize * 0.2);
-        ctx.lineTo(-tileSize * 0.34, tileSize * 0.18);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-      } else {
-        const r = tileSize * 0.22;
-        const grad = ctx.createRadialGradient(0,0,0,0,0,r);
-        grad.addColorStop(0, it.onFire ? '#ffb080' : '#ffe6aa');
-        grad.addColorStop(1, '#000000');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0,0,r,0,Math.PI*2);
-        ctx.fill();
+        // Direction from joystick
+        if (input.moveX !== 0 || input.moveY !== 0) {
+          player.facing = { x: input.moveX, y: input.moveY };
+          if (moveCooldown === 0) {
+            const nx = clamp(player.x + input.moveX, 0, GRID_W - 1);
+            const ny = clamp(player.y + input.moveY, 0, GRID_H - 1);
+            if (isWalkable(nx, ny) || grid[ny][nx] === TILE.CRATE) {
+              player.x = nx;
+              player.y = ny;
+            }
+            moveCooldown = currentMode === MODES.LASER ? 0.05 : 0.12;
+          }
+        }
+
+        if (player.invuln > 0) player.invuln -= dt;
+
+        // Tile interactions
+        const t = grid[player.y][player.x];
+        if (t === TILE.SNEAKER) {
+          grid[player.y][player.x] = TILE.EMPTY;
+          sneakersCollected++;
+          score += 100;
+        }
+        if (t === TILE.EXIT && currentMode === MODES.METRO && sneakersCollected >= sneakersTotal) {
+          stage++;
+          buildMetroSneakerRun();
+        }
+
+        // Magnet pulls sneakers one step toward player
+        if (powerMagnet) {
+          for (let y = 0; y < GRID_H; y++) {
+            for (let x = 0; x < GRID_W; x++) {
+              if (grid[y][x] === TILE.SNEAKER) {
+                const dx = player.x - x;
+                const dy = player.y - y;
+                if (Math.abs(dx) + Math.abs(dy) === 1) {
+                  grid[y][x] = TILE.EMPTY;
+                  sneakersCollected++;
+                  score += 100;
+                }
+              }
+            }
+          }
+        }
+
+        // Bomb placement
+        const bombPressed = input.bombDown && !lastButtons.bomb;
+        if (bombPressed) {
+          bombs.push({
+            x: player.x,
+            y: player.y,
+            timer: triggerMode ? 999 : 2.5,
+            armed: triggerMode
+          });
+        }
+
+        // Laser
+        const laserPressed = input.laserDown && !lastButtons.laser;
+        if (laserPressed) {
+          // Simple 3-tile line attack
+          const dir = player.facing;
+          for (let i = 1; i <= 3; i++) {
+            const lx = player.x + dir.x * i;
+            const ly = player.y + dir.y * i;
+            enemies = enemies.filter(e => !(e.x === lx && e.y === ly));
+          }
+        }
+
+        // Timer / trigger mode
+        if (input.timerPressed && !lastButtons.timer) {
+          if (powerStopwatch || powerCrosshair) {
+            triggerMode = !triggerMode;
+            bombs.forEach(b => {
+              if (triggerMode) {
+                b.armed = true;
+                b.timer = 999;
+              } else {
+                if (b.timer > 5) b.timer = 1.0;
+              }
+            });
+          }
+        }
+
+        // Special / star mode
+        if (input.specialPressed && !lastButtons.special) {
+          if (!starMode) {
+            starMode = true;
+            starTimer = 8.0;
+          } else {
+            starMode = false;
+            starTimer = 0;
+          }
+        }
+
+        if (starMode) {
+          starTimer -= dt;
+          if (starTimer <= 0) {
+            starMode = false;
+            starTimer = 0;
+          }
+        }
       }
-      ctx.restore();
-    }
 
-    // bombs
-    for (const b of bombs) {
-      if (b.exploded) continue;
-      const level = vis[b.ty] && vis[b.ty][b.tx] || 0;
-      if (!level) continue;
-      const x0 = originX + (b.tx + 0.5) * tileSize;
-      const y0 = originY + (b.ty + 0.5) * tileSize;
-      ctx.save();
-      ctx.translate(x0, y0);
-      ctx.globalAlpha = level === 2 ? 1.0 : 0.8;
-      ctx.fillStyle = '#111521';
-      ctx.beginPath();
-      ctx.arc(0, 0, tileSize * 0.22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ff5533';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
-    }
+      function updateEnemies(dt) {
+        enemies.forEach(e => {
+          e.cooldown -= dt;
+          if (e.cooldown > 0) return;
+          e.cooldown = hardcore ? 0.3 : 0.5;
+          const dirs = [
+            { x: 1, y: 0 },
+            { x: -1, y: 0 },
+            { x: 0, y: 1 },
+            { x: 0, y: -1 }
+          ];
+          const d = dirs[randomInt(0, dirs.length - 1)];
+          const nx = clamp(e.x + d.x, 0, GRID_W - 1);
+          const ny = clamp(e.y + d.y, 0, GRID_H - 1);
+          if (isWalkable(nx, ny)) {
+            e.x = nx;
+            e.y = ny;
+          }
+        });
 
-    // fires
-    for (const f of fires) {
-      if (!f.alive) continue;
-      const level = vis[f.ty] && vis[f.ty][f.tx] || 0;
-      if (!level) continue;
-      const cx = originX + f.px * tileSize;
-      const cy = originY + f.py * tileSize;
-      const r = tileSize * 0.26;
-      const flicker = (Math.sin(timeAccum * 18 + f.tx * 3) + 1) * 0.5 * 0.2;
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      grad.addColorStop(0, '#fff6d0');
-      grad.addColorStop(0.4 + flicker, '#ff8a3a');
-      grad.addColorStop(1, '#420000');
-      ctx.save();
-      ctx.globalAlpha = level === 2 ? 1.0 : 0.8;
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+        // Collisions with player
+        enemies.forEach(e => {
+          if (player && e.x === player.x && e.y === player.y && !starMode) {
+            damagePlayer();
+          } else if (player && e.x === player.x && e.y === player.y && starMode) {
+            // in star mode, touching enemy removes it
+            e.x = -999;
+            e.y = -999;
+          }
+        });
 
-    // explosions visuals
-    for (const ex of explosions) {
-      const level = vis[ex.ty] && vis[ex.ty][ex.tx] || 0;
-      if (!level) continue;
-      const cx = originX + (ex.tx + 0.5) * tileSize;
-      const cy = originY + (ex.ty + 0.5) * tileSize;
-      const t = ex.t;
-      const radius = tileSize * (0.4 + 0.5 * t);
-      const alpha = Math.max(0, 1 - t);
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-      grad.addColorStop(0, `rgba(255,240,180,${alpha})`);
-      grad.addColorStop(0.5, `rgba(255,120,50,${alpha * 0.8})`);
-      grad.addColorStop(1, 'rgba(80,0,0,0)');
-      ctx.save();
-      ctx.globalAlpha = level === 2 ? alpha : alpha * 0.7;
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+        enemies = enemies.filter(e => e.x >= 0);
+        flamesTotal = enemies.length;
+      }
 
-    // player
-    if (player.alive) {
-      const level = vis[player.ty] && vis[player.ty][player.tx] || 0;
-      if (level) {
-        const cx = originX + player.px * tileSize;
-        const cy = originY + player.py * tileSize;
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.globalAlpha = level === 2 ? 1.0 : 0.9;
+      function explodeBomb(b) {
+        const dirs = [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+          { x: -1, y: 0 },
+          { x: 0, y: 1 },
+          { x: 0, y: -1 }
+        ];
+        dirs.forEach(d => {
+          const x = b.x + d.x;
+          const y = b.y + d.y;
+          if (x < 0 || y < 0 || x >= GRID_W || y >= GRID_H) return;
+          const t = grid[y][x];
+          if (t === TILE.CRATE) {
+            grid[y][x] = TILE.EMPTY;
+            boxCount++;
+            score += 50;
+          }
+          enemies = enemies.filter(e => !(e.x === x && e.y === y));
+          if (player && player.x === x && player.y === y && !starMode) {
+            damagePlayer();
+          }
+          explosions.push({ x, y, timer: 0.4 });
+        });
+      }
 
-        const bodyW = tileSize * 0.45;
-        const bodyH = tileSize * 0.55;
-        ctx.fillStyle = '#1b1f3a';
-        ctx.strokeStyle = '#ff3a2f';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.roundRect(-bodyW/2, -bodyH/2, bodyW, bodyH, 6);
-        ctx.fill();
-        ctx.stroke();
+      function updateBombs(dt) {
+        bombs.forEach(b => {
+          if (!triggerMode) {
+            b.timer -= dt;
+          }
+        });
 
-        ctx.beginPath();
-        ctx.arc(0, -bodyH * 0.45, tileSize * 0.22, Math.PI, 0);
-        ctx.lineTo(tileSize * 0.22, -bodyH * 0.1);
-        ctx.lineTo(-tileSize * 0.22, -bodyH * 0.1);
-        ctx.closePath();
-        ctx.fillStyle = '#131527';
-        ctx.fill();
-        ctx.stroke();
+        const shouldDetonateAll = input.timerPressed && !lastButtons.timer && triggerMode;
+        bombs.forEach(b => {
+          if (b.timer <= 0 || shouldDetonateAll) {
+            explodeBomb(b);
+            b._remove = true;
+          }
+        });
+        bombs = bombs.filter(b => !b._remove);
 
-        ctx.fillStyle = '#f7e0c0';
-        ctx.beginPath();
-        ctx.arc(0, -bodyH * 0.25, tileSize * 0.14, 0, Math.PI * 2);
-        ctx.fill();
+        explosions.forEach(ex => {
+          ex.timer -= dt;
+        });
+        explosions = explosions.filter(ex => ex.timer > 0);
+      }
 
-        const step = Math.sin(timeAccum * 12) * 0.12;
-        ctx.fillStyle = '#111318';
-        ctx.fillRect(-bodyW*0.25, bodyH*0.15 + step, bodyW*0.2, bodyH*0.35);
-        ctx.fillRect(bodyW*0.05, bodyH*0.15 - step, bodyW*0.2, bodyH*0.35);
+      // ---------- MENU ----------
+      let helpVisible = false;
 
-        ctx.fillStyle = '#f4f4f4';
-        ctx.fillRect(-bodyW*0.26, bodyH*0.46 + step, bodyW*0.24, bodyH*0.08);
-        ctx.fillRect(bodyW*0.02, bodyH*0.46 - step, bodyW*0.24, bodyH*0.08);
+      function updateMenu(dt) {
+        if (input.moveY !== 0 && !lastButtons.special) {
+          if (input.moveY < 0) selectedIndex = (selectedIndex + GAME_LIST.length - 1) % GAME_LIST.length;
+          if (input.moveY > 0) selectedIndex = (selectedIndex + 1) % GAME_LIST.length;
+        }
 
-        if (player.shieldCharges > 0) {
-          ctx.strokeStyle = '#4cffd0';
-          ctx.lineWidth = 2;
+        // Bomb / Laser confirm
+        const confirmPressed = (input.bombDown && !lastButtons.bomb) || (input.laserDown && !lastButtons.laser);
+        if (confirmPressed) {
+          const selected = GAME_LIST[selectedIndex];
+          buildGame(selected.id);
+        }
+
+        // Timer toggles hardcore
+        if (input.timerPressed && !lastButtons.timer) {
+          hardcore = !hardcore;
+        }
+
+        // Special toggles help
+        if (input.specialPressed && !lastButtons.special) {
+          helpVisible = !helpVisible;
+        }
+      }
+
+      // ---------- DRAWING ----------
+      function resizeCanvas() {
+        const crt = document.querySelector('.crt');
+        if (!crt) return;
+        const cssW = crt.clientWidth;
+        const cssH = crt.clientHeight;
+
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+      }
+
+      function drawGridBackground(cellSize) {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        ctx.fillStyle = '#0a241f';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = '#123c33';
+        ctx.lineWidth = 1;
+        for (let y = 0; y <= GRID_H; y++) {
           ctx.beginPath();
-          ctx.arc(0, 0, tileSize * 0.4, 0, Math.PI * 2);
+          ctx.moveTo(0, y * cellSize);
+          ctx.lineTo(GRID_W * cellSize, y * cellSize);
           ctx.stroke();
         }
-
-        ctx.restore();
+        for (let x = 0; x <= GRID_W; x++) {
+          ctx.beginPath();
+          ctx.moveTo(x * cellSize, 0);
+          ctx.lineTo(x * cellSize, GRID_H * cellSize);
+          ctx.stroke();
+        }
       }
-    }
 
-    // vignette
-    ctx.save();
-    const grad = ctx.createRadialGradient(
-      w/2, h/2, Math.min(w,h)*0.2,
-      w/2, h/2, Math.max(w,h)*0.7
-    );
-    grad.addColorStop(0, 'rgba(0,0,0,0.0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.8)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-    ctx.restore();
-
-    // overlay messages
-    ctx.save();
-    ctx.fillStyle = '#d6c7a4';
-    ctx.font = '16px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    if (gameState === 'title') {
-      ctx.fillText('SNEAKER BOMBER', w/2, h/2 - 20);
-      ctx.fillText('MOVE STICK / PRESS BOMB', w/2, h/2 + 12);
-    } else if (gameState === 'dead') {
-      ctx.fillText('GAME OVER', w/2, h/2 - 10);
-      ctx.fillText('PRESS BOMB TO RESTART', w/2, h/2 + 18);
-    } else if (gameState === 'win') {
-      ctx.fillText('ALL SNEAKERS FOUND', w/2, h/2 - 10);
-      ctx.fillText('PRESS BOMB TO RESTART', w/2, h/2 + 18);
-    }
-    ctx.restore();
-  }
-
-  // --- MAIN LOOP ---
-  let lastTime = performance.now();
-
-  function step(ts) {
-    const dt = Math.min(0.05, (ts - lastTime) / 1000);
-    lastTime = ts;
-    timeAccum += dt;
-
-    pollJoypad();
-
-    if (gameState === 'title') {
-      if (input.dirX || input.dirY || input.bombClick) {
-        gameState = 'playing';
+      function drawSpriteOnGrid(sprite, gx, gy, color, secondary) {
+        const cellSize = Math.floor(Math.min(canvas.clientWidth / GRID_W, canvas.clientHeight / GRID_H));
+        const x = gx * cellSize;
+        const y = gy * cellSize;
+        drawSprite(sprite, x, y, cellSize, color, secondary || color);
       }
-      render();
-      input.bombClick = false;
-      input.triggerClick = false;
-      input.laserClick = false;
-      requestAnimationFrame(step);
-      return;
-    }
 
-    if (gameState === 'dead' || gameState === 'win') {
-      if (input.bombClick) {
-        resetState();
+      function drawMenu() {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        ctx.fillStyle = '#0a241f';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#d6c7a4';
+        ctx.font = '16px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('SNEAKERQUEST CONSOLE', w / 2, 24);
+
+        ctx.font = '10px "Press Start 2P"';
+        const startY = 80;
+        GAME_LIST.forEach((g, i) => {
+          const y = startY + i * 40;
+          const isSel = i === selectedIndex;
+          ctx.fillStyle = isSel ? '#ff3a2f' : '#d6c7a4';
+          ctx.fillText(g.label, w / 2, y);
+          if (hardcore) {
+            ctx.fillText('HARDCORE', w / 2, startY + GAME_LIST.length * 40 + 20);
+          }
+        });
+
+        if (helpVisible) {
+          const boxW = w * 0.9;
+          const boxH = h * 0.42;
+          const bx = (w - boxW) / 2;
+          const by = h - boxH - 20;
+          ctx.fillStyle = '#121212';
+          ctx.fillRect(bx, by, boxW, boxH);
+          ctx.strokeStyle = '#ff3a2f';
+          ctx.strokeRect(bx, by, boxW, boxH);
+          ctx.fillStyle = '#d6c7a4';
+          ctx.font = '8px "Press Start 2P"';
+          ctx.textAlign = 'left';
+          const lines = [
+            'BOMB: DROP BOMB',
+            'LASER: FIRE LASER',
+            'TIMER: TRIGGER MODE',
+            'STAR: STAR MODE / HELP',
+            'MOVE: JOYSTICK / ARROWS'
+          ];
+          lines.forEach((line, i) => {
+            ctx.fillText(line, bx + 12, by + 16 + i * 14);
+          });
+        }
       }
-      render();
-      input.bombClick = false;
-      input.triggerClick = false;
-      input.laserClick = false;
-      requestAnimationFrame(step);
-      return;
-    }
 
-    // playing
-    if (input.bombClick) {
-      plantBomb();
-    }
-    if (input.triggerClick) {
-      triggerRemoteBombs();
-    }
-    if (input.laserClick) {
-      fireLaser();
-    }
-    input.bombClick = false;
-    input.triggerClick = false;
-    input.laserClick = false;
+      function drawGame() {
+        const cellSize = Math.floor(Math.min(canvas.clientWidth / GRID_W, canvas.clientHeight / GRID_H));
+        drawGridBackground(cellSize);
 
-    for (const b of bombs) {
-      if (b.exploded) continue;
-      b.timer -= dt;
-      if (b.timer <= 0) {
-        explodeBomb(b);
+        for (let y = 0; y < GRID_H; y++) {
+          for (let x = 0; x < GRID_W; x++) {
+            const t = grid[y][x];
+            if (t === TILE.WALL) {
+              ctx.fillStyle = '#123c33';
+              ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            } else if (t === TILE.CRATE) {
+              drawSpriteOnGrid(SPRITES.crate, x, y, '#b99b66');
+            } else if (t === TILE.SNEAKER) {
+              drawSpriteOnGrid(SPRITES.sneaker, x, y, '#ff3a2f');
+            } else if (t === TILE.EXIT) {
+              drawSpriteOnGrid(SPRITES.crate, x, y, '#d6c7a4');
+            }
+          }
+        }
+
+        bombs.forEach(b => {
+          drawSpriteOnGrid(SPRITES.bomb, b.x, b.y, '#ff3a2f');
+        });
+
+        explosions.forEach(ex => {
+          drawSpriteOnGrid(SPRITES.explosion, ex.x, ex.y, '#ffe36a');
+        });
+
+        enemies.forEach(e => {
+          drawSpriteOnGrid(SPRITES.enemy, e.x, e.y, '#ffcf5a');
+        });
+
+        if (player) {
+          const color = starMode ? '#ffe36a' : '#d6c7a4';
+          drawSpriteOnGrid(SPRITES.player, player.x, player.y, color);
+        }
       }
+
+      function drawPausedOverlay() {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ff3a2f';
+        ctx.font = '14px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('PAUSED', w / 2, h / 2);
+      }
+
+      // ---------- MAIN LOOP ----------
+      let lastTime = performance.now();
+
+      function tick(now) {
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+
+        pollControls();
+
+        if (!paused) {
+          if (currentMode === MODES.MENU) {
+            updateMenu(dt);
+          } else {
+            frameTime += dt;
+            timeLeft -= dt;
+            if (timeLeft < 0) {
+              currentMode = MODES.MENU;
+            } else {
+              updatePlayer(dt);
+              updateEnemies(dt);
+              updateBombs(dt);
+            }
+          }
+        }
+
+        resizeCanvas();
+        if (currentMode === MODES.MENU) drawMenu(); else drawGame();
+        if (paused) drawPausedOverlay();
+
+        updateHUD();
+
+        lastButtons.bomb = input.bombDown;
+        lastButtons.laser = input.laserDown;
+        lastButtons.timer = input.timerPressed;
+        lastButtons.special = input.specialPressed;
+        input.timerPressed = false;
+        input.specialPressed = false;
+
+        requestAnimationFrame(tick);
+      }
+
+      resizeCanvas();
+      requestAnimationFrame(tick);
     }
-
-    updateBurningBoxes(dt);
-    updatePlayer(dt);
-    updateFires(dt);
-    updateMagnet(dt);
-    firesPickupItems();
-    updateHUD();
-
-    // explosions lifetime
-    for (const ex of explosions) {
-      ex.t += dt * 3;
-    }
-    explosions = explosions.filter(ex => ex.t < 1.0);
-
-    render();
-    requestAnimationFrame(step);
-  }
-
-  function resizeCanvas() {
-    updateLayout();
-    render();
-  }
-
-  resetState();
-  setupControlBridge();
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-  requestAnimationFrame(step);
-}
-
     document.addEventListener('DOMContentLoaded', () => {
       MobileSafariLock.initialize();
       IconManager.updateAllIcons();
       setupSimpleGame();
       const pauseBtn = document.getElementById('btn-pause');
-      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
+      if (pauseBtn) {
+        pauseBtn.addEventListener('click', function () {
+          const next = this.dataset.state === 'playing' ? 'paused' : 'playing';
+          this.dataset.state = next;
+        });
+      }
       setTimeout(() => { window.scrollTo(0, 0); }, 120);
     });
 
     // Simple UI API
     window.SneakerQuestUI = {
       IconManager,
-      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
-      setHearts:   (f, t) => IconManager.renderHearts(f, t),
-      setPowers:   (f, t) => IconManager.renderPowers(t, f),
-      setFires:    (f, t) => IconManager.renderFires(f, t),
-      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
-      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
-      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
-      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
+      setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
+      setHearts:   (filled, total) => IconManager.renderHearts(filled, total),
+      setPowers:   (total, filled) => IconManager.renderPowers(total, filled),
+      setFires:    (filled, total) => IconManager.renderFires(filled, total),
+      setCounter:  (v) => {
+        const el = document.getElementById('counter');
+        if (el) el.textContent = String(v).padStart(3, '0');
+      },
+      setStage:    (s) => {
+        const el = document.querySelector('.chip-stage');
+        if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`;
+      },
+      setScore:    (v) => {
+        const el = document.querySelector('.chip-score');
+        if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`;
+      },
+      setTime:     (t) => {
+        const el = document.querySelector('.chip-time');
+        if (el) el.textContent = t;
+      }
     };
       // === HARD LOCK: disable zooming (pinch, double-tap, ctrl+wheel) ===
     (function lockPageZoom(){
