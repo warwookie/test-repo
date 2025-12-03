@@ -3399,709 +3399,703 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
     // === GAME SETUP ===
     function setupSimpleGame() {
       const canvas = document.getElementById('gameCanvas');
-      if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      // --------- GLOBAL STATE ---------
-      const MODES = {
-        MENU: 'menu',
-        METRO: 'metro_run',
-        BOX: 'box_break',
-        LASER: 'night_laser'
-      };
-
-      const GAME_LIST = [
-        { id: MODES.METRO, label: 'METRO SNEAKER RUN' },
-        { id: MODES.BOX,   label: 'BOX BREAK BATTLES' },
-        { id: MODES.LASER, label: 'NIGHT LASER PATROL' }
-      ];
-
-      let currentMode = MODES.MENU;
-      let selectedIndex = 0;
-      let hardcore = false;
-      let paused = false;
-
-      // Shared meta
-      let stage = 1;
-      let score = 0;
-      let timeLeft = 0;
-      let frameTime = 0;
-
-      // Core player + world state
-      const TILE_SIZE = 16;
+      // -----------------------------
+      // CONSTANTS / GRID
+      // -----------------------------
       const GRID_W = 15;
       const GRID_H = 11;
+      const TILE = { EMPTY: 0, WALL: 1, BOX: 2 };
 
-      const TILE = {
-        EMPTY: 0,
-        WALL: 1,
-        CRATE: 2,
-        SNEAKER: 3,
-        EXIT: 4
+      // map + entities
+      let grid = [];
+      let bombs = [];        // {tx,ty,timer,exploded}
+      let fires = [];        // {x,y,dirX,dirY,changeTimer,alive,carryItems:[]}
+      let items = [];        // {x,y,type,hidden,onFire}
+      let burningBoxes = []; // {tx,ty,timer}
+      let explosions = [];   // {tx,ty,time,maxTime}
+
+      // player
+      const player = {
+        x: 1.5,
+        y: 1.5,
+        speed: 3.0,   // tiles per second
+        facing: 'right',
+        lives: 3,
+        shield: 0,
+        alive: true
       };
 
-      let grid = [];
-      let player = null;
-      let enemies = [];
-      let bombs = [];
-      let explosions = [];
-      let sneakersTotal = 0;
-      let sneakersCollected = 0;
-      let flamesTotal = 0;
-      let boxCount = 0;
+      // powerups
+      const powers = {
+        stopwatch: false,
+        shield: false,
+        magnet: false,
+        crosshair: false,
+      };
+      const powerOrder = ['stopwatch', 'shield', 'magnet', 'crosshair'];
 
-      // Power-up state
-      let powerStopwatch = false;
-      let powerShield = false;
-      let powerMagnet = false;
-      let powerCrosshair = false;
-      let triggerMode = false;
-      let starMode = false;
-      let starTimer = 0;
+      // meta
+      let collectedSneakers = 0;
+      const totalSneakers = 5;
+      let boxesDestroyed = 0;
+      let score = 0;
+      let gameState = 'title'; // 'title' | 'playing' | 'dead' | 'win';
+      let timeAccum = 0;
 
-      // Input state from iframe + keyboard
+      // canvas layout
+      let tileSize = 24;
+      let originX = 0;
+      let originY = 0;
+
+      // -----------------------------
+      // INPUT (JOYPAD + BUTTONS)
+      // -----------------------------
       const input = {
         moveX: 0,
         moveY: 0,
-        bombDown: false,
-        laserDown: false,
+        bombPressed: false,
+        blastPressed: false,
         timerPressed: false,
-        specialPressed: false
       };
 
-      // To detect edge-triggered presses
-      const lastButtons = {
-        bomb: false,
-        laser: false,
-        timer: false,
-        special: false
-      };
+      let controlsWin = null;
 
-      function clamp(v, min, max) {
-        return v < min ? min : (v > max ? max : v);
-      }
+      function setupControlBridge() {
+        const iframe = document.getElementById('controlsFrame');
+        if (!iframe) return;
 
-      // ---------- SPRITES (8x8 pixel art patterns) ----------
-      // Each sprite is 8 strings of 8 chars: '.' = transparent, other = colored.
-      const SPRITES = {
-        player: [
-          '........',
-          '..XX..X.',
-          '.XXXXXX.',
-          '.X.XX.X.',
-          '.XXXXXX.',
-          '..X..X..',
-          '.X....X.',
-          '........'
-        ],
-        enemy: [
-          '........',
-          '.XXXXXX.',
-          'X.XX.XX.',
-          'XXXXXXX.',
-          'X.XXXX.X',
-          'X.X..X.X',
-          '.X.XX.X.',
-          '........'
-        ],
-        crate: [
-          'XXXXXXXX',
-          'X......X',
-          'X.XXXX.X',
-          'X.X..X.X',
-          'X.XXXX.X',
-          'X......X',
-          'XXXXXXXX',
-          'XXXXXXXX'
-        ],
-        sneaker: [
-          '........',
-          '.....XX.',
-          '....XXX.',
-          '..XXXXX.',
-          '.XXXXXX.',
-          '.XX.XX..',
-          '...XX...',
-          '........'
-        ],
-        bomb: [
-          '........',
-          '........',
-          '..XXXX..',
-          '.XXXXXX.',
-          '.XXXXXX.',
-          '.XXXXXX.',
-          '..XXXX..',
-          '........'
-        ],
-        explosion: [
-          '..X..X..',
-          '.XXXXXX.',
-          'XXXXXXXX',
-          'XXXXXXXX',
-          'XXXXXXXX',
-          'XXXXXXXX',
-          '.XXXXXX.',
-          '..X..X..'
-        ],
-        exit: [
-          'XXXXXXXX',
-          'X......X',
-          'X.XXXX.X',
-          'X.X..X.X',
-          'X.XX.X.X',
-          'X......X',
-          'X DOOR X',
-          'XXXXXXXX'
-        ]
-      };
+        function bind() {
+          try {
+            controlsWin = iframe.contentWindow;
 
-      function drawSprite(sprite, x, y, size, fg, bg) {
-        const px = size / 8;
-        for (let j = 0; j < 8; j++) {
-          const row = sprite[j];
-          for (let i = 0; i < 8; i++) {
-            const ch = row[i];
-            if (ch === ' ') continue;
-            if (ch === '.' || ch === undefined) continue;
-            ctx.fillStyle = ch === 'X' ? fg : bg;
-            ctx.fillRect(Math.floor(x + i * px), Math.floor(y + j * px), Math.ceil(px), Math.ceil(px));
-          }
-        }
-      }
+            const idoc = iframe.contentDocument || controlsWin.document;
+            if (!idoc) return;
 
-      // ---------- HUD HELPERS ----------
-      function updateHUD() {
-        if (!window.SneakerQuestUI) return;
-        window.SneakerQuestUI.setHearts(player ? player.hp : 0, 3);
-        window.SneakerQuestUI.setSneakers(sneakersCollected, 5);
-        window.SneakerQuestUI.setFires(flamesTotal, 5);
+            const bombBtn  = idoc.getElementById('btn2_proxy_bomb')  || idoc.getElementById('btn2_bomb');
+            const blastBtn = idoc.getElementById('btn2_proxy_blast') || idoc.getElementById('btn2_laser');
+            const timerBtn = idoc.getElementById('btn2_timer');
 
-        let powersActive = 0;
-        if (powerStopwatch) powersActive++;
-        if (powerShield) powersActive++;
-        if (powerMagnet) powersActive++;
-        if (powerCrosshair) powersActive++;
-        window.SneakerQuestUI.setPowers(4, powersActive);
-
-        window.SneakerQuestUI.setCounter(boxCount);
-        window.SneakerQuestUI.setScore(score);
-        window.SneakerQuestUI.setStage(stage);
-
-        const t = Math.max(0, Math.floor(timeLeft));
-        const seconds = String(t % 60).padStart(2, '0');
-        const minutes = String(Math.floor(t / 60)).padStart(2, '0');
-        window.SneakerQuestUI.setTime(minutes + ':' + seconds);
-      }
-
-      // ---------- WORLD GENERATION ----------
-      function makeEmptyGrid() {
-        grid = new Array(GRID_H);
-        for (let y = 0; y < GRID_H; y++) {
-          grid[y] = new Array(GRID_W).fill(TILE.EMPTY);
-        }
-      }
-
-      function placeBorders() {
-        for (let x = 0; x < GRID_W; x++) {
-          grid[0][x] = TILE.WALL;
-          grid[GRID_H - 1][x] = TILE.WALL;
-        }
-        for (let y = 0; y < GRID_H; y++) {
-          grid[y][0] = TILE.WALL;
-          grid[y][GRID_W - 1] = TILE.WALL;
-        }
-      }
-
-      function clearGameState() {
-        player = null;
-        enemies = [];
-        bombs = [];
-        explosions = [];
-        sneakersTotal = 0;
-        sneakersCollected = 0;
-        flamesTotal = 0;
-        boxCount = 0;
-        powerStopwatch = false;
-        powerShield = false;
-        powerMagnet = false;
-        powerCrosshair = false;
-        triggerMode = false;
-        starMode = false;
-        starTimer = 0;
-      }
-
-      function spawnPlayer(x, y) {
-        player = {
-          x,
-          y,
-          hp: 3,
-          invuln: 0,
-          facing: { x: 0, y: 1 },
-          mode: currentMode
-        };
-      }
-
-      function spawnEnemy(x, y) {
-        enemies.push({
-          x,
-          y,
-          dir: { x: 0, y: 1 },
-          cooldown: 0
-        });
-      }
-
-      function randomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
-
-      function buildMetroSneakerRun() {
-        clearGameState();
-        makeEmptyGrid();
-        placeBorders();
-
-        // Random crates and sneakers
-        for (let y = 1; y < GRID_H - 1; y++) {
-          for (let x = 1; x < GRID_W - 1; x++) {
-            if (x === 1 && y === 1) continue;
-            if (Math.random() < 0.2) {
-              grid[y][x] = TILE.WALL;
-            } else if (Math.random() < 0.28) {
-              grid[y][x] = TILE.CRATE;
+            if (bombBtn) {
+              bombBtn.addEventListener('click', () => {
+                input.bombPressed = true;
+              });
             }
+            if (blastBtn) {
+              blastBtn.addEventListener('click', () => {
+                input.blastPressed = true;
+              });
+            }
+            if (timerBtn) {
+              timerBtn.addEventListener('click', () => {
+                input.timerPressed = true;
+              });
+            }
+          } catch (e) {
+            console.warn('SneakerQuest controls bridge error:', e);
           }
         }
 
-        // Place sneakers in random crates or tiles
-        let placedSneakers = 0;
-        while (placedSneakers < 5) {
-          const x = randomInt(1, GRID_W - 2);
-          const y = randomInt(1, GRID_H - 2);
-          if (grid[y][x] === TILE.EMPTY || grid[y][x] === TILE.CRATE) {
-            grid[y][x] = TILE.SNEAKER;
-            placedSneakers++;
-          }
+        if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+          bind();
+        } else {
+          iframe.addEventListener('load', bind, { once: true });
         }
-        sneakersTotal = 5;
-
-        // Place exit
-        let ex = GRID_W - 2;
-        let ey = GRID_H - 2;
-        grid[ey][ex] = TILE.EXIT;
-
-        // Spawn player and enemies
-        spawnPlayer(1, 1);
-        const enemyCount = hardcore ? 5 : 3;
-        for (let i = 0; i < enemyCount; i++) {
-          const exx = randomInt(2, GRID_W - 3);
-          const eyy = randomInt(2, GRID_H - 3);
-          enemies.push({ x: exx, y: eyy, dir: { x: 0, y: 1 }, cooldown: 0 });
-        }
-        flamesTotal = enemies.length;
-        timeLeft = hardcore ? 90 : 120;
       }
 
-      function buildBoxBreakBattles() {
-        clearGameState();
-        makeEmptyGrid();
-        placeBorders();
+      // keyboard as backup (not primary control)
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'a') input.moveX = -1;
+        if (e.key === 'ArrowRight' || e.key === 'd') input.moveX =  1;
+        if (e.key === 'ArrowUp'   || e.key === 'w') input.moveY = -1;
+        if (e.key === 'ArrowDown' || e.key === 's') input.moveY =  1;
+        if (e.key === ' ') input.bombPressed = true;
+        if (e.key === 'k') input.blastPressed = true;
+        if (e.key === 'l') input.timerPressed = true;
+      });
+      window.addEventListener('keyup', (e) => {
+        if (['ArrowLeft','ArrowRight','a','d'].includes(e.key)) input.moveX = 0;
+        if (['ArrowUp','ArrowDown','w','s'].includes(e.key))    input.moveY = 0;
+      });
 
-        for (let y = 1; y < GRID_H - 1; y++) {
-          for (let x = 1; x < GRID_W - 1; x++) {
-            if (Math.random() < 0.65) {
-              grid[y][x] = TILE.CRATE;
+      function pollJoypad() {
+        if (!controlsWin || !controlsWin.jpad_state) return;
+
+        const js = controlsWin.jpad_state;
+        const mag = js.mag || Math.hypot(js.x, js.y);
+        const threshold = 0.25;
+
+        // If arrow-pad laser mode is active, DO NOT move avatar with pad
+        if (controlsWin.laserArrowMode) {
+          input.moveX = 0;
+          input.moveY = 0;
+          return;
+        }
+
+        if (mag < threshold) {
+          input.moveX = 0;
+          input.moveY = 0;
+        } else {
+          input.moveX = js.x;
+          input.moveY = js.y;
+        }
+      }
+
+      // -----------------------------
+      // MAP GENERATION
+      // -----------------------------
+      function buildGrid() {
+        grid = [];
+        for (let y = 0; y < GRID_H; y++) {
+          const row = [];
+          for (let x = 0; x < GRID_W; x++) {
+            if (y === 0 || y === GRID_H - 1 || x === 0 || x === GRID_W - 1) {
+              row.push(TILE.WALL);
+            } else if (x % 2 === 0 && y % 2 === 0) {
+              row.push(TILE.WALL);
             } else {
-              grid[y][x] = TILE.EMPTY;
+              row.push(TILE.BOX);
             }
           }
+          grid.push(row);
         }
-
-        // A few sneakers hidden in crates
-        let placedSneakers = 0;
-        while (placedSneakers < 3) {
-          const x = randomInt(1, GRID_W - 2);
-          const y = randomInt(1, GRID_H - 2);
-          if (grid[y][x] === TILE.CRATE) {
-            grid[y][x] = TILE.SNEAKER;
-            placedSneakers++;
-          }
+        // clear spawn
+        const clearSpots = [
+          [1,1],[2,1],[1,2]
+        ];
+        for (const [cx, cy] of clearSpots) {
+          if (grid[cy] && grid[cy][cx] === TILE.BOX) grid[cy][cx] = TILE.EMPTY;
         }
-        sneakersTotal = 3;
-
-        spawnPlayer(1, 1);
-
-        if (hardcore) {
-          for (let i = 0; i < 3; i++) {
-            const exx = randomInt(2, GRID_W - 3);
-            const eyy = randomInt(2, GRID_H - 3);
-            spawnEnemy(exx, eyy);
-          }
-        }
-        flamesTotal = enemies.length;
-        timeLeft = hardcore ? 60 : 90;
       }
 
-      function buildNightLaserPatrol() {
-        clearGameState();
-        makeEmptyGrid();
-        placeBorders();
-
-        // A few crate clusters as cover
-        for (let y = 2; y < GRID_H - 2; y++) {
-          for (let x = 2; x < GRID_W - 2; x++) {
-            if (Math.random() < 0.25) {
-              grid[y][x] = TILE.CRATE;
-            }
-          }
+      function placeFires(count) {
+        fires = [];
+        let placed = 0;
+        while (placed < count) {
+          const x = 2 + Math.floor(Math.random() * (GRID_W - 4));
+          const y = 2 + Math.floor(Math.random() * (GRID_H - 4));
+          if (grid[y][x] === TILE.WALL) continue;
+          fires.push({
+            x: x + 0.5,
+            y: y + 0.5,
+            dirX: 0,
+            dirY: 1,
+            changeTimer: 0.5 + Math.random() * 1.5,
+            alive: true,
+            carryItems: []
+          });
+          placed++;
         }
-        spawnPlayer(Math.floor(GRID_W / 2), Math.floor(GRID_H / 2));
-        timeLeft = hardcore ? 75 : 90;
-
-        const enemyCount = hardcore ? 7 : 5;
-        for (let i = 0; i < enemyCount; i++) {
-          const side = randomInt(0, 3);
-          let ex = 1, ey = 1;
-          if (side === 0) { ex = randomInt(1, GRID_W - 2); ey = 1; }
-          if (side === 1) { ex = randomInt(1, GRID_W - 2); ey = GRID_H - 2; }
-          if (side === 2) { ex = 1; ey = randomInt(1, GRID_H - 2); }
-          if (side === 3) { ex = GRID_W - 2; ey = randomInt(1, GRID_H - 2); }
-          spawnEnemy(ex, ey);
-        }
-        flamesTotal = enemies.length;
       }
 
-      function buildGame(mode) {
-        currentMode = mode;
-        stage = 1;
+      function placeItems() {
+        items = [];
+        const pool = [];
+        for (let i = 0; i < totalSneakers; i++) pool.push('sneaker');
+        for (const p of powerOrder) pool.push(p);
+
+        const boxTiles = [];
+        for (let y = 1; y < GRID_H - 1; y++) {
+          for (let x = 1; x < GRID_W - 1; x++) {
+            if (grid[y][x] === TILE.BOX) boxTiles.push({x,y});
+          }
+        }
+        for (let i = boxTiles.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          [boxTiles[i], boxTiles[j]] = [boxTiles[j], boxTiles[i]];
+        }
+        for (let i = 0; i < pool.length && i < boxTiles.length; i++) {
+          const t = boxTiles[i];
+          items.push({
+            x: t.x + 0.5,
+            y: t.y + 0.5,
+            type: pool[i],
+            hidden: true,
+            onFire: false
+          });
+        }
+      }
+
+      function resetState() {
+        buildGrid();
+        placeFires(4);
+        placeItems();
+        bombs = [];
+        burningBoxes = [];
+        explosions = [];
+        player.x = 1.5;
+        player.y = 1.5;
+        player.facing = 'right';
+        player.lives = 3;
+        player.shield = 0;
+        player.alive = true;
+        for (const k of Object.keys(powers)) powers[k] = false;
+        collectedSneakers = 0;
+        boxesDestroyed = 0;
         score = 0;
-        if (mode === MODES.METRO) buildMetroSneakerRun();
-        else if (mode === MODES.BOX) buildBoxBreakBattles();
-        else if (mode === MODES.LASER) buildNightLaserPatrol();
+        timeAccum = 0;
+        gameState = 'title';
         updateHUD();
       }
 
-      // ---------- INPUT FROM CONTROLS FRAME ----------
-      const controlsFrame = document.getElementById('controlsFrame');
+      // -----------------------------
+      // HUD
+      // -----------------------------
+      function powerCount() {
+        return powerOrder.reduce((n,k) => n + (powers[k] ? 1 : 0), 0);
+      }
 
-      function pollControls() {
-        input.moveX = 0;
-        input.moveY = 0;
+      function updateHUD() {
+        if (!window.SneakerQuestUI) return;
+        SneakerQuestUI.setSneakers(collectedSneakers, totalSneakers);
+        SneakerQuestUI.setHearts(player.lives, 3);
+        SneakerQuestUI.setFires(fires.filter(f => f.alive).length, 4);
+        SneakerQuestUI.setPowers(powerCount(), 4);
+        SneakerQuestUI.setCounter(boxesDestroyed);
+        SneakerQuestUI.setScore(score);
+        SneakerQuestUI.setStage(1);
+        const t = Math.max(0, timeAccum);
+        const totalTenths = Math.floor(t * 10);
+        const seconds = Math.floor(totalTenths / 10);
+        const tenths = totalTenths % 10;
+        const minutes = Math.floor(seconds / 60);
+        const s2 = seconds % 60;
+        const timeStr = `${String(minutes).padStart(2,'0')}:${String(s2).padStart(2,'0')}:${tenths}`;
+        SneakerQuestUI.setTime(timeStr);
+      }
 
-        if (controlsFrame && controlsFrame.contentWindow && controlsFrame.contentWindow.jpad_state) {
-          const js = controlsFrame.contentWindow.jpad_state;
-          if (js.mag > 0.2) {
-            const ax = js.x;
-            const ay = js.y;
-            if (Math.abs(ax) > Math.abs(ay)) {
-              input.moveX = ax > 0 ? 1 : -1;
-              input.moveY = 0;
-            } else {
-              input.moveY = ay > 0 ? 1 : -1;
-              input.moveX = 0;
+      // -----------------------------
+      // UTILS
+      // -----------------------------
+      function worldToTile(x, y) {
+        return { tx: Math.floor(x), ty: Math.floor(y) };
+      }
+      function inBounds(tx, ty) {
+        return tx >= 0 && tx < GRID_W && ty >= 0 && ty < GRID_H;
+      }
+      function tileAt(tx, ty) {
+        if (!inBounds(tx,ty)) return TILE.WALL;
+        return grid[ty][tx];
+      }
+
+      function canWalkAt(x, y) {
+        const radius = 0.20; // smaller radius => easier corners
+        const points = [
+          [x - radius, y - radius],
+          [x + radius, y - radius],
+          [x - radius, y + radius],
+          [x + radius, y + radius]
+        ];
+        for (const [px, py] of points) {
+          const { tx, ty } = worldToTile(px, py);
+          const t = tileAt(tx, ty);
+          if (t === TILE.WALL || t === TILE.BOX) return false;
+        }
+        return true;
+      }
+
+      // -----------------------------
+      // BOMBS / EXPLOSIONS
+      // -----------------------------
+      function plantBomb() {
+        const { tx, ty } = worldToTile(player.x, player.y);
+        if (!inBounds(tx,ty)) return;
+        if (bombs.some(b => b.tx === tx && b.ty === ty && !b.exploded)) return;
+        bombs.push({
+          tx, ty,
+          timer: 2.5,
+          exploded: false
+        });
+      }
+
+      function triggerRemote() {
+        if (!powers.crosshair) return;
+        let any = false;
+        for (const b of bombs) {
+          if (!b.exploded) {
+            b.timer = Math.min(b.timer, 0.15);
+            any = true;
+          }
+        }
+        if (any) {
+          // optional score tweak or SFX hook
+        }
+      }
+
+      function addExplosion(tx, ty) {
+        explosions.push({ tx, ty, time: 0, maxTime: 0.4 });
+      }
+
+      function explodeBomb(bomb) {
+        if (bomb.exploded) return;
+        bomb.exploded = true;
+        const { tx, ty } = bomb;
+
+        function hitTile(cx, cy) {
+          if (!inBounds(cx, cy)) return;
+          const t = grid[cy][cx];
+          addExplosion(cx, cy);
+
+          // destroy box
+          if (t === TILE.BOX) {
+            grid[cy][cx] = TILE.EMPTY;
+            boxesDestroyed++;
+            score += 60;
+            for (const it of items) {
+              if (Math.floor(it.x) === cx && Math.floor(it.y) === cy && it.hidden) {
+                it.hidden = false;
+              }
             }
+          }
+
+          // damages fires
+          for (const f of fires) {
+            if (!f.alive) continue;
+            if (Math.floor(f.x) === cx && Math.floor(f.y) === cy) {
+              f.alive = false;
+              score += 200;
+              for (const it of f.carryItems) {
+                items.push({
+                  x: f.x,
+                  y: f.y,
+                  type: it,
+                  hidden: false,
+                  onFire: false
+                });
+              }
+              f.carryItems = [];
+            }
+          }
+
+          // player hit
+          if (Math.floor(player.x) === cx && Math.floor(player.y) === cy) {
+            damagePlayer();
+          }
+        }
+
+        // centre + 1 tile each direction
+        hitTile(tx, ty);
+        hitTile(tx + 1, ty);
+        hitTile(tx - 1, ty);
+        hitTile(tx, ty + 1);
+        hitTile(tx, ty - 1);
+      }
+
+      // burning boxes from fire
+      function igniteBox(tx, ty) {
+        if (!inBounds(tx,ty)) return;
+        if (grid[ty][tx] !== TILE.BOX) return;
+        if (burningBoxes.some(b => b.tx === tx && b.ty === ty)) return;
+        burningBoxes.push({ tx, ty, timer: 10.0 });
+        for (const it of items) {
+          if (Math.floor(it.x) === tx && Math.floor(it.y) === ty && it.hidden) {
+            it.onFire = true;
           }
         }
       }
 
-      // Keyboard fallback for dev
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowUp') input.moveY = -1;
-        if (e.key === 'ArrowDown') input.moveY = 1;
-        if (e.key === 'ArrowLeft') input.moveX = -1;
-        if (e.key === 'ArrowRight') input.moveX = 1;
-        if (e.key === ' ') input.bombDown = true;
-      });
-      window.addEventListener('keyup', (e) => {
-        if (['ArrowUp','ArrowDown'].includes(e.key)) input.moveY = 0;
-        if (['ArrowLeft','ArrowRight'].includes(e.key)) input.moveX = 0;
-        if (e.key === ' ') input.bombDown = false;
-      });
-
-      // Buttons inside iframe
-      function wireButtons() {
-        if (!controlsFrame || !controlsFrame.contentWindow || !controlsFrame.contentWindow.document) return;
-        const d = controlsFrame.contentWindow.document;
-        const btnBomb = d.getElementById('btn2_proxy_bomb');
-        const btnLaser = d.getElementById('btn2_proxy_blast');
-        const btnTimer = d.getElementById('btn2_timer');
-        const btnSpecial = d.getElementById('btn2_special');
-
-        function hookButton(btn, key) {
-          if (!btn) return;
-          btn.addEventListener('pointerdown', () => { input[key] = true; });
-          btn.addEventListener('pointerup',   () => { input[key] = false; });
-          btn.addEventListener('pointerleave',() => { input[key] = false; });
+      function updateBurningBoxes(dt) {
+        for (const b of burningBoxes) {
+          b.timer -= dt;
+          if (b.timer <= 0 && grid[b.ty][b.tx] === TILE.BOX) {
+            // contained explosion only on that tile
+            grid[b.ty][b.tx] = TILE.EMPTY;
+            boxesDestroyed++;
+            score += 40;
+            addExplosion(b.tx, b.ty);
+            for (const it of items) {
+              if (Math.floor(it.x) === b.tx && Math.floor(it.y) === b.ty && it.hidden) {
+                it.hidden = false;
+                it.onFire = true;
+              }
+            }
+            b.timer = 0;
+          }
         }
-
-        hookButton(btnBomb, 'bombDown');
-        hookButton(btnLaser, 'laserDown');
-
-        if (btnTimer) {
-          btnTimer.addEventListener('click', () => {
-            input.timerPressed = true;
-          });
-        }
-        if (btnSpecial) {
-          btnSpecial.addEventListener('click', () => {
-            input.specialPressed = true;
-          });
-        }
+        burningBoxes = burningBoxes.filter(b => b.timer > 0);
       }
 
-      if (controlsFrame) {
-        controlsFrame.addEventListener('load', wireButtons);
-        if (controlsFrame.contentWindow && controlsFrame.contentWindow.document && controlsFrame.contentWindow.document.readyState === 'complete') {
-          wireButtons();
-        }
-      }
-
-      // ---------- GAME LOGIC ----------
-      let moveCooldown = 0;
-
-      function isWalkable(x, y) {
-        if (x < 0 || y < 0 || x >= GRID_W || y >= GRID_H) return false;
-        const t = grid[y][x];
-        return t === TILE.EMPTY || t === TILE.SNEAKER || t === TILE.EXIT;
-      }
-
+      // -----------------------------
+      // PLAYER DAMAGE / ITEMS
+      // -----------------------------
       function damagePlayer() {
-        if (!player || player.invuln > 0) return;
-        if (powerShield) {
-          powerShield = false;
-          player.invuln = 1;
+        if (!player.alive) return;
+        if (player.shield > 0) {
+          player.shield--;
+          if (player.shield <= 0) powers.shield = false;
+          updateHUD();
           return;
         }
-        player.hp--;
-        player.invuln = 1.2;
-        if (player.hp <= 0) {
-          currentMode = MODES.MENU;
+        player.lives--;
+        if (player.lives <= 0) {
+          player.alive = false;
+          gameState = 'dead';
+        } else {
+          player.x = 1.5;
+          player.y = 1.5;
+        }
+        updateHUD();
+      }
+
+      function applyItem(it) {
+        if (it.type === 'sneaker') {
+          collectedSneakers = Math.min(totalSneakers, collectedSneakers + 1);
+          score += 120;
+        } else if (it.type === 'stopwatch') {
+          powers.stopwatch = true;
+        } else if (it.type === 'shield') {
+          powers.shield = true;
+          player.shield = 1;
+        } else if (it.type === 'magnet') {
+          powers.magnet = true;
+        } else if (it.type === 'crosshair') {
+          powers.crosshair = true;
+        }
+        updateHUD();
+      }
+
+      function updateMagnet(dt) {
+        if (!powers.magnet) return;
+        const radius = 3.2;
+        for (const it of items) {
+          if (it.hidden) continue;
+          if (it.type !== 'sneaker') continue;
+          const dx = player.x - it.x;
+          const dy = player.y - it.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 0.2 && dist < radius) {
+            const pull = 2.5 * dt;
+            it.x += (dx / dist) * pull;
+            it.y += (dy / dist) * pull;
+          }
         }
       }
 
+      function firesPickupItems() {
+        for (const f of fires) {
+          if (!f.alive) continue;
+          for (const it of items) {
+            if (it.hidden) continue;
+            if (it.type === 'sneaker' || powerOrder.includes(it.type)) {
+              if (Math.floor(it.x) === Math.floor(f.x) &&
+                  Math.floor(it.y) === Math.floor(f.y)) {
+                f.carryItems.push(it.type);
+                it.hidden = true;
+              }
+            }
+          }
+        }
+      }
+
+      // -----------------------------
+      // UPDATE LOOP
+      // -----------------------------
       function updatePlayer(dt) {
-        if (!player) return;
-        moveCooldown -= dt;
-        if (moveCooldown < 0) moveCooldown = 0;
+        if (!player.alive) return;
 
-        // Direction from joystick
-        if (input.moveX !== 0 || input.moveY !== 0) {
-          player.facing = { x: input.moveX, y: input.moveY };
-          if (moveCooldown === 0) {
-            const nx = clamp(player.x + input.moveX, 0, GRID_W - 1);
-            const ny = clamp(player.y + input.moveY, 0, GRID_H - 1);
-            if (isWalkable(nx, ny) || grid[ny][nx] === TILE.CRATE) {
-              player.x = nx;
-              player.y = ny;
-            }
-            moveCooldown = currentMode === MODES.LASER ? 0.05 : 0.12;
+        // movement from joystick
+        let dx = input.moveX;
+        let dy = input.moveY;
+        const mag = Math.hypot(dx, dy);
+        if (mag > 1e-3) {
+          dx /= mag;
+          dy /= mag;
+        }
+
+        const vx = dx * player.speed * dt;
+        const vy = dy * player.speed * dt;
+
+        if (Math.abs(vx) > 0.0001) {
+          if (vx > 0) player.facing = 'right';
+          else player.facing = 'left';
+        } else if (Math.abs(vy) > 0.0001) {
+          if (vy > 0) player.facing = 'down';
+          else player.facing = 'up';
+        }
+
+        // move X then Y for better corner handling
+        let newX = player.x + vx;
+        let newY = player.y;
+        if (canWalkAt(newX, newY)) player.x = newX;
+
+        newX = player.x;
+        newY = player.y + vy;
+        if (canWalkAt(newX, newY)) player.y = newY;
+
+        // collect items
+        for (const it of items) {
+          if (it.hidden) continue;
+          const dx2 = it.x - player.x;
+          const dy2 = it.y - player.y;
+          if (Math.hypot(dx2, dy2) < 0.45) {
+            applyItem(it);
+            it.hidden = true;
           }
         }
 
-        if (player.invuln > 0) player.invuln -= dt;
-
-        // Tile interactions
-        const t = grid[player.y][player.x];
-        if (t === TILE.SNEAKER) {
-          grid[player.y][player.x] = TILE.EMPTY;
-          sneakersCollected++;
-          score += 100;
-        }
-        if (t === TILE.EXIT && currentMode === MODES.METRO && sneakersCollected >= sneakersTotal) {
-          stage++;
-          buildMetroSneakerRun();
-        }
-
-        // Magnet pulls sneakers one step toward player
-        if (powerMagnet) {
-          for (let y = 0; y < GRID_H; y++) {
-            for (let x = 0; x < GRID_W; x++) {
-              if (grid[y][x] === TILE.SNEAKER) {
-                const dx = player.x - x;
-                const dy = player.y - y;
-                if (Math.abs(dx) + Math.abs(dy) === 1) {
-                  grid[y][x] = TILE.EMPTY;
-                  sneakersCollected++;
-                  score += 100;
-                }
-              }
-            }
-          }
-        }
-
-        // Bomb placement
-        const bombPressed = input.bombDown && !lastButtons.bomb;
-        if (bombPressed) {
-          bombs.push({
-            x: player.x,
-            y: player.y,
-            timer: triggerMode ? 999 : 2.5,
-            armed: triggerMode
-          });
-        }
-
-        // Laser
-        const laserPressed = input.laserDown && !lastButtons.laser;
-        if (laserPressed) {
-          // Simple 3-tile line attack
-          const dir = player.facing;
-          for (let i = 1; i <= 3; i++) {
-            const lx = player.x + dir.x * i;
-            const ly = player.y + dir.y * i;
-            enemies = enemies.filter(e => !(e.x === lx && e.y === ly));
-          }
-        }
-
-        // Timer / trigger mode
-        if (input.timerPressed && !lastButtons.timer) {
-          if (powerStopwatch || powerCrosshair) {
-            triggerMode = !triggerMode;
-            bombs.forEach(b => {
-              if (triggerMode) {
-                b.armed = true;
-                b.timer = 999;
-              } else {
-                if (b.timer > 5) b.timer = 1.0;
-              }
-            });
-          }
-        }
-
-        // Special / star mode
-        if (input.specialPressed && !lastButtons.special) {
-          if (!starMode) {
-            starMode = true;
-            starTimer = 8.0;
-          } else {
-            starMode = false;
-            starTimer = 0;
-          }
-        }
-
-        if (starMode) {
-          starTimer -= dt;
-          if (starTimer <= 0) {
-            starMode = false;
-            starTimer = 0;
+        // collide with fires
+        for (const f of fires) {
+          if (!f.alive) continue;
+          const dx3 = f.x - player.x;
+          const dy3 = f.y - player.y;
+          if (Math.hypot(dx3, dy3) < 0.45) {
+            damagePlayer();
           }
         }
       }
 
-      function updateEnemies(dt) {
-        enemies.forEach(e => {
-          e.cooldown -= dt;
-          if (e.cooldown > 0) return;
-          e.cooldown = hardcore ? 0.3 : 0.5;
-          const dirs = [
-            { x: 1, y: 0 },
-            { x: -1, y: 0 },
-            { x: 0, y: 1 },
-            { x: 0, y: -1 }
-          ];
-          const d = dirs[randomInt(0, dirs.length - 1)];
-          const nx = clamp(e.x + d.x, 0, GRID_W - 1);
-          const ny = clamp(e.y + d.y, 0, GRID_H - 1);
-          if (isWalkable(nx, ny)) {
-            e.x = nx;
-            e.y = ny;
-          }
-        });
+      function updateFires(dt) {
+        const baseSpeed = 1.4; // normal pace
+        const slowFactor = powers.stopwatch ? 0.5 : 1.0;
 
-        // Collisions with player
-        enemies.forEach(e => {
-          if (player && e.x === player.x && e.y === player.y && !starMode) {
-            damagePlayer();
-          } else if (player && e.x === player.x && e.y === player.y && starMode) {
-            // in star mode, touching enemy removes it
-            e.x = -999;
-            e.y = -999;
-          }
-        });
+        for (const f of fires) {
+          if (!f.alive) continue;
 
-        enemies = enemies.filter(e => e.x >= 0);
-        flamesTotal = enemies.length;
-      }
+          f.changeTimer -= dt;
+          if (f.changeTimer <= 0) {
+            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+            const d = dirs[(Math.random() * dirs.length) | 0];
+            f.dirX = d[0];
+            f.dirY = d[1];
+            f.changeTimer = 0.6 + Math.random() * 1.4;
+          }
 
-      function explodeBomb(b) {
-        const dirs = [
-          { x: 0, y: 0 },
-          { x: 1, y: 0 },
-          { x: -1, y: 0 },
-          { x: 0, y: 1 },
-          { x: 0, y: -1 }
-        ];
-        dirs.forEach(d => {
-          const x = b.x + d.x;
-          const y = b.y + d.y;
-          if (x < 0 || y < 0 || x >= GRID_W || y >= GRID_H) return;
-          const t = grid[y][x];
-          if (t === TILE.CRATE) {
-            grid[y][x] = TILE.EMPTY;
-            boxCount++;
-            score += 50;
-          }
-          enemies = enemies.filter(e => !(e.x === x && e.y === y));
-          if (player && player.x === x && player.y === y && !starMode) {
-            damagePlayer();
-          }
-          explosions.push({ x, y, timer: 0.4 });
-        });
+          const speed = baseSpeed * slowFactor;
+          const vx = f.dirX * speed * dt;
+          const vy = f.dirY * speed * dt;
+
+          let newX = f.x + vx;
+          let newY = f.y;
+          if (canWalkAt(newX, newY)) f.x = newX;
+          else f.dirX = -f.dirX;
+
+          newX = f.x;
+          newY = f.y + vy;
+          if (canWalkAt(newX, newY)) f.y = newY;
+          else f.dirY = -f.dirY;
+
+          // ignite box under fire
+          const { tx, ty } = worldToTile(f.x, f.y);
+          if (tileAt(tx, ty) === TILE.BOX) igniteBox(tx, ty);
+        }
       }
 
       function updateBombs(dt) {
-        bombs.forEach(b => {
-          if (!triggerMode) {
-            b.timer -= dt;
-          }
-        });
-
-        const shouldDetonateAll = input.timerPressed && !lastButtons.timer && triggerMode;
-        bombs.forEach(b => {
-          if (b.timer <= 0 || shouldDetonateAll) {
+        for (const b of bombs) {
+          if (b.exploded) continue;
+          b.timer -= dt;
+          if (b.timer <= 0) {
             explodeBomb(b);
-            b._remove = true;
           }
-        });
-        bombs = bombs.filter(b => !b._remove);
-
-        explosions.forEach(ex => {
-          ex.timer -= dt;
-        });
-        explosions = explosions.filter(ex => ex.timer > 0);
-      }
-
-      // ---------- MENU ----------
-      let helpVisible = false;
-
-      function updateMenu(dt) {
-        if (input.moveY !== 0 && !lastButtons.special) {
-          if (input.moveY < 0) selectedIndex = (selectedIndex + GAME_LIST.length - 1) % GAME_LIST.length;
-          if (input.moveY > 0) selectedIndex = (selectedIndex + 1) % GAME_LIST.length;
-        }
-
-        // Bomb / Laser confirm
-        const confirmPressed = (input.bombDown && !lastButtons.bomb) || (input.laserDown && !lastButtons.laser);
-        if (confirmPressed) {
-          const selected = GAME_LIST[selectedIndex];
-          buildGame(selected.id);
-        }
-
-        // Timer toggles hardcore
-        if (input.timerPressed && !lastButtons.timer) {
-          hardcore = !hardcore;
-        }
-
-        // Special toggles help
-        if (input.specialPressed && !lastButtons.special) {
-          helpVisible = !helpVisible;
         }
       }
 
-      // ---------- DRAWING ----------
-      function resizeCanvas() {
+      function updateExplosions(dt) {
+        for (const ex of explosions) {
+          ex.time += dt;
+        }
+        explosions = explosions.filter(ex => ex.time < ex.maxTime);
+      }
+
+      // -----------------------------
+      // LASER
+      // -----------------------------
+      function fireLaser() {
+        // short plus beam 1 tile in facing direction
+        const { tx, ty } = worldToTile(player.x, player.y);
+        let dx = 0, dy = 0;
+        if (player.facing === 'right') dx = 1;
+        else if (player.facing === 'left') dx = -1;
+        else if (player.facing === 'down') dy = 1;
+        else if (player.facing === 'up') dy = -1;
+
+        if (!dx && !dy) return;
+
+        function hit(cx, cy) {
+          if (!inBounds(cx,cy)) return;
+          addExplosion(cx, cy);
+          const t = grid[cy][cx];
+          if (t === TILE.BOX) {
+            grid[cy][cx] = TILE.EMPTY;
+            boxesDestroyed++;
+            score += 40;
+            for (const it of items) {
+              if (Math.floor(it.x) === cx && Math.floor(it.y) === cy && it.hidden) {
+                it.hidden = false;
+              }
+            }
+          }
+          for (const f of fires) {
+            if (!f.alive) continue;
+            if (Math.floor(f.x) === cx && Math.floor(f.y) === cy) {
+              f.alive = false;
+              score += 180;
+              for (const it of f.carryItems) {
+                items.push({
+                  x: f.x,
+                  y: f.y,
+                  type: it,
+                  hidden: false,
+                  onFire: false
+                });
+              }
+              f.carryItems = [];
+            }
+          }
+        }
+
+        const cx = tx + dx;
+        const cy = ty + dy;
+        hit(cx, cy);
+      }
+
+      // -----------------------------
+      // LIGHTING / VISIBILITY
+      // -----------------------------
+      function computeVisibility() {
+        // 0 = dark, 1 = dim, 2 = bright
+        const vis = [];
+        for (let y = 0; y < GRID_H; y++) {
+          const row = new Array(GRID_W).fill(0);
+          vis.push(row);
+        }
+
+        function lightAround(cx, cy, radius, level) {
+          const rInt = radius | 0;
+          for (let dy = -rInt; dy <= rInt; dy++) {
+            for (let dx = -rInt; dx <= rInt; dx++) {
+              const tx = cx + dx;
+              const ty = cy + dy;
+              if (!inBounds(tx,ty)) continue;
+              if (Math.max(Math.abs(dx), Math.abs(dy)) <= rInt) {
+                vis[ty][tx] = Math.max(vis[ty][tx], level);
+              }
+            }
+          }
+        }
+
+        const p = worldToTile(player.x, player.y);
+        lightAround(p.tx, p.ty, 1, 2); // 3x3 bright
+
+        for (const f of fires) {
+          if (!f.alive) continue;
+          const t = worldToTile(f.x, f.y);
+          lightAround(t.tx, t.ty, 1, 1); // 3x3 dim
+        }
+        for (const b of burningBoxes) {
+          lightAround(b.tx, b.ty, 1, 1);
+        }
+        return vis;
+      }
+
+      // -----------------------------
+      // RENDER
+      // -----------------------------
+      function updateLayout() {
         const crt = document.querySelector('.crt');
-        if (!crt) return;
-        const cssW = crt.clientWidth;
-        const cssH = crt.clientHeight;
+        const cssW = crt.clientWidth || 320;
+        const cssH = crt.clientHeight || 240;
 
         canvas.style.width = cssW + 'px';
         canvas.style.height = cssH + 'px';
@@ -4110,219 +4104,409 @@ document.addEventListener(&#x27;touchmove&#x27;, (e)=&gt;{
         canvas.width = Math.round(cssW * dpr);
         canvas.height = Math.round(cssH * dpr);
 
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.setTransform(1,0,0,1,0,0);
         ctx.scale(dpr, dpr);
+
+        const usableW = cssW;
+        const usableH = cssH;
+        tileSize = Math.floor(Math.min(usableW / GRID_W, usableH / GRID_H));
+        originX = (cssW - GRID_W * tileSize) / 2;
+        originY = (cssH - GRID_H * tileSize) / 2;
       }
 
-      function drawGridBackground(cellSize) {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        ctx.fillStyle = '#0a241f';
+      function drawTiles(vis) {
+        const w = canvas.clientWidth || canvas.width;
+        const h = canvas.clientHeight || canvas.height;
+
+        // background
+        ctx.fillStyle = '#020305';
         ctx.fillRect(0, 0, w, h);
-
-        ctx.strokeStyle = '#123c33';
-        ctx.lineWidth = 1;
-        for (let y = 0; y <= GRID_H; y++) {
-          ctx.beginPath();
-          ctx.moveTo(0, y * cellSize);
-          ctx.lineTo(GRID_W * cellSize, y * cellSize);
-          ctx.stroke();
-        }
-        for (let x = 0; x <= GRID_W; x++) {
-          ctx.beginPath();
-          ctx.moveTo(x * cellSize, 0);
-          ctx.lineTo(x * cellSize, GRID_H * cellSize);
-          ctx.stroke();
-        }
-      }
-
-      function drawSpriteOnGrid(sprite, gx, gy, color, secondary) {
-        const cellSize = Math.floor(Math.min(canvas.clientWidth / GRID_W, canvas.clientHeight / GRID_H));
-        const x = gx * cellSize;
-        const y = gy * cellSize;
-        drawSprite(sprite, x, y, cellSize, color, secondary || color);
-      }
-
-      function drawMenu() {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        ctx.fillStyle = '#0a241f';
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.fillStyle = '#d6c7a4';
-        ctx.font = '16px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText('SNEAKERQUEST CONSOLE', w / 2, 24);
-
-        ctx.font = '10px "Press Start 2P"';
-        const startY = 80;
-        GAME_LIST.forEach((g, i) => {
-          const y = startY + i * 40;
-          const isSel = i === selectedIndex;
-          ctx.fillStyle = isSel ? '#ff3a2f' : '#d6c7a4';
-          ctx.fillText(g.label, w / 2, y);
-          if (hardcore) {
-            ctx.fillText('HARDCORE', w / 2, startY + GAME_LIST.length * 40 + 20);
-          }
-        });
-
-        if (helpVisible) {
-          const boxW = w * 0.9;
-          const boxH = h * 0.42;
-          const bx = (w - boxW) / 2;
-          const by = h - boxH - 20;
-          ctx.fillStyle = '#121212';
-          ctx.fillRect(bx, by, boxW, boxH);
-          ctx.strokeStyle = '#ff3a2f';
-          ctx.strokeRect(bx, by, boxW, boxH);
-          ctx.fillStyle = '#d6c7a4';
-          ctx.font = '8px "Press Start 2P"';
-          ctx.textAlign = 'left';
-          const lines = [
-            'BOMB: DROP BOMB',
-            'LASER: FIRE LASER',
-            'TIMER: TRIGGER MODE',
-            'STAR: STAR MODE / HELP',
-            'MOVE: JOYSTICK / ARROWS'
-          ];
-          lines.forEach((line, i) => {
-            ctx.fillText(line, bx + 12, by + 16 + i * 14);
-          });
-        }
-      }
-
-      function drawGame() {
-        const cellSize = Math.floor(Math.min(canvas.clientWidth / GRID_W, canvas.clientHeight / GRID_H));
-        drawGridBackground(cellSize);
 
         for (let y = 0; y < GRID_H; y++) {
           for (let x = 0; x < GRID_W; x++) {
+            const v = vis[y][x];
+            if (v === 0) continue; // map invisible
+
+            const screenX = originX + x * tileSize;
+            const screenY = originY + y * tileSize;
+
+            // floor
+            ctx.fillStyle = v === 2 ? '#11151b' : '#07080b';
+            ctx.fillRect(screenX, screenY, tileSize, tileSize);
+
             const t = grid[y][x];
             if (t === TILE.WALL) {
-              ctx.fillStyle = '#123c33';
-              ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            } else if (t === TILE.CRATE) {
-              drawSpriteOnGrid(SPRITES.crate, x, y, '#b99b66');
-            } else if (t === TILE.SNEAKER) {
-              drawSpriteOnGrid(SPRITES.sneaker, x, y, '#ff3a2f');
-            } else if (t === TILE.EXIT) {
-              drawSpriteOnGrid(SPRITES.crate, x, y, '#d6c7a4');
+              const g = ctx.createLinearGradient(
+                screenX, screenY,
+                screenX, screenY + tileSize
+              );
+              g.addColorStop(0, '#1b1b26');
+              g.addColorStop(1, '#06070d');
+              ctx.fillStyle = g;
+              ctx.fillRect(screenX+1, screenY+1, tileSize-2, tileSize-2);
+            } else if (t === TILE.BOX) {
+              // sneaker box vibe
+              ctx.fillStyle = '#262034';
+              ctx.fillRect(screenX+3, screenY+3, tileSize-6, tileSize-6);
+              ctx.strokeStyle = '#ff3a2f';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(screenX+4, screenY+4, tileSize-8, tileSize-8);
+              // lid stripe
+              ctx.fillStyle = '#ffb347';
+              ctx.fillRect(screenX+4, screenY+4, tileSize-8, 3);
             }
           }
         }
 
-        bombs.forEach(b => {
-          drawSpriteOnGrid(SPRITES.bomb, b.x, b.y, '#ff3a2f');
-        });
-
-        explosions.forEach(ex => {
-          drawSpriteOnGrid(SPRITES.explosion, ex.x, ex.y, '#ffe36a');
-        });
-
-        enemies.forEach(e => {
-          drawSpriteOnGrid(SPRITES.enemy, e.x, e.y, '#ffcf5a');
-        });
-
-        if (player) {
-          const color = starMode ? '#ffe36a' : '#d6c7a4';
-          drawSpriteOnGrid(SPRITES.player, player.x, player.y, color);
+        // burning box glow
+        for (const b of burningBoxes) {
+          const v = vis[b.ty] && vis[b.ty][b.tx];
+          if (!v) continue;
+          const x = originX + b.tx * tileSize + tileSize/2;
+          const y = originY + b.ty * tileSize + tileSize/2;
+          const r = tileSize * 0.7;
+          const g = ctx.createRadialGradient(x,y,0,x,y,r);
+          g.addColorStop(0, 'rgba(255,240,190,0.9)');
+          g.addColorStop(0.4, 'rgba(255,140,60,0.9)');
+          g.addColorStop(1, 'rgba(40,5,0,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(x-r, y-r, r*2, r*2);
         }
       }
 
-      function drawPausedOverlay() {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        ctx.fillStyle = 'rgba(0,0,0,0.45)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#ff3a2f';
-        ctx.font = '14px "Press Start 2P"';
+      function drawItems(vis) {
+        for (const it of items) {
+          if (it.hidden) continue;
+          const { tx, ty } = worldToTile(it.x, it.y);
+          const v = vis[ty] && vis[ty][tx];
+          if (!v) continue;
+
+          const cx = originX + it.x * tileSize;
+          const cy = originY + it.y * tileSize;
+
+          ctx.save();
+          ctx.translate(cx, cy);
+
+          if (it.type === 'sneaker') {
+            ctx.fillStyle = '#f5f5f5';
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-tileSize*0.28, 0);
+            ctx.lineTo(tileSize*0.25, -tileSize*0.10);
+            ctx.lineTo(tileSize*0.18, tileSize*0.20);
+            ctx.lineTo(-tileSize*0.32, tileSize*0.12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ff3a2f';
+            ctx.fillRect(-tileSize*0.18, -tileSize*0.08, tileSize*0.22, tileSize*0.07);
+          } else {
+            const r = tileSize * 0.22;
+            const g = ctx.createRadialGradient(0,0,0,0,0,r);
+            g.addColorStop(0, it.onFire ? '#ffd0a0' : '#ffeec0');
+            g.addColorStop(1, '#000000');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(0,0,r,0,Math.PI*2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+      }
+
+      function drawBombs() {
+        for (const b of bombs) {
+          if (b.exploded) continue;
+          const x = originX + (b.tx + 0.5) * tileSize;
+          const y = originY + (b.ty + 0.5) * tileSize;
+          const pulse = 0.5 + 0.5 * Math.sin((2.5 - b.timer) * 12);
+
+          ctx.save();
+          ctx.translate(x,y);
+          ctx.globalCompositeOperation = 'lighter';
+
+          const rOuter = tileSize * (0.25 + 0.15 * pulse);
+          const g = ctx.createRadialGradient(0,0,0,0,0,rOuter);
+          g.addColorStop(0, 'rgba(255,220,150,0.9)');
+          g.addColorStop(0.4, 'rgba(255,120,80,0.7)');
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0,0,rOuter,0,Math.PI*2);
+          ctx.fill();
+
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = '#11141e';
+          ctx.beginPath();
+          ctx.arc(0,0,tileSize*0.22,0,Math.PI*2);
+          ctx.fill();
+          ctx.strokeStyle = '#ff3a2f';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function drawExplosions() {
+        for (const ex of explosions) {
+          const t = ex.time / ex.maxTime;
+          const alpha = 1 - t;
+          const x = originX + (ex.tx + 0.5) * tileSize;
+          const y = originY + (ex.ty + 0.5) * tileSize;
+
+          ctx.save();
+          ctx.translate(x,y);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `rgba(255,220,180,${alpha})`;
+          ctx.lineWidth = tileSize * 0.25;
+
+          // plus shape
+          ctx.beginPath();
+          ctx.moveTo(-tileSize*0.6, 0);
+          ctx.lineTo(tileSize*0.6, 0);
+          ctx.moveTo(0, -tileSize*0.6);
+          ctx.lineTo(0, tileSize*0.6);
+          ctx.stroke();
+
+          ctx.fillStyle = `rgba(255,140,60,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(0,0,tileSize*0.25,0,Math.PI*2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      function drawFires(vis) {
+        for (const f of fires) {
+          if (!f.alive) continue;
+          const { tx, ty } = worldToTile(f.x, f.y);
+          const v = vis[ty] && vis[ty][tx];
+          if (!v) continue;
+
+          const x = originX + f.x * tileSize;
+          const y = originY + f.y * tileSize;
+          const t = timeAccum * 18 + f.x * 3;
+          const flicker = (Math.sin(t) + 1) * 0.5;
+
+          ctx.save();
+          ctx.translate(x,y);
+          ctx.globalCompositeOperation = 'lighter';
+
+          const r = tileSize * 0.55;
+          const g = ctx.createRadialGradient(0,0,0,0,0,r);
+          g.addColorStop(0, 'rgba(255,245,210,1)');
+          g.addColorStop(0.4 + 0.1*flicker, 'rgba(255,150,70,0.9)');
+          g.addColorStop(1, 'rgba(40,5,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0,0,r,0,Math.PI*2);
+          ctx.fill();
+
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.restore();
+        }
+      }
+
+      function drawPlayer(vis) {
+        if (!player.alive) return;
+        const { tx, ty } = worldToTile(player.x, player.y);
+        const v = vis[ty] && vis[ty][tx];
+        if (!v) return;
+
+        const x = originX + player.x * tileSize;
+        const y = originY + player.y * tileSize;
+        const runPhase = Math.sin(timeAccum * 10);
+        const bob = runPhase * tileSize * 0.06;
+
+        ctx.save();
+        ctx.translate(x, y + bob);
+
+        // glow
+        ctx.globalCompositeOperation = 'lighter';
+        let g = ctx.createRadialGradient(0,0,0,0,0,tileSize*0.7);
+        g.addColorStop(0, 'rgba(120,255,220,0.8)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(0,0,tileSize*0.7,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        // body (hoodie top-down-ish)
+        const bodyW = tileSize * 0.55;
+        const bodyH = tileSize * 0.55;
+        ctx.fillStyle = '#161a28';
+        ctx.strokeStyle = '#49ffd5';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-bodyW/2, -bodyH/2, bodyW, bodyH, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // head circle
+        ctx.fillStyle = '#101320';
+        ctx.beginPath();
+        ctx.arc(0, -bodyH*0.25, tileSize*0.18, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f6d6b0';
+        ctx.beginPath();
+        ctx.arc(0, -bodyH*0.25, tileSize*0.14, 0, Math.PI*2);
+        ctx.fill();
+
+        // simple eyes
+        ctx.fillStyle = '#111';
+        const eyeOffset = 0.04 * runPhase * tileSize;
+        ctx.fillRect(-tileSize*0.06 - eyeOffset, -bodyH*0.27, tileSize*0.05, tileSize*0.04);
+        ctx.fillRect( tileSize*0.01 - eyeOffset, -bodyH*0.27, tileSize*0.05, tileSize*0.04);
+
+        // legs
+        ctx.fillStyle = '#0f1118';
+        const legSwing = runPhase * tileSize * 0.12;
+        ctx.fillRect(-bodyW*0.25, bodyH*0.10 + legSwing, bodyW*0.18, bodyH*0.40);
+        ctx.fillRect( bodyW*0.07, bodyH*0.10 - legSwing, bodyW*0.18, bodyH*0.40);
+
+        // shoes
+        ctx.fillStyle = '#f5f5f5';
+        ctx.fillRect(-bodyW*0.27, bodyH*0.42 + legSwing, bodyW*0.22, tileSize*0.08);
+        ctx.fillRect( bodyW*0.05, bodyH*0.42 - legSwing, bodyW*0.22, tileSize*0.08);
+
+        // shield halo
+        if (player.shield > 0) {
+          ctx.strokeStyle = '#49ffd5';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0,0,tileSize*0.42,0,Math.PI*2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function drawOverlayText() {
+        const w = canvas.clientWidth || canvas.width;
+        const h = canvas.clientHeight || canvas.height;
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        if (gameState === 'title' || gameState === 'dead' || gameState === 'win') {
+          ctx.fillRect(0,0,w,h);
+        }
+        ctx.fillStyle = '#e2d4ac';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('PAUSED', w / 2, h / 2);
+        ctx.font = '16px "Press Start 2P", system-ui';
+        if (gameState === 'title') {
+          ctx.fillText('SNEAKER BOMBER', w/2, h/2 - 24);
+          ctx.font = '10px "Press Start 2P", system-ui';
+          ctx.fillText('MOVE JOYSTICK TO START', w/2, h/2 + 4);
+          ctx.fillText('BOMB = DROP / TIMER = TRIGGER', w/2, h/2 + 22);
+        } else if (gameState === 'dead') {
+          ctx.fillText('GAME OVER', w/2, h/2 - 16);
+          ctx.font = '10px "Press Start 2P", system-ui';
+          ctx.fillText('PRESS BOMB TO RESTART', w/2, h/2 + 8);
+        } else if (gameState === 'win') {
+          ctx.fillText('SNEAKER STORE CLEARED', w/2, h/2 - 16);
+          ctx.font = '10px "Press Start 2P", system-ui';
+          ctx.fillText('PRESS BOMB TO RESTART', w/2, h/2 + 8);
+        }
+        ctx.restore();
       }
 
-      // ---------- MAIN LOOP ----------
+      // -----------------------------
+      // MAIN LOOP
+      // -----------------------------
       let lastTime = performance.now();
 
-      function tick(now) {
-        const dt = (now - lastTime) / 1000;
+      function step(now) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
         lastTime = now;
+        timeAccum += dt;
 
-        pollControls();
+        pollJoypad();
 
-        if (!paused) {
-          if (currentMode === MODES.MENU) {
-            updateMenu(dt);
-          } else {
-            frameTime += dt;
-            timeLeft -= dt;
-            if (timeLeft < 0) {
-              currentMode = MODES.MENU;
-            } else {
-              updatePlayer(dt);
-              updateEnemies(dt);
-              updateBombs(dt);
-            }
+        if (gameState === 'title') {
+          if (input.moveX || input.moveY || input.bombPressed || input.blastPressed) {
+            gameState = 'playing';
+          }
+        } else if (gameState === 'dead' || gameState === 'win') {
+          if (input.bombPressed) {
+            resetState();
+          }
+        } else if (gameState === 'playing') {
+          if (input.bombPressed) {
+            plantBomb();
+          }
+          if (input.blastPressed) {
+            fireLaser();
+          }
+          if (input.timerPressed) {
+            triggerRemote();
+          }
+
+          updateBombs(dt);
+          updateBurningBoxes(dt);
+          updatePlayer(dt);
+          updateFires(dt);
+          updateMagnet(dt);
+          firesPickupItems();
+          updateExplosions(dt);
+
+          // win if all sneakers collected
+          if (collectedSneakers >= totalSneakers) {
+            gameState = 'win';
           }
         }
 
-        resizeCanvas();
-        if (currentMode === MODES.MENU) drawMenu(); else drawGame();
-        if (paused) drawPausedOverlay();
+        input.bombPressed = false;
+        input.blastPressed = false;
+        input.timerPressed = false;
 
         updateHUD();
 
-        lastButtons.bomb = input.bombDown;
-        lastButtons.laser = input.laserDown;
-        lastButtons.timer = input.timerPressed;
-        lastButtons.special = input.specialPressed;
-        input.timerPressed = false;
-        input.specialPressed = false;
+        const vis = computeVisibility();
+        updateLayout();
+        drawTiles(vis);
+        drawItems(vis);
+        drawBombs();
+        drawFires(vis);
+        drawPlayer(vis);
+        drawExplosions();
+        drawOverlayText();
 
-        requestAnimationFrame(tick);
+        requestAnimationFrame(step);
       }
 
-      resizeCanvas();
-      requestAnimationFrame(tick);
+      resetState();
+      setupControlBridge();
+      updateLayout();
+      requestAnimationFrame(step);
     }
-    document.addEventListener('DOMContentLoaded', () => {
+
+document.addEventListener('DOMContentLoaded', () => {
       MobileSafariLock.initialize();
       IconManager.updateAllIcons();
       setupSimpleGame();
       const pauseBtn = document.getElementById('btn-pause');
-      if (pauseBtn) {
-        pauseBtn.addEventListener('click', function () {
-          const next = this.dataset.state === 'playing' ? 'paused' : 'playing';
-          this.dataset.state = next;
-        });
-      }
+      if (pauseBtn) pauseBtn.addEventListener('click', function(){ this.dataset.state = this.dataset.state === 'playing' ? 'paused' : 'playing'; });
       setTimeout(() => { window.scrollTo(0, 0); }, 120);
     });
 
     // Simple UI API
     window.SneakerQuestUI = {
       IconManager,
-      setSneakers: (filled, total) => IconManager.renderSneakers(filled, total),
-      setHearts:   (filled, total) => IconManager.renderHearts(filled, total),
-      setPowers:   (total, filled) => IconManager.renderPowers(total, filled),
-      setFires:    (filled, total) => IconManager.renderFires(filled, total),
-      setCounter:  (v) => {
-        const el = document.getElementById('counter');
-        if (el) el.textContent = String(v).padStart(3, '0');
-      },
-      setStage:    (s) => {
-        const el = document.querySelector('.chip-stage');
-        if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`;
-      },
-      setScore:    (v) => {
-        const el = document.querySelector('.chip-score');
-        if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`;
-      },
-      setTime:     (t) => {
-        const el = document.querySelector('.chip-time');
-        if (el) el.textContent = t;
-      }
+      setSneakers: (f, t) => IconManager.renderSneakers(f, t),
+      setHearts:   (f, t) => IconManager.renderHearts(f, t),
+      setPowers:   (f, t) => IconManager.renderPowers(t, f),
+      setFires:    (f, t) => IconManager.renderFires(f, t),
+      setCounter:  (v) => { const el = document.getElementById('counter'); if (el) el.textContent = String(v).padStart(3, '0'); },
+      setStage:    (s) => { const el = document.querySelector('.chip-stage'); if (el) el.textContent = `STAGE – ${String(s).padStart(2, '0')}`; },
+      setScore:    (v) => { const el = document.querySelector('.chip-score'); if (el) el.textContent = `SCORE ${String(v).padStart(6, '0')}`; },
+      setTime:     (t) => { const el = document.querySelector('.chip-time');  if (el) el.textContent = t; }
     };
       // === HARD LOCK: disable zooming (pinch, double-tap, ctrl+wheel) ===
     (function lockPageZoom(){
